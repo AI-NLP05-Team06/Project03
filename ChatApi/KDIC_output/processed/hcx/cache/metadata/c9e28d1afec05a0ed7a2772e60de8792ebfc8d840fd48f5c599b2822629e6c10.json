@@ -1,0 +1,21 @@
+{
+  "summary": "이 문서는 예금보험공사의 착오송금 반환 신청에 대한 PDF 취소신청서 양식을 제공합니다.",
+  "sub_category": "착오송금 반환 지원",
+  "user_roles": [
+    "착오송금인"
+  ],
+  "keywords": [
+    "착오송금",
+    "반환 신청",
+    "PDF 양식",
+    "신청 철회"
+  ],
+  "question_types": [
+    "서류형"
+  ],
+  "answerable_questions": [
+    "착오송금 반환 신청을 어떻게 철회하나요?"
+  ],
+  "needs_human_review": false,
+  "review_reason": ""
+}

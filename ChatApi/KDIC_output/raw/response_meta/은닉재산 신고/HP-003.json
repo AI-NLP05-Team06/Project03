@@ -1,0 +1,23 @@
+{
+  "requested_url": "https://www.kdic.or.kr/sp/sprtfund/SprtFndIvsfalUnrlIlglDclrGudn/selectScrn.do",
+  "final_url": "https://www.kdic.or.kr/sp/sprtfund/SprtFndIvsfalUnrlIlglDclrGudn/selectScrn.do",
+  "status_code": 200,
+  "ok": true,
+  "content_type": "text/html; charset=UTF-8",
+  "encoding": "UTF-8",
+  "elapsed_seconds": 1.604,
+  "collected_at": "2026-07-21T11:22:47+09:00",
+  "content_length": 496580,
+  "raw_sha256": "b489513c1eb30074e9ea2d9f5b7d3843d54a7284c0557b00ebd888c92d5f0150",
+  "redirect_history": [],
+  "selected_headers": {
+    "Content-Type": "text/html; charset=UTF-8",
+    "Robots-Check": "unavailable:UnicodeDecodeError"
+  },
+  "url_id": "HP-003",
+  "business_function": "은닉재산 신고",
+  "page_title_manifest": "지원자금관리 > 부실책임조사 > 금융부실관련자 불법행위신고 > 신고센터 소개",
+  "fetch_strategy": "requests_html",
+  "parser_profile": "kdic_final_integrated_v4_5",
+  "raw_html_path": "raw/html/은닉재산 신고/HP-003.html"
+}

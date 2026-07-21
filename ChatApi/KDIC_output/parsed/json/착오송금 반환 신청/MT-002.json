@@ -1,0 +1,147 @@
+{
+  "doc_id": "MT-002",
+  "parent_doc_id": "MT-002",
+  "record_type": "page",
+  "indexable": true,
+  "rag_index_mode": "full",
+  "title": "착오송금 반환지원 절차",
+  "manifest_title": "착오송금 반환지원제도 > 착오송금반환지원 절차",
+  "page_heading": "착오송금반환지원 절차",
+  "display_title": "착오송금 반환지원 절차",
+  "html_title": "제도·정책 착오송금 반환지원제도 착오송금반환지원 절차",
+  "source_url": "https://www.kdic.or.kr/sp/kmrs/kmrsItrdProc/selectScrn.do",
+  "final_url": "https://www.kdic.or.kr/sp/kmrs/kmrsItrdProc/selectScrn.do",
+  "site_name": "예금보험공사",
+  "business_function": "착오송금 반환 신청",
+  "target_business_function": "착오송금 반환 신청",
+  "page_type": "process_page",
+  "parser_profile": "kdic_final_integrated_v4_5",
+  "resource_group_selector": "",
+  "resource_group_chunk_policy": "page",
+  "breadcrumb": [
+    "착오송금 반환 신청",
+    "착오송금 반환지원제도 > 착오송금반환지원 절차"
+  ],
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "착오송금반환지원 절차"
+    },
+    {
+      "type": "paragraph",
+      "text": "( 착오송금인-예금보험공사-착오송금 수취인, 중앙행정기관 금융회사등 - 예금보험공사 - 법원 )"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "착오송금인은 예금보험공사에게 반환지원신청(채권매입)",
+        "예금보험공사는 중앙행정기관/금융회사 등에 착오송금 수취인 정보 확인",
+        "예금보험공사는 착오송금 수취인에게 자진반환 권유",
+        "예금보험공사는 법원에게 착오송금 수취인이 미반환시 지급명령 진행",
+        "예금보험공사는 착오송금 수취인에게서 회수 시 회수액에서 비용 차감 후 착오송금인에게 잔액 반환"
+      ]
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "금융회사를 통한 사전반환 신청단계에서 착오송금 수취인이 자진반환 불응 시 착오송금인은 예보에 반환지원을 신청하고, 지원대상에 해당될 경우 예보는 착오송금인으로부터 부당이득반환채권을 매입합니다.",
+        "예금보험공사는 금융회사, 통신사, 행정안전부 등을 통하여 착오송금 수취인의 연락처 및 주소를 확보합니다.",
+        "예금보험공사는 확보된 연락처, 주소 정보를 토대로 착오송금 수취인에게 자진반환을 권유하여 회수합니다.",
+        "만약 착오송금 수취인이 자진반환에 응하지 않을 경우 법원의 지급명령을 통해 회수를 진행합니다.",
+        "회수 완료 시 회수액에서 회수에 소요된 비용을 차감한 후 잔액을 착오송금인에게 반환합니다."
+      ]
+    }
+  ],
+  "links": [],
+  "actions": [],
+  "attachments": [],
+  "images": [
+    {
+      "url": "https://www.kdic.or.kr/assets/images/img-SP-DA0-000-pc.png",
+      "alt": "예금보험공사를 통한 착오송금 반환지원의 절차",
+      "filename": "img-SP-DA0-000-pc.png",
+      "image_role": "process_diagram",
+      "indexable": false,
+      "download_policy": "download_original_no_index",
+      "download_status": "downloaded",
+      "local_path": "raw/assets/착오송금 반환 신청/MT-002/images/img-SP-DA0-000-pc.png",
+      "size_bytes": 52323,
+      "sha256": "c00abd349652e5ce4bcf70ec5e53f159c2ab96076c7feb1367a28292ac47df72"
+    }
+  ],
+  "videos": [],
+  "supplementary_links": [],
+  "embedded_document_ids": [],
+  "modal_resources": [],
+  "policy": {
+    "normalized_decision": "include_full",
+    "content_scope": "반환지원 5단계 절차 전체",
+    "rag_index_label": "O",
+    "action_policy": "있을 경우 O(신청)",
+    "expected_action_types": "apply",
+    "pagination_policy": "불필요",
+    "auth_required": "필요 가능",
+    "attachment_download_policy": "X",
+    "attachment_rag_policy": "none",
+    "attachment_user_delivery_policy": "none",
+    "video_policy": "none",
+    "webtoon_policy": "none",
+    "image_policy": "metadata_only_nondecorative",
+    "modal_content_policy": "none"
+  },
+  "parsed_at": "2026-07-21T11:21:26+09:00",
+  "content_markdown": "### 착오송금반환지원 절차\n\n( 착오송금인-예금보험공사-착오송금 수취인, 중앙행정기관 금융회사등 - 예금보험공사 - 법원 )\n\n1. 착오송금인은 예금보험공사에게 반환지원신청(채권매입)\n2. 예금보험공사는 중앙행정기관/금융회사 등에 착오송금 수취인 정보 확인\n3. 예금보험공사는 착오송금 수취인에게 자진반환 권유\n4. 예금보험공사는 법원에게 착오송금 수취인이 미반환시 지급명령 진행\n5. 예금보험공사는 착오송금 수취인에게서 회수 시 회수액에서 비용 차감 후 착오송금인에게 잔액 반환\n\n1. 금융회사를 통한 사전반환 신청단계에서 착오송금 수취인이 자진반환 불응 시 착오송금인은 예보에 반환지원을 신청하고, 지원대상에 해당될 경우 예보는 착오송금인으로부터 부당이득반환채권을 매입합니다.\n2. 예금보험공사는 금융회사, 통신사, 행정안전부 등을 통하여 착오송금 수취인의 연락처 및 주소를 확보합니다.\n3. 예금보험공사는 확보된 연락처, 주소 정보를 토대로 착오송금 수취인에게 자진반환을 권유하여 회수합니다.\n4. 만약 착오송금 수취인이 자진반환에 응하지 않을 경우 법원의 지급명령을 통해 회수를 진행합니다.\n5. 회수 완료 시 회수액에서 회수에 소요된 비용을 차감한 후 잔액을 착오송금인에게 반환합니다.",
+  "body_markdown": "### 착오송금반환지원 절차\n\n( 착오송금인-예금보험공사-착오송금 수취인, 중앙행정기관 금융회사등 - 예금보험공사 - 법원 )\n\n1. 착오송금인은 예금보험공사에게 반환지원신청(채권매입)\n2. 예금보험공사는 중앙행정기관/금융회사 등에 착오송금 수취인 정보 확인\n3. 예금보험공사는 착오송금 수취인에게 자진반환 권유\n4. 예금보험공사는 법원에게 착오송금 수취인이 미반환시 지급명령 진행\n5. 예금보험공사는 착오송금 수취인에게서 회수 시 회수액에서 비용 차감 후 착오송금인에게 잔액 반환\n\n1. 금융회사를 통한 사전반환 신청단계에서 착오송금 수취인이 자진반환 불응 시 착오송금인은 예보에 반환지원을 신청하고, 지원대상에 해당될 경우 예보는 착오송금인으로부터 부당이득반환채권을 매입합니다.\n2. 예금보험공사는 금융회사, 통신사, 행정안전부 등을 통하여 착오송금 수취인의 연락처 및 주소를 확보합니다.\n3. 예금보험공사는 확보된 연락처, 주소 정보를 토대로 착오송금 수취인에게 자진반환을 권유하여 회수합니다.\n4. 만약 착오송금 수취인이 자진반환에 응하지 않을 경우 법원의 지급명령을 통해 회수를 진행합니다.\n5. 회수 완료 시 회수액에서 회수에 소요된 비용을 차감한 후 잔액을 착오송금인에게 반환합니다.",
+  "content_text": "착오송금반환지원 절차 ( 착오송금인-예금보험공사-착오송금 수취인, 중앙행정기관 금융회사등 - 예금보험공사 - 법원 ) 착오송금인은 예금보험공사에게 반환지원신청(채권매입) 예금보험공사는 중앙행정기관/금융회사 등에 착오송금 수취인 정보 확인 예금보험공사는 착오송금 수취인에게 자진반환 권유 예금보험공사는 법원에게 착오송금 수취인이 미반환시 지급명령 진행 예금보험공사는 착오송금 수취인에게서 회수 시 회수액에서 비용 차감 후 착오송금인에게 잔액 반환 금융회사를 통한 사전반환 신청단계에서 착오송금 수취인이 자진반환 불응 시 착오송금인은 예보에 반환지원을 신청하고, 지원대상에 해당될 경우 예보는 착오송금인으로부터 부당이득반환채권을 매입합니다. 예금보험공사는 금융회사, 통신사, 행정안전부 등을 통하여 착오송금 수취인의 연락처 및 주소를 확보합니다. 예금보험공사는 확보된 연락처, 주소 정보를 토대로 착오송금 수취인에게 자진반환을 권유하여 회수합니다. 만약 착오송금 수취인이 자진반환에 응하지 않을 경우 법원의 지급명령을 통해 회수를 진행합니다. 회수 완료 시 회수액에서 회수에 소요된 비용을 차감한 후 잔액을 착오송금인에게 반환합니다.",
+  "markdown_export": "# 착오송금 반환지원 절차\n\n### 착오송금반환지원 절차\n\n( 착오송금인-예금보험공사-착오송금 수취인, 중앙행정기관 금융회사등 - 예금보험공사 - 법원 )\n\n1. 착오송금인은 예금보험공사에게 반환지원신청(채권매입)\n2. 예금보험공사는 중앙행정기관/금융회사 등에 착오송금 수취인 정보 확인\n3. 예금보험공사는 착오송금 수취인에게 자진반환 권유\n4. 예금보험공사는 법원에게 착오송금 수취인이 미반환시 지급명령 진행\n5. 예금보험공사는 착오송금 수취인에게서 회수 시 회수액에서 비용 차감 후 착오송금인에게 잔액 반환\n\n1. 금융회사를 통한 사전반환 신청단계에서 착오송금 수취인이 자진반환 불응 시 착오송금인은 예보에 반환지원을 신청하고, 지원대상에 해당될 경우 예보는 착오송금인으로부터 부당이득반환채권을 매입합니다.\n2. 예금보험공사는 금융회사, 통신사, 행정안전부 등을 통하여 착오송금 수취인의 연락처 및 주소를 확보합니다.\n3. 예금보험공사는 확보된 연락처, 주소 정보를 토대로 착오송금 수취인에게 자진반환을 권유하여 회수합니다.\n4. 만약 착오송금 수취인이 자진반환에 응하지 않을 경우 법원의 지급명령을 통해 회수를 진행합니다.\n5. 회수 완료 시 회수액에서 회수에 소요된 비용을 차감한 후 잔액을 착오송금인에게 반환합니다.",
+  "export_markdown": "# 착오송금 반환지원 절차\n\n### 착오송금반환지원 절차\n\n( 착오송금인-예금보험공사-착오송금 수취인, 중앙행정기관 금융회사등 - 예금보험공사 - 법원 )\n\n1. 착오송금인은 예금보험공사에게 반환지원신청(채권매입)\n2. 예금보험공사는 중앙행정기관/금융회사 등에 착오송금 수취인 정보 확인\n3. 예금보험공사는 착오송금 수취인에게 자진반환 권유\n4. 예금보험공사는 법원에게 착오송금 수취인이 미반환시 지급명령 진행\n5. 예금보험공사는 착오송금 수취인에게서 회수 시 회수액에서 비용 차감 후 착오송금인에게 잔액 반환\n\n1. 금융회사를 통한 사전반환 신청단계에서 착오송금 수취인이 자진반환 불응 시 착오송금인은 예보에 반환지원을 신청하고, 지원대상에 해당될 경우 예보는 착오송금인으로부터 부당이득반환채권을 매입합니다.\n2. 예금보험공사는 금융회사, 통신사, 행정안전부 등을 통하여 착오송금 수취인의 연락처 및 주소를 확보합니다.\n3. 예금보험공사는 확보된 연락처, 주소 정보를 토대로 착오송금 수취인에게 자진반환을 권유하여 회수합니다.\n4. 만약 착오송금 수취인이 자진반환에 응하지 않을 경우 법원의 지급명령을 통해 회수를 진행합니다.\n5. 회수 완료 시 회수액에서 회수에 소요된 비용을 차감한 후 잔액을 착오송금인에게 반환합니다.",
+  "parsed_content_sha256": "1735e96d0820da7eb38e1d7df0a2dc3266a7682aa2ed7c0b68cfc2fdb35d2e4b",
+  "content_hash": "1735e96d0820da7eb38e1d7df0a2dc3266a7682aa2ed7c0b68cfc2fdb35d2e4b",
+  "quality": {
+    "status": "pass",
+    "reasons": [],
+    "source_text_chars": 576,
+    "parsed_text_chars": 576,
+    "retention_ratio": 1.0,
+    "faq_count": 0,
+    "table_count": 0,
+    "attachment_button_count": 0,
+    "action_count": 0,
+    "video_count": 0,
+    "supplementary_link_count": 0,
+    "noise_hits": []
+  },
+  "chunk_strategy": "auto_structure",
+  "table_group_key": "",
+  "table_entity_column": "",
+  "heading_context_policy": "inherit",
+  "pagination_collection": {
+    "collection_scope": "single_public_page",
+    "is_complete": true,
+    "pagination_detected": false,
+    "expected_page_count": 1,
+    "fetched_page_count": 1,
+    "failures": []
+  },
+  "downloaded_assets": {
+    "attachments": [],
+    "images": [
+      {
+        "url": "https://www.kdic.or.kr/assets/images/img-SP-DA0-000-pc.png",
+        "alt": "예금보험공사를 통한 착오송금 반환지원의 절차",
+        "filename": "img-SP-DA0-000-pc.png",
+        "image_role": "process_diagram",
+        "indexable": false,
+        "download_policy": "download_original_no_index",
+        "download_status": "downloaded",
+        "local_path": "raw/assets/착오송금 반환 신청/MT-002/images/img-SP-DA0-000-pc.png",
+        "size_bytes": 52323,
+        "sha256": "c00abd349652e5ce4bcf70ec5e53f159c2ab96076c7feb1367a28292ac47df72"
+      }
+    ],
+    "failures": []
+  }
+}

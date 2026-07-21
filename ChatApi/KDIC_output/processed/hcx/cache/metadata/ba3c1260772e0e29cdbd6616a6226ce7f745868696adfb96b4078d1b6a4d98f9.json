@@ -1,0 +1,20 @@
+{
+  "summary": "이 문서는 부채증명원 발급신청서로, 성명, 주민등록번호, 발급대상기관 등의 개인정보를 기입하고 제출하는 서류입니다.",
+  "sub_category": "채무조정 안내",
+  "user_roles": [
+    "채무자"
+  ],
+  "keywords": [
+    "부채증명원",
+    "발급신청서",
+    "채무조정"
+  ],
+  "question_types": [
+    "서류형"
+  ],
+  "answerable_questions": [
+    "부채증명원은 어떻게 발급받을 수 있나요?"
+  ],
+  "needs_human_review": false,
+  "review_reason": ""
+}

@@ -1,0 +1,20 @@
+{
+  "summary": "착오송금액 반환 시 발생한 이체 수수료를 환급받기 위한 신청서 양식을 제공합니다.",
+  "sub_category": "착오송금 반환",
+  "user_roles": [
+    "착오송금 수취인"
+  ],
+  "keywords": [
+    "착오송금",
+    "이체수수료 환급",
+    "신청서"
+  ],
+  "question_types": [
+    "서류형"
+  ],
+  "answerable_questions": [
+    "이체수수료 환급 신청서는 어떻게 생겼나요?"
+  ],
+  "needs_human_review": false,
+  "review_reason": ""
+}

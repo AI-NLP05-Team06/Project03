@@ -1,0 +1,20 @@
+{
+  "summary": "이 양식은 착오송금 반환 신청 시 수령 계좌 변경을 위해 사용됩니다.",
+  "sub_category": "착오송금 반환 신청",
+  "user_roles": [
+    "착오송금인"
+  ],
+  "keywords": [
+    "수령계좌 변경",
+    "착오송금",
+    "예보"
+  ],
+  "question_types": [
+    "서류형"
+  ],
+  "answerable_questions": [
+    "수령 계좌 변경 신청서는 어디에서 받을 수 있나요?"
+  ],
+  "needs_human_review": false,
+  "review_reason": ""
+}

@@ -1,0 +1,58 @@
+{
+  "doc_id": "BI-001-ATT-c3577595",
+  "parent_doc_id": "BI-001",
+  "attachment_id": "c357759570c48b8f",
+  "record_type": "attachment",
+  "indexable": false,
+  "rag_index_mode": "none",
+  "title": "손해담보 약정서 (PDF)",
+  "source_url": "https://www.kdic.or.kr/sp/dpstrprot/DpsmIbamtAplyPossDcmnt/selectScrn.do",
+  "official_download_url": null,
+  "user_action_url": "https://www.kdic.or.kr/sp/dpstrprot/DpsmIbamtAplyPossDcmnt/selectScrn.do",
+  "site_name": "예금보험공사",
+  "business_function": "예금보험금 안내",
+  "target_business_function": "예금보험금 안내",
+  "page_type": "attachment",
+  "file_format": "PDF",
+  "mime_type": "application/pdf",
+  "filename": "c357759570c48b8f_손해담보 약정서.pdf",
+  "local_path": "raw/assets/예금보험금 안내/BI-001/attachments/c357759570c48b8f_손해담보 약정서.pdf",
+  "size_bytes": 55999,
+  "sha256": "7d3c2393b3b908e121ce649eac51cc9b09ec9ab565734bf5dec45125afec1916",
+  "processing_policy": "download_no_index",
+  "classification_reason": "짧거나 설명 가치가 낮은 파일",
+  "needs_review": true,
+  "attachment_role": "unknown",
+  "contains_fillable_fields": false,
+  "contains_instructions": false,
+  "has_unique_information": false,
+  "duplicates_parent_content": false,
+  "is_scanned_candidate": false,
+  "ocr_required": false,
+  "extraction_quality": "good",
+  "text_extraction_status": "success",
+  "content_text": "<별지제12호서식><신설2025.6.26>손해담보약정서예금보험공사및( )(금융회사명)귀중본인은예금자(채권자) 의사망으로인하여아래의금원에대하여상속받음에있어다음과같이귀공사에손해를끼치지아니할것을약정합니다.1.소액상속내역표시피상속인성명피상속인주민등록번호금융회사명금원종류금액 원2.약정내역본상속금원지급에대하여본인이상속인전원을대표하여추후상속과관련된분쟁발생시예금보험공사및 (금융회사명)에손해가발생하지않도록본인이책임질것을확약합니다.향후이와관련된분쟁등으로공사에손해가발생하는경우일체의손해(소송비용등추가발생비용포함)에대하여본인(상속인)이배상하기로합니다. 년월일 본인(상속인): (인) 주민등록번호: 주소:예금보험공사사장귀하",
+  "content_markdown": "# 손해담보 약정서 (PDF)\n\n<별지제12호서식><신설2025.6.26>손해담보약정서예금보험공사및( )(금융회사명)귀중본인은예금자(채권자) 의사망으로인하여아래의금원에대하여상속받음에있어다음과같이귀공사에손해를끼치지아니할것을약정합니다.1.소액상속내역표시피상속인성명피상속인주민등록번호금융회사명금원종류금액 원2.약정내역본상속금원지급에대하여본인이상속인전원을대표하여추후상속과관련된분쟁발생시예금보험공사및 (금융회사명)에손해가발생하지않도록본인이책임질것을확약합니다.향후이와관련된분쟁등으로공사에손해가발생하는경우일체의손해(소송비용등추가발생비용포함)에대하여본인(상속인)이배상하기로합니다. 년월일 본인(상속인): (인) 주민등록번호: 주소:예금보험공사사장귀하",
+  "blocks": [
+    {
+      "type": "paragraph",
+      "text": "<별지제12호서식><신설2025.6.26>손해담보약정서예금보험공사및( )(금융회사명)귀중본인은예금자(채권자) 의사망으로인하여아래의금원에대하여상속받음에있어다음과같이귀공사에손해를끼치지아니할것을약정합니다.1.소액상속내역표시피상속인성명피상속인주민등록번호금융회사명금원종류금액 원2.약정내역본상속금원지급에대하여본인이상속인전원을대표하여추후상속과관련된분쟁발생시예금보험공사및 (금융회사명)에손해가발생하지않도록본인이책임질것을확약합니다.향후이와관련된분쟁등으로공사에손해가발생하는경우일체의손해(소송비용등추가발생비용포함)에대하여본인(상속인)이배상하기로합니다. 년월일 본인(상속인): (인) 주민등록번호: 주소:예금보험공사사장귀하"
+    }
+  ],
+  "actions": [],
+  "attachments": [],
+  "images": [],
+  "videos": [],
+  "supplementary_links": [],
+  "links": [],
+  "quality": {
+    "status": "review",
+    "reasons": [
+      "짧거나 설명 가치가 낮은 파일"
+    ],
+    "parsed_text_chars": 337,
+    "faq_count": 0,
+    "table_count": 0
+  },
+  "parsed_at": "2026-07-21T11:23:22+09:00"
+}

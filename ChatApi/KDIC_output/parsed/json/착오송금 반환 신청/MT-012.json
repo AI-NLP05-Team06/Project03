@@ -1,0 +1,461 @@
+{
+  "doc_id": "MT-012",
+  "parent_doc_id": "MT-012",
+  "record_type": "page",
+  "indexable": true,
+  "rag_index_mode": "full",
+  "title": "방문접수안내",
+  "manifest_title": "착오송금반환지원 > 소개와 방법안내 > 방문접수안내",
+  "page_heading": "방문접수안내",
+  "display_title": "방문접수안내",
+  "html_title": "금융안심포털",
+  "source_url": "https://fins.kdic.or.kr/ir/aplygudn/MtrsVstRcptGudn/selectScrn.do",
+  "final_url": "https://fins.kdic.or.kr/ir/aplygudn/MtrsVstRcptGudn/selectScrn.do",
+  "site_name": "금융안심포털",
+  "business_function": "착오송금 반환 신청",
+  "target_business_function": "착오송금 반환 신청",
+  "page_type": "static_page",
+  "parser_profile": "kdic_final_integrated_v4_5",
+  "resource_group_selector": "",
+  "resource_group_chunk_policy": "page",
+  "breadcrumb": [
+    "착오송금 반환 신청",
+    "착오송금반환지원 > 소개와 방법안내 > 방문접수안내"
+  ],
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "방문접수 절차"
+    },
+    {
+      "type": "paragraph",
+      "text": "방문접수는 평일 09:00 ~ 17:00까지 운영됩니다. 점심시간 12:00 ~ 13:00"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "STEP 01 센터방문 구비서류와 신분증 지참하여 가까운 센터로 방문해 주세요. 구비서류 안내",
+        "STEP2 신청서 제출 신청서 작성 후 구비서류와 함께 제출해 주세요. HWP PDF",
+        "STEP3 신청서 접수 착오송금반환지원을 신청하시면 접수증을 발급 받으실수 있습니다.",
+        "STEP4 반환지원대상 심사 및 채권매입 심사 담당자가 신청 내용을 확인하고 반환지원 대상 여부를 심사합니다. 심사결과(제도 이용 대상, 비대상)는 SMS로 안내해드립니다. 신청대상여부 확인하기",
+        "STEP5 반환지원 절차진행 제도 이용 대상인 경우 반환지원 절차가 진행됩니다."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "센터 안내"
+    },
+    {
+      "type": "paragraph",
+      "text": "예금보험공사 본사(지하1층 고객센터) 서울시 중구 청계천로 30 (지번주소: 서울특별시 중구 다동 33)"
+    },
+    {
+      "type": "paragraph",
+      "text": "지하철 이용 시"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "1호선 : 종각역 5번출구 영풍문고 길건너 도보 5분 거리",
+        "2호선 : 을지로입구역 2번출구 청계천 방향 도보 5분 거리",
+        "5호선 : 광화문역 5번출구 동아일보방면 도보 7분 거리"
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "버스이용시"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "광화문(역)에서 하차"
+      ]
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "간선버스 : 101, 160, 260, 270, 273, 370, 470, 471, 704, 710, 720",
+        "광역버스 : 9709",
+        "경기버스 : (일반)99, 1002, / (급행)8600, 8611 / (직행)9710"
+      ]
+    }
+  ],
+  "links": [
+    {
+      "url": "https://fins.kdic.or.kr/ir/msdrpr/selectAplyQlfcIdntyRslt.do",
+      "anchor_text": "신청대상여부 확인하기",
+      "link_role": "action",
+      "action_type": "apply",
+      "source_tag": "button",
+      "action_id": "6ec11899c44f66f0",
+      "resource_group_id": "",
+      "interaction_type": "navigate",
+      "target_layer_id": "",
+      "target_document_id": ""
+    },
+    {
+      "url": "https://fins.kdic.or.kr/ir/msdrpr/selectAplyQlfcIdntyRslt.do",
+      "anchor_text": "신청하기",
+      "link_role": "action",
+      "action_type": "apply",
+      "source_tag": "button",
+      "action_id": "2feae9067bdf9d5e",
+      "resource_group_id": "",
+      "interaction_type": "navigate",
+      "target_layer_id": "",
+      "target_document_id": ""
+    },
+    {
+      "url": "https://fins.kdic.or.kr/ir/aplygudn/MtrsVstRcptGudn/selectScrn.do",
+      "anchor_text": "HWP 신청서 공식 다운로드 페이지",
+      "link_role": "action",
+      "action_type": "download",
+      "source_tag": "attachment",
+      "action_id": "89506d1392cacfa8",
+      "resource_group_id": "",
+      "interaction_type": "navigate",
+      "target_layer_id": "",
+      "target_document_id": ""
+    },
+    {
+      "url": "https://fins.kdic.or.kr/ir/aplygudn/MtrsVstRcptGudn/selectScrn.do",
+      "anchor_text": "PDF 신청서 공식 다운로드 페이지",
+      "link_role": "action",
+      "action_type": "download",
+      "source_tag": "attachment",
+      "action_id": "5f05a1864ba05ed9",
+      "resource_group_id": "",
+      "interaction_type": "navigate",
+      "target_layer_id": "",
+      "target_document_id": ""
+    }
+  ],
+  "actions": [
+    {
+      "action_id": "6ec11899c44f66f0",
+      "label": "신청대상여부 확인하기",
+      "raw_label": "",
+      "url": "https://fins.kdic.or.kr/ir/msdrpr/selectAplyQlfcIdntyRslt.do",
+      "action_type": "apply",
+      "source_tag": "button",
+      "javascript_function": "javascript:window.location.href='/ir/msdrpr/selectAplyQlfcIdntyRslt.do';",
+      "auth_required": "신청 단계에서 필요",
+      "official_domain": true,
+      "requires_review": false
+    },
+    {
+      "action_id": "2feae9067bdf9d5e",
+      "label": "신청하기",
+      "raw_label": "",
+      "url": "https://fins.kdic.or.kr/ir/msdrpr/selectAplyQlfcIdntyRslt.do",
+      "action_type": "apply",
+      "source_tag": "button",
+      "javascript_function": "javascript:window.location.href='/ir/msdrpr/selectAplyQlfcIdntyRslt.do';",
+      "auth_required": "신청 단계에서 필요",
+      "official_domain": true,
+      "requires_review": false
+    },
+    {
+      "action_id": "89506d1392cacfa8",
+      "label": "HWP 신청서 공식 다운로드 페이지",
+      "url": "https://fins.kdic.or.kr/ir/aplygudn/MtrsVstRcptGudn/selectScrn.do",
+      "action_type": "download",
+      "source_tag": "attachment",
+      "attachment_id": "89506d1392cacfa8",
+      "download_method": "gfn_downloadFile",
+      "delivery_mode": "official_download_page",
+      "auth_required": "불필요",
+      "official_domain": true,
+      "requires_review": false
+    },
+    {
+      "action_id": "5f05a1864ba05ed9",
+      "label": "PDF 신청서 공식 다운로드 페이지",
+      "url": "https://fins.kdic.or.kr/ir/aplygudn/MtrsVstRcptGudn/selectScrn.do",
+      "action_type": "download",
+      "source_tag": "attachment",
+      "attachment_id": "5f05a1864ba05ed9",
+      "download_method": "gfn_downloadFile",
+      "delivery_mode": "official_download_page",
+      "auth_required": "불필요",
+      "official_domain": true,
+      "requires_review": false
+    }
+  ],
+  "attachments": [
+    {
+      "attachment_id": "89506d1392cacfa8",
+      "display_name": "HWP 신청서",
+      "file_format": "HWP",
+      "download_method": "gfn_downloadFile",
+      "token1": "0MPeNMADCMnnd9ok7g0v3aKBGpesQ6zYz3niIEhOkstmofBKi8Rl4AJGkE5DwEM+/Zo7JnKGyITTi2pk2zes5A==",
+      "token2": "nXSt084EYAk4T4YesCDLOivGXiLBTSa6hfOm9wilHZo=",
+      "row_context": "",
+      "button_text": "HWP 신청서 다운로드",
+      "source_page_url": "https://fins.kdic.or.kr/ir/aplygudn/MtrsVstRcptGudn/selectScrn.do",
+      "source_url": "https://fins.kdic.or.kr/ir/aplygudn/MtrsVstRcptGudn/selectScrn.do",
+      "official_download_url": null,
+      "user_action_url": "https://fins.kdic.or.kr/ir/aplygudn/MtrsVstRcptGudn/selectScrn.do",
+      "delivery_mode": "official_download_page",
+      "download_status": "downloaded",
+      "processing_policy": "download_no_index",
+      "indexable": false,
+      "needs_review": false,
+      "filename": "89506d1392cacfa8_01_신청서양식.hwp",
+      "local_path": "raw/assets/착오송금 반환 신청/MT-012/attachments/89506d1392cacfa8_01_신청서양식.hwp",
+      "download_url_observed": "blob:https://fins.kdic.or.kr/1952eb83-2463-4e60-b12c-4991702ba902",
+      "mime_type": "application/x-hwp",
+      "detected_format": "HWP",
+      "signature_valid": true,
+      "html_error_response": false,
+      "size_bytes": 81408,
+      "sha256": "afc9c34d37b6ee8bb2ef9c10315a85910db8424d32f89b9d16ea7f8517e6970c",
+      "extracted_text": "汤捯 捤獥 <별지 제1호 서식> 湯湷 <개정 2024. 2. 21>\n氠瑢\n접수번호\n잘못 보낸 돈 되찾기 서비스 신청서\n(착오송금 반환지원 신청서)\n담 당\n팀 장\n예금보험공사 사장 귀하\n• 잘못 보낸 돈 되찾기 서비스 신청을 위하여 공사에 제출하신 모든 서류는 반환해 드리지 않습니다.\n• 아래 내용은 잘못 보낸 돈 되찾기 서비스 심사과정에서 필요한 중요사항이오니, 누락되는 부분 없이 사실대로 기재하시기 바랍니다.\n氠瑢\n󰊱 잘못 송금한 자\n개인\n이 름\n주민등록번호\n(외국인등록번호)\n법인/\n비법인\n법인 이름\n(법인명)\n대 표\n사업자등록번호\n(고유번호/납세번호)\n공통\n휴대전화번호\n유선전화번호\n이메일\n주소\n※ 다른 사람이 대신 신청하는 경우\n󰊲 대리인\n이 름\n주민등록번호\n(외국인등록번호)\n휴대전화번호\n이메일\n주 소\n대리 신청 이유\n돈을 잘못 송금한 자가 □ 법인 또는 비법인단체\n□ 미성년자 □ 군복무 중 □ 해외거주 중 □ 기타 ( )\n잘못 송금한 내용\n󰊳\n개요\n잘못 송금한 날짜\n년 월 일\n송금 방법\n□ 무통장 입금 (카드, 통장 없이 ATM기 등 이용)\n□ 간편 송금 (카카오페이, 토스, 네이버페이 등 이용하여 충전된 금액을 송금)\n□ 계좌 이체 (본인 계좌에서 다른 계좌로 송금)\n계좌이체의 경우\n계좌이체\n방법\n□ 인터넷뱅킹 □ 모바일앱 (□ 오픈뱅킹)\n□ 텔레뱅킹 □ 자동화기기(CD/ATM) □ 창구\n송금시\n출금계좌\n금융회사\n계좌번호\n예 금 주\n󰊴\n상세\n내용\n원래 송금하려고 했던\n계좌 및 금액\n(돈이 들어갔어야 하는 계좌)\n금융회사\n계좌번호\n예 금 주\n보내려던 금액\n금 원\n잘못 송금받은\n계좌 및 금액\n(실제로 돈이 들어간 계좌)\n금융회사\n계좌번호\n예 금 주\n총 송금한 금액\n금 원\n잘못 송금한 금액\n금 원\n잘못 송금한 이유\n□ 계좌번호를 잘못 입력\n□ 돈을 받을 사람의 이름을 착각 (동명이인 등)\n□ 보내는 금액을 잘못 입력\n□ 보내야 할 횟수를 넘어서 여러 번 송금\n□ 목록(최근 이체내역, 자주 쓰는 계좌)에서 잘못 선택\n□ 기타( )\n捤獥 汤捯 湰灧 氠瑢\n󰊵 신청 전\n필수 확인사항\n(1) 거래 금융회사를 통해 반환요청을 하였고, 반환이 안 된다는 통지를 받으셨나요?\n반환 요청한 날\n년 월 일\n반환이 안 된다는 통지를 받은 날\n년 월 일\n반환이 안 된 이유\n□ 연락이 안 됨 □ 반환을 거부함\n□ 기타( )\n(2) 잘못 송금한 건과 관련하여 진행중인 법적조치가 있으신가요?\n□ 없음 □ 경찰을 통해 형사 절차 진행 중\n□ 지급명령신청 또는 민사소송(부당이득반환청구) 등 법적 절차 진행 중\n(3) 잘못 송금한 금액을 송금시 출금계좌로 돌려드리면 될까요?\n□ 네. 송금시 출금계좌로 반환 □ 아니오. 별도 다른 계좌 지정 필요\n(별도 계좌 지정 시)\n지정할 다른 계좌\n(※ 잘못 송금한 자 명의의\n계좌여야 합니다.)\n별도 지정 이유\n□ 출금계좌 해약 □ 간편 송금\n□ 무통장 입금 □ 기타( )\n금융회사\n계좌번호\n예 금 주\n(4) 계약서 및 규정 내용을 꼼꼼하게 읽어보고 내용을 이해하셨나요?\n본인은 ①권리 양수도 계약서, ②금융거래정보제공 동의서, ③잘못 보낸 돈 되찾기 서비스 관련 규정 및 ④권리양도 통지 위임장을 ( 열람 )하고, 그 내용을 ( 이해 )하였습니다.\n(5) 진행상황을 통지받을 연락방법을 선택하셨나요?(중복선택 가능)\n□ 신청인(잘못 송금한 자 또는 대리인)의 휴대전화 □ 신청인의 이메일\n󰊶 설문조사\n• 아래의 설문은 원활한 제도 운영을 위한 제도개선 및 효율적 홍보 등을 위해 활용될 예정입니다. 필수가 아닌 선택사항으로 작성하지 않아도 잘못 보낸 돈 되찾기 서비스 이용에 불이익은 없습니다.\n제도를 알게 된 경로\n□ 금융회사등에서 안내 □ 인터넷 검색 □ 방송보도\n□ 유튜브 □ 신문기사 □ 기타( )\n잘못 송금한 사실을 알아차린 때\n□ 송금 즉시 □ 일주일 내 □ 한달 내 □ 한달 이상 지난 후\n과거에 잘못 송금한 경험\n□ 이전에 송금 실수 없었음 □ 1회 □ 2회 이상\n돈을 보내려던 목적\n□ 물품·서비스 구매 □ 본인의 다른 계좌 □ 가족·지인 송금\n□ 직원 급여 □ 전월세 대금 □ 기타( )\n돈을 보낼 때 상황\n□ 음주, 졸음 등 집중할 수 없는 상황 □ 다른 용무 중\n□ 건강상의 이유 □ 디지털 기기 사용 미숙 □ 기타\n본인은 위의 내용을 사실대로 기재하였으며,\n위와 같이 잘못 보낸 돈 되찾기 서비스(착오송금반환지원제도) 이용을 신청하고자 합니다.\n년 월 일\n신청인(대리인) : (인 또는 서명)\n※ 개인정보 수집‧이용‧제공은 예금자보호법 제18조(업무의 범위) 제1항 제6호의2에 근거한 것으로 동의를 받고 있지 않습니다.",
+      "extracted_text_chars": 2234,
+      "text_extraction_status": "success",
+      "text_extraction_error": "",
+      "is_scanned_candidate": false,
+      "ocr_required": false,
+      "extraction_quality": "good",
+      "attachment_role": "form",
+      "contains_fillable_fields": true,
+      "contains_instructions": true,
+      "has_unique_information": false,
+      "duplicates_parent_content": false,
+      "classification_reason": "신청서·동의서·위임장·샘플 등 작성용 자료",
+      "parsed_markdown_path": "parsed/attachments/착오송금 반환 신청/MT-012/MT-012-ATT-89506d13.md",
+      "parsed_json_path": "parsed/attachments/착오송금 반환 신청/MT-012/MT-012-ATT-89506d13.json"
+    },
+    {
+      "attachment_id": "5f05a1864ba05ed9",
+      "display_name": "PDF 신청서",
+      "file_format": "PDF",
+      "download_method": "gfn_downloadFile",
+      "token1": "0MPeNMADCMnnd9ok7g0v3aKBGpesQ6zYz3niIEhOkstTzqcEGILdLWW6hqKWNkRFzF3lZwWGzTQnmL4bl6XExQ==",
+      "token2": "nXSt084EYAk4T4YesCDLOs35KTL5gtf6OZoupkkvFGY=",
+      "row_context": "",
+      "button_text": "PDF 신청서 다운로드",
+      "source_page_url": "https://fins.kdic.or.kr/ir/aplygudn/MtrsVstRcptGudn/selectScrn.do",
+      "source_url": "https://fins.kdic.or.kr/ir/aplygudn/MtrsVstRcptGudn/selectScrn.do",
+      "official_download_url": null,
+      "user_action_url": "https://fins.kdic.or.kr/ir/aplygudn/MtrsVstRcptGudn/selectScrn.do",
+      "delivery_mode": "official_download_page",
+      "download_status": "downloaded",
+      "processing_policy": "download_no_index",
+      "indexable": false,
+      "needs_review": false,
+      "filename": "5f05a1864ba05ed9_01_신청서양식.pdf",
+      "local_path": "raw/assets/착오송금 반환 신청/MT-012/attachments/5f05a1864ba05ed9_01_신청서양식.pdf",
+      "download_url_observed": "blob:https://fins.kdic.or.kr/9fcb3ab1-92f0-4274-a236-f38faec47f62",
+      "mime_type": "application/pdf",
+      "detected_format": "PDF",
+      "signature_valid": true,
+      "html_error_response": false,
+      "size_bytes": 269730,
+      "sha256": "f9cca273b5c8d605976e0d17a29c680a6a0f069b0f4d0a6c7e1446fa831b1e31",
+      "extracted_text": "<별지제1호서식><개정2024.2.21>접수번호잘못 보낸 돈 되찾기 서비스 신청서(착오송금 반환지원 신청서) 담 당팀 장예금보험공사 사장 귀하• 잘못 보낸 돈 되찾기 서비스 신청을 위하여 공사에 제출하신 모든 서류는 반환해 드리지 않습니다.• 아래 내용은 잘못 보낸 돈 되찾기 서비스 심사과정에서 필요한 중요사항이오니, 누락되는 부분 없이 사실대로 기재하시기 바랍니다.\n 잘못 송금한 자개인이 름주민등록번호(외국인등록번호)법인/비법인법인 이름(법인명) 대 표사업자등록번호(고유번호/납세번호)공통휴대전화번호유선전화번호이메일주소※ 다른 사람이 대신 신청하는 경우  대리인이 름주민등록번호(외국인등록번호)휴대전화번호이메일주 소대리 신청 이유돈을 잘못 송금한 자가 □ 법인 또는 비법인단체 □ 미성년자 □ 군복무 중 □ 해외거주 중 □ 기타 ( )\n잘못 송금한 내용\n개요잘못 송금한 날짜 년 월 일송금 방법□ 무통장 입금 (카드, 통장 없이 ATM기 등 이용)□ 간편 송금 (카카오페이, 토스, 네이버페이 등 이용하여 충전된 금액을 송금)□ 계좌 이체 (본인 계좌에서 다른 계좌로 송금)계좌이체의경우계좌이체방법□ 인터넷뱅킹 □ 모바일앱 (□ 오픈뱅킹)□ 텔레뱅킹 □ 자동화기기(CD/ATM) □ 창구송금시출금계좌금융회사계좌번호예 금 주\n상세내용\n원래 송금하려고 했던 계좌 및 금액(돈이 들어갔어야 하는 계좌) 금융회사계좌번호예 금 주보내려던 금액금 원잘못 송금받은 계좌 및 금액(실제로 돈이 들어간 계좌) 금융회사계좌번호예 금 주총 송금한 금액금 원잘못 송금한 금액금 원잘못 송금한 이유□ 계좌번호를 잘못 입력 □ 돈을 받을 사람의 이름을 착각 (동명이인 등) □ 보내는 금액을 잘못 입력 □ 보내야 할 횟수를 넘어서 여러 번 송금 □ 목록(최근 이체내역, 자주 쓰는 계좌)에서 잘못 선택□ 기타( )\n 신청 전 필수 확인사항\n(1) 거래 금융회사를 통해 반환요청을 하였고, 반환이 안 된다는 통지를 받으셨나요?반환 요청한 날 년 월 일 반환이 안 된다는 통지를 받은 날 년 월 일 반환이 안 된 이유□ 연락이 안 됨 □ 반환을 거부함□ 기타( )(2) 잘못 송금한 건과 관련하여 진행중인 법적조치가 있으신가요? □ 없음 □ 경찰을 통해 형사 절차 진행 중 □ 지급명령신청 또는 민사소송(부당이득반환청구) 등 법적 절차 진행 중(3) 잘못 송금한 금액을 송금시 출금계좌로 돌려드리면 될까요? □ 네. 송금시 출금계좌로 반환 □ 아니오. 별도 다른 계좌 지정 필요 (별도 계좌 지정 시)지정할 다른 계좌 (※ 잘못 송금한 자 명의의계좌여야 합니다.)별도 지정 이유□ 출금계좌 해약 □ 간편 송금□ 무통장 입금 □ 기타( )금융회사계좌번호예 금 주 (4) 계약서 및 규정 내용을 꼼꼼하게 읽어보고 내용을 이해하셨나요? 본인은 ①권리 양수도 계약서, ②금융거래정보제공 동의서, ③잘못 보낸 돈 되찾기 서비스 관련 규정 및 ④권리양도 통지 위임장을 ( 열람 )하고, 그 내용을 ( 이해 )하였습니다.(5) 진행상황을 통지받을 연락방법을 선택하셨나요?(중복선택 가능) □ 신청인(잘못 송금한 자 또는 대리인)의 휴대전화 □ 신청인의 이메일\n 설문조사\n• 아래의 설문은 원활한 제도 운영을 위한 제도개선 및 효율적 홍보 등을 위해 활용될 예정입니다. 필수가 아닌 선택사항으로 작성하지 않아도 잘못 보낸 돈 되찾기 서비스 이용에 불이익은 없습니다.제도를 알게 된 경로□ 금융회사등에서 안내 □ 인터넷 검색 □ 방송보도□ 유튜브 □ 신문기사 □ 기타( )잘못 송금한 사실을 알아차린 때□ 송금 즉시 □ 일주일 내 □ 한달 내 □ 한달 이상 지난 후 과 거 에 잘 못 송 금 한 경험□ 이전에 송금 실수 없었음 □ 1회 □ 2회 이상 돈을 보내려던 목적□ 물품·서비스 구매 □ 본인의 다른 계좌 □ 가족·지인 송금□ 직원 급여 □ 전월세 대금 □ 기타( )돈을 보낼 때 상황□ 음주, 졸음 등 집중할 수 없는 상황 □ 다른 용무 중□ 건강상의 이유 □ 디지털 기기 사용 미숙 □ 기타본인은 위의 내용을 사실대로 기재하였으며,위와 같이 잘못 보낸 돈 되찾기 서비스(착오송금반환지원제도) 이용을 신청하고자 합니다.년 월 일 신청인(대리인) : (인 또는 서명)※ 개인정보 수집‧이용‧제공은 예금자보호법 제18조(업무의 범위) 제1항 제6호의2에 근거한 것으로 동의를 받고 있지 않습니다.",
+      "extracted_text_chars": 2111,
+      "text_extraction_status": "success",
+      "text_extraction_error": "",
+      "is_scanned_candidate": false,
+      "ocr_required": false,
+      "extraction_quality": "good",
+      "attachment_role": "form",
+      "contains_fillable_fields": true,
+      "contains_instructions": true,
+      "has_unique_information": false,
+      "duplicates_parent_content": false,
+      "classification_reason": "신청서·동의서·위임장·샘플 등 작성용 자료",
+      "parsed_markdown_path": "parsed/attachments/착오송금 반환 신청/MT-012/MT-012-ATT-5f05a186.md",
+      "parsed_json_path": "parsed/attachments/착오송금 반환 신청/MT-012/MT-012-ATT-5f05a186.json"
+    }
+  ],
+  "images": [
+    {
+      "url": "https://fins.kdic.or.kr/assets/images/img-irAoo000M1-step01.png",
+      "alt": "",
+      "filename": "img-irAoo000M1-step01.png",
+      "image_role": "process_diagram",
+      "indexable": false,
+      "download_policy": "download_original_no_index",
+      "download_status": "downloaded",
+      "local_path": "raw/assets/착오송금 반환 신청/MT-012/images/img-irAoo000M1-step01.png",
+      "size_bytes": 3603,
+      "sha256": "8bbac689b3336ee91fccfa9201bbc0ef237ae866d448f54ac831ecedd033647c"
+    },
+    {
+      "url": "https://fins.kdic.or.kr/assets/images/img-irAoo000M1-step02.png",
+      "alt": "",
+      "filename": "img-irAoo000M1-step02.png",
+      "image_role": "process_diagram",
+      "indexable": false,
+      "download_policy": "download_original_no_index",
+      "download_status": "downloaded",
+      "local_path": "raw/assets/착오송금 반환 신청/MT-012/images/img-irAoo000M1-step02.png",
+      "size_bytes": 6704,
+      "sha256": "f4cb053c5cc42a5d21330231595c59e9f9f5fd9fed40b11d4d6d13b1d984cb67"
+    },
+    {
+      "url": "https://fins.kdic.or.kr/assets/images/img-irAoo000M1-step03.png",
+      "alt": "",
+      "filename": "img-irAoo000M1-step03.png",
+      "image_role": "process_diagram",
+      "indexable": false,
+      "download_policy": "download_original_no_index",
+      "download_status": "downloaded",
+      "local_path": "raw/assets/착오송금 반환 신청/MT-012/images/img-irAoo000M1-step03.png",
+      "size_bytes": 3482,
+      "sha256": "b19420b8a0c8f984a298deee105028cc4b0467b4391622b0d5c159b908ccd6cf"
+    },
+    {
+      "url": "https://fins.kdic.or.kr/assets/images/img-irAoo000M1-step04.png",
+      "alt": "",
+      "filename": "img-irAoo000M1-step04.png",
+      "image_role": "process_diagram",
+      "indexable": false,
+      "download_policy": "download_original_no_index",
+      "download_status": "downloaded",
+      "local_path": "raw/assets/착오송금 반환 신청/MT-012/images/img-irAoo000M1-step04.png",
+      "size_bytes": 4954,
+      "sha256": "150b260abad2e43f78847648db4cc5f49ce0bc2b544812bb3daa230d95c06e90"
+    },
+    {
+      "url": "https://fins.kdic.or.kr/assets/images/img-irAoo000M1-step05.png",
+      "alt": "",
+      "filename": "img-irAoo000M1-step05.png",
+      "image_role": "process_diagram",
+      "indexable": false,
+      "download_policy": "download_original_no_index",
+      "download_status": "downloaded",
+      "local_path": "raw/assets/착오송금 반환 신청/MT-012/images/img-irAoo000M1-step05.png",
+      "size_bytes": 3220,
+      "sha256": "d955e8889c4edad5ae98ef3800289fef44837158c5325090e2c773f3ffe41506"
+    }
+  ],
+  "videos": [],
+  "supplementary_links": [],
+  "embedded_document_ids": [],
+  "modal_resources": [],
+  "policy": {
+    "normalized_decision": "include_full",
+    "content_scope": "방문접수 절차·운영시간·주소 전체",
+    "rag_index_label": "O",
+    "action_policy": "O(자가진단·신청·서식 다운로드)",
+    "expected_action_types": "self_check|apply|download",
+    "pagination_policy": "불필요",
+    "auth_required": "신청 단계에서 필요",
+    "attachment_download_policy": "O",
+    "attachment_rag_policy": "auto_classify_guide_only",
+    "attachment_user_delivery_policy": "direct_official_url_if_stable_else_source_page",
+    "video_policy": "none",
+    "webtoon_policy": "none",
+    "image_policy": "metadata_only_nondecorative",
+    "modal_content_policy": "none"
+  },
+  "parsed_at": "2026-07-21T11:21:57+09:00",
+  "content_markdown": "### 방문접수 절차\n\n방문접수는 평일 09:00 ~ 17:00까지 운영됩니다. 점심시간 12:00 ~ 13:00\n\n- STEP 01 센터방문 구비서류와 신분증 지참하여 가까운 센터로 방문해 주세요. 구비서류 안내\n- STEP2 신청서 제출 신청서 작성 후 구비서류와 함께 제출해 주세요. HWP PDF\n- STEP3 신청서 접수 착오송금반환지원을 신청하시면 접수증을 발급 받으실수 있습니다.\n- STEP4 반환지원대상 심사 및 채권매입 심사 담당자가 신청 내용을 확인하고 반환지원 대상 여부를 심사합니다. 심사결과(제도 이용 대상, 비대상)는 SMS로 안내해드립니다. 신청대상여부 확인하기\n- STEP5 반환지원 절차진행 제도 이용 대상인 경우 반환지원 절차가 진행됩니다.\n\n### 센터 안내\n\n예금보험공사 본사(지하1층 고객센터) 서울시 중구 청계천로 30 (지번주소: 서울특별시 중구 다동 33)\n\n지하철 이용 시\n\n- 1호선 : 종각역 5번출구 영풍문고 길건너 도보 5분 거리\n- 2호선 : 을지로입구역 2번출구 청계천 방향 도보 5분 거리\n- 5호선 : 광화문역 5번출구 동아일보방면 도보 7분 거리\n\n버스이용시\n\n- 광화문(역)에서 하차\n\n- 간선버스 : 101, 160, 260, 270, 273, 370, 470, 471, 704, 710, 720\n- 광역버스 : 9709\n- 경기버스 : (일반)99, 1002, / (급행)8600, 8611 / (직행)9710",
+  "body_markdown": "### 방문접수 절차\n\n방문접수는 평일 09:00 ~ 17:00까지 운영됩니다. 점심시간 12:00 ~ 13:00\n\n- STEP 01 센터방문 구비서류와 신분증 지참하여 가까운 센터로 방문해 주세요. 구비서류 안내\n- STEP2 신청서 제출 신청서 작성 후 구비서류와 함께 제출해 주세요. HWP PDF\n- STEP3 신청서 접수 착오송금반환지원을 신청하시면 접수증을 발급 받으실수 있습니다.\n- STEP4 반환지원대상 심사 및 채권매입 심사 담당자가 신청 내용을 확인하고 반환지원 대상 여부를 심사합니다. 심사결과(제도 이용 대상, 비대상)는 SMS로 안내해드립니다. 신청대상여부 확인하기\n- STEP5 반환지원 절차진행 제도 이용 대상인 경우 반환지원 절차가 진행됩니다.\n\n### 센터 안내\n\n예금보험공사 본사(지하1층 고객센터) 서울시 중구 청계천로 30 (지번주소: 서울특별시 중구 다동 33)\n\n지하철 이용 시\n\n- 1호선 : 종각역 5번출구 영풍문고 길건너 도보 5분 거리\n- 2호선 : 을지로입구역 2번출구 청계천 방향 도보 5분 거리\n- 5호선 : 광화문역 5번출구 동아일보방면 도보 7분 거리\n\n버스이용시\n\n- 광화문(역)에서 하차\n\n- 간선버스 : 101, 160, 260, 270, 273, 370, 470, 471, 704, 710, 720\n- 광역버스 : 9709\n- 경기버스 : (일반)99, 1002, / (급행)8600, 8611 / (직행)9710",
+  "content_text": "방문접수 절차 방문접수는 평일 09:00 ~ 17:00까지 운영됩니다. 점심시간 12:00 ~ 13:00 STEP 01 센터방문 구비서류와 신분증 지참하여 가까운 센터로 방문해 주세요. 구비서류 안내 STEP2 신청서 제출 신청서 작성 후 구비서류와 함께 제출해 주세요. HWP PDF STEP3 신청서 접수 착오송금반환지원을 신청하시면 접수증을 발급 받으실수 있습니다. STEP4 반환지원대상 심사 및 채권매입 심사 담당자가 신청 내용을 확인하고 반환지원 대상 여부를 심사합니다. 심사결과(제도 이용 대상, 비대상)는 SMS로 안내해드립니다. 신청대상여부 확인하기 STEP5 반환지원 절차진행 제도 이용 대상인 경우 반환지원 절차가 진행됩니다. 센터 안내 예금보험공사 본사(지하1층 고객센터) 서울시 중구 청계천로 30 (지번주소: 서울특별시 중구 다동 33) 지하철 이용 시 1호선 : 종각역 5번출구 영풍문고 길건너 도보 5분 거리 2호선 : 을지로입구역 2번출구 청계천 방향 도보 5분 거리 5호선 : 광화문역 5번출구 동아일보방면 도보 7분 거리 버스이용시 광화문(역)에서 하차 간선버스 : 101, 160, 260, 270, 273, 370, 470, 471, 704, 710, 720 광역버스 : 9709 경기버스 : (일반)99, 1002, / (급행)8600, 8611 / (직행)9710",
+  "markdown_export": "# 방문접수안내\n\n### 방문접수 절차\n\n방문접수는 평일 09:00 ~ 17:00까지 운영됩니다. 점심시간 12:00 ~ 13:00\n\n- STEP 01 센터방문 구비서류와 신분증 지참하여 가까운 센터로 방문해 주세요. 구비서류 안내\n- STEP2 신청서 제출 신청서 작성 후 구비서류와 함께 제출해 주세요. HWP PDF\n- STEP3 신청서 접수 착오송금반환지원을 신청하시면 접수증을 발급 받으실수 있습니다.\n- STEP4 반환지원대상 심사 및 채권매입 심사 담당자가 신청 내용을 확인하고 반환지원 대상 여부를 심사합니다. 심사결과(제도 이용 대상, 비대상)는 SMS로 안내해드립니다. 신청대상여부 확인하기\n- STEP5 반환지원 절차진행 제도 이용 대상인 경우 반환지원 절차가 진행됩니다.\n\n### 센터 안내\n\n예금보험공사 본사(지하1층 고객센터) 서울시 중구 청계천로 30 (지번주소: 서울특별시 중구 다동 33)\n\n지하철 이용 시\n\n- 1호선 : 종각역 5번출구 영풍문고 길건너 도보 5분 거리\n- 2호선 : 을지로입구역 2번출구 청계천 방향 도보 5분 거리\n- 5호선 : 광화문역 5번출구 동아일보방면 도보 7분 거리\n\n버스이용시\n\n- 광화문(역)에서 하차\n\n- 간선버스 : 101, 160, 260, 270, 273, 370, 470, 471, 704, 710, 720\n- 광역버스 : 9709\n- 경기버스 : (일반)99, 1002, / (급행)8600, 8611 / (직행)9710\n\n## 공식 바로가기\n\n- [신청대상여부 확인하기](https://fins.kdic.or.kr/ir/msdrpr/selectAplyQlfcIdntyRslt.do) — apply\n- [신청하기](https://fins.kdic.or.kr/ir/msdrpr/selectAplyQlfcIdntyRslt.do) — apply\n- [HWP 신청서 공식 다운로드 페이지](https://fins.kdic.or.kr/ir/aplygudn/MtrsVstRcptGudn/selectScrn.do) — download\n- [PDF 신청서 공식 다운로드 페이지](https://fins.kdic.or.kr/ir/aplygudn/MtrsVstRcptGudn/selectScrn.do) — download",
+  "export_markdown": "# 방문접수안내\n\n### 방문접수 절차\n\n방문접수는 평일 09:00 ~ 17:00까지 운영됩니다. 점심시간 12:00 ~ 13:00\n\n- STEP 01 센터방문 구비서류와 신분증 지참하여 가까운 센터로 방문해 주세요. 구비서류 안내\n- STEP2 신청서 제출 신청서 작성 후 구비서류와 함께 제출해 주세요. HWP PDF\n- STEP3 신청서 접수 착오송금반환지원을 신청하시면 접수증을 발급 받으실수 있습니다.\n- STEP4 반환지원대상 심사 및 채권매입 심사 담당자가 신청 내용을 확인하고 반환지원 대상 여부를 심사합니다. 심사결과(제도 이용 대상, 비대상)는 SMS로 안내해드립니다. 신청대상여부 확인하기\n- STEP5 반환지원 절차진행 제도 이용 대상인 경우 반환지원 절차가 진행됩니다.\n\n### 센터 안내\n\n예금보험공사 본사(지하1층 고객센터) 서울시 중구 청계천로 30 (지번주소: 서울특별시 중구 다동 33)\n\n지하철 이용 시\n\n- 1호선 : 종각역 5번출구 영풍문고 길건너 도보 5분 거리\n- 2호선 : 을지로입구역 2번출구 청계천 방향 도보 5분 거리\n- 5호선 : 광화문역 5번출구 동아일보방면 도보 7분 거리\n\n버스이용시\n\n- 광화문(역)에서 하차\n\n- 간선버스 : 101, 160, 260, 270, 273, 370, 470, 471, 704, 710, 720\n- 광역버스 : 9709\n- 경기버스 : (일반)99, 1002, / (급행)8600, 8611 / (직행)9710\n\n## 공식 바로가기\n\n- [신청대상여부 확인하기](https://fins.kdic.or.kr/ir/msdrpr/selectAplyQlfcIdntyRslt.do) — apply\n- [신청하기](https://fins.kdic.or.kr/ir/msdrpr/selectAplyQlfcIdntyRslt.do) — apply\n- [HWP 신청서 공식 다운로드 페이지](https://fins.kdic.or.kr/ir/aplygudn/MtrsVstRcptGudn/selectScrn.do) — download\n- [PDF 신청서 공식 다운로드 페이지](https://fins.kdic.or.kr/ir/aplygudn/MtrsVstRcptGudn/selectScrn.do) — download",
+  "parsed_content_sha256": "55537cba4226c325c1072f195089b68f20d845ee21eb100a1b77a531e439ede3",
+  "content_hash": "55537cba4226c325c1072f195089b68f20d845ee21eb100a1b77a531e439ede3",
+  "quality": {
+    "status": "pass",
+    "reasons": [],
+    "source_text_chars": 674,
+    "parsed_text_chars": 674,
+    "retention_ratio": 1.0,
+    "faq_count": 0,
+    "table_count": 0,
+    "attachment_button_count": 2,
+    "action_count": 4,
+    "video_count": 0,
+    "supplementary_link_count": 0,
+    "noise_hits": []
+  },
+  "chunk_strategy": "auto_structure",
+  "table_group_key": "",
+  "table_entity_column": "",
+  "heading_context_policy": "inherit",
+  "pagination_collection": {
+    "collection_scope": "single_public_page",
+    "is_complete": true,
+    "pagination_detected": false,
+    "expected_page_count": 1,
+    "fetched_page_count": 1,
+    "failures": []
+  },
+  "downloaded_assets": {
+    "attachments": [],
+    "images": [
+      {
+        "url": "https://fins.kdic.or.kr/assets/images/img-irAoo000M1-step01.png",
+        "alt": "",
+        "filename": "img-irAoo000M1-step01.png",
+        "image_role": "process_diagram",
+        "indexable": false,
+        "download_policy": "download_original_no_index",
+        "download_status": "downloaded",
+        "local_path": "raw/assets/착오송금 반환 신청/MT-012/images/img-irAoo000M1-step01.png",
+        "size_bytes": 3603,
+        "sha256": "8bbac689b3336ee91fccfa9201bbc0ef237ae866d448f54ac831ecedd033647c"
+      },
+      {
+        "url": "https://fins.kdic.or.kr/assets/images/img-irAoo000M1-step02.png",
+        "alt": "",
+        "filename": "img-irAoo000M1-step02.png",
+        "image_role": "process_diagram",
+        "indexable": false,
+        "download_policy": "download_original_no_index",
+        "download_status": "downloaded",
+        "local_path": "raw/assets/착오송금 반환 신청/MT-012/images/img-irAoo000M1-step02.png",
+        "size_bytes": 6704,
+        "sha256": "f4cb053c5cc42a5d21330231595c59e9f9f5fd9fed40b11d4d6d13b1d984cb67"
+      },
+      {
+        "url": "https://fins.kdic.or.kr/assets/images/img-irAoo000M1-step03.png",
+        "alt": "",
+        "filename": "img-irAoo000M1-step03.png",
+        "image_role": "process_diagram",
+        "indexable": false,
+        "download_policy": "download_original_no_index",
+        "download_status": "downloaded",
+        "local_path": "raw/assets/착오송금 반환 신청/MT-012/images/img-irAoo000M1-step03.png",
+        "size_bytes": 3482,
+        "sha256": "b19420b8a0c8f984a298deee105028cc4b0467b4391622b0d5c159b908ccd6cf"
+      },
+      {
+        "url": "https://fins.kdic.or.kr/assets/images/img-irAoo000M1-step04.png",
+        "alt": "",
+        "filename": "img-irAoo000M1-step04.png",
+        "image_role": "process_diagram",
+        "indexable": false,
+        "download_policy": "download_original_no_index",
+        "download_status": "downloaded",
+        "local_path": "raw/assets/착오송금 반환 신청/MT-012/images/img-irAoo000M1-step04.png",
+        "size_bytes": 4954,
+        "sha256": "150b260abad2e43f78847648db4cc5f49ce0bc2b544812bb3daa230d95c06e90"
+      },
+      {
+        "url": "https://fins.kdic.or.kr/assets/images/img-irAoo000M1-step05.png",
+        "alt": "",
+        "filename": "img-irAoo000M1-step05.png",
+        "image_role": "process_diagram",
+        "indexable": false,
+        "download_policy": "download_original_no_index",
+        "download_status": "downloaded",
+        "local_path": "raw/assets/착오송금 반환 신청/MT-012/images/img-irAoo000M1-step05.png",
+        "size_bytes": 3220,
+        "sha256": "d955e8889c4edad5ae98ef3800289fef44837158c5325090e2c773f3ffe41506"
+      }
+    ],
+    "failures": []
+  }
+}

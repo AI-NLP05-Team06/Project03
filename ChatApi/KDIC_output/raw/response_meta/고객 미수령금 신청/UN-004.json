@@ -1,0 +1,23 @@
+{
+  "requested_url": "https://www.kdic.or.kr/sp/dpstrprot/ProtSystHrpeHistInq/selectScrn.do",
+  "final_url": "https://www.kdic.or.kr/sp/dpstrprot/ProtSystHrpeHistInq/selectScrn.do",
+  "status_code": 200,
+  "ok": true,
+  "content_type": "text/html; charset=UTF-8",
+  "encoding": "UTF-8",
+  "elapsed_seconds": 1.298,
+  "collected_at": "2026-07-21T11:21:18+09:00",
+  "content_length": 497440,
+  "raw_sha256": "14c105c1c0c31bdd4275fd66cf09e78ed211379c322382fb12366dc471b216d2",
+  "redirect_history": [],
+  "selected_headers": {
+    "Content-Type": "text/html; charset=UTF-8",
+    "Robots-Check": "unavailable:UnicodeDecodeError"
+  },
+  "url_id": "UN-004",
+  "business_function": "고객 미수령금 신청",
+  "page_title_manifest": "미수령금 통합조회/신청 > 상속인 금융거래조회",
+  "fetch_strategy": "requests_html",
+  "parser_profile": "kdic_final_integrated_v4_5",
+  "raw_html_path": "raw/html/고객 미수령금 신청/UN-004.html"
+}

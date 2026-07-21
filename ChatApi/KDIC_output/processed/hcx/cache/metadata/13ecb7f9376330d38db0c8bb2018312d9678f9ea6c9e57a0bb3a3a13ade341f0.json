@@ -1,0 +1,21 @@
+{
+  "summary": "본 문서는 착오송금 반환 요구에 대한 이의 제기서 양식으로, 착오송금 수취인이 예금보험공사에 제출하는 서류입니다.",
+  "sub_category": "착오송금 관련 서식",
+  "user_roles": [
+    "착오송금 수취인"
+  ],
+  "keywords": [
+    "착오송금",
+    "이의제기",
+    "예금보험공사",
+    "반환요구"
+  ],
+  "question_types": [
+    "서류형"
+  ],
+  "answerable_questions": [
+    "착오송금 반환 요청에 대한 이의 제기서 양식은 무엇인가?"
+  ],
+  "needs_human_review": false,
+  "review_reason": ""
+}

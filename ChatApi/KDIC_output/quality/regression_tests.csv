@@ -1,0 +1,392 @@
+﻿validation,passed,value
+DP-001 인덱싱 문서 청크 존재,True,
+DP-001 FAQ 청크 무손실,True,
+DP-001 청크 본문 보존율,True,1.0
+DP-002 인덱싱 문서 청크 존재,True,
+DP-002 FAQ 청크 무손실,True,
+DP-002 청크 본문 보존율,True,1.0
+DP-003 인덱싱 문서 청크 존재,True,
+DP-003 FAQ 청크 무손실,True,
+DP-003 청크 본문 보존율,True,1.0
+DP-004 인덱싱 문서 청크 존재,True,
+DP-004 FAQ 청크 무손실,True,
+DP-004 청크 본문 보존율,True,1.0
+DP-005 인덱싱 문서 청크 존재,True,
+DP-005 FAQ 청크 무손실,True,
+DP-005 청크 본문 보존율,True,1.0
+DP-006 인덱싱 문서 청크 존재,True,
+DP-006 FAQ 청크 무손실,True,
+DP-006 청크 본문 보존율,True,1.0
+DP-007 인덱싱 문서 청크 존재,True,
+DP-007 FAQ 청크 무손실,True,
+DP-007 청크 본문 보존율,True,1.0
+BI-001 인덱싱 문서 청크 존재,True,
+BI-001 FAQ 청크 무손실,True,
+BI-001 청크 본문 보존율,True,1.0
+BI-002 인덱싱 문서 청크 존재,True,
+BI-002 FAQ 청크 무손실,True,
+BI-002 청크 본문 보존율,True,1.0
+BI-003 인덱싱 문서 청크 존재,True,
+BI-003 FAQ 청크 무손실,True,
+BI-003 청크 본문 보존율,True,1.0
+BI-004 인덱싱 문서 청크 존재,True,
+BI-004 FAQ 청크 무손실,True,
+BI-004 청크 본문 보존율,True,1.0
+UN-001 인덱싱 문서 청크 존재,True,
+UN-001 FAQ 청크 무손실,True,
+UN-001 청크 본문 보존율,True,1.0
+UN-002 인덱싱 문서 청크 존재,True,
+UN-002 FAQ 청크 무손실,True,
+UN-002 청크 본문 보존율,True,1.0
+UN-003 인덱싱 문서 청크 존재,True,
+UN-003 FAQ 청크 무손실,True,
+UN-003 청크 본문 보존율,True,1.0
+UN-004 인덱싱 문서 청크 존재,True,
+UN-004 FAQ 청크 무손실,True,
+UN-004 청크 본문 보존율,True,1.0
+MT-001 인덱싱 문서 청크 존재,True,
+MT-001 FAQ 청크 무손실,True,
+MT-001 청크 본문 보존율,True,1.0
+MT-002 인덱싱 문서 청크 존재,True,
+MT-002 FAQ 청크 무손실,True,
+MT-002 청크 본문 보존율,True,1.0
+MT-003 인덱싱 문서 청크 존재,True,
+MT-003 FAQ 청크 무손실,True,
+MT-003 청크 본문 보존율,True,1.0
+MT-004 인덱싱 문서 청크 존재,True,
+MT-004 FAQ 청크 무손실,True,
+MT-004 청크 본문 보존율,True,1.0
+MT-005 인덱싱 문서 청크 존재,True,
+MT-005 FAQ 청크 무손실,True,
+MT-005 청크 본문 보존율,True,1.0
+MT-006 인덱싱 문서 청크 존재,True,
+MT-006 FAQ 청크 무손실,True,
+MT-006 청크 본문 보존율,True,1.0
+MT-007 인덱싱 문서 청크 존재,True,
+MT-007 FAQ 청크 무손실,True,
+MT-007 청크 본문 보존율,True,1.0
+MT-008 인덱싱 문서 청크 존재,True,
+MT-008 FAQ 청크 무손실,True,
+MT-008 청크 본문 보존율,True,1.0
+MT-009 인덱싱 문서 청크 존재,True,
+MT-009 FAQ 청크 무손실,True,
+MT-009 청크 본문 보존율,True,1.0
+MT-010 인덱싱 문서 청크 존재,True,
+MT-010 FAQ 청크 무손실,True,
+MT-010 청크 본문 보존율,True,1.0
+MT-011 인덱싱 문서 청크 존재,True,
+MT-011 FAQ 청크 무손실,True,
+MT-011 청크 본문 보존율,True,1.0
+MT-012 인덱싱 문서 청크 존재,True,
+MT-012 FAQ 청크 무손실,True,
+MT-012 청크 본문 보존율,True,1.0
+MT-013 인덱싱 문서 청크 존재,True,
+MT-013 FAQ 청크 무손실,True,
+MT-013 청크 본문 보존율,True,1.0
+MT-015 인덱싱 문서 청크 존재,True,
+MT-015 FAQ 청크 무손실,True,
+MT-015 청크 본문 보존율,True,1.0
+DA-001 인덱싱 문서 청크 존재,True,
+DA-001 FAQ 청크 무손실,True,
+DA-001 청크 본문 보존율,True,1.0
+DA-002 인덱싱 문서 청크 존재,True,
+DA-002 FAQ 청크 무손실,True,
+DA-002 청크 본문 보존율,True,1.0
+DA-003 인덱싱 문서 청크 존재,True,
+DA-003 FAQ 청크 무손실,True,
+DA-003 청크 본문 보존율,True,1.0
+DA-004 인덱싱 문서 청크 존재,True,
+DA-004 FAQ 청크 무손실,True,
+DA-004 청크 본문 보존율,True,1.0
+DA-005 인덱싱 문서 청크 존재,True,
+DA-005 FAQ 청크 무손실,True,
+DA-005 청크 본문 보존율,True,1.0
+DA-006 인덱싱 문서 청크 존재,True,
+DA-006 FAQ 청크 무손실,True,
+DA-006 청크 본문 보존율,True,1.0
+DA-007 인덱싱 문서 청크 존재,True,
+DA-007 FAQ 청크 무손실,True,
+DA-007 청크 본문 보존율,True,1.0
+DA-008 인덱싱 문서 청크 존재,True,
+DA-008 FAQ 청크 무손실,True,
+DA-008 청크 본문 보존율,True,1.0
+HP-001 인덱싱 문서 청크 존재,True,
+HP-001 FAQ 청크 무손실,True,
+HP-001 청크 본문 보존율,True,1.0
+HP-002 인덱싱 문서 청크 존재,True,
+HP-002 FAQ 청크 무손실,True,
+HP-002 청크 본문 보존율,True,1.0
+HP-003 인덱싱 문서 청크 존재,True,
+HP-003 FAQ 청크 무손실,True,
+HP-003 청크 본문 보존율,True,1.0
+MT-010_rule_layer01 인덱싱 문서 청크 존재,True,
+MT-010_rule_layer01 FAQ 청크 무손실,True,
+MT-010_rule_layer01 청크 본문 보존율,True,1.0
+MT-010_operation_layer01 인덱싱 문서 청크 존재,True,
+MT-010_operation_layer01 FAQ 청크 무손실,True,
+MT-010_operation_layer01 청크 본문 보존율,True,1.0
+DP-003-ATT-57b9a22e 인덱싱 문서 청크 존재,True,
+DP-003-ATT-57b9a22e FAQ 청크 무손실,True,
+DP-003-ATT-57b9a22e 청크 본문 보존율,True,1.0
+DP-003-ATT-3b79157f 인덱싱 문서 청크 존재,True,
+DP-003-ATT-3b79157f FAQ 청크 무손실,True,
+DP-003-ATT-3b79157f 청크 본문 보존율,True,1.0
+DP-001 1억원,True,
+UN-003 미수령금 종류,True,
+BI-004 전체 페이지,True,
+MT-001 영상 공식 페이지 참고 링크,True,
+MT-009 구버전 금액 제외,True,
+MT-009 웹툰 공식 페이지 참고 링크,True,
+DP-001 Action URL links 동기화,True,
+DP-001 Action URL Markdown 동기화,True,
+DP-001 맥락 포함 표시 제목,True,보호한도
+DP-001 Adobe Reader 노이즈 제거,True,
+DP-001 Action 라벨 길이,True,
+DP-001 목록 번호 중복 제거,True,
+DP-002 Action URL links 동기화,True,
+DP-002 Action URL Markdown 동기화,True,
+DP-002 맥락 포함 표시 제목,True,예금자보호제도
+DP-002 Adobe Reader 노이즈 제거,True,
+DP-002 Action 라벨 길이,True,
+DP-002 목록 번호 중복 제거,True,
+DP-003 Action URL links 동기화,True,
+DP-003 Action URL Markdown 동기화,True,
+DP-003 맥락 포함 표시 제목,True,보호대상 금융회사 개요
+DP-003 Adobe Reader 노이즈 제거,True,
+DP-003 Action 라벨 길이,True,
+DP-003 목록 번호 중복 제거,True,
+DP-004 Action URL links 동기화,True,
+DP-004 Action URL Markdown 동기화,True,
+DP-004 맥락 포함 표시 제목,True,보호대상 금융상품 개요
+DP-004 Adobe Reader 노이즈 제거,True,
+DP-004 Action 라벨 길이,True,
+DP-004 목록 번호 중복 제거,True,
+DP-005 Action URL links 동기화,True,
+DP-005 Action URL Markdown 동기화,True,
+DP-005 맥락 포함 표시 제목,True,예금자보호제도 FAQ
+DP-005 Adobe Reader 노이즈 제거,True,
+DP-005 Action 라벨 길이,True,
+DP-005 목록 번호 중복 제거,True,
+DP-006 Action URL links 동기화,True,
+DP-006 Action URL Markdown 동기화,True,
+DP-006 맥락 포함 표시 제목,True,예금자보호제도 FAQ
+DP-006 Adobe Reader 노이즈 제거,True,
+DP-006 Action 라벨 길이,True,
+DP-006 목록 번호 중복 제거,True,
+DP-007 Action URL links 동기화,True,
+DP-007 Action URL Markdown 동기화,True,
+DP-007 맥락 포함 표시 제목,True,예금자보호한도(해외)
+DP-007 Adobe Reader 노이즈 제거,True,
+DP-007 Action 라벨 길이,True,
+DP-007 목록 번호 중복 제거,True,
+BI-001 Action URL links 동기화,True,
+BI-001 Action URL Markdown 동기화,True,
+BI-001 맥락 포함 표시 제목,True,신청시 구비서류
+BI-001 Adobe Reader 노이즈 제거,True,
+BI-001 Action 라벨 길이,True,
+BI-001 목록 번호 중복 제거,True,
+BI-002 Action URL links 동기화,True,
+BI-002 Action URL Markdown 동기화,True,
+BI-002 맥락 포함 표시 제목,True,예금보험금 신청절차
+BI-002 Adobe Reader 노이즈 제거,True,
+BI-002 Action 라벨 길이,True,
+BI-002 목록 번호 중복 제거,True,
+BI-003 Action URL links 동기화,True,
+BI-003 Action URL Markdown 동기화,True,
+BI-003 맥락 포함 표시 제목,True,예금보험금이란?
+BI-003 Adobe Reader 노이즈 제거,True,
+BI-003 Action 라벨 길이,True,
+BI-003 목록 번호 중복 제거,True,
+BI-004 Action URL links 동기화,True,
+BI-004 Action URL Markdown 동기화,True,
+BI-004 맥락 포함 표시 제목,True,예금보험금 지급대상 금융회사
+BI-004 Adobe Reader 노이즈 제거,True,
+BI-004 Action 라벨 길이,True,
+BI-004 목록 번호 중복 제거,True,
+UN-001 Action URL links 동기화,True,
+UN-001 Action URL Markdown 동기화,True,
+UN-001 맥락 포함 표시 제목,True,고객미수령금
+UN-001 Adobe Reader 노이즈 제거,True,
+UN-001 Action 라벨 길이,True,
+UN-001 목록 번호 중복 제거,True,
+UN-002 Action URL links 동기화,True,
+UN-002 Action URL Markdown 동기화,True,
+UN-002 맥락 포함 표시 제목,True,통합신청 소개와 신청 방법 안내
+UN-002 Adobe Reader 노이즈 제거,True,
+UN-002 Action 라벨 길이,True,
+UN-002 목록 번호 중복 제거,True,
+UN-003 Action URL links 동기화,True,
+UN-003 Action URL Markdown 동기화,True,
+UN-003 맥락 포함 표시 제목,True,통합신청 소개와 신청방법 안내
+UN-003 Adobe Reader 노이즈 제거,True,
+UN-003 Action 라벨 길이,True,
+UN-003 목록 번호 중복 제거,True,
+UN-004 Action URL links 동기화,True,
+UN-004 Action URL Markdown 동기화,True,
+UN-004 맥락 포함 표시 제목,True,상속인 금융거래조회
+UN-004 Adobe Reader 노이즈 제거,True,
+UN-004 Action 라벨 길이,True,
+UN-004 목록 번호 중복 제거,True,
+MT-001 Action URL links 동기화,True,
+MT-001 Action URL Markdown 동기화,True,
+MT-001 맥락 포함 표시 제목,True,잘못 보낸 돈 되찾기 서비스 (착오송금 반환지원 제도)
+MT-001 Adobe Reader 노이즈 제거,True,
+MT-001 Action 라벨 길이,True,
+MT-001 목록 번호 중복 제거,True,
+MT-002 Action URL links 동기화,True,
+MT-002 Action URL Markdown 동기화,True,
+MT-002 맥락 포함 표시 제목,True,착오송금 반환지원 절차
+MT-002 Adobe Reader 노이즈 제거,True,
+MT-002 Action 라벨 길이,True,
+MT-002 목록 번호 중복 제거,True,
+MT-003 Action URL links 동기화,True,
+MT-003 Action URL Markdown 동기화,True,
+MT-003 맥락 포함 표시 제목,True,착오송금 반환지원 신청방법
+MT-003 Adobe Reader 노이즈 제거,True,
+MT-003 Action 라벨 길이,True,
+MT-003 목록 번호 중복 제거,True,
+MT-004 Action URL links 동기화,True,
+MT-004 Action URL Markdown 동기화,True,
+MT-004 맥락 포함 표시 제목,True,착오송금 반환지원 FAQ
+MT-004 Adobe Reader 노이즈 제거,True,
+MT-004 Action 라벨 길이,True,
+MT-004 목록 번호 중복 제거,True,
+MT-005 Action URL links 동기화,True,
+MT-005 Action URL Markdown 동기화,True,
+MT-005 맥락 포함 표시 제목,True,착오송금 반환지원 주요 FAQ
+MT-005 Adobe Reader 노이즈 제거,True,
+MT-005 Action 라벨 길이,True,
+MT-005 목록 번호 중복 제거,True,
+MT-006 Action URL links 동기화,True,
+MT-006 Action URL Markdown 동기화,True,
+MT-006 맥락 포함 표시 제목,True,착오송금 수취인 유의사항
+MT-006 Adobe Reader 노이즈 제거,True,
+MT-006 Action 라벨 길이,True,
+MT-006 목록 번호 중복 제거,True,
+MT-007 Action URL links 동기화,True,
+MT-007 Action URL Markdown 동기화,True,
+MT-007 맥락 포함 표시 제목,True,착오송금 수취인 구비서류 안내
+MT-007 Adobe Reader 노이즈 제거,True,
+MT-007 Action 라벨 길이,True,
+MT-007 목록 번호 중복 제거,True,
+MT-008 Action URL links 동기화,True,
+MT-008 Action URL Markdown 동기화,True,
+MT-008 맥락 포함 표시 제목,True,착오송금인 구비서류 안내
+MT-008 Adobe Reader 노이즈 제거,True,
+MT-008 Action 라벨 길이,True,
+MT-008 목록 번호 중복 제거,True,
+MT-009 Action URL links 동기화,True,
+MT-009 Action URL Markdown 동기화,True,
+MT-009 맥락 포함 표시 제목,True,반환지원절차
+MT-009 Adobe Reader 노이즈 제거,True,
+MT-009 Action 라벨 길이,True,
+MT-009 목록 번호 중복 제거,True,
+MT-010 Action URL links 동기화,True,
+MT-010 Action URL Markdown 동기화,True,
+MT-010 맥락 포함 표시 제목,True,관련 법령 및 규정
+MT-010 Adobe Reader 노이즈 제거,True,
+MT-010 Action 라벨 길이,True,
+MT-010 목록 번호 중복 제거,True,
+MT-011 Action URL links 동기화,True,
+MT-011 Action URL Markdown 동기화,True,
+MT-011 맥락 포함 표시 제목,True,상황선택
+MT-011 Adobe Reader 노이즈 제거,True,
+MT-011 Action 라벨 길이,True,
+MT-011 목록 번호 중복 제거,True,
+MT-012 Action URL links 동기화,True,
+MT-012 Action URL Markdown 동기화,True,
+MT-012 맥락 포함 표시 제목,True,방문접수안내
+MT-012 Adobe Reader 노이즈 제거,True,
+MT-012 Action 라벨 길이,True,
+MT-012 목록 번호 중복 제거,True,
+MT-013 Action URL links 동기화,True,
+MT-013 Action URL Markdown 동기화,True,
+MT-013 맥락 포함 표시 제목,True,착오송금인 유의사항
+MT-013 Adobe Reader 노이즈 제거,True,
+MT-013 Action 라벨 길이,True,
+MT-013 목록 번호 중복 제거,True,
+MT-014 Action URL links 동기화,True,
+MT-014 Action URL Markdown 동기화,True,
+MT-014 맥락 포함 표시 제목,True,착오송금 반환지원 신청대상 자가진단
+MT-014 Adobe Reader 노이즈 제거,True,
+MT-014 Action 라벨 길이,True,
+MT-014 목록 번호 중복 제거,True,
+MT-015 Action URL links 동기화,True,
+MT-015 Action URL Markdown 동기화,True,
+MT-015 맥락 포함 표시 제목,True,착오송금 반환지원 신청대상
+MT-015 Adobe Reader 노이즈 제거,True,
+MT-015 Action 라벨 길이,True,
+MT-015 목록 번호 중복 제거,True,
+DA-001 Action URL links 동기화,True,
+DA-001 Action URL Markdown 동기화,True,
+DA-001 맥락 포함 표시 제목,True,채무조정제도
+DA-001 Adobe Reader 노이즈 제거,True,
+DA-001 Action 라벨 길이,True,
+DA-001 목록 번호 중복 제거,True,
+DA-002 Action URL links 동기화,True,
+DA-002 Action URL Markdown 동기화,True,
+DA-002 맥락 포함 표시 제목,True,채무정보 조회 ＆ 상담신청
+DA-002 Adobe Reader 노이즈 제거,True,
+DA-002 Action 라벨 길이,True,
+DA-002 목록 번호 중복 제거,True,
+DA-003 Action URL links 동기화,True,
+DA-003 Action URL Markdown 동기화,True,
+DA-003 맥락 포함 표시 제목,True,채무조정
+DA-003 Adobe Reader 노이즈 제거,True,
+DA-003 Action 라벨 길이,True,
+DA-003 목록 번호 중복 제거,True,
+DA-004 Action URL links 동기화,True,
+DA-004 Action URL Markdown 동기화,True,
+DA-004 맥락 포함 표시 제목,True,신용회복 지원
+DA-004 Adobe Reader 노이즈 제거,True,
+DA-004 Action 라벨 길이,True,
+DA-004 목록 번호 중복 제거,True,
+DA-005 Action URL links 동기화,True,
+DA-005 Action URL Markdown 동기화,True,
+DA-005 맥락 포함 표시 제목,True,파산면책
+DA-005 Adobe Reader 노이즈 제거,True,
+DA-005 Action 라벨 길이,True,
+DA-005 목록 번호 중복 제거,True,
+DA-006 Action URL links 동기화,True,
+DA-006 Action URL Markdown 동기화,True,
+DA-006 맥락 포함 표시 제목,True,개인회생
+DA-006 Adobe Reader 노이즈 제거,True,
+DA-006 Action 라벨 길이,True,
+DA-006 목록 번호 중복 제거,True,
+DA-007 Action URL links 동기화,True,
+DA-007 Action URL Markdown 동기화,True,
+DA-007 맥락 포함 표시 제목,True,부채증명원/금융거래정보신청
+DA-007 Adobe Reader 노이즈 제거,True,
+DA-007 Action 라벨 길이,True,
+DA-007 목록 번호 중복 제거,True,
+DA-008 Action URL links 동기화,True,
+DA-008 Action URL Markdown 동기화,True,
+DA-008 맥락 포함 표시 제목,True,채무정보조회 FAQ
+DA-008 Adobe Reader 노이즈 제거,True,
+DA-008 Action 라벨 길이,True,
+DA-008 목록 번호 중복 제거,True,
+HP-001 Action URL links 동기화,True,
+HP-001 Action URL Markdown 동기화,True,
+HP-001 맥락 포함 표시 제목,True,금융부실관련자 은닉재산 신고 신고센터
+HP-001 Adobe Reader 노이즈 제거,True,
+HP-001 Action 라벨 길이,True,
+HP-001 목록 번호 중복 제거,True,
+HP-002 Action URL links 동기화,True,
+HP-002 Action URL Markdown 동기화,True,
+HP-002 맥락 포함 표시 제목,True,은닉재산 신고 FAQ
+HP-002 Adobe Reader 노이즈 제거,True,
+HP-002 Action 라벨 길이,True,
+HP-002 목록 번호 중복 제거,True,
+HP-003 Action URL links 동기화,True,
+HP-003 Action URL Markdown 동기화,True,
+HP-003 맥락 포함 표시 제목,True,신고센터 소개
+HP-003 Adobe Reader 노이즈 제거,True,
+HP-003 Action 라벨 길이,True,
+HP-003 목록 번호 중복 제거,True,
+HP-004 Action URL links 동기화,True,
+HP-004 Action URL Markdown 동기화,True,
+HP-004 맥락 포함 표시 제목,True,부실책임조사 진행현황 조회 (개인정보 수집이용 동의)
+HP-004 Adobe Reader 노이즈 제거,True,
+HP-004 Action 라벨 길이,True,
+HP-004 목록 번호 중복 제거,True,
+MT-009 웹툰 본문·청크 제외,True,

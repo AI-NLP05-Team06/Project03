@@ -1,0 +1,22 @@
+{
+  "summary": "(붙임) 부보금융회사 변동 현황(26년 1분기 기준)_홈페이지 공시",
+  "sub_category": "부보금융회사 변동 현황",
+  "user_roles": [
+    "일반 사용자"
+  ],
+  "keywords": [
+    "부보금융회사",
+    "현황",
+    "26년 1분기"
+  ],
+  "question_types": [
+    "대상형",
+    "비교형"
+  ],
+  "answerable_questions": [
+    "어떤 금융회사가 부보금융회사에서 제외되었나요?",
+    "최근 분기와 이전 분기의 부보금융회사 수는 어떻게 다른가요?"
+  ],
+  "needs_human_review": false,
+  "review_reason": ""
+}

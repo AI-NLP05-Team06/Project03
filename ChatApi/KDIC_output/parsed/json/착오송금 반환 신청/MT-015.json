@@ -1,0 +1,140 @@
+{
+  "doc_id": "MT-015",
+  "parent_doc_id": "MT-015",
+  "record_type": "page",
+  "indexable": true,
+  "rag_index_mode": "full",
+  "title": "착오송금 반환지원 신청대상",
+  "manifest_title": "착오송금 반환지원제도 > 착오송금반환지원 신청대상",
+  "page_heading": "착오송금반환지원 신청대상",
+  "display_title": "착오송금 반환지원 신청대상",
+  "html_title": "제도·정책 착오송금 반환지원제도 착오송금반환지원 신청대상",
+  "source_url": "https://www.kdic.or.kr/sp/kmrs/kmrsItrdAplyTrgt/selectScrn.do",
+  "final_url": "https://www.kdic.or.kr/sp/kmrs/kmrsItrdAplyTrgt/selectScrn.do",
+  "site_name": "예금보험공사",
+  "business_function": "착오송금 반환 신청",
+  "target_business_function": "착오송금 반환 신청",
+  "page_type": "static_page",
+  "parser_profile": "kdic_final_integrated_v4_5",
+  "resource_group_selector": "",
+  "resource_group_chunk_policy": "page",
+  "breadcrumb": [
+    "착오송금 반환 신청",
+    "착오송금 반환지원제도 > 착오송금반환지원 신청대상"
+  ],
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 4,
+      "text": "신청 가능한 착오송금 금액 한도가 있나요?"
+    },
+    {
+      "type": "paragraph",
+      "text": "신청 가능 한도는 착오송금 건당 5만원 이상 ~ 1억원 이하 입니다."
+    },
+    {
+      "type": "heading",
+      "level": 4,
+      "text": "언제까지 신청하면 되나요?"
+    },
+    {
+      "type": "paragraph",
+      "text": "잘못 이체한 날로부터 1년 이내까지 신청 가능합니다"
+    },
+    {
+      "type": "heading",
+      "level": 4,
+      "text": "예금보험공사에 신청하기 전에 해야 할 일이 있나요?"
+    },
+    {
+      "type": "paragraph",
+      "text": "이체 시 이용한 금융회사, 간편송금업체 등을 통해 먼저 반환을 요청해야 합니다."
+    },
+    {
+      "type": "paragraph",
+      "text": "금융회사, 간편송금업체 등을 통해서도 돌려받지 못한 경우 신청 가능합니다."
+    },
+    {
+      "type": "heading",
+      "level": 4,
+      "text": "예금보험공사에서 지원하지 않는 경우도 있나요?"
+    },
+    {
+      "type": "paragraph",
+      "text": "지원하지 않는 대표적인 사례는 다음과 같습니다"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "잘못 보낸 계좌가 사기, 보이스피싱 등 범죄 이용(의심) 계좌인 경우",
+        "잘못 보낸 계좌가 압류 등 법적제한계좌 또는 지급정지계좌인 경우",
+        "잘못 보낸 계좌의 예금주가 사망했거나 출국하여 국내 주소 없는 경우",
+        "잘못 보낸 계좌의 예금주(법인)가 휴·폐업한 경우 등"
+      ]
+    }
+  ],
+  "links": [],
+  "actions": [],
+  "attachments": [],
+  "images": [],
+  "videos": [],
+  "supplementary_links": [],
+  "embedded_document_ids": [],
+  "modal_resources": [],
+  "policy": {
+    "normalized_decision": "include_full",
+    "content_scope": "신청 가능 금액·기한·제외사유 전체",
+    "rag_index_label": "O",
+    "action_policy": "있을 경우 O(자가진단·신청)",
+    "expected_action_types": "self_check|apply",
+    "pagination_policy": "불필요",
+    "auth_required": "신청 단계에서 필요",
+    "attachment_download_policy": "X",
+    "attachment_rag_policy": "none",
+    "attachment_user_delivery_policy": "none",
+    "video_policy": "none",
+    "webtoon_policy": "none",
+    "image_policy": "metadata_only_nondecorative",
+    "modal_content_policy": "none"
+  },
+  "parsed_at": "2026-07-21T11:22:04+09:00",
+  "content_markdown": "#### 신청 가능한 착오송금 금액 한도가 있나요?\n\n신청 가능 한도는 착오송금 건당 5만원 이상 ~ 1억원 이하 입니다.\n\n#### 언제까지 신청하면 되나요?\n\n잘못 이체한 날로부터 1년 이내까지 신청 가능합니다\n\n#### 예금보험공사에 신청하기 전에 해야 할 일이 있나요?\n\n이체 시 이용한 금융회사, 간편송금업체 등을 통해 먼저 반환을 요청해야 합니다.\n\n금융회사, 간편송금업체 등을 통해서도 돌려받지 못한 경우 신청 가능합니다.\n\n#### 예금보험공사에서 지원하지 않는 경우도 있나요?\n\n지원하지 않는 대표적인 사례는 다음과 같습니다\n\n- 잘못 보낸 계좌가 사기, 보이스피싱 등 범죄 이용(의심) 계좌인 경우\n- 잘못 보낸 계좌가 압류 등 법적제한계좌 또는 지급정지계좌인 경우\n- 잘못 보낸 계좌의 예금주가 사망했거나 출국하여 국내 주소 없는 경우\n- 잘못 보낸 계좌의 예금주(법인)가 휴·폐업한 경우 등",
+  "body_markdown": "#### 신청 가능한 착오송금 금액 한도가 있나요?\n\n신청 가능 한도는 착오송금 건당 5만원 이상 ~ 1억원 이하 입니다.\n\n#### 언제까지 신청하면 되나요?\n\n잘못 이체한 날로부터 1년 이내까지 신청 가능합니다\n\n#### 예금보험공사에 신청하기 전에 해야 할 일이 있나요?\n\n이체 시 이용한 금융회사, 간편송금업체 등을 통해 먼저 반환을 요청해야 합니다.\n\n금융회사, 간편송금업체 등을 통해서도 돌려받지 못한 경우 신청 가능합니다.\n\n#### 예금보험공사에서 지원하지 않는 경우도 있나요?\n\n지원하지 않는 대표적인 사례는 다음과 같습니다\n\n- 잘못 보낸 계좌가 사기, 보이스피싱 등 범죄 이용(의심) 계좌인 경우\n- 잘못 보낸 계좌가 압류 등 법적제한계좌 또는 지급정지계좌인 경우\n- 잘못 보낸 계좌의 예금주가 사망했거나 출국하여 국내 주소 없는 경우\n- 잘못 보낸 계좌의 예금주(법인)가 휴·폐업한 경우 등",
+  "content_text": "신청 가능한 착오송금 금액 한도가 있나요? 신청 가능 한도는 착오송금 건당 5만원 이상 ~ 1억원 이하 입니다. 언제까지 신청하면 되나요? 잘못 이체한 날로부터 1년 이내까지 신청 가능합니다 예금보험공사에 신청하기 전에 해야 할 일이 있나요? 이체 시 이용한 금융회사, 간편송금업체 등을 통해 먼저 반환을 요청해야 합니다. 금융회사, 간편송금업체 등을 통해서도 돌려받지 못한 경우 신청 가능합니다. 예금보험공사에서 지원하지 않는 경우도 있나요? 지원하지 않는 대표적인 사례는 다음과 같습니다 잘못 보낸 계좌가 사기, 보이스피싱 등 범죄 이용(의심) 계좌인 경우 잘못 보낸 계좌가 압류 등 법적제한계좌 또는 지급정지계좌인 경우 잘못 보낸 계좌의 예금주가 사망했거나 출국하여 국내 주소 없는 경우 잘못 보낸 계좌의 예금주(법인)가 휴·폐업한 경우 등",
+  "markdown_export": "# 착오송금 반환지원 신청대상\n\n#### 신청 가능한 착오송금 금액 한도가 있나요?\n\n신청 가능 한도는 착오송금 건당 5만원 이상 ~ 1억원 이하 입니다.\n\n#### 언제까지 신청하면 되나요?\n\n잘못 이체한 날로부터 1년 이내까지 신청 가능합니다\n\n#### 예금보험공사에 신청하기 전에 해야 할 일이 있나요?\n\n이체 시 이용한 금융회사, 간편송금업체 등을 통해 먼저 반환을 요청해야 합니다.\n\n금융회사, 간편송금업체 등을 통해서도 돌려받지 못한 경우 신청 가능합니다.\n\n#### 예금보험공사에서 지원하지 않는 경우도 있나요?\n\n지원하지 않는 대표적인 사례는 다음과 같습니다\n\n- 잘못 보낸 계좌가 사기, 보이스피싱 등 범죄 이용(의심) 계좌인 경우\n- 잘못 보낸 계좌가 압류 등 법적제한계좌 또는 지급정지계좌인 경우\n- 잘못 보낸 계좌의 예금주가 사망했거나 출국하여 국내 주소 없는 경우\n- 잘못 보낸 계좌의 예금주(법인)가 휴·폐업한 경우 등",
+  "export_markdown": "# 착오송금 반환지원 신청대상\n\n#### 신청 가능한 착오송금 금액 한도가 있나요?\n\n신청 가능 한도는 착오송금 건당 5만원 이상 ~ 1억원 이하 입니다.\n\n#### 언제까지 신청하면 되나요?\n\n잘못 이체한 날로부터 1년 이내까지 신청 가능합니다\n\n#### 예금보험공사에 신청하기 전에 해야 할 일이 있나요?\n\n이체 시 이용한 금융회사, 간편송금업체 등을 통해 먼저 반환을 요청해야 합니다.\n\n금융회사, 간편송금업체 등을 통해서도 돌려받지 못한 경우 신청 가능합니다.\n\n#### 예금보험공사에서 지원하지 않는 경우도 있나요?\n\n지원하지 않는 대표적인 사례는 다음과 같습니다\n\n- 잘못 보낸 계좌가 사기, 보이스피싱 등 범죄 이용(의심) 계좌인 경우\n- 잘못 보낸 계좌가 압류 등 법적제한계좌 또는 지급정지계좌인 경우\n- 잘못 보낸 계좌의 예금주가 사망했거나 출국하여 국내 주소 없는 경우\n- 잘못 보낸 계좌의 예금주(법인)가 휴·폐업한 경우 등",
+  "parsed_content_sha256": "6c9f930996be88489bd4d38b9313edeebb0ff2b94d4b28111d5be08a5bc7e6ab",
+  "content_hash": "6c9f930996be88489bd4d38b9313edeebb0ff2b94d4b28111d5be08a5bc7e6ab",
+  "quality": {
+    "status": "pass",
+    "reasons": [],
+    "source_text_chars": 417,
+    "parsed_text_chars": 417,
+    "retention_ratio": 1.0,
+    "faq_count": 0,
+    "table_count": 0,
+    "attachment_button_count": 0,
+    "action_count": 0,
+    "video_count": 0,
+    "supplementary_link_count": 0,
+    "noise_hits": []
+  },
+  "chunk_strategy": "auto_structure",
+  "table_group_key": "",
+  "table_entity_column": "",
+  "heading_context_policy": "inherit",
+  "pagination_collection": {
+    "collection_scope": "single_public_page",
+    "is_complete": true,
+    "pagination_detected": false,
+    "expected_page_count": 1,
+    "fetched_page_count": 1,
+    "failures": []
+  },
+  "downloaded_assets": {
+    "attachments": [],
+    "images": [],
+    "failures": []
+  }
+}

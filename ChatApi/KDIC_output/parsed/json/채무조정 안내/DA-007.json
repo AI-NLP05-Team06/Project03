@@ -1,0 +1,446 @@
+{
+  "doc_id": "DA-007",
+  "parent_doc_id": "DA-007",
+  "record_type": "page",
+  "indexable": true,
+  "rag_index_mode": "public_only",
+  "title": "부채증명원/금융거래정보신청",
+  "manifest_title": "지원자금관리 > 부채증명원/금융거래정보신청",
+  "page_heading": "부채증명원/금융거래정보신청",
+  "display_title": "부채증명원/금융거래정보신청",
+  "html_title": "제도·정책 지원자금관리 부채증명원/금융거래정보신청",
+  "source_url": "https://www.kdic.or.kr/sp/sprtfund/SprtFndDebtDlngAplyGudn/selectScrn.do",
+  "final_url": "https://www.kdic.or.kr/sp/sprtfund/SprtFndDebtDlngAplyGudn/selectScrn.do",
+  "site_name": "예금보험공사",
+  "business_function": "채무조정 안내",
+  "target_business_function": "채무조정 안내",
+  "page_type": "interactive_service",
+  "parser_profile": "kdic_final_integrated_v4_5",
+  "resource_group_selector": "",
+  "resource_group_chunk_policy": "page",
+  "breadcrumb": [
+    "채무조정 안내",
+    "지원자금관리 > 부채증명원/금융거래정보신청"
+  ],
+  "blocks": [
+    {
+      "type": "paragraph",
+      "text": "예금보험공사에서 관리하는 파산금융회사에 대한 부채증명원/금융거래정보 발급을 도와드리는 서비스 입니다."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "신청대상"
+    },
+    {
+      "type": "heading",
+      "level": 4,
+      "text": "파산금융회사에 부채를 가지고 있는 채무자의 부채증명원/금융거래정보"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "파산절차가 진행중인 금융회사의 부채증명원/금융거래정보를 접수받아 해당 파산재단으로 이송하여 발급",
+        "법적 종결된 파산재단의 경우 부채증명원 신청만 가능"
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "신청방법"
+    },
+    {
+      "type": "paragraph",
+      "text": "부채증명원/금융거래정본, 인터넷 신청을 원칙으로 하되, 직접 내방( 공사 고객도우미실, 인근파산재단 )하여 신청하실 수도 있습니다."
+    },
+    {
+      "type": "definition",
+      "term": "신청 시 구비서류",
+      "definition_blocks": [
+        {
+          "type": "table",
+          "headers": [
+            "인터넷 신청시",
+            "인터넷 신청시 2",
+            "공인인증서, 휴대폰",
+            "공인인증서, 휴대폰 2"
+          ],
+          "rows": [
+            [
+              "방문 신청 시",
+              "본인 방문",
+              "부채증명원 발급신청서",
+              "부채증명원 발급신청서 FILE 다운로드"
+            ],
+            [
+              "방문 신청 시",
+              "본인 방문",
+              "금융거래정보 발급신청서",
+              "금융거래정보 발급신청서 FILE 다운로드"
+            ],
+            [
+              "방문 신청 시",
+              "본인 방문",
+              "본인 신분증",
+              ""
+            ],
+            [
+              "방문 신청 시",
+              "대리인 방문",
+              "부채증명원 발급신청서",
+              "부채증명원 발급신청서 FILE 다운로드"
+            ],
+            [
+              "방문 신청 시",
+              "대리인 방문",
+              "금융거래정보 발급신청서",
+              "금융거래정보 발급신청서 FILE 다운로드"
+            ],
+            [
+              "방문 신청 시",
+              "대리인 방문",
+              "위임장",
+              "위임장 FILE 다운로드"
+            ],
+            [
+              "방문 신청 시",
+              "대리인 방문",
+              "위임자 인감증명서",
+              ""
+            ],
+            [
+              "방문 신청 시",
+              "대리인 방문",
+              "대리인 신분증",
+              ""
+            ]
+          ],
+          "row_count": 8
+        }
+      ],
+      "definition_text": "인터넷 신청시 인터넷 신청시 2 공인인증서, 휴대폰 공인인증서, 휴대폰 2 방문 신청 시 본인 방문 부채증명원 발급신청서 부채증명원 발급신청서 FILE 다운로드 방문 신청 시 본인 방문 금융거래정보 발급신청서 금융거래정보 발급신청서 FILE 다운로드 방문 신청 시 본인 방문 본인 신분증 방문 신청 시 대리인 방문 부채증명원 발급신청서 부채증명원 발급신청서 FILE 다운로드 방문 신청 시 대리인 방문 금융거래정보 발급신청서 금융거래정보 발급신청서 FILE 다운로드 방문 신청 시 대리인 방문 위임장 위임장 FILE 다운로드 방문 신청 시 대리인 방문 위임자 인감증명서 방문 신청 시 대리인 방문 대리인 신분증"
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "교부방법"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "인터넷 및 내방(우리 공사 접수분 제외)하여 신청하신 경력증명서/확인서는 발급신청서에 기재된 수령희망주소지로 등기 및 FAX로 발송되며, 신청일로부터 5일 이내에 수령하실 수 있습니다.",
+        "신청하신 내용의 정상 접수여부, 파산금융회사 이송 등 처리과정을 E-Mail 또는 SMS로 안내해드리고 있으므로 참고하시기 바랍니다."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "신청 시 유의사항"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "경력증명서/확인서 신청접수, 파산금융회사 이송 등의 처리과정이 E-Mail 또는 SMS로 통보되므로 연락처를 정확하게 기재하셔야 합니다.",
+        "발급된 경력증명서/확인서는 수령 희망지로 등기우편 발송되므로 수령희망지 주소를 빠짐없이 정확하게 기재 하셔야 합니다.",
+        "기타 경력증명서/확인서 발급과 관련하여 궁금하신 사항은 우리 공사 고객도우미실(☎ 1588-0037)로 문의하시기 바랍니다."
+      ]
+    }
+  ],
+  "links": [
+    {
+      "url": "https://fins.kdic.or.kr/mm/lgn/selectNonMbrLgn.do",
+      "anchor_text": "부채증명원/금융거래정보 신청하기",
+      "link_role": "action",
+      "action_type": "issue",
+      "source_tag": "button",
+      "action_id": "15f0fd77bc1c392a",
+      "resource_group_id": "",
+      "interaction_type": "navigate",
+      "target_layer_id": "",
+      "target_document_id": ""
+    },
+    {
+      "url": "https://www.kdic.or.kr/sp/sprtfund/SprtFndDebtDlngAplyGudn/selectScrn.do",
+      "anchor_text": "부채증명원 발급신청서 (FILE) 공식 다운로드 페이지",
+      "link_role": "action",
+      "action_type": "download",
+      "source_tag": "attachment",
+      "action_id": "975ba507672f1226",
+      "resource_group_id": "",
+      "interaction_type": "navigate",
+      "target_layer_id": "",
+      "target_document_id": ""
+    },
+    {
+      "url": "https://www.kdic.or.kr/sp/sprtfund/SprtFndDebtDlngAplyGudn/selectScrn.do",
+      "anchor_text": "금융거래정보 발급신청서 (FILE) 공식 다운로드 페이지",
+      "link_role": "action",
+      "action_type": "download",
+      "source_tag": "attachment",
+      "action_id": "bee3f76123209c2d",
+      "resource_group_id": "",
+      "interaction_type": "navigate",
+      "target_layer_id": "",
+      "target_document_id": ""
+    },
+    {
+      "url": "https://www.kdic.or.kr/sp/sprtfund/SprtFndDebtDlngAplyGudn/selectScrn.do",
+      "anchor_text": "위임장 (FILE) 공식 다운로드 페이지",
+      "link_role": "action",
+      "action_type": "download",
+      "source_tag": "attachment",
+      "action_id": "9b28385c18fd0fb6",
+      "resource_group_id": "",
+      "interaction_type": "navigate",
+      "target_layer_id": "",
+      "target_document_id": ""
+    }
+  ],
+  "actions": [
+    {
+      "action_id": "15f0fd77bc1c392a",
+      "label": "부채증명원/금융거래정보 신청하기",
+      "raw_label": "",
+      "url": "https://fins.kdic.or.kr/mm/lgn/selectNonMbrLgn.do",
+      "action_type": "issue",
+      "source_tag": "button",
+      "javascript_function": "gfn_openUrl",
+      "auth_required": "필요",
+      "official_domain": true,
+      "requires_review": false
+    },
+    {
+      "action_id": "975ba507672f1226",
+      "label": "부채증명원 발급신청서 (FILE) 공식 다운로드 페이지",
+      "url": "https://www.kdic.or.kr/sp/sprtfund/SprtFndDebtDlngAplyGudn/selectScrn.do",
+      "action_type": "download",
+      "source_tag": "attachment",
+      "attachment_id": "975ba507672f1226",
+      "download_method": "gfn_downloadFile",
+      "delivery_mode": "official_download_page",
+      "auth_required": "불필요",
+      "official_domain": true,
+      "requires_review": false
+    },
+    {
+      "action_id": "bee3f76123209c2d",
+      "label": "금융거래정보 발급신청서 (FILE) 공식 다운로드 페이지",
+      "url": "https://www.kdic.or.kr/sp/sprtfund/SprtFndDebtDlngAplyGudn/selectScrn.do",
+      "action_type": "download",
+      "source_tag": "attachment",
+      "attachment_id": "bee3f76123209c2d",
+      "download_method": "gfn_downloadFile",
+      "delivery_mode": "official_download_page",
+      "auth_required": "불필요",
+      "official_domain": true,
+      "requires_review": false
+    },
+    {
+      "action_id": "9b28385c18fd0fb6",
+      "label": "위임장 (FILE) 공식 다운로드 페이지",
+      "url": "https://www.kdic.or.kr/sp/sprtfund/SprtFndDebtDlngAplyGudn/selectScrn.do",
+      "action_type": "download",
+      "source_tag": "attachment",
+      "attachment_id": "9b28385c18fd0fb6",
+      "download_method": "gfn_downloadFile",
+      "delivery_mode": "official_download_page",
+      "auth_required": "불필요",
+      "official_domain": true,
+      "requires_review": false
+    }
+  ],
+  "attachments": [
+    {
+      "attachment_id": "975ba507672f1226",
+      "display_name": "부채증명원 발급신청서 (FILE)",
+      "file_format": "FILE",
+      "download_method": "gfn_downloadFile",
+      "token1": "0MPeNMADCMnnd9ok7g0v3Zgp3LeBelnr3f7RWPzh422izJy8yULHNXlvNNxr73Yuy+Q0ImuXrZGTzSXfFfImcQ==",
+      "token2": "aT895kugvMDZx5vH6LWFoK9RBF8sWOt9rMBMYvIRySPCzm988toSL9/iwsFAgi6M",
+      "row_context": "방문 신청 시 | 본인 방문 | 부채증명원 발급신청서",
+      "button_text": "부채증명원 발급신청서 다운로드",
+      "source_page_url": "https://www.kdic.or.kr/sp/sprtfund/SprtFndDebtDlngAplyGudn/selectScrn.do",
+      "source_url": "https://www.kdic.or.kr/sp/sprtfund/SprtFndDebtDlngAplyGudn/selectScrn.do",
+      "official_download_url": null,
+      "user_action_url": "https://www.kdic.or.kr/sp/sprtfund/SprtFndDebtDlngAplyGudn/selectScrn.do",
+      "delivery_mode": "official_download_page",
+      "download_status": "downloaded",
+      "processing_policy": "download_no_index",
+      "indexable": false,
+      "needs_review": false,
+      "filename": "975ba507672f1226_부채증명원 발급신청서.hwp",
+      "local_path": "raw/assets/채무조정 안내/DA-007/attachments/975ba507672f1226_부채증명원 발급신청서.hwp",
+      "download_url_observed": "blob:https://www.kdic.or.kr/f18aef4d-f4e3-4294-a172-70d835fec5b9",
+      "mime_type": "application/x-hwp",
+      "detected_format": "HWP",
+      "signature_valid": true,
+      "html_error_response": false,
+      "size_bytes": 14336,
+      "sha256": "57296d7d95d75d7b276e79bdf6c75c5776fb86c0e2a6b2b0cbe35e56400fb400",
+      "extracted_text": "捤獥 汤捯 부채증명원 발급신청서\n漠杳\n氠瑢\n성 명\n주민등록번호\n발급대상기관\n기 준 일 자\n대 출 과 목\n계 좌 번 호\n비 고\n제 출 처\n제 출 용 도\n신 청 부 수\n각 통\n주민등록지\n수령방법\n○ 우편\n(우편번호 - )\n○ FAX\n연 락 처\n자 택\nE-mail\n휴대폰\n위와 같이 부채증명원을 발급하여 주시기 바랍니다.\n20 년 월 일\n위 신청인(대리인) (인)\n氠瑢\n신원확인\n소 속\n직 위\n성 명\n서 명\n※신청인(대리인) 신원을 확인한 접수직원의 소속부서(공사) 또는 파산재단명(파산재단) 기재\n예금보험공사 / 파산재단 귀중",
+      "extracted_text_chars": 292,
+      "text_extraction_status": "success",
+      "text_extraction_error": "",
+      "is_scanned_candidate": false,
+      "ocr_required": false,
+      "extraction_quality": "good",
+      "attachment_role": "form",
+      "contains_fillable_fields": true,
+      "contains_instructions": false,
+      "has_unique_information": false,
+      "duplicates_parent_content": false,
+      "classification_reason": "신청서·동의서·위임장·샘플 등 작성용 자료",
+      "parsed_markdown_path": "parsed/attachments/채무조정 안내/DA-007/DA-007-ATT-975ba507.md",
+      "parsed_json_path": "parsed/attachments/채무조정 안내/DA-007/DA-007-ATT-975ba507.json"
+    },
+    {
+      "attachment_id": "bee3f76123209c2d",
+      "display_name": "금융거래정보 발급신청서 (FILE)",
+      "file_format": "FILE",
+      "download_method": "gfn_downloadFile",
+      "token1": "0MPeNMADCMnnd9ok7g0v3chVXK//fAAesMzAta1YFtUxqGm+Twe9rZKBa/KGO6BhvLYjoAdGSx2awJ3tDR23Jwnk/wmxbAxIW2wrGYJyj8c=",
+      "token2": "lrORylGlqUswt9N3XfP9pNYJBSRy0EhF4XgZQYve5BoRHZg0txPShR2Ghq1xpnCK",
+      "row_context": "금융거래정보 발급신청서",
+      "button_text": "금융거래정보 발급신청서 다운로드",
+      "source_page_url": "https://www.kdic.or.kr/sp/sprtfund/SprtFndDebtDlngAplyGudn/selectScrn.do",
+      "source_url": "https://www.kdic.or.kr/sp/sprtfund/SprtFndDebtDlngAplyGudn/selectScrn.do",
+      "official_download_url": null,
+      "user_action_url": "https://www.kdic.or.kr/sp/sprtfund/SprtFndDebtDlngAplyGudn/selectScrn.do",
+      "delivery_mode": "official_download_page",
+      "download_status": "downloaded",
+      "processing_policy": "download_no_index",
+      "indexable": false,
+      "needs_review": false,
+      "filename": "bee3f76123209c2d_금융거래정보 발급신청서.hwp",
+      "local_path": "raw/assets/채무조정 안내/DA-007/attachments/bee3f76123209c2d_금융거래정보 발급신청서.hwp",
+      "download_url_observed": "blob:https://www.kdic.or.kr/5e8ca558-e93e-4e5b-8dcb-1c440dfb3b48",
+      "mime_type": "application/x-hwp",
+      "detected_format": "HWP",
+      "signature_valid": true,
+      "html_error_response": false,
+      "size_bytes": 14848,
+      "sha256": "399d692dc88181a53b45c7dd4c9e566eece95224458ada0568508db373acfc85",
+      "extracted_text": "捤獥 汤捯\n금융거래정보제공 요구서\n본인이 귀( )과 거래하고 있는 아래 계좌에 대한 정보 제공을 요구합니다.\n1. 금융거래정보 요구자 인적사항\n氠瑢\n성명\n주민등록번호\n-\n주소\n연락처\n(휴대전화) (자택)\n제 출 처\n제출용도\n신청부수\n각 통\n2. 금융거래정보 요구 내용\n氠瑢\n요 구 내 용\n비 고\n예시)\n□ 금융거래 확인서(2015.12.30.현재)\n□ 여신거래 내역\n(대상기간: 2001. 01. 01.부터 2010. 02. 10.까지)\n□ 수신거래 내역\n(대상기간: 001. 01. 01.부터 2010. 02. 10.까지)\n□ 기타\n( 여신거래약정서 사본 )\n예시)\n①수신거래내역전체\n②여신거래내역전체\n3. 금융거래정보 수령방법\n氠瑢\n우편수령\n□ 주소지\n□ 새로운 주소지\n(우편번호 )\n팩스 수령\n□ 팩스 수령( )\n20 . . .\n위 금융거래정보제공 요구인(대리인) (인)\n氠瑢\n신원확인\n소 속\n직 위\n성 명\n서 명\n*요청인(대리인)신원을 확인한 접수직원의 소속부서(공사)또는 파산재단명(파산재단 기재)\n예금보험공사/( )파산재단 귀중",
+      "extracted_text_chars": 525,
+      "text_extraction_status": "success",
+      "text_extraction_error": "",
+      "is_scanned_candidate": false,
+      "ocr_required": false,
+      "extraction_quality": "good",
+      "attachment_role": "form",
+      "contains_fillable_fields": true,
+      "contains_instructions": false,
+      "has_unique_information": false,
+      "duplicates_parent_content": false,
+      "classification_reason": "신청서·동의서·위임장·샘플 등 작성용 자료",
+      "parsed_markdown_path": "parsed/attachments/채무조정 안내/DA-007/DA-007-ATT-bee3f761.md",
+      "parsed_json_path": "parsed/attachments/채무조정 안내/DA-007/DA-007-ATT-bee3f761.json"
+    },
+    {
+      "attachment_id": "9b28385c18fd0fb6",
+      "display_name": "위임장 (FILE)",
+      "file_format": "FILE",
+      "download_method": "gfn_downloadFile",
+      "token1": "0MPeNMADCMnnd9ok7g0v3UrI1INCELbGy7jd4UB4eKGpNYtL+//QgjRShTE4sYAJEDFii7jQhQ8qGEUWhejcKw==",
+      "token2": "0eqcSLo2ZFpR6wfAdHIqQhorEEiHzlLwubxYlPSuzf0=",
+      "row_context": "위임장",
+      "button_text": "위임장 다운로드",
+      "source_page_url": "https://www.kdic.or.kr/sp/sprtfund/SprtFndDebtDlngAplyGudn/selectScrn.do",
+      "source_url": "https://www.kdic.or.kr/sp/sprtfund/SprtFndDebtDlngAplyGudn/selectScrn.do",
+      "official_download_url": null,
+      "user_action_url": "https://www.kdic.or.kr/sp/sprtfund/SprtFndDebtDlngAplyGudn/selectScrn.do",
+      "delivery_mode": "official_download_page",
+      "download_status": "downloaded",
+      "processing_policy": "download_no_index",
+      "indexable": false,
+      "needs_review": false,
+      "filename": "9b28385c18fd0fb6_대리인 위임장.hwp",
+      "local_path": "raw/assets/채무조정 안내/DA-007/attachments/9b28385c18fd0fb6_대리인 위임장.hwp",
+      "download_url_observed": "blob:https://www.kdic.or.kr/060d047a-b7c4-4e60-a455-055e45433b00",
+      "mime_type": "application/x-hwp",
+      "detected_format": "HWP",
+      "signature_valid": true,
+      "html_error_response": false,
+      "size_bytes": 11264,
+      "sha256": "576d7f1af0e23b55174ce1f64dcc35c994d92d4bb96539fe95bad1845f54e937",
+      "extracted_text": "捤獥 汤捯 위 임 장\n대 리 인 성 명 :\n생 년 월 일 :\n주 소 :\n연 락 처 :\n본인은 위 사람을 대리인으로 정하고 부채증명원 발급 신청을 위임함\n20 년 월 일\n위 임 인 주 소 :\n(본 인) 생 년 월 일 :\n성 명 : (인)\n연 락 처 :\n※ 인감증명서 상 인감날인 요망(인감증명서 첨부)\n예 금 보 험 공 사 / 파산재단 귀중",
+      "extracted_text_chars": 189,
+      "text_extraction_status": "success",
+      "text_extraction_error": "",
+      "is_scanned_candidate": false,
+      "ocr_required": false,
+      "extraction_quality": "good",
+      "attachment_role": "form",
+      "contains_fillable_fields": true,
+      "contains_instructions": false,
+      "has_unique_information": false,
+      "duplicates_parent_content": false,
+      "classification_reason": "신청서·동의서·위임장·샘플 등 작성용 자료",
+      "parsed_markdown_path": "parsed/attachments/채무조정 안내/DA-007/DA-007-ATT-9b28385c.md",
+      "parsed_json_path": "parsed/attachments/채무조정 안내/DA-007/DA-007-ATT-9b28385c.json"
+    }
+  ],
+  "images": [],
+  "videos": [],
+  "supplementary_links": [],
+  "embedded_document_ids": [],
+  "modal_resources": [],
+  "policy": {
+    "normalized_decision": "include_partial",
+    "content_scope": "발급대상·필요서류·신청방법만 인덱싱",
+    "rag_index_label": "공개 설명만 O",
+    "action_policy": "O(부채증명원·금융거래정보 신청)",
+    "expected_action_types": "apply|issue",
+    "pagination_policy": "제외(신청 서비스)",
+    "auth_required": "필요",
+    "attachment_download_policy": "O",
+    "attachment_rag_policy": "auto_classify_guide_only",
+    "attachment_user_delivery_policy": "direct_official_url_if_stable_else_source_page",
+    "video_policy": "none",
+    "webtoon_policy": "none",
+    "image_policy": "metadata_only_nondecorative",
+    "modal_content_policy": "none"
+  },
+  "parsed_at": "2026-07-21T11:22:31+09:00",
+  "content_markdown": "예금보험공사에서 관리하는 파산금융회사에 대한 부채증명원/금융거래정보 발급을 도와드리는 서비스 입니다.\n\n### 신청대상\n\n#### 파산금융회사에 부채를 가지고 있는 채무자의 부채증명원/금융거래정보\n\n- 파산절차가 진행중인 금융회사의 부채증명원/금융거래정보를 접수받아 해당 파산재단으로 이송하여 발급\n- 법적 종결된 파산재단의 경우 부채증명원 신청만 가능\n\n### 신청방법\n\n부채증명원/금융거래정본, 인터넷 신청을 원칙으로 하되, 직접 내방( 공사 고객도우미실, 인근파산재단 )하여 신청하실 수도 있습니다.\n\n### 신청 시 구비서류\n| 인터넷 신청시 | 인터넷 신청시 2 | 공인인증서, 휴대폰 | 공인인증서, 휴대폰 2 |\n| --- | --- | --- | --- |\n| 방문 신청 시 | 본인 방문 | 부채증명원 발급신청서 | 부채증명원 발급신청서 FILE 다운로드 |\n| 방문 신청 시 | 본인 방문 | 금융거래정보 발급신청서 | 금융거래정보 발급신청서 FILE 다운로드 |\n| 방문 신청 시 | 본인 방문 | 본인 신분증 |  |\n| 방문 신청 시 | 대리인 방문 | 부채증명원 발급신청서 | 부채증명원 발급신청서 FILE 다운로드 |\n| 방문 신청 시 | 대리인 방문 | 금융거래정보 발급신청서 | 금융거래정보 발급신청서 FILE 다운로드 |\n| 방문 신청 시 | 대리인 방문 | 위임장 | 위임장 FILE 다운로드 |\n| 방문 신청 시 | 대리인 방문 | 위임자 인감증명서 |  |\n| 방문 신청 시 | 대리인 방문 | 대리인 신분증 |  |\n\n### 교부방법\n\n- 인터넷 및 내방(우리 공사 접수분 제외)하여 신청하신 경력증명서/확인서는 발급신청서에 기재된 수령희망주소지로 등기 및 FAX로 발송되며, 신청일로부터 5일 이내에 수령하실 수 있습니다.\n- 신청하신 내용의 정상 접수여부, 파산금융회사 이송 등 처리과정을 E-Mail 또는 SMS로 안내해드리고 있으므로 참고하시기 바랍니다.\n\n### 신청 시 유의사항\n\n- 경력증명서/확인서 신청접수, 파산금융회사 이송 등의 처리과정이 E-Mail 또는 SMS로 통보되므로 연락처를 정확하게 기재하셔야 합니다.\n- 발급된 경력증명서/확인서는 수령 희망지로 등기우편 발송되므로 수령희망지 주소를 빠짐없이 정확하게 기재 하셔야 합니다.\n- 기타 경력증명서/확인서 발급과 관련하여 궁금하신 사항은 우리 공사 고객도우미실(☎ 1588-0037)로 문의하시기 바랍니다.",
+  "body_markdown": "예금보험공사에서 관리하는 파산금융회사에 대한 부채증명원/금융거래정보 발급을 도와드리는 서비스 입니다.\n\n### 신청대상\n\n#### 파산금융회사에 부채를 가지고 있는 채무자의 부채증명원/금융거래정보\n\n- 파산절차가 진행중인 금융회사의 부채증명원/금융거래정보를 접수받아 해당 파산재단으로 이송하여 발급\n- 법적 종결된 파산재단의 경우 부채증명원 신청만 가능\n\n### 신청방법\n\n부채증명원/금융거래정본, 인터넷 신청을 원칙으로 하되, 직접 내방( 공사 고객도우미실, 인근파산재단 )하여 신청하실 수도 있습니다.\n\n### 신청 시 구비서류\n| 인터넷 신청시 | 인터넷 신청시 2 | 공인인증서, 휴대폰 | 공인인증서, 휴대폰 2 |\n| --- | --- | --- | --- |\n| 방문 신청 시 | 본인 방문 | 부채증명원 발급신청서 | 부채증명원 발급신청서 FILE 다운로드 |\n| 방문 신청 시 | 본인 방문 | 금융거래정보 발급신청서 | 금융거래정보 발급신청서 FILE 다운로드 |\n| 방문 신청 시 | 본인 방문 | 본인 신분증 |  |\n| 방문 신청 시 | 대리인 방문 | 부채증명원 발급신청서 | 부채증명원 발급신청서 FILE 다운로드 |\n| 방문 신청 시 | 대리인 방문 | 금융거래정보 발급신청서 | 금융거래정보 발급신청서 FILE 다운로드 |\n| 방문 신청 시 | 대리인 방문 | 위임장 | 위임장 FILE 다운로드 |\n| 방문 신청 시 | 대리인 방문 | 위임자 인감증명서 |  |\n| 방문 신청 시 | 대리인 방문 | 대리인 신분증 |  |\n\n### 교부방법\n\n- 인터넷 및 내방(우리 공사 접수분 제외)하여 신청하신 경력증명서/확인서는 발급신청서에 기재된 수령희망주소지로 등기 및 FAX로 발송되며, 신청일로부터 5일 이내에 수령하실 수 있습니다.\n- 신청하신 내용의 정상 접수여부, 파산금융회사 이송 등 처리과정을 E-Mail 또는 SMS로 안내해드리고 있으므로 참고하시기 바랍니다.\n\n### 신청 시 유의사항\n\n- 경력증명서/확인서 신청접수, 파산금융회사 이송 등의 처리과정이 E-Mail 또는 SMS로 통보되므로 연락처를 정확하게 기재하셔야 합니다.\n- 발급된 경력증명서/확인서는 수령 희망지로 등기우편 발송되므로 수령희망지 주소를 빠짐없이 정확하게 기재 하셔야 합니다.\n- 기타 경력증명서/확인서 발급과 관련하여 궁금하신 사항은 우리 공사 고객도우미실(☎ 1588-0037)로 문의하시기 바랍니다.",
+  "content_text": "예금보험공사에서 관리하는 파산금융회사에 대한 부채증명원/금융거래정보 발급을 도와드리는 서비스 입니다. 신청대상 파산금융회사에 부채를 가지고 있는 채무자의 부채증명원/금융거래정보 파산절차가 진행중인 금융회사의 부채증명원/금융거래정보를 접수받아 해당 파산재단으로 이송하여 발급 법적 종결된 파산재단의 경우 부채증명원 신청만 가능 신청방법 부채증명원/금융거래정본, 인터넷 신청을 원칙으로 하되, 직접 내방( 공사 고객도우미실, 인근파산재단 )하여 신청하실 수도 있습니다. 신청 시 구비서류 인터넷 신청시 인터넷 신청시 2 공인인증서, 휴대폰 공인인증서, 휴대폰 2 방문 신청 시 본인 방문 부채증명원 발급신청서 부채증명원 발급신청서 FILE 다운로드 방문 신청 시 본인 방문 금융거래정보 발급신청서 금융거래정보 발급신청서 FILE 다운로드 방문 신청 시 본인 방문 본인 신분증 방문 신청 시 대리인 방문 부채증명원 발급신청서 부채증명원 발급신청서 FILE 다운로드 방문 신청 시 대리인 방문 금융거래정보 발급신청서 금융거래정보 발급신청서 FILE 다운로드 방문 신청 시 대리인 방문 위임장 위임장 FILE 다운로드 방문 신청 시 대리인 방문 위임자 인감증명서 방문 신청 시 대리인 방문 대리인 신분증 교부방법 인터넷 및 내방(우리 공사 접수분 제외)하여 신청하신 경력증명서/확인서는 발급신청서에 기재된 수령희망주소지로 등기 및 FAX로 발송되며, 신청일로부터 5일 이내에 수령하실 수 있습니다. 신청하신 내용의 정상 접수여부, 파산금융회사 이송 등 처리과정을 E-Mail 또는 SMS로 안내해드리고 있으므로 참고하시기 바랍니다. 신청 시 유의사항 경력증명서/확인서 신청접수, 파산금융회사 이송 등의 처리과정이 E-Mail 또는 SMS로 통보되므로 연락처를 정확하게 기재하셔야 합니다. 발급된 경력증명서/확인서는 수령 희망지로 등기우편 발송되므로 수령희망지 주소를 빠짐없이 정확하게 기재 하셔야 합니다. 기타 경력증명서/확인서 발급과 관련하여 궁금하신 사항은 우리 공사 고객도우미실(☎ 1588-0037)로 문의하시기 바랍니다.",
+  "markdown_export": "# 부채증명원/금융거래정보신청\n\n예금보험공사에서 관리하는 파산금융회사에 대한 부채증명원/금융거래정보 발급을 도와드리는 서비스 입니다.\n\n### 신청대상\n\n#### 파산금융회사에 부채를 가지고 있는 채무자의 부채증명원/금융거래정보\n\n- 파산절차가 진행중인 금융회사의 부채증명원/금융거래정보를 접수받아 해당 파산재단으로 이송하여 발급\n- 법적 종결된 파산재단의 경우 부채증명원 신청만 가능\n\n### 신청방법\n\n부채증명원/금융거래정본, 인터넷 신청을 원칙으로 하되, 직접 내방( 공사 고객도우미실, 인근파산재단 )하여 신청하실 수도 있습니다.\n\n### 신청 시 구비서류\n| 인터넷 신청시 | 인터넷 신청시 2 | 공인인증서, 휴대폰 | 공인인증서, 휴대폰 2 |\n| --- | --- | --- | --- |\n| 방문 신청 시 | 본인 방문 | 부채증명원 발급신청서 | 부채증명원 발급신청서 FILE 다운로드 |\n| 방문 신청 시 | 본인 방문 | 금융거래정보 발급신청서 | 금융거래정보 발급신청서 FILE 다운로드 |\n| 방문 신청 시 | 본인 방문 | 본인 신분증 |  |\n| 방문 신청 시 | 대리인 방문 | 부채증명원 발급신청서 | 부채증명원 발급신청서 FILE 다운로드 |\n| 방문 신청 시 | 대리인 방문 | 금융거래정보 발급신청서 | 금융거래정보 발급신청서 FILE 다운로드 |\n| 방문 신청 시 | 대리인 방문 | 위임장 | 위임장 FILE 다운로드 |\n| 방문 신청 시 | 대리인 방문 | 위임자 인감증명서 |  |\n| 방문 신청 시 | 대리인 방문 | 대리인 신분증 |  |\n\n### 교부방법\n\n- 인터넷 및 내방(우리 공사 접수분 제외)하여 신청하신 경력증명서/확인서는 발급신청서에 기재된 수령희망주소지로 등기 및 FAX로 발송되며, 신청일로부터 5일 이내에 수령하실 수 있습니다.\n- 신청하신 내용의 정상 접수여부, 파산금융회사 이송 등 처리과정을 E-Mail 또는 SMS로 안내해드리고 있으므로 참고하시기 바랍니다.\n\n### 신청 시 유의사항\n\n- 경력증명서/확인서 신청접수, 파산금융회사 이송 등의 처리과정이 E-Mail 또는 SMS로 통보되므로 연락처를 정확하게 기재하셔야 합니다.\n- 발급된 경력증명서/확인서는 수령 희망지로 등기우편 발송되므로 수령희망지 주소를 빠짐없이 정확하게 기재 하셔야 합니다.\n- 기타 경력증명서/확인서 발급과 관련하여 궁금하신 사항은 우리 공사 고객도우미실(☎ 1588-0037)로 문의하시기 바랍니다.\n\n## 공식 바로가기\n\n- [부채증명원/금융거래정보 신청하기](https://fins.kdic.or.kr/mm/lgn/selectNonMbrLgn.do) — issue\n- [부채증명원 발급신청서 (FILE) 공식 다운로드 페이지](https://www.kdic.or.kr/sp/sprtfund/SprtFndDebtDlngAplyGudn/selectScrn.do) — download\n- [금융거래정보 발급신청서 (FILE) 공식 다운로드 페이지](https://www.kdic.or.kr/sp/sprtfund/SprtFndDebtDlngAplyGudn/selectScrn.do) — download\n- [위임장 (FILE) 공식 다운로드 페이지](https://www.kdic.or.kr/sp/sprtfund/SprtFndDebtDlngAplyGudn/selectScrn.do) — download",
+  "export_markdown": "# 부채증명원/금융거래정보신청\n\n예금보험공사에서 관리하는 파산금융회사에 대한 부채증명원/금융거래정보 발급을 도와드리는 서비스 입니다.\n\n### 신청대상\n\n#### 파산금융회사에 부채를 가지고 있는 채무자의 부채증명원/금융거래정보\n\n- 파산절차가 진행중인 금융회사의 부채증명원/금융거래정보를 접수받아 해당 파산재단으로 이송하여 발급\n- 법적 종결된 파산재단의 경우 부채증명원 신청만 가능\n\n### 신청방법\n\n부채증명원/금융거래정본, 인터넷 신청을 원칙으로 하되, 직접 내방( 공사 고객도우미실, 인근파산재단 )하여 신청하실 수도 있습니다.\n\n### 신청 시 구비서류\n| 인터넷 신청시 | 인터넷 신청시 2 | 공인인증서, 휴대폰 | 공인인증서, 휴대폰 2 |\n| --- | --- | --- | --- |\n| 방문 신청 시 | 본인 방문 | 부채증명원 발급신청서 | 부채증명원 발급신청서 FILE 다운로드 |\n| 방문 신청 시 | 본인 방문 | 금융거래정보 발급신청서 | 금융거래정보 발급신청서 FILE 다운로드 |\n| 방문 신청 시 | 본인 방문 | 본인 신분증 |  |\n| 방문 신청 시 | 대리인 방문 | 부채증명원 발급신청서 | 부채증명원 발급신청서 FILE 다운로드 |\n| 방문 신청 시 | 대리인 방문 | 금융거래정보 발급신청서 | 금융거래정보 발급신청서 FILE 다운로드 |\n| 방문 신청 시 | 대리인 방문 | 위임장 | 위임장 FILE 다운로드 |\n| 방문 신청 시 | 대리인 방문 | 위임자 인감증명서 |  |\n| 방문 신청 시 | 대리인 방문 | 대리인 신분증 |  |\n\n### 교부방법\n\n- 인터넷 및 내방(우리 공사 접수분 제외)하여 신청하신 경력증명서/확인서는 발급신청서에 기재된 수령희망주소지로 등기 및 FAX로 발송되며, 신청일로부터 5일 이내에 수령하실 수 있습니다.\n- 신청하신 내용의 정상 접수여부, 파산금융회사 이송 등 처리과정을 E-Mail 또는 SMS로 안내해드리고 있으므로 참고하시기 바랍니다.\n\n### 신청 시 유의사항\n\n- 경력증명서/확인서 신청접수, 파산금융회사 이송 등의 처리과정이 E-Mail 또는 SMS로 통보되므로 연락처를 정확하게 기재하셔야 합니다.\n- 발급된 경력증명서/확인서는 수령 희망지로 등기우편 발송되므로 수령희망지 주소를 빠짐없이 정확하게 기재 하셔야 합니다.\n- 기타 경력증명서/확인서 발급과 관련하여 궁금하신 사항은 우리 공사 고객도우미실(☎ 1588-0037)로 문의하시기 바랍니다.\n\n## 공식 바로가기\n\n- [부채증명원/금융거래정보 신청하기](https://fins.kdic.or.kr/mm/lgn/selectNonMbrLgn.do) — issue\n- [부채증명원 발급신청서 (FILE) 공식 다운로드 페이지](https://www.kdic.or.kr/sp/sprtfund/SprtFndDebtDlngAplyGudn/selectScrn.do) — download\n- [금융거래정보 발급신청서 (FILE) 공식 다운로드 페이지](https://www.kdic.or.kr/sp/sprtfund/SprtFndDebtDlngAplyGudn/selectScrn.do) — download\n- [위임장 (FILE) 공식 다운로드 페이지](https://www.kdic.or.kr/sp/sprtfund/SprtFndDebtDlngAplyGudn/selectScrn.do) — download",
+  "parsed_content_sha256": "3395cf5b12631dbb2bcc1020b3cbe05a2b1c2de4d9565213c1ff5e67c73ef651",
+  "content_hash": "3395cf5b12631dbb2bcc1020b3cbe05a2b1c2de4d9565213c1ff5e67c73ef651",
+  "quality": {
+    "status": "pass",
+    "reasons": [],
+    "source_text_chars": 1019,
+    "parsed_text_chars": 1019,
+    "retention_ratio": 1.0,
+    "faq_count": 0,
+    "table_count": 1,
+    "attachment_button_count": 3,
+    "action_count": 4,
+    "video_count": 0,
+    "supplementary_link_count": 0,
+    "noise_hits": []
+  },
+  "chunk_strategy": "auto_structure",
+  "table_group_key": "",
+  "table_entity_column": "",
+  "heading_context_policy": "inherit",
+  "pagination_collection": {
+    "collection_scope": "single_public_page",
+    "is_complete": true,
+    "pagination_detected": false,
+    "expected_page_count": 1,
+    "fetched_page_count": 1,
+    "failures": []
+  },
+  "downloaded_assets": {
+    "attachments": [],
+    "images": [],
+    "failures": []
+  }
+}

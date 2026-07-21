@@ -1,0 +1,23 @@
+{
+  "requested_url": "https://www.kdic.or.kr/rb/lbltajmt/LbltAjmtSprtLbltInfoInqDscsnAply/selectScrn.do",
+  "final_url": "https://www.kdic.or.kr/rb/lbltajmt/LbltAjmtSprtLbltInfoInqDscsnAply/selectScrn.do",
+  "status_code": 200,
+  "ok": true,
+  "content_type": "text/html; charset=UTF-8",
+  "encoding": "UTF-8",
+  "elapsed_seconds": 1.458,
+  "collected_at": "2026-07-21T11:22:11+09:00",
+  "content_length": 495243,
+  "raw_sha256": "c91fc15b49a4f286e7e4b1f5859bb8243cc58a2272a30c19db8a46a1366e1913",
+  "redirect_history": [],
+  "selected_headers": {
+    "Content-Type": "text/html; charset=UTF-8",
+    "Robots-Check": "unavailable:UnicodeDecodeError"
+  },
+  "url_id": "DA-002",
+  "business_function": "채무조정 안내",
+  "page_title_manifest": "채무조정 재기지원 > 채무정보 조회 ＆ 상담신청",
+  "fetch_strategy": "requests_html",
+  "parser_profile": "kdic_final_integrated_v4_5",
+  "raw_html_path": "raw/html/채무조정 안내/DA-002.html"
+}

@@ -1,0 +1,58 @@
+{
+  "doc_id": "BI-001-ATT-66c5e974",
+  "parent_doc_id": "BI-001",
+  "attachment_id": "66c5e9743dd29c15",
+  "record_type": "attachment",
+  "indexable": false,
+  "rag_index_mode": "none",
+  "title": "친권자합의서 (PDF)",
+  "source_url": "https://www.kdic.or.kr/sp/dpstrprot/DpsmIbamtAplyPossDcmnt/selectScrn.do",
+  "official_download_url": null,
+  "user_action_url": "https://www.kdic.or.kr/sp/dpstrprot/DpsmIbamtAplyPossDcmnt/selectScrn.do",
+  "site_name": "예금보험공사",
+  "business_function": "예금보험금 안내",
+  "target_business_function": "예금보험금 안내",
+  "page_type": "attachment",
+  "file_format": "PDF",
+  "mime_type": "application/pdf",
+  "filename": "66c5e9743dd29c15_친권자합의서.pdf",
+  "local_path": "raw/assets/예금보험금 안내/BI-001/attachments/66c5e9743dd29c15_친권자합의서.pdf",
+  "size_bytes": 71886,
+  "sha256": "2ea24afdb58a28d4e69dab598dade8ad9362f80168c145c152fb2b6210969342",
+  "processing_policy": "download_no_index",
+  "classification_reason": "짧거나 설명 가치가 낮은 파일",
+  "needs_review": true,
+  "attachment_role": "unknown",
+  "contains_fillable_fields": true,
+  "contains_instructions": false,
+  "has_unique_information": false,
+  "duplicates_parent_content": false,
+  "is_scanned_candidate": false,
+  "ocr_required": false,
+  "extraction_quality": "good",
+  "text_extraction_status": "success",
+  "content_text": "미성년자예금에대한친권자합의서예금보험공사사장귀하()와()는아래예금자()의친권자로서민법제909조제2항에의거동미성년자예금에관한일체의권리행사를함에있어,친권자()가권리를단독행사함에합의합니다.따라서,동권리행사와관련하여향후귀예금보험공사에대하여어떠한경우라도이의를제기하지않을것이며,만일의경우에도연대하여민․형사상의모든책임을질것을확약합니다.관련예금내역과목계좌번호예금자명주민등록번호원금\n20년월일□친권자(父)성명: (인)주민등록번호:주소: (전화번호: )□친권자(母)성명: (인)주민등록번호:주소: (전화번호: )붙임:1.친권자를확인할수있는서류(가족관계증명서,주민등록등본등)1부2.예금보험금(가지급금포함)을수령하지않는친권자의인감증명서1부.※예금보험금(가지급금포함)을수령할친권자는수령인본인의실명확인증표를제시하여야합니다.",
+  "content_markdown": "# 친권자합의서 (PDF)\n\n미성년자예금에대한친권자합의서예금보험공사사장귀하()와()는아래예금자()의친권자로서민법제909조제2항에의거동미성년자예금에관한일체의권리행사를함에있어,친권자()가권리를단독행사함에합의합니다.따라서,동권리행사와관련하여향후귀예금보험공사에대하여어떠한경우라도이의를제기하지않을것이며,만일의경우에도연대하여민․형사상의모든책임을질것을확약합니다.관련예금내역과목계좌번호예금자명주민등록번호원금\n20년월일□친권자(父)성명: (인)주민등록번호:주소: (전화번호: )□친권자(母)성명: (인)주민등록번호:주소: (전화번호: )붙임:1.친권자를확인할수있는서류(가족관계증명서,주민등록등본등)1부2.예금보험금(가지급금포함)을수령하지않는친권자의인감증명서1부.※예금보험금(가지급금포함)을수령할친권자는수령인본인의실명확인증표를제시하여야합니다.",
+  "blocks": [
+    {
+      "type": "paragraph",
+      "text": "미성년자예금에대한친권자합의서예금보험공사사장귀하()와()는아래예금자()의친권자로서민법제909조제2항에의거동미성년자예금에관한일체의권리행사를함에있어,친권자()가권리를단독행사함에합의합니다.따라서,동권리행사와관련하여향후귀예금보험공사에대하여어떠한경우라도이의를제기하지않을것이며,만일의경우에도연대하여민․형사상의모든책임을질것을확약합니다.관련예금내역과목계좌번호예금자명주민등록번호원금\n20년월일□친권자(父)성명: (인)주민등록번호:주소: (전화번호: )□친권자(母)성명: (인)주민등록번호:주소: (전화번호: )붙임:1.친권자를확인할수있는서류(가족관계증명서,주민등록등본등)1부2.예금보험금(가지급금포함)을수령하지않는친권자의인감증명서1부.※예금보험금(가지급금포함)을수령할친권자는수령인본인의실명확인증표를제시하여야합니다."
+    }
+  ],
+  "actions": [],
+  "attachments": [],
+  "images": [],
+  "videos": [],
+  "supplementary_links": [],
+  "links": [],
+  "quality": {
+    "status": "review",
+    "reasons": [
+      "짧거나 설명 가치가 낮은 파일"
+    ],
+    "parsed_text_chars": 389,
+    "faq_count": 0,
+    "table_count": 0
+  },
+  "parsed_at": "2026-07-21T11:23:21+09:00"
+}

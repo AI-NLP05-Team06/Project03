@@ -1,0 +1,20 @@
+{
+  "summary": "이 문서는 예금보험공사에서 제공하는 손해담보 약정서로 상속받은 금원과 관련하여 공사에 손해를 끼치지 않을 것을 약정하는 내용을 담고 있습니다.",
+  "sub_category": "예금보험금 안내",
+  "user_roles": [
+    "상속인"
+  ],
+  "keywords": [
+    "손해담보 약정서",
+    "상속",
+    "예금보험공사"
+  ],
+  "question_types": [
+    "서류형"
+  ],
+  "answerable_questions": [
+    "손해담보 약정서 양식은 어떻게 되나요?"
+  ],
+  "needs_human_review": false,
+  "review_reason": ""
+}

@@ -1,0 +1,23 @@
+{
+  "requested_url": "https://www.kdic.or.kr/rb/lbltajmt/LbltAjmtSprtCredRcvrySprt/selectScrn.do",
+  "final_url": "https://www.kdic.or.kr/rb/lbltajmt/LbltAjmtSprtCredRcvrySprt/selectScrn.do",
+  "status_code": 200,
+  "ok": true,
+  "content_type": "text/html; charset=UTF-8",
+  "encoding": "UTF-8",
+  "elapsed_seconds": 1.562,
+  "collected_at": "2026-07-21T11:22:19+09:00",
+  "content_length": 504098,
+  "raw_sha256": "1a776ec58931df7d57cdc9228e9cfe597f72c43c50d3e261f85a89ba66e39315",
+  "redirect_history": [],
+  "selected_headers": {
+    "Content-Type": "text/html; charset=UTF-8",
+    "Robots-Check": "unavailable:UnicodeDecodeError"
+  },
+  "url_id": "DA-004",
+  "business_function": "채무조정 안내",
+  "page_title_manifest": "채무조정 재기지원 > 신용회복 지원",
+  "fetch_strategy": "requests_html",
+  "parser_profile": "kdic_final_integrated_v4_5",
+  "raw_html_path": "raw/html/채무조정 안내/DA-004.html"
+}

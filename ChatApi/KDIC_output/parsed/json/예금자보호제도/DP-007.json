@@ -1,0 +1,148 @@
+{
+  "doc_id": "DP-007",
+  "parent_doc_id": "DP-007",
+  "record_type": "page",
+  "indexable": true,
+  "rag_index_mode": "reference",
+  "title": "예금자보호한도(해외)",
+  "manifest_title": "예금자보호한도(해외)",
+  "page_heading": "예금자보호한도(해외)",
+  "display_title": "예금자보호한도(해외)",
+  "html_title": "예금보험공사 경영공시 자체공시 예금자보호제도(일반) 예금자보호한도(해외)",
+  "source_url": "https://www.kdic.or.kr/di/bzpblnt/selectPbcrPblntProtLmtsOvrs.do",
+  "final_url": "https://www.kdic.or.kr/di/bzpblnt/selectPbcrPblntProtLmtsOvrs.do",
+  "site_name": "예금보험공사",
+  "business_function": "예금자보호제도",
+  "target_business_function": "예금자보호제도",
+  "page_type": "reference_comparison",
+  "parser_profile": "kdic_final_integrated_v4_5",
+  "resource_group_selector": "",
+  "resource_group_chunk_policy": "page",
+  "breadcrumb": [
+    "예금자보호제도",
+    "예금자보호한도(해외)"
+  ],
+  "blocks": [
+    {
+      "type": "table",
+      "headers": [
+        "구분",
+        "구분 2",
+        "한국",
+        "미국",
+        "캐나다",
+        "일본",
+        "영국",
+        "독일"
+      ],
+      "rows": [
+        [
+          "예금보호한도",
+          "1인당 보호한도(A) 1 아래 도움말 참조",
+          "1억원",
+          "USD 25만",
+          "CAD 10만",
+          "JPY 1,000만",
+          "GBP 12만",
+          "EUR 10만"
+        ],
+        [
+          "예금보호한도",
+          "1인당GDP(B) 2 아래 도움말 참조",
+          "5,052만원",
+          "USD 8.96만",
+          "CAD 7.66만",
+          "JPY 513만",
+          "GBP 4.28만",
+          "EUR 5.31만"
+        ],
+        [
+          "예금보호한도",
+          "비율(A/B)",
+          "1.98배",
+          "2.79배",
+          "1.31배",
+          "1.95배",
+          "2.80배",
+          "1.88배"
+        ]
+      ],
+      "row_count": 3
+    },
+    {
+      "type": "paragraph",
+      "text": "도움말(각주설명)"
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "’25.12월 기준",
+        "IMF 자료(‘World Economic Outlook(’25.10월), '25년 추정치)"
+      ]
+    }
+  ],
+  "links": [],
+  "actions": [],
+  "attachments": [],
+  "images": [],
+  "videos": [],
+  "supplementary_links": [],
+  "embedded_document_ids": [],
+  "modal_resources": [],
+  "policy": {
+    "normalized_decision": "include_reference",
+    "content_scope": "해외 제도 비교표만 별도 reference 인덱스",
+    "rag_index_label": "보조 인덱스 O",
+    "action_policy": "X",
+    "expected_action_types": "",
+    "pagination_policy": "불필요",
+    "auth_required": "해당 없음",
+    "attachment_download_policy": "X",
+    "attachment_rag_policy": "none",
+    "attachment_user_delivery_policy": "none",
+    "video_policy": "none",
+    "webtoon_policy": "none",
+    "image_policy": "metadata_only_nondecorative",
+    "modal_content_policy": "none"
+  },
+  "parsed_at": "2026-07-21T11:20:39+09:00",
+  "content_markdown": "| 구분 | 구분 2 | 한국 | 미국 | 캐나다 | 일본 | 영국 | 독일 |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n| 예금보호한도 | 1인당 보호한도(A) 1 아래 도움말 참조 | 1억원 | USD 25만 | CAD 10만 | JPY 1,000만 | GBP 12만 | EUR 10만 |\n| 예금보호한도 | 1인당GDP(B) 2 아래 도움말 참조 | 5,052만원 | USD 8.96만 | CAD 7.66만 | JPY 513만 | GBP 4.28만 | EUR 5.31만 |\n| 예금보호한도 | 비율(A/B) | 1.98배 | 2.79배 | 1.31배 | 1.95배 | 2.80배 | 1.88배 |\n\n도움말(각주설명)\n\n1. ’25.12월 기준\n2. IMF 자료(‘World Economic Outlook(’25.10월), '25년 추정치)",
+  "body_markdown": "| 구분 | 구분 2 | 한국 | 미국 | 캐나다 | 일본 | 영국 | 독일 |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n| 예금보호한도 | 1인당 보호한도(A) 1 아래 도움말 참조 | 1억원 | USD 25만 | CAD 10만 | JPY 1,000만 | GBP 12만 | EUR 10만 |\n| 예금보호한도 | 1인당GDP(B) 2 아래 도움말 참조 | 5,052만원 | USD 8.96만 | CAD 7.66만 | JPY 513만 | GBP 4.28만 | EUR 5.31만 |\n| 예금보호한도 | 비율(A/B) | 1.98배 | 2.79배 | 1.31배 | 1.95배 | 2.80배 | 1.88배 |\n\n도움말(각주설명)\n\n1. ’25.12월 기준\n2. IMF 자료(‘World Economic Outlook(’25.10월), '25년 추정치)",
+  "content_text": "구분 구분 2 한국 미국 캐나다 일본 영국 독일 예금보호한도 1인당 보호한도(A) 1 아래 도움말 참조 1억원 USD 25만 CAD 10만 JPY 1,000만 GBP 12만 EUR 10만 예금보호한도 1인당GDP(B) 2 아래 도움말 참조 5,052만원 USD 8.96만 CAD 7.66만 JPY 513만 GBP 4.28만 EUR 5.31만 예금보호한도 비율(A/B) 1.98배 2.79배 1.31배 1.95배 2.80배 1.88배 도움말(각주설명) ’25.12월 기준 IMF 자료(‘World Economic Outlook(’25.10월), '25년 추정치)",
+  "markdown_export": "# 예금자보호한도(해외)\n\n| 구분 | 구분 2 | 한국 | 미국 | 캐나다 | 일본 | 영국 | 독일 |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n| 예금보호한도 | 1인당 보호한도(A) 1 아래 도움말 참조 | 1억원 | USD 25만 | CAD 10만 | JPY 1,000만 | GBP 12만 | EUR 10만 |\n| 예금보호한도 | 1인당GDP(B) 2 아래 도움말 참조 | 5,052만원 | USD 8.96만 | CAD 7.66만 | JPY 513만 | GBP 4.28만 | EUR 5.31만 |\n| 예금보호한도 | 비율(A/B) | 1.98배 | 2.79배 | 1.31배 | 1.95배 | 2.80배 | 1.88배 |\n\n도움말(각주설명)\n\n1. ’25.12월 기준\n2. IMF 자료(‘World Economic Outlook(’25.10월), '25년 추정치)",
+  "export_markdown": "# 예금자보호한도(해외)\n\n| 구분 | 구분 2 | 한국 | 미국 | 캐나다 | 일본 | 영국 | 독일 |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n| 예금보호한도 | 1인당 보호한도(A) 1 아래 도움말 참조 | 1억원 | USD 25만 | CAD 10만 | JPY 1,000만 | GBP 12만 | EUR 10만 |\n| 예금보호한도 | 1인당GDP(B) 2 아래 도움말 참조 | 5,052만원 | USD 8.96만 | CAD 7.66만 | JPY 513만 | GBP 4.28만 | EUR 5.31만 |\n| 예금보호한도 | 비율(A/B) | 1.98배 | 2.79배 | 1.31배 | 1.95배 | 2.80배 | 1.88배 |\n\n도움말(각주설명)\n\n1. ’25.12월 기준\n2. IMF 자료(‘World Economic Outlook(’25.10월), '25년 추정치)",
+  "parsed_content_sha256": "e5f21e5626515c5c05ca39fbb32ad66d5534aa20612b2596819343008cb5b194",
+  "content_hash": "e5f21e5626515c5c05ca39fbb32ad66d5534aa20612b2596819343008cb5b194",
+  "quality": {
+    "status": "pass",
+    "reasons": [],
+    "source_text_chars": 313,
+    "parsed_text_chars": 313,
+    "retention_ratio": 1.0,
+    "faq_count": 0,
+    "table_count": 1,
+    "attachment_button_count": 0,
+    "action_count": 0,
+    "video_count": 0,
+    "supplementary_link_count": 0,
+    "noise_hits": []
+  },
+  "chunk_strategy": "auto_structure",
+  "table_group_key": "",
+  "table_entity_column": "",
+  "heading_context_policy": "inherit",
+  "pagination_collection": {
+    "collection_scope": "single_public_page",
+    "is_complete": true,
+    "pagination_detected": false,
+    "expected_page_count": 1,
+    "fetched_page_count": 1,
+    "failures": []
+  },
+  "downloaded_assets": {
+    "attachments": [],
+    "images": [],
+    "failures": []
+  }
+}

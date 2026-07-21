@@ -1,0 +1,21 @@
+{
+  "summary": "예금보험공사에서 제공하는 착오송금 반환 신청을 위한 채권양도통지 위임장 양식입니다.",
+  "sub_category": "착오송금 지원",
+  "user_roles": [
+    "착오송금 수취인"
+  ],
+  "keywords": [
+    "착오송금",
+    "반환신청",
+    "채권양도통지",
+    "위임장"
+  ],
+  "question_types": [
+    "서류형"
+  ],
+  "answerable_questions": [
+    "채권양도 통지 위임장은 어떻게 생겼나요?"
+  ],
+  "needs_human_review": false,
+  "review_reason": ""
+}

@@ -1,0 +1,58 @@
+{
+  "doc_id": "BI-001-ATT-bf847d84",
+  "parent_doc_id": "BI-001",
+  "attachment_id": "bf847d8484e81a9a",
+  "record_type": "attachment",
+  "indexable": false,
+  "rag_index_mode": "none",
+  "title": "친권자합의서 (HWP)",
+  "source_url": "https://www.kdic.or.kr/sp/dpstrprot/DpsmIbamtAplyPossDcmnt/selectScrn.do",
+  "official_download_url": null,
+  "user_action_url": "https://www.kdic.or.kr/sp/dpstrprot/DpsmIbamtAplyPossDcmnt/selectScrn.do",
+  "site_name": "예금보험공사",
+  "business_function": "예금보험금 안내",
+  "target_business_function": "예금보험금 안내",
+  "page_type": "attachment",
+  "file_format": "HWP",
+  "mime_type": "application/x-hwp",
+  "filename": "bf847d8484e81a9a_친권자합의서.hwp",
+  "local_path": "raw/assets/예금보험금 안내/BI-001/attachments/bf847d8484e81a9a_친권자합의서.hwp",
+  "size_bytes": 44544,
+  "sha256": "d43a4b91670c6f0ad82fc591636a8c3e27da923efc5642f4507fa11056c97c78",
+  "processing_policy": "download_no_index",
+  "classification_reason": "설명 텍스트는 충분하지만 문서 역할이 불명확하여 사람 검토 필요",
+  "needs_review": true,
+  "attachment_role": "unknown",
+  "contains_fillable_fields": false,
+  "contains_instructions": false,
+  "has_unique_information": false,
+  "duplicates_parent_content": false,
+  "is_scanned_candidate": false,
+  "ocr_required": false,
+  "extraction_quality": "good",
+  "text_extraction_status": "success",
+  "content_text": "捤獥 汤捯 氠瑢\n미성년자 예금에 대한 친권자 합의서\n예금보험공사 사장 귀하\n( )와 ( )는 아래 예금자 ( )의 친권자로서 민법 제909조제2항에 의거 동 미성년자 예금에 관한 일체의 권리행사를 함에 있어, 친권자 ( )가 권리를 단독 행사함에 합의합니다. 따라서, 동 권리행사와 관련하여 향후 귀 예금보험공사에 대하여 어떠한 경우라도 이의를 제기하지 않을 것이며, 만일의 경우에도 연대하여 민․형사상의 모든 책임을 질 것을 확약합니다.\n관 련 예 금 내 역\n氠瑢\n과 목\n계좌번호\n예금자명\n주민등록번호\n원 금\n20 년 월 일\n□ 친 권 자(父)\n성 명 : (인)\n주민등록번호 :\n주 소 : (전화번호: )\n□ 친 권 자(母)\n성 명 : (인)\n주민등록번호 :\n주 소 : (전화번호: )\n붙임 : 1. 친권자를 확인할 수 있는 서류(가족관계증명서, 주민등록등본 등) 1부\n2. 예금보험금(가지급금 포함)을 수령하지 않는 친권자의 인감증명서 1부.\n※ 예금보험금(가지급금 포함)을 수령할 친권자는 수령인 본인의 실명확인증표를 제시하여야 합니다.",
+  "content_markdown": "# 친권자합의서 (HWP)\n\n捤獥 汤捯 氠瑢\n미성년자 예금에 대한 친권자 합의서\n예금보험공사 사장 귀하\n( )와 ( )는 아래 예금자 ( )의 친권자로서 민법 제909조제2항에 의거 동 미성년자 예금에 관한 일체의 권리행사를 함에 있어, 친권자 ( )가 권리를 단독 행사함에 합의합니다. 따라서, 동 권리행사와 관련하여 향후 귀 예금보험공사에 대하여 어떠한 경우라도 이의를 제기하지 않을 것이며, 만일의 경우에도 연대하여 민․형사상의 모든 책임을 질 것을 확약합니다.\n관 련 예 금 내 역\n氠瑢\n과 목\n계좌번호\n예금자명\n주민등록번호\n원 금\n20 년 월 일\n□ 친 권 자(父)\n성 명 : (인)\n주민등록번호 :\n주 소 : (전화번호: )\n□ 친 권 자(母)\n성 명 : (인)\n주민등록번호 :\n주 소 : (전화번호: )\n붙임 : 1. 친권자를 확인할 수 있는 서류(가족관계증명서, 주민등록등본 등) 1부\n2. 예금보험금(가지급금 포함)을 수령하지 않는 친권자의 인감증명서 1부.\n※ 예금보험금(가지급금 포함)을 수령할 친권자는 수령인 본인의 실명확인증표를 제시하여야 합니다.",
+  "blocks": [
+    {
+      "type": "paragraph",
+      "text": "捤獥 汤捯 氠瑢\n미성년자 예금에 대한 친권자 합의서\n예금보험공사 사장 귀하\n( )와 ( )는 아래 예금자 ( )의 친권자로서 민법 제909조제2항에 의거 동 미성년자 예금에 관한 일체의 권리행사를 함에 있어, 친권자 ( )가 권리를 단독 행사함에 합의합니다. 따라서, 동 권리행사와 관련하여 향후 귀 예금보험공사에 대하여 어떠한 경우라도 이의를 제기하지 않을 것이며, 만일의 경우에도 연대하여 민․형사상의 모든 책임을 질 것을 확약합니다.\n관 련 예 금 내 역\n氠瑢\n과 목\n계좌번호\n예금자명\n주민등록번호\n원 금\n20 년 월 일\n□ 친 권 자(父)\n성 명 : (인)\n주민등록번호 :\n주 소 : (전화번호: )\n□ 친 권 자(母)\n성 명 : (인)\n주민등록번호 :\n주 소 : (전화번호: )\n붙임 : 1. 친권자를 확인할 수 있는 서류(가족관계증명서, 주민등록등본 등) 1부\n2. 예금보험금(가지급금 포함)을 수령하지 않는 친권자의 인감증명서 1부.\n※ 예금보험금(가지급금 포함)을 수령할 친권자는 수령인 본인의 실명확인증표를 제시하여야 합니다."
+    }
+  ],
+  "actions": [],
+  "attachments": [],
+  "images": [],
+  "videos": [],
+  "supplementary_links": [],
+  "links": [],
+  "quality": {
+    "status": "review",
+    "reasons": [
+      "설명 텍스트는 충분하지만 문서 역할이 불명확하여 사람 검토 필요"
+    ],
+    "parsed_text_chars": 527,
+    "faq_count": 0,
+    "table_count": 0
+  },
+  "parsed_at": "2026-07-21T11:23:21+09:00"
+}

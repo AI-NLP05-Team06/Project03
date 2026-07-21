@@ -1,0 +1,153 @@
+{
+  "doc_id": "MT-001",
+  "parent_doc_id": "MT-001",
+  "record_type": "page",
+  "indexable": true,
+  "rag_index_mode": "full",
+  "title": "잘못 보낸 돈 되찾기 서비스 (착오송금 반환지원 제도)",
+  "manifest_title": "착오송금 반환지원제도 > 착오송금반환지원 제도란",
+  "page_heading": "잘못 보낸 돈 되찾기 서비스 (착오송금반환지원 제도)",
+  "display_title": "잘못 보낸 돈 되찾기 서비스 (착오송금 반환지원 제도)",
+  "html_title": "제도·정책 착오송금 반환지원제도 착오송금반환지원 제도란",
+  "source_url": "https://www.kdic.or.kr/sp/kmrs/kmrsItrd/selectScrn.do",
+  "final_url": "https://www.kdic.or.kr/sp/kmrs/kmrsItrd/selectScrn.do",
+  "site_name": "예금보험공사",
+  "business_function": "착오송금 반환 신청",
+  "target_business_function": "착오송금 반환 신청",
+  "page_type": "video_page",
+  "parser_profile": "kdic_final_integrated_v4_5",
+  "resource_group_selector": "",
+  "resource_group_chunk_policy": "page",
+  "breadcrumb": [
+    "착오송금 반환 신청",
+    "착오송금 반환지원제도 > 착오송금반환지원 제도란"
+  ],
+  "blocks": [
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "제도 소개 안내영상"
+    },
+    {
+      "type": "paragraph",
+      "text": "잘못 보낸 돈 되찾기 서비스란 착오송금인이 실수로 잘못 보낸 돈을 최소한의 비용으로 빠르게 되찾을 수 있도록 도와드리는 제도입니다.",
+      "source_semantic_fix": "sentence_heading_to_paragraph"
+    }
+  ],
+  "links": [],
+  "actions": [],
+  "attachments": [],
+  "images": [
+    {
+      "url": "https://www.kdic.or.kr/assets/images/img-SP-DA0-000.png",
+      "alt": "송금 후 아차 싶은 순간, 기억하세요 예금보험공사",
+      "filename": "img-SP-DA0-000.png",
+      "image_role": "content_image",
+      "indexable": false,
+      "download_policy": "download_original_no_index",
+      "download_status": "downloaded",
+      "local_path": "raw/assets/착오송금 반환 신청/MT-001/images/img-SP-DA0-000.png",
+      "size_bytes": 68300,
+      "sha256": "65bb0b360f463e336f7c5296d88219469431d2a3b2a5c954667c5440176f0f5e"
+    }
+  ],
+  "videos": [
+    {
+      "video_id": "2ae44a5a29133c9c",
+      "label": "착오송금 반환지원제도 > 착오송금반환지원 제도란 영상",
+      "media_url": "https://www.kdic.or.kr/assets/images/ci.mp4",
+      "poster_url": "https://www.kdic.or.kr/assets/images/kmrs_intro.png",
+      "source_page_url": "https://www.kdic.or.kr/sp/kmrs/kmrsItrd/selectScrn.do",
+      "source_tag": "video",
+      "indexable": false,
+      "download": false,
+      "content_role": "supplementary",
+      "delivery_mode": "official_page"
+    }
+  ],
+  "supplementary_links": [
+    {
+      "supplementary_id": "6c133695917a0770",
+      "label": "착오송금 반환지원 제도 소개 영상 보기",
+      "url": "https://www.kdic.or.kr/sp/kmrs/kmrsItrd/selectScrn.do",
+      "link_type": "video",
+      "indexable": false,
+      "content_status": "reference_only",
+      "display_condition": "user_requests_video",
+      "media_urls": [
+        "https://www.kdic.or.kr/assets/images/ci.mp4"
+      ],
+      "notice": "영상은 이해를 돕는 참고 자료이며 최신 제도 답변의 직접 근거로 사용하지 않습니다."
+    }
+  ],
+  "embedded_document_ids": [],
+  "modal_resources": [],
+  "policy": {
+    "normalized_decision": "include_full",
+    "content_scope": "제도 소개 본문 전체, 영상은 메타데이터",
+    "rag_index_label": "O",
+    "action_policy": "X",
+    "expected_action_types": "",
+    "pagination_policy": "불필요",
+    "auth_required": "해당 없음",
+    "attachment_download_policy": "X",
+    "attachment_rag_policy": "none",
+    "attachment_user_delivery_policy": "none",
+    "video_policy": "reference_only_official_page",
+    "webtoon_policy": "none",
+    "image_policy": "metadata_only_nondecorative",
+    "modal_content_policy": "none"
+  },
+  "parsed_at": "2026-07-21T11:21:22+09:00",
+  "content_markdown": "### 제도 소개 안내영상\n\n잘못 보낸 돈 되찾기 서비스란 착오송금인이 실수로 잘못 보낸 돈을 최소한의 비용으로 빠르게 되찾을 수 있도록 도와드리는 제도입니다.",
+  "body_markdown": "### 제도 소개 안내영상\n\n잘못 보낸 돈 되찾기 서비스란 착오송금인이 실수로 잘못 보낸 돈을 최소한의 비용으로 빠르게 되찾을 수 있도록 도와드리는 제도입니다.",
+  "content_text": "제도 소개 안내영상 잘못 보낸 돈 되찾기 서비스란 착오송금인이 실수로 잘못 보낸 돈을 최소한의 비용으로 빠르게 되찾을 수 있도록 도와드리는 제도입니다.",
+  "markdown_export": "# 잘못 보낸 돈 되찾기 서비스 (착오송금 반환지원 제도)\n\n### 제도 소개 안내영상\n\n잘못 보낸 돈 되찾기 서비스란 착오송금인이 실수로 잘못 보낸 돈을 최소한의 비용으로 빠르게 되찾을 수 있도록 도와드리는 제도입니다.\n\n## 참고 자료\n\n- [착오송금 반환지원 제도 소개 영상 보기](https://www.kdic.or.kr/sp/kmrs/kmrsItrd/selectScrn.do)",
+  "export_markdown": "# 잘못 보낸 돈 되찾기 서비스 (착오송금 반환지원 제도)\n\n### 제도 소개 안내영상\n\n잘못 보낸 돈 되찾기 서비스란 착오송금인이 실수로 잘못 보낸 돈을 최소한의 비용으로 빠르게 되찾을 수 있도록 도와드리는 제도입니다.\n\n## 참고 자료\n\n- [착오송금 반환지원 제도 소개 영상 보기](https://www.kdic.or.kr/sp/kmrs/kmrsItrd/selectScrn.do)",
+  "parsed_content_sha256": "6dc55754eecbf69175b9f3b664d8bdf2d7abab8654af8afb9f8c38f912964ac6",
+  "content_hash": "6dc55754eecbf69175b9f3b664d8bdf2d7abab8654af8afb9f8c38f912964ac6",
+  "quality": {
+    "status": "pass",
+    "reasons": [],
+    "source_text_chars": 84,
+    "parsed_text_chars": 84,
+    "retention_ratio": 1.0,
+    "faq_count": 0,
+    "table_count": 0,
+    "attachment_button_count": 0,
+    "action_count": 0,
+    "video_count": 1,
+    "supplementary_link_count": 1,
+    "noise_hits": []
+  },
+  "chunk_strategy": "auto_structure",
+  "table_group_key": "",
+  "table_entity_column": "",
+  "heading_context_policy": "inherit",
+  "pagination_collection": {
+    "collection_scope": "single_public_page",
+    "is_complete": true,
+    "pagination_detected": false,
+    "expected_page_count": 1,
+    "fetched_page_count": 1,
+    "failures": []
+  },
+  "downloaded_assets": {
+    "attachments": [],
+    "images": [
+      {
+        "url": "https://www.kdic.or.kr/assets/images/img-SP-DA0-000.png",
+        "alt": "송금 후 아차 싶은 순간, 기억하세요 예금보험공사",
+        "filename": "img-SP-DA0-000.png",
+        "image_role": "content_image",
+        "indexable": false,
+        "download_policy": "download_original_no_index",
+        "download_status": "downloaded",
+        "local_path": "raw/assets/착오송금 반환 신청/MT-001/images/img-SP-DA0-000.png",
+        "size_bytes": 68300,
+        "sha256": "65bb0b360f463e336f7c5296d88219469431d2a3b2a5c954667c5440176f0f5e"
+      }
+    ],
+    "failures": []
+  }
+}

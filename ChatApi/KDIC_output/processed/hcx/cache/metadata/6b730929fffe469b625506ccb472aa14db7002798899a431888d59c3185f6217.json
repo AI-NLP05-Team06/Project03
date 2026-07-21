@@ -1,0 +1,20 @@
+{
+  "summary": "친권자합의서는 미성년자 예금에 대해 친권자가 권리를 단독으로 행사하는 것에 동의하고 이에 따른 책임을 진다는 내용을 담고 있습니다.",
+  "sub_category": "예금보험금 신청 관련 서식",
+  "user_roles": [
+    "예금보험금 신청인"
+  ],
+  "keywords": [
+    "친권자합의서",
+    "미성년자 예금",
+    "예금보험공사"
+  ],
+  "question_types": [
+    "서류형"
+  ],
+  "answerable_questions": [
+    "친권자합의서 양식은 어디에서 받을 수 있나요?"
+  ],
+  "needs_human_review": false,
+  "review_reason": ""
+}

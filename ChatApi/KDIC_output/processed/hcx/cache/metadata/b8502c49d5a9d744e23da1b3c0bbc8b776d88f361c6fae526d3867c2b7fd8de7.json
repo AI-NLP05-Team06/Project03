@@ -1,0 +1,20 @@
+{
+  "summary": "이 문서는 예금보험공사에서 제공하는 금융거래정보 발급신청서로, 채무조정을 위해 사용됩니다.",
+  "sub_category": "채무조정 안내",
+  "user_roles": [
+    "채무자"
+  ],
+  "keywords": [
+    "금융거래정보 제공 요구",
+    "계좌 정보 제공",
+    "채무조정"
+  ],
+  "question_types": [
+    "서류형"
+  ],
+  "answerable_questions": [
+    "금융거래정보 발급신청서를 어디에서 받을 수 있나요?"
+  ],
+  "needs_human_review": false,
+  "review_reason": ""
+}

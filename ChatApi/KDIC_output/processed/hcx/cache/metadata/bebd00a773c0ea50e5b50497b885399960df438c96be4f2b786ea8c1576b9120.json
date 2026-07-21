@@ -1,0 +1,21 @@
+{
+  "summary": "본 문서는 각 국가별 예금자보호한도를 비교하여 보여주고 있습니다.",
+  "sub_category": "예금자보호제도 안내",
+  "user_roles": [
+    "일반 사용자",
+    "일반 예금자"
+  ],
+  "keywords": [
+    "예금자보호한도",
+    "국가별 비교",
+    "IMF자료"
+  ],
+  "question_types": [
+    "비교형"
+  ],
+  "answerable_questions": [
+    "한국과 미국의 예금자보호 한도는 어떻게 다를까?"
+  ],
+  "needs_human_review": false,
+  "review_reason": ""
+}

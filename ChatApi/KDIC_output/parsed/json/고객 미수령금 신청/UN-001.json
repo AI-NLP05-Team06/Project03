@@ -1,0 +1,254 @@
+{
+  "doc_id": "UN-001",
+  "parent_doc_id": "UN-001",
+  "record_type": "page",
+  "indexable": true,
+  "rag_index_mode": "full",
+  "title": "고객미수령금",
+  "manifest_title": "미수령금 통합조회/신청 > 고객미수령금",
+  "page_heading": "고객미수령금",
+  "display_title": "고객미수령금",
+  "html_title": "제도·정책 예금자보호제도 미수령금 통합조회/신청 고객미수령금",
+  "source_url": "https://www.kdic.or.kr/sp/dpstrprot/ProtSystNramtInqAplyNramtGudn/selectScrn.do",
+  "final_url": "https://www.kdic.or.kr/sp/dpstrprot/ProtSystNramtInqAplyNramtGudn/selectScrn.do",
+  "site_name": "예금보험공사",
+  "business_function": "고객 미수령금 신청",
+  "target_business_function": "고객 미수령금 신청",
+  "page_type": "static_page",
+  "parser_profile": "kdic_final_integrated_v4_5",
+  "resource_group_selector": "",
+  "resource_group_chunk_policy": "page",
+  "breadcrumb": [
+    "고객 미수령금 신청",
+    "미수령금 통합조회/신청 > 고객미수령금"
+  ],
+  "blocks": [
+    {
+      "type": "paragraph",
+      "text": "예금보험공사는 부실화된 금융회사의 예금자등이 찾아가지 아니한 금액을 고객 미수령금으로 분류하여 통합 관리하고 있으며, 지속적인 홍보 및 안내를 통한 적극적인 미수령금 찾아주기 서비스를 제공하고 있습니다."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "고객 미수령금이란?"
+    },
+    {
+      "type": "paragraph",
+      "text": "부실화된 금융회사의 예금자 등이 찾아가지 아니한 금액을 말합니다."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "고객 미수령금의 종류"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "예금보험금",
+        "파산배당금",
+        "개산지급금 정산금"
+      ]
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "예금보험에 가입한 금융회사가 예금의 지급정지, 영업 인·허가의 취소 등 보험사고로 인하여 고객의 예금을 지급할 수 없을 때 공사가 해당 금융회사를 대신하여 지급하는 보험금을 말합니다."
+      ]
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "금융회사가 파산하는 경우 남은 자산을 현금화하여 채권자들에게 그 채권액 비율대로 배당하는 금액을 말합니다."
+      ]
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "파산배당금 등으로 회수한 금액에서 소요비용을 공제한 금액이 수령한 개산지급금을 초과하는 때에 그 초과금액을 예금자에게 추가로 지급하는데, 이를 개산지급금 정산금이라고 합니다."
+      ]
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "파산 금융회사 정보 검색"
+    },
+    {
+      "type": "paragraph",
+      "text": "예금보험공사가 관리하고 있는 파산금융회사의 상세정보를 확인할 수 있습니다."
+    },
+    {
+      "type": "heading",
+      "level": 3,
+      "text": "지급대행점 목록 및 방문신청시 구비 서류"
+    },
+    {
+      "type": "paragraph",
+      "text": "예금보험공사는 미수령금 종류별·부실금융회사별로 독립되어 있던 지급대행점 운영 체계를 개선하여 미수령금 종류별·부실금융회사별 구분없이 ‘16.10월부터 전국 지급대행점 어디에서든 미수령금을 통합 신청할 수 있도록 하였습니다."
+    }
+  ],
+  "links": [
+    {
+      "url": "https://www.kdic.or.kr/sp/sprtfund/selectBkrpFndtPsta.do",
+      "anchor_text": "파산금융기관 정보 검색",
+      "link_role": "action",
+      "action_type": "lookup",
+      "source_tag": "button",
+      "action_id": "145c6163e5747e00",
+      "resource_group_id": "",
+      "interaction_type": "navigate",
+      "target_layer_id": "",
+      "target_document_id": ""
+    },
+    {
+      "url": "https://www.kdic.or.kr/sp/dpstrprot/selectProtSystBamtGiveInq.do",
+      "anchor_text": "지급대행점 조회하기",
+      "link_role": "action",
+      "action_type": "lookup",
+      "source_tag": "button",
+      "action_id": "bd75edf8442f0309",
+      "resource_group_id": "",
+      "interaction_type": "navigate",
+      "target_layer_id": "",
+      "target_document_id": ""
+    },
+    {
+      "url": "https://www.kdic.or.kr/sp/dpstrprot/DpsmIbamtAplyPossDcmnt/selectScrn.do",
+      "anchor_text": "구비서류 바로가기",
+      "link_role": "action",
+      "action_type": "related_service",
+      "source_tag": "button",
+      "action_id": "ebd3d4117caef702",
+      "resource_group_id": "",
+      "interaction_type": "navigate",
+      "target_layer_id": "",
+      "target_document_id": ""
+    },
+    {
+      "url": "https://fins.kdic.or.kr/ua/aplygudn/NramtItgrAplyItrdMthdGudn/selectScrn.do",
+      "anchor_text": "미수령금 통합신청시스템 바로가기",
+      "link_role": "action",
+      "action_type": "apply",
+      "source_tag": "button",
+      "action_id": "400eccb467aa8215",
+      "resource_group_id": "",
+      "interaction_type": "navigate",
+      "target_layer_id": "",
+      "target_document_id": ""
+    }
+  ],
+  "actions": [
+    {
+      "action_id": "145c6163e5747e00",
+      "label": "파산금융기관 정보 검색",
+      "raw_label": "",
+      "url": "https://www.kdic.or.kr/sp/sprtfund/selectBkrpFndtPsta.do",
+      "action_type": "lookup",
+      "source_tag": "button",
+      "javascript_function": "javascript:gfn_openUrl",
+      "auth_required": "일부 필요",
+      "official_domain": true,
+      "requires_review": false
+    },
+    {
+      "action_id": "bd75edf8442f0309",
+      "label": "지급대행점 조회하기",
+      "raw_label": "",
+      "url": "https://www.kdic.or.kr/sp/dpstrprot/selectProtSystBamtGiveInq.do",
+      "action_type": "lookup",
+      "source_tag": "button",
+      "javascript_function": "javascript:gfn_openUrl",
+      "auth_required": "일부 필요",
+      "official_domain": true,
+      "requires_review": false
+    },
+    {
+      "action_id": "ebd3d4117caef702",
+      "label": "구비서류 바로가기",
+      "raw_label": "",
+      "url": "https://www.kdic.or.kr/sp/dpstrprot/DpsmIbamtAplyPossDcmnt/selectScrn.do",
+      "action_type": "related_service",
+      "source_tag": "button",
+      "javascript_function": "javascript:gfn_openUrl",
+      "auth_required": "일부 필요",
+      "official_domain": true,
+      "requires_review": false
+    },
+    {
+      "action_id": "400eccb467aa8215",
+      "label": "미수령금 통합신청시스템 바로가기",
+      "raw_label": "",
+      "url": "https://fins.kdic.or.kr/ua/aplygudn/NramtItgrAplyItrdMthdGudn/selectScrn.do",
+      "action_type": "apply",
+      "source_tag": "button",
+      "javascript_function": "javascript:gfn_openUrl",
+      "auth_required": "일부 필요",
+      "official_domain": true,
+      "requires_review": false
+    }
+  ],
+  "attachments": [],
+  "images": [],
+  "videos": [],
+  "supplementary_links": [],
+  "embedded_document_ids": [],
+  "modal_resources": [],
+  "policy": {
+    "normalized_decision": "include_full",
+    "content_scope": "미수령금 정의·종류·신청방법 전체",
+    "rag_index_label": "O",
+    "action_policy": "O(신청·조회·구비서류)",
+    "expected_action_types": "apply|lookup|related_service",
+    "pagination_policy": "불필요",
+    "auth_required": "일부 필요",
+    "attachment_download_policy": "X",
+    "attachment_rag_policy": "none",
+    "attachment_user_delivery_policy": "none",
+    "video_policy": "none",
+    "webtoon_policy": "none",
+    "image_policy": "metadata_only_nondecorative",
+    "modal_content_policy": "none"
+  },
+  "parsed_at": "2026-07-21T11:21:10+09:00",
+  "content_markdown": "예금보험공사는 부실화된 금융회사의 예금자등이 찾아가지 아니한 금액을 고객 미수령금으로 분류하여 통합 관리하고 있으며, 지속적인 홍보 및 안내를 통한 적극적인 미수령금 찾아주기 서비스를 제공하고 있습니다.\n\n### 고객 미수령금이란?\n\n부실화된 금융회사의 예금자 등이 찾아가지 아니한 금액을 말합니다.\n\n### 고객 미수령금의 종류\n\n- 예금보험금\n- 파산배당금\n- 개산지급금 정산금\n\n- 예금보험에 가입한 금융회사가 예금의 지급정지, 영업 인·허가의 취소 등 보험사고로 인하여 고객의 예금을 지급할 수 없을 때 공사가 해당 금융회사를 대신하여 지급하는 보험금을 말합니다.\n\n- 금융회사가 파산하는 경우 남은 자산을 현금화하여 채권자들에게 그 채권액 비율대로 배당하는 금액을 말합니다.\n\n- 파산배당금 등으로 회수한 금액에서 소요비용을 공제한 금액이 수령한 개산지급금을 초과하는 때에 그 초과금액을 예금자에게 추가로 지급하는데, 이를 개산지급금 정산금이라고 합니다.\n\n### 파산 금융회사 정보 검색\n\n예금보험공사가 관리하고 있는 파산금융회사의 상세정보를 확인할 수 있습니다.\n\n### 지급대행점 목록 및 방문신청시 구비 서류\n\n예금보험공사는 미수령금 종류별·부실금융회사별로 독립되어 있던 지급대행점 운영 체계를 개선하여 미수령금 종류별·부실금융회사별 구분없이 ‘16.10월부터 전국 지급대행점 어디에서든 미수령금을 통합 신청할 수 있도록 하였습니다.",
+  "body_markdown": "예금보험공사는 부실화된 금융회사의 예금자등이 찾아가지 아니한 금액을 고객 미수령금으로 분류하여 통합 관리하고 있으며, 지속적인 홍보 및 안내를 통한 적극적인 미수령금 찾아주기 서비스를 제공하고 있습니다.\n\n### 고객 미수령금이란?\n\n부실화된 금융회사의 예금자 등이 찾아가지 아니한 금액을 말합니다.\n\n### 고객 미수령금의 종류\n\n- 예금보험금\n- 파산배당금\n- 개산지급금 정산금\n\n- 예금보험에 가입한 금융회사가 예금의 지급정지, 영업 인·허가의 취소 등 보험사고로 인하여 고객의 예금을 지급할 수 없을 때 공사가 해당 금융회사를 대신하여 지급하는 보험금을 말합니다.\n\n- 금융회사가 파산하는 경우 남은 자산을 현금화하여 채권자들에게 그 채권액 비율대로 배당하는 금액을 말합니다.\n\n- 파산배당금 등으로 회수한 금액에서 소요비용을 공제한 금액이 수령한 개산지급금을 초과하는 때에 그 초과금액을 예금자에게 추가로 지급하는데, 이를 개산지급금 정산금이라고 합니다.\n\n### 파산 금융회사 정보 검색\n\n예금보험공사가 관리하고 있는 파산금융회사의 상세정보를 확인할 수 있습니다.\n\n### 지급대행점 목록 및 방문신청시 구비 서류\n\n예금보험공사는 미수령금 종류별·부실금융회사별로 독립되어 있던 지급대행점 운영 체계를 개선하여 미수령금 종류별·부실금융회사별 구분없이 ‘16.10월부터 전국 지급대행점 어디에서든 미수령금을 통합 신청할 수 있도록 하였습니다.",
+  "content_text": "예금보험공사는 부실화된 금융회사의 예금자등이 찾아가지 아니한 금액을 고객 미수령금으로 분류하여 통합 관리하고 있으며, 지속적인 홍보 및 안내를 통한 적극적인 미수령금 찾아주기 서비스를 제공하고 있습니다. 고객 미수령금이란? 부실화된 금융회사의 예금자 등이 찾아가지 아니한 금액을 말합니다. 고객 미수령금의 종류 예금보험금 파산배당금 개산지급금 정산금 예금보험에 가입한 금융회사가 예금의 지급정지, 영업 인·허가의 취소 등 보험사고로 인하여 고객의 예금을 지급할 수 없을 때 공사가 해당 금융회사를 대신하여 지급하는 보험금을 말합니다. 금융회사가 파산하는 경우 남은 자산을 현금화하여 채권자들에게 그 채권액 비율대로 배당하는 금액을 말합니다. 파산배당금 등으로 회수한 금액에서 소요비용을 공제한 금액이 수령한 개산지급금을 초과하는 때에 그 초과금액을 예금자에게 추가로 지급하는데, 이를 개산지급금 정산금이라고 합니다. 파산 금융회사 정보 검색 예금보험공사가 관리하고 있는 파산금융회사의 상세정보를 확인할 수 있습니다. 지급대행점 목록 및 방문신청시 구비 서류 예금보험공사는 미수령금 종류별·부실금융회사별로 독립되어 있던 지급대행점 운영 체계를 개선하여 미수령금 종류별·부실금융회사별 구분없이 ‘16.10월부터 전국 지급대행점 어디에서든 미수령금을 통합 신청할 수 있도록 하였습니다.",
+  "markdown_export": "# 고객미수령금\n\n예금보험공사는 부실화된 금융회사의 예금자등이 찾아가지 아니한 금액을 고객 미수령금으로 분류하여 통합 관리하고 있으며, 지속적인 홍보 및 안내를 통한 적극적인 미수령금 찾아주기 서비스를 제공하고 있습니다.\n\n### 고객 미수령금이란?\n\n부실화된 금융회사의 예금자 등이 찾아가지 아니한 금액을 말합니다.\n\n### 고객 미수령금의 종류\n\n- 예금보험금\n- 파산배당금\n- 개산지급금 정산금\n\n- 예금보험에 가입한 금융회사가 예금의 지급정지, 영업 인·허가의 취소 등 보험사고로 인하여 고객의 예금을 지급할 수 없을 때 공사가 해당 금융회사를 대신하여 지급하는 보험금을 말합니다.\n\n- 금융회사가 파산하는 경우 남은 자산을 현금화하여 채권자들에게 그 채권액 비율대로 배당하는 금액을 말합니다.\n\n- 파산배당금 등으로 회수한 금액에서 소요비용을 공제한 금액이 수령한 개산지급금을 초과하는 때에 그 초과금액을 예금자에게 추가로 지급하는데, 이를 개산지급금 정산금이라고 합니다.\n\n### 파산 금융회사 정보 검색\n\n예금보험공사가 관리하고 있는 파산금융회사의 상세정보를 확인할 수 있습니다.\n\n### 지급대행점 목록 및 방문신청시 구비 서류\n\n예금보험공사는 미수령금 종류별·부실금융회사별로 독립되어 있던 지급대행점 운영 체계를 개선하여 미수령금 종류별·부실금융회사별 구분없이 ‘16.10월부터 전국 지급대행점 어디에서든 미수령금을 통합 신청할 수 있도록 하였습니다.\n\n## 공식 바로가기\n\n- [파산금융기관 정보 검색](https://www.kdic.or.kr/sp/sprtfund/selectBkrpFndtPsta.do) — lookup\n- [지급대행점 조회하기](https://www.kdic.or.kr/sp/dpstrprot/selectProtSystBamtGiveInq.do) — lookup\n- [구비서류 바로가기](https://www.kdic.or.kr/sp/dpstrprot/DpsmIbamtAplyPossDcmnt/selectScrn.do) — related_service\n- [미수령금 통합신청시스템 바로가기](https://fins.kdic.or.kr/ua/aplygudn/NramtItgrAplyItrdMthdGudn/selectScrn.do) — apply",
+  "export_markdown": "# 고객미수령금\n\n예금보험공사는 부실화된 금융회사의 예금자등이 찾아가지 아니한 금액을 고객 미수령금으로 분류하여 통합 관리하고 있으며, 지속적인 홍보 및 안내를 통한 적극적인 미수령금 찾아주기 서비스를 제공하고 있습니다.\n\n### 고객 미수령금이란?\n\n부실화된 금융회사의 예금자 등이 찾아가지 아니한 금액을 말합니다.\n\n### 고객 미수령금의 종류\n\n- 예금보험금\n- 파산배당금\n- 개산지급금 정산금\n\n- 예금보험에 가입한 금융회사가 예금의 지급정지, 영업 인·허가의 취소 등 보험사고로 인하여 고객의 예금을 지급할 수 없을 때 공사가 해당 금융회사를 대신하여 지급하는 보험금을 말합니다.\n\n- 금융회사가 파산하는 경우 남은 자산을 현금화하여 채권자들에게 그 채권액 비율대로 배당하는 금액을 말합니다.\n\n- 파산배당금 등으로 회수한 금액에서 소요비용을 공제한 금액이 수령한 개산지급금을 초과하는 때에 그 초과금액을 예금자에게 추가로 지급하는데, 이를 개산지급금 정산금이라고 합니다.\n\n### 파산 금융회사 정보 검색\n\n예금보험공사가 관리하고 있는 파산금융회사의 상세정보를 확인할 수 있습니다.\n\n### 지급대행점 목록 및 방문신청시 구비 서류\n\n예금보험공사는 미수령금 종류별·부실금융회사별로 독립되어 있던 지급대행점 운영 체계를 개선하여 미수령금 종류별·부실금융회사별 구분없이 ‘16.10월부터 전국 지급대행점 어디에서든 미수령금을 통합 신청할 수 있도록 하였습니다.\n\n## 공식 바로가기\n\n- [파산금융기관 정보 검색](https://www.kdic.or.kr/sp/sprtfund/selectBkrpFndtPsta.do) — lookup\n- [지급대행점 조회하기](https://www.kdic.or.kr/sp/dpstrprot/selectProtSystBamtGiveInq.do) — lookup\n- [구비서류 바로가기](https://www.kdic.or.kr/sp/dpstrprot/DpsmIbamtAplyPossDcmnt/selectScrn.do) — related_service\n- [미수령금 통합신청시스템 바로가기](https://fins.kdic.or.kr/ua/aplygudn/NramtItgrAplyItrdMthdGudn/selectScrn.do) — apply",
+  "parsed_content_sha256": "e16a717efc465555be6c8aa8c97a95cda44b4619d82f45e17f31a4f5556f8ae3",
+  "content_hash": "e16a717efc465555be6c8aa8c97a95cda44b4619d82f45e17f31a4f5556f8ae3",
+  "quality": {
+    "status": "pass",
+    "reasons": [],
+    "source_text_chars": 660,
+    "parsed_text_chars": 660,
+    "retention_ratio": 1.0,
+    "faq_count": 0,
+    "table_count": 0,
+    "attachment_button_count": 0,
+    "action_count": 4,
+    "video_count": 0,
+    "supplementary_link_count": 0,
+    "noise_hits": []
+  },
+  "chunk_strategy": "auto_structure",
+  "table_group_key": "",
+  "table_entity_column": "",
+  "heading_context_policy": "inherit",
+  "pagination_collection": {
+    "collection_scope": "single_public_page",
+    "is_complete": true,
+    "pagination_detected": false,
+    "expected_page_count": 1,
+    "fetched_page_count": 1,
+    "failures": []
+  },
+  "downloaded_assets": {
+    "attachments": [],
+    "images": [],
+    "failures": []
+  }
+}
