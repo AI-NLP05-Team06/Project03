@@ -1,3 +1,4 @@
+# [9/10] 사용자 입력을 받아 반복적으로 run_kdic_rag()를 실행하는 대화형 질의응답 루프입니다. (실행 시 즉시 입력창이 뜹니다)
 from config import *
 from run_rag import *
 

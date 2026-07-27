@@ -1,3 +1,4 @@
+# [6/10] HCX 채팅 완성(hcx_chat_text)과 질문 임베딩(hcx_embed_text) 호출 함수를 정의합니다.
 from config import *
 from hcx_client import *
 from integrity_check import *

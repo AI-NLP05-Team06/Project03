@@ -1,3 +1,4 @@
+# [5/10] Colab Secret 또는 환경변수에서 HCX_API_KEY를 읽어 HCX(OpenAI 호환) 클라이언트를 생성합니다.
 from config import *
 
 try:

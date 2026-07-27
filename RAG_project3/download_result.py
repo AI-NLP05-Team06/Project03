@@ -1,3 +1,4 @@
+# [10/10] 대화형 세션에서 마지막으로 성공한 질문의 결과 JSON을 다운로드(Colab)하거나 로컬 경로를 출력합니다.
 from config import *
 from interactive_chat import *
 

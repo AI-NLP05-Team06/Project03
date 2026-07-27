@@ -1,3 +1,4 @@
+# [1/10] 공통 설정: HCX 모델명, Top-K·최소 유사도 등 검색 기본값, 작업 폴더 경로를 정의합니다.
 from __future__ import annotations
 
 import json
