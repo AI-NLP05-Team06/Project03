@@ -2,15 +2,29 @@
 from config import *
 
 
+def resolve_local_kdic_output() -> Path:
+    """로컬 환경: KDIC_ZIP_PATH 환경변수(zip 파일 또는 jsonl 3종이 든 폴더)를 찾습니다."""
+    local_path = Path(
+        os.environ.get("KDIC_ZIP_PATH", "data")
+    ).resolve()
+
+    if not local_path.exists():
+        raise FileNotFoundError(
+            f"KDIC 데이터를 찾을 수 없습니다: {local_path}\n"
+            "KDIC_ZIP_PATH 환경변수로 zip 파일 또는 jsonl 3종(documents.jsonl, "
+            "chunks.jsonl, chunk_embeddings_hcx.jsonl)이 든 폴더 경로를 지정하세요."
+        )
+
+    print("로컬 데이터 사용:", local_path)
+    return local_path
+
+
 def upload_kdic_output_zip() -> Path:
     """Colab 업로드 창에서 ZIP 파일 하나를 받아 로컬 경로로 저장합니다."""
     try:
         from google.colab import files
-    except ImportError as error:
-        raise RuntimeError(
-            "이 셀은 Google Colab 업로드 기능을 사용합니다. "
-            "로컬 Jupyter라면 ZIP 경로를 직접 지정하는 셀을 사용하세요."
-        ) from error
+    except ImportError:
+        return resolve_local_kdic_output()
 
     uploaded = files.upload()
     zip_names = [name for name in uploaded if name.lower().endswith(".zip")]
@@ -31,13 +45,18 @@ def upload_kdic_output_zip() -> Path:
 
 
 def extract_kdic_output(zip_path: Path) -> Path:
-    """기존 압축 해제 폴더를 지우고 ZIP 전체를 안전하게 해제합니다."""
+    """기존 압축 해제 폴더를 지우고, ZIP이면 해제하고 폴더면 그대로 복사해둡니다."""
     if not zip_path.exists():
-        raise FileNotFoundError(f"ZIP 파일이 없습니다: {zip_path}")
+        raise FileNotFoundError(f"ZIP/폴더 경로가 없습니다: {zip_path}")
 
     if EXTRACT_ROOT.exists():
         shutil.rmtree(EXTRACT_ROOT)
     EXTRACT_ROOT.mkdir(parents=True, exist_ok=True)
+
+    if zip_path.is_dir():
+        shutil.copytree(zip_path, EXTRACT_ROOT, dirs_exist_ok=True)
+        print("폴더 복사 완료:", EXTRACT_ROOT)
+        return EXTRACT_ROOT
 
     with zipfile.ZipFile(zip_path, "r") as archive:
         bad_member = archive.testzip()

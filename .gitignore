@@ -18,5 +18,7 @@ dist/
 *.key
 
 # KDIC RAG project runtime artifacts (generated when running locally)
-RAG_project3/kdic_rag_baseline/
+RAG_project3/rag_baseline/
 KDIC_output*.zip
+RAG_project3/data/*
+!RAG_project3/data/.gitkeep

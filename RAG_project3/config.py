@@ -43,7 +43,7 @@ else:
     # 로컬 환경: KDIC_WORK_ROOT 환경변수로 덮어쓸 수 있고,
     # 지정하지 않으면 현재 폴더 아래에 생성합니다.
     WORK_ROOT = Path(
-        os.environ.get("KDIC_WORK_ROOT", "./kdic_rag_baseline")
+        os.environ.get("KDIC_WORK_ROOT", "./rag_baseline")
     ).resolve()
 
 EXTRACT_ROOT = WORK_ROOT / "uploaded_output"
