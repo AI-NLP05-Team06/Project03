@@ -13,7 +13,7 @@ RAG_project3/
 ├── hcx_client.py          # HCX_API_KEY 읽기, 클라이언트 생성
 ├── hcx_api.py             # chat·embed 호출 함수
 ├── search_answer.py       # 코사인 유사도 검색 + 근거 기반 답변
-├── run_rag.py              # 질문 1건 실행, JSON 저장
+├── run_rag.py             # 질문 1건 실행, JSON 저장
 ├── interactive_chat.py    # 터미널에서 실행하는 메인 파일
 ├── download_result.py     # 로컬에선 결과 경로만 출력
 ├── requirements.txt       # numpy·pandas·ipython 추가
@@ -44,8 +44,6 @@ RAG_project3/
 
 ```powershell
 cd RAG_project3
-python -m venv venv
-.\venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 ```
 
