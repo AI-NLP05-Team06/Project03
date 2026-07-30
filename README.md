@@ -1,6 +1,6 @@
 # RAG_project3
 
-`KDIC_RAG_V4_7_INTERACTIVE_CHAT.ipynb`(Colab 노트북)을 셀 단위로 쪼개서 파일로 나눈 버전이며, 로컬에서도 그대로 돌아가도록 손봤습니다.
+`KDIC_RAG_V4_7_INTERACTIVE_CHAT.ipynb`(Colab 노트북)을 셀 단위로 쪼개서 파일로 나눈 버전이며, 로컬에서도 그대로 돌아가도록 손봤습니다. 그러나 '크롤링 → 청킹 → 임베딩 모델로 벡터화 → 질문 벡터화 → 검색 → 답변 생성
 
 ## 1. 디렉터리 구조
 
