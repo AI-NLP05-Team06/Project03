@@ -1,4 +1,4 @@
 openai>=1.68,<2
 numpy>=2.2.4,<3
 pandas>=2.2.3,<3
-ipython>=8.24.2,<9
+IPython.display>=8.24.2,<9
