@@ -4,7 +4,7 @@ from __future__ import annotations
 from kiwipiepy import Kiwi
 from rank_bm25 import BM25Okapi
 
-from load_data import RESULT
+from core.load_data import RESULT
 
 _kiwi = Kiwi()
 

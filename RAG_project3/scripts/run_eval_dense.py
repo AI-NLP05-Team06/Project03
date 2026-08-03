@@ -1,8 +1,12 @@
 # [Eval-run] 9개 조합 실험 1단계: Dense 단독(Reranking 미적용) baseline을 평가합니다.
-from config import *
-from integrity_check import *
-from search_answer import *
-from eval_search import *
+
+import sys as _sys
+from pathlib import Path as _Path
+_sys.path.insert(0, str(_Path(__file__).resolve().parent.parent))
+from core.config import *
+from core.integrity_check import *
+from retrieval.search_answer import *
+from evaluation.eval_search import *
 
 COMBO_NAME = "dense_norerank_noexp"
 SEARCH_TOP_K = 10

@@ -1,7 +1,11 @@
 # [8/10] 질문 1건을 받아 검색→답변 생성까지 실행하고 결과를 JSON으로 저장하는 run_kdic_rag()를 정의합니다.
-from config import *
-from integrity_check import *
-from search_answer import *
+
+import sys as _sys
+from pathlib import Path as _Path
+_sys.path.insert(0, str(_Path(__file__).resolve().parent.parent))
+from core.config import *
+from core.integrity_check import *
+from retrieval.search_answer import *
 
 
 def utc_now_iso() -> str:

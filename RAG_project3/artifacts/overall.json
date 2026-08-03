@@ -1,0 +1,1 @@
+{"dense_hit3": 0.6667, "bm25_hit3": 0.4583, "hybrid_hit3": 0.725, "dense_recall5": 0.6778, "bm25_recall5": 0.4731, "hybrid_recall5": 0.7011, "dense_mrr10": 0.5725, "bm25_mrr10": 0.4049, "hybrid_mrr10": 0.6201, "n_questions": 120, "pattern_counts": {"all_hit": 43, "mixed": 41, "all_miss": 25, "hybrid_regressed": 8, "hybrid_rescued": 3}}

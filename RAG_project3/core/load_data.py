@@ -1,6 +1,6 @@
 # [3/10] 압축 해제된 폴더에서 documents/chunks/chunk_embeddings_hcx jsonl 파일을 찾아 로드합니다.
-from config import *
-from upload_extract import *
+from core.config import *
+from core.upload_extract import *
 
 
 def find_unique_file(root: Path, filename: str) -> Path:

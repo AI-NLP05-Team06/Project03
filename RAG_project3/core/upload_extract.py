@@ -1,5 +1,5 @@
 # [2/10] KDIC_output.zip을 업로드(Colab)하고 압축을 해제해 EXTRACT_ROOT에 풀어둡니다.
-from config import *
+from core.config import *
 
 
 def resolve_local_kdic_output() -> Path:
