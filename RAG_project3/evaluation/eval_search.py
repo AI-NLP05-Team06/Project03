@@ -1,4 +1,4 @@
-# [Eval] 검색평가대상=Y 113건 전체를 기준으로 '지표·칼럼 안내' 시트에 정의된 지표를 계산합니다.
+# [Eval] Evaluation_DataSet_v3.xlsx 기준으로 '지표·칼럼 안내'에 정의된 지표를 계산합니다.
 from __future__ import annotations
 
 import json
@@ -9,10 +9,10 @@ from typing import Any, Callable
 
 import pandas as pd
 
-from config import RESULT_ROOT
+from core.config import RESULT_ROOT
 
-GOLD_PATH = Path("data/평가데이터셋_검색평가지표용.xlsx")
-GOLD_SHEET = "검색평가용"
+GOLD_PATH = Path("data/Evaluation_DataSet_v3.xlsx")
+GOLD_SHEET = "평가데이터셋 V4_1"
 EVAL_LOG_PATH = RESULT_ROOT / "search_eval_log.csv"
 
 
@@ -22,7 +22,19 @@ def _parse_id_list(value: Any) -> list[str]:
     value = str(value).strip()
     if not value:
         return []
-    return json.loads(value)
+
+    parsed = json.loads(value)
+    if not isinstance(parsed, list):
+        raise TypeError(f"gold_chunk_ids가 리스트가 아닙니다: {parsed!r}")
+
+    # 이중 대괄호(예: [["X"]]) 오타를 한 겹 펴서 복구합니다.
+    flattened: list[str] = []
+    for item in parsed:
+        if isinstance(item, list):
+            flattened.extend(item)
+        else:
+            flattened.append(item)
+    return flattened
 
 
 def load_gold_set(
@@ -30,19 +42,29 @@ def load_gold_set(
     sheet_name: str = GOLD_SHEET,
 ) -> list[dict[str, Any]]:
     df = pd.read_excel(path, sheet_name=sheet_name)
-    df = df[df["검색평가대상"] == "Y"]
 
     records: list[dict[str, Any]] = []
+    skipped: list[str] = []
     for _, row in df.iterrows():
-        primary_ids = _parse_id_list(row["gold_primary_chunk_ids"])
-        supporting_ids = _parse_id_list(row["gold_supporting_chunk_ids"])
-        gold_ids = _parse_id_list(row["gold_chunk_ids"])
+        if "evaluation_target" in row and row["evaluation_target"] != "Y":
+            continue
+
+        try:
+            primary_ids = _parse_id_list(row["gold_primary_chunk_ids"])
+            supporting_ids = _parse_id_list(row["gold_supporting_chunk_ids"])
+            gold_ids = _parse_id_list(row["gold_chunk_ids"])
+        except (json.JSONDecodeError, TypeError):
+            skipped.append(str(row["evaluation_id"]))
+            continue
+
+        if not gold_ids:
+            continue
 
         records.append({
             "evaluation_id": row["evaluation_id"],
-            "question": row["예상질문"],
+            "question": row["question"],
             "business_function": row["gold_business_function"],
-            "complexity": row["질문 복잡도"],
+            "complexity": row["complexity"],
             "multi_chunk_required": row["multi_chunk_required"] == "Y",
             "primary_chunk_ids": primary_ids,
             "supporting_chunk_ids": supporting_ids,
@@ -51,6 +73,12 @@ def load_gold_set(
 
     if not records:
         raise RuntimeError(f"검색평가대상=Y 문항이 없습니다: {path}")
+
+    if skipped:
+        print(
+            f"[경고] gold_chunk_ids 형식이 깨져서 건너뛴 문항 {len(skipped)}건:",
+            ", ".join(skipped),
+        )
 
     return records
 
@@ -239,4 +267,4 @@ def log_result(combo_name: str, summary: dict[str, Any]) -> None:
     print("평가 로그 저장:", EVAL_LOG_PATH)
 
 
-print("평가 하니스 준비 완료 (9개 지표, 113건)")
+print("평가 하니스 준비 완료")

@@ -1,6 +1,10 @@
 # [9/10] 사용자 입력을 받아 반복적으로 run_kdic_rag()를 실행하는 대화형 질의응답 루프입니다. (실행 시 즉시 입력창이 뜹니다)
-from config import *
-from run_rag import *
+
+import sys as _sys
+from pathlib import Path as _Path
+_sys.path.insert(0, str(_Path(__file__).resolve().parent.parent))
+from core.config import *
+from scripts.run_rag import *
 
 # None이면 6개 업무 전체에서 검색합니다.
 # 특정 업무만 검색하려면 아래 값을 6개 업무 중 하나로 변경할 수 있습니다.

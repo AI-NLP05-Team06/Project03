@@ -1,7 +1,7 @@
 # [4/10] 로드된 documents/chunks/embeddings의 ID 중복·연결·차원 무결성을 검사합니다.
-from config import *
-from upload_extract import *
-from load_data import *
+from core.config import *
+from core.upload_extract import *
+from core.load_data import *
 
 
 def assert_unique(values: list[str], label: str) -> None:

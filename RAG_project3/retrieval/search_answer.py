@@ -1,7 +1,7 @@
 # [7/10] 코사인 유사도 기반 Dense 검색과, 검색된 근거 청크만 사용하는 HCX 답변 생성 함수를 정의합니다.
-from config import *
-from load_data import *
-from hcx_api import *
+from core.config import *
+from core.load_data import *
+from core.hcx_api import *
 
 
 def cosine_similarity(
