@@ -7,7 +7,7 @@ import os
 # 충돌하는 문제를 막기 위해, FlagEmbedding을 불러오기 전에 미리 꺼둡니다.
 os.environ.setdefault("USE_TF", "0")
 
-from FlagEmbedding import FlagReranker
+from FlagEmbedding import FlagReranker  # pyright: ignore[reportMissingImports]
 
 RERANKER_MODEL_NAME = "BAAI/bge-reranker-v2-m3"
 CONTENT_MAX_CHARS = 300

@@ -22,26 +22,18 @@ from evaluation.eval_search import (
     log_result,
 )
 
-HYBRID_POOL_FOR_RERANK = 30
-MAX_RERANK_N = 20  # 빠른 방향성 확인용: N=20 하나만 채점 (전체 스윕 시 30으로 복원)
-N_OPTIONS = [20]  # 빠른 방향성 확인용 spot-check (전체 스윕은 [10,15,20,25,30]로 복원)
+HYBRID_POOL_FOR_RERANK = 50
+MAX_RERANK_N = 50
+N_OPTIONS = [10, 15, 20, 25, 30, 40, 50]
 TOP_K_FINAL = 5
 
-# reranker 효과를 볼 만한 도메인만 선별 (hidden_assets_report는 이미 hit@3=0.96으로
-# 거의 다 맞혀서 제외, unclaimed_funds도 이미 양호해서 제외)
-TARGET_DOMAINS = {
-    "debt_adjustment",
-    "deposit_insurance_payout",
-    "deposit_protection",
-    "mistaken_transfer",
-}
-
-SAMPLE_SIZE = 20  # 빠른 방향성 확인용 표본 (전체 79문항 대신 일부만)
+# GPU(Colab)에서는 CPU 대비 훨씬 빠르므로 도메인/표본 제한 없이 전체 120문항으로 스윕합니다.
+# (로컬 CPU에서 빠르게 방향성만 볼 땐 아래 두 줄의 주석을 풀어서 4개 도메인·표본만 쓰세요.)
+# TARGET_DOMAINS = {"debt_adjustment", "deposit_insurance_payout", "deposit_protection", "mistaken_transfer"}
+# gold_records = [r for r in gold_records if r["business_function"] in TARGET_DOMAINS][:20]
 
 gold_records = load_gold_set()
-gold_records = [r for r in gold_records if r["business_function"] in TARGET_DOMAINS]
-gold_records = gold_records[:SAMPLE_SIZE]
-print("평가 문항 수(도메인 필터 + 표본):", len(gold_records), flush=True)
+print("평가 문항 수(전체):", len(gold_records), flush=True)
 
 
 # ============================================================
@@ -76,7 +68,7 @@ print("캐시 완료:", len(cache), "건 (hybrid pool=", HYBRID_POOL_FOR_RERANK,
 # ============================================================
 # 2) 평가 함수
 # ============================================================
-def evaluate_ranked_ids_list(ranked_ids_by_record: list[tuple[dict, list[str]]]) -> dict:
+def _per_question_rows(ranked_ids_by_record: list[tuple[dict, list[str]]]) -> pd.DataFrame:
     rows = []
     for record, ranked_ids in ranked_ids_by_record:
         gold_ids = record["gold_chunk_ids"]
@@ -87,6 +79,8 @@ def evaluate_ranked_ids_list(ranked_ids_by_record: list[tuple[dict, list[str]]])
         recall5 = recall_at_k(ranked_ids, gold_ids, 5)
 
         row = {
+            "evaluation_id": record["evaluation_id"],
+            "business_function": record["business_function"],
             "hit@3": hit_at_k(ranked_ids, gold_ids, 3),
             "recall@5": recall5,
             "mrr@10": mrr_at_k(ranked_ids, gold_ids, 10),
@@ -103,8 +97,11 @@ def evaluate_ranked_ids_list(ranked_ids_by_record: list[tuple[dict, list[str]]])
             if complete_applicable else None
         )
         rows.append(row)
+    return pd.DataFrame(rows)
 
-    df = pd.DataFrame(rows)
+
+def evaluate_ranked_ids_list(ranked_ids_by_record: list[tuple[dict, list[str]]]) -> dict:
+    df = _per_question_rows(ranked_ids_by_record)
     summary: dict = {"n_questions": len(df)}
     for metric in (
         "hit@3", "recall@5", "mrr@10", "map@10",
@@ -121,6 +118,14 @@ def evaluate_ranked_ids_list(ranked_ids_by_record: list[tuple[dict, list[str]]])
     return summary
 
 
+def domain_breakdown(ranked_ids_by_record: list[tuple[dict, list[str]]]) -> pd.DataFrame:
+    df = _per_question_rows(ranked_ids_by_record)
+    metrics = ["hit@3", "recall@5", "mrr@10", "map@10", "precision@5", "f1@5", "ndcg@5"]
+    g = df.groupby("business_function")[metrics].mean().round(4)
+    g["n"] = df.groupby("business_function").size()
+    return g
+
+
 # ============================================================
 # 3) baseline: rerank 없이 hybrid(pool=30) 그대로 top-5
 # ============================================================
@@ -129,15 +134,16 @@ baseline_pairs = [
     for record, fused, _ in cache
 ]
 baseline_summary = evaluate_ranked_ids_list(baseline_pairs)
-log_result("hybrid_pool30_norerank_4dom", baseline_summary)
-print("\n=== baseline: hybrid_pool30_norerank_4dom ===")
+log_result("hybrid_pool30_norerank_full", baseline_summary)
+print("\n=== baseline: hybrid_pool30_norerank_full ===")
 print(json.dumps(baseline_summary, ensure_ascii=False, indent=2))
 
 
 # ============================================================
 # 4) N 스윕: 캐시된 rerank 점수로 top-N만 재정렬 후 top-5
 # ============================================================
-summaries: dict[str, dict] = {"hybrid_pool30_norerank_4dom": baseline_summary}
+summaries: dict[str, dict] = {"hybrid_pool30_norerank_full": baseline_summary}
+pairs_by_n: dict[int, list[tuple[dict, list[str]]]] = {}
 
 for n in N_OPTIONS:
     pairs = []
@@ -150,8 +156,9 @@ for n in N_OPTIONS:
         )
         ranked_ids = [r["chunk"]["chunk_id"] for r in reranked[:TOP_K_FINAL]]
         pairs.append((record, ranked_ids))
+    pairs_by_n[n] = pairs
 
-    combo_name = f"rerank_N{n}_4dom"
+    combo_name = f"rerank_N{n}_full"
     summary = evaluate_ranked_ids_list(pairs)
     summaries[combo_name] = summary
     log_result(combo_name, summary)
@@ -163,3 +170,26 @@ print(result_df[["mrr@10", "recall@5", "ndcg@5", "hit@3", "map@10"]])
 best_name = result_df.index[0]
 print(f"\n>>> 최고 조합: {best_name} (mrr@10={summaries[best_name]['mrr@10']})")
 print("성능:", json.dumps(summaries[best_name], ensure_ascii=False, indent=2))
+
+
+# ============================================================
+# 5) 도메인별 비교: reranker 안 썼을 때(baseline) vs 확정 N(=25) 썼을 때
+# ============================================================
+CONFIRMED_N = 25
+
+baseline_domain = domain_breakdown(baseline_pairs)
+rerank_domain = domain_breakdown(pairs_by_n[CONFIRMED_N])
+
+print(f"\n=== 도메인별 비교: baseline(rerank 없음) vs rerank_N{CONFIRMED_N} ===")
+compare = baseline_domain[["hit@3", "recall@5", "mrr@10", "ndcg@5"]].add_suffix("_baseline").join(
+    rerank_domain[["hit@3", "recall@5", "mrr@10", "ndcg@5"]].add_suffix(f"_rerank_N{CONFIRMED_N}")
+).join(rerank_domain[["n"]])
+print(compare)
+
+baseline_domain.to_csv(RESULT_ROOT / "domain_breakdown_hybrid_norerank_full.csv", encoding="utf-8-sig")
+rerank_domain.to_csv(RESULT_ROOT / f"domain_breakdown_rerank_N{CONFIRMED_N}_full.csv", encoding="utf-8-sig")
+compare.to_csv(RESULT_ROOT / "domain_breakdown_rerank_vs_norerank.csv", encoding="utf-8-sig")
+print("\n도메인별 CSV 저장 완료:")
+print(" -", RESULT_ROOT / "domain_breakdown_hybrid_norerank_full.csv")
+print(" -", RESULT_ROOT / f"domain_breakdown_rerank_N{CONFIRMED_N}_full.csv")
+print(" -", RESULT_ROOT / "domain_breakdown_rerank_vs_norerank.csv")

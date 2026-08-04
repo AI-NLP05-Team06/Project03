@@ -1,5 +1,7 @@
 openai>=1.68,<2
 numpy>=2.2.4,<3
 pandas>=2.2.3,<3
-IPython.display>=8.24.2,<9
+ipython>=8.24.2,<9
 FlagEmbedding>=1.4,<2
+transformers==4.46.3
+tokenizers==0.20.3
