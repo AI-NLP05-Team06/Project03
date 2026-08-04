@@ -17,15 +17,16 @@ RAG_project3/
 │   ├── search_answer.py     # Dense(코사인 유사도) 검색 + 근거 기반 답변 생성
 │   ├── bm25_search.py       # kiwipiepy 형태소 분석 + BM25Okapi 검색
 │   ├── hybrid_search.py     # Dense+BM25를 Weighted-sum(Min-Max)로 융합 (확정값: pool=10, 7:3)
-│   └── reranker.py          # BGE-Reranker-v2-m3(cross-encoder) 로컬 재정렬
+│   └── reranker.py          # BGE-Reranker-v2-m3(cross-encoder) 로컬 재정렬 (확정값: pool=50→상위25 재정렬)
 ├── evaluation/               # 평가·튜닝 하니스
 │   ├── eval_search.py       # 지표 계산(hit@3·recall@5·mrr@10 등) + 평가 실행 함수
 │   ├── tune_hybrid.py       # candidate_pool_size → fusion 방식 → weights 단계적 스윕
-│   └── tune_reranker.py     # reranker에 넣을 후보 개수(N) 스윕
+│   └── tune_reranker.py     # reranker에 넣을 후보 개수(N) 스윕 + 도메인별 breakdown (GPU 권장)
 ├── scripts/                  # 실행 진입점
 │   ├── run_eval_dense.py    # Dense baseline 평가
 │   ├── run_eval_bm25.py     # BM25 baseline 평가
 │   ├── run_eval_hybrid.py   # Hybrid baseline 평가
+│   ├── run_eval_rerank.py   # Hybrid+Reranker(N=25) 최종 평가 (GPU 권장)
 │   ├── run_rag.py           # 질문 1건 실행, JSON 저장
 │   ├── interactive_chat.py  # 터미널 대화형 질의응답 (메인 실행 파일)
 │   └── download_result.py   # 로컬에선 결과 경로만 출력

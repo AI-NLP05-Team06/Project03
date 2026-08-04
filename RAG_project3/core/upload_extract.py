@@ -20,7 +20,13 @@ def resolve_local_kdic_output() -> Path:
 
 
 def upload_kdic_output_zip() -> Path:
-    """Colab 업로드 창에서 ZIP 파일 하나를 받아 로컬 경로로 저장합니다."""
+    """Colab 업로드 창에서 ZIP 파일 하나를 받아 로컬 경로로 저장합니다.
+    단, KDIC_ZIP_PATH가 가리키는 경로(기본값 "data")가 이미 있으면 그걸 그대로 씁니다 —
+    !python script.py처럼 서브프로세스로 실행될 때는 대화형 업로드 창 자체가 동작하지 않아서."""
+    local_candidate = Path(os.environ.get("KDIC_ZIP_PATH", "data"))
+    if local_candidate.exists():
+        return resolve_local_kdic_output()
+
     try:
         from google.colab import files
     except ImportError:
