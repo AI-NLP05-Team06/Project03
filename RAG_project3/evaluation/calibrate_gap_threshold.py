@@ -37,7 +37,7 @@ for i, record in enumerate(gold_records, 1):
         print(f"  진행: {i}/{len(gold_records)}", flush=True)
 
 df = pd.DataFrame(rows)
-df.to_csv(RESULT_ROOT / "gap_calibration.csv", index=False, encoding="utf-8-sig")
+df.to_csv(EXPERIMENTS_ROOT / "gap_calibration.csv", index=False, encoding="utf-8-sig")
 
 print("\n=== hit@3=1(정답) vs hit@3=0(오답) 그룹별 gap 분포 ===")
 print(df.groupby("hit@3")["gap"].describe())
@@ -47,4 +47,4 @@ bins = [0, 0.02, 0.05, 0.08, 0.10, 0.12, 0.15, 0.20, 0.30, 1.0]
 df["gap_bin"] = pd.cut(df["gap"], bins=bins)
 print(df.groupby("gap_bin")["hit@3"].agg(["mean", "count"]))
 
-print("\ngap_calibration.csv 저장 완료:", RESULT_ROOT / "gap_calibration.csv")
+print("\ngap_calibration.csv 저장 완료:", EXPERIMENTS_ROOT / "gap_calibration.csv")

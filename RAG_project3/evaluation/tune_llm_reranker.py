@@ -163,7 +163,7 @@ domain_compare = baseline_domain[["hit@3", "recall@5", "mrr@10", "ndcg@5"]].add_
 ).join(llm_domain[["n"]])
 print(domain_compare)
 
-baseline_domain.to_csv(RESULT_ROOT / "domain_breakdown_hybrid_norerank_4dom.csv", encoding="utf-8-sig")
-llm_domain.to_csv(RESULT_ROOT / f"domain_breakdown_llm_rerank_N{LLM_RERANK_N}_4dom.csv", encoding="utf-8-sig")
-domain_compare.to_csv(RESULT_ROOT / "domain_breakdown_llm_rerank_vs_norerank.csv", encoding="utf-8-sig")
+baseline_domain.to_csv(DOMAIN_BREAKDOWN_ROOT / "hybrid_norerank_4dom.csv", encoding="utf-8-sig")
+llm_domain.to_csv(DOMAIN_BREAKDOWN_ROOT / f"llm_rerank_N{LLM_RERANK_N}_4dom.csv", encoding="utf-8-sig")
+domain_compare.to_csv(DOMAIN_BREAKDOWN_ROOT / "llm_rerank_vs_norerank.csv", encoding="utf-8-sig")
 print("\n도메인별 CSV 저장 완료:", RESULT_ROOT)

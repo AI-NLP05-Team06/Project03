@@ -10,9 +10,9 @@ from scripts.run_rag import *
 # 특정 업무만 검색하려면 아래 값을 6개 업무 중 하나로 변경할 수 있습니다.
 BUSINESS_FUNCTION_FILTER = None
 
-# 기존 V4.6 Baseline 검색 설정을 그대로 사용합니다.
+# 확정 파이프라인(Hybrid+Reranker) 기준 설정입니다.
 TOP_K = 5
-MIN_SCORE = 0.30
+MIN_SCORE = HCX_RAG_MIN_SCORE_RERANK
 
 EXIT_COMMANDS = {"종료", "끝", "exit", "quit", "q"}
 chat_history: list[dict[str, Any]] = []
