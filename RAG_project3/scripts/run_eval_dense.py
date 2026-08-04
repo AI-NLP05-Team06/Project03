@@ -30,6 +30,6 @@ print(json.dumps(eval_result["summary"], ensure_ascii=False, indent=2))
 
 log_result(COMBO_NAME, eval_result["summary"])
 
-detail_path = RESULT_ROOT / f"detail_{COMBO_NAME}.csv"
+detail_path = DETAIL_ROOT / f"{COMBO_NAME}.csv"
 eval_result["detail"].to_csv(detail_path, index=False, encoding="utf-8-sig")
 print("문항별 상세 결과 저장:", detail_path)

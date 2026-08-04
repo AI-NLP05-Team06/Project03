@@ -11,10 +11,11 @@ os.environ.setdefault("USE_TF", "0")
 import json
 import time
 
+from core.config import BGE_M3_DATA_ROOT
 from core.load_data import RESULT
 from FlagEmbedding import BGEM3FlagModel
 
-OUT_PATH = _Path(__file__).resolve().parent.parent / "rag_baseline" / "results" / "chunk_embeddings_bge_m3_structured.jsonl"
+OUT_PATH = BGE_M3_DATA_ROOT / "chunk_embeddings_bge_m3_structured.jsonl"
 BATCH_SIZE = 12
 MAX_LENGTH = 1024
 
