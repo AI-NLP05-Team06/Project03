@@ -68,6 +68,34 @@ def _remove_unsupported_urls_and_phones(
     return answer.strip()
 
 
+def _verify_numeric_claims(evidence_text: str, draft_answer: str) -> str:
+    """URL/전화번호와 달리 금액·한도·기간·비율은 표현이 다양해 화이트리스트로
+    못 거르므로, LLM에게 근거 원문과 한 문장씩 대조시켜 근거에 없는 수치를
+    지우거나 고치게 하는 2차 검수 패스입니다."""
+    return hcx_chat_text(
+        system_prompt=(
+            "당신은 아래 초안 답변이 근거 원문에 실제로 있는 내용만 담고 "
+            "있는지 검증하고 고치는 검수자입니다. 초안에 등장하는 금액, "
+            "한도, 기간, 비율 등 구체적인 수치를 근거 원문과 하나씩 "
+            "대조하세요. 근거 원문에 그대로 없는 수치가 있으면 그 문장을 "
+            "삭제하거나 근거에 있는 값으로 고치세요. 근거에 실제로 있는 "
+            "내용, 문장 구조, 어투는 그대로 유지하고 새로운 내용을 "
+            "추가하지 마세요."
+        ),
+        user_prompt=f"""
+[검색된 공식 근거]
+{evidence_text}
+
+[검수 대상 초안 답변]
+{draft_answer}
+
+위 초안에서 근거 원문에 없는 구체적 수치를 찾아 삭제하거나 근거에 있는 값으로 고친 최종 답변만 출력하세요. 다른 설명이나 "수정했습니다" 같은 말은 출력하지 마세요.
+""".strip(),
+        max_tokens=900,
+        temperature=0.0,
+    )
+
+
 def generate_grounded_hcx_answer(
     question: str,
     search_results: list[dict],
@@ -136,8 +164,10 @@ def generate_grounded_hcx_answer(
         temperature=0.0,
     )
 
+    verified_answer = _verify_numeric_claims(evidence_text, raw_answer)
+
     answer = _remove_unsupported_urls_and_phones(
-        raw_answer,
+        verified_answer,
         allowed_urls,
         allowed_phones,
     )
