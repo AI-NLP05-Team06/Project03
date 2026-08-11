@@ -13,7 +13,8 @@ from retrieval.hybrid_search import hybrid_search
 from retrieval.query_expansion import (
     generate_hyde_passage,
     generate_multi_queries,
-    reciprocal_rank_fusion,
+    generate_stepback_query,
+    score_sum_fusion,
 )
 from evaluation.eval_search import load_gold_set, recall_at_k, hit_at_k
 
@@ -23,9 +24,12 @@ TOP_K = 5
 POOL_K = 20  # RRF 병합 전, variant별로 넉넉히 뽑아둘 pool 크기
 
 
+def _search(question: str, top_k: int = POOL_K) -> list[dict]:
+    return hybrid_search(question, top_k=top_k, business_function=None)
+
+
 def _ranked_ids(question: str, top_k: int = POOL_K) -> list[str]:
-    results = hybrid_search(question, top_k=top_k, business_function=None)
-    return [r["chunk"]["chunk_id"] for r in results]
+    return [r["chunk"]["chunk_id"] for r in _search(question, top_k)]
 
 
 def evaluate_baseline(question: str) -> list[str]:
@@ -34,13 +38,18 @@ def evaluate_baseline(question: str) -> list[str]:
 
 def evaluate_multi_query(question: str) -> list[str]:
     variants = generate_multi_queries(question)
-    ranked_lists = [_ranked_ids(v) for v in variants]
-    return reciprocal_rank_fusion(ranked_lists)
+    results_lists = [_search(v) for v in variants]
+    return score_sum_fusion(results_lists)
 
 
 def evaluate_hyde(question: str) -> list[str]:
     passage = generate_hyde_passage(question)
     return _ranked_ids(passage)
+
+
+def evaluate_stepback(question: str) -> list[str]:
+    stepback_query = generate_stepback_query(question)
+    return _ranked_ids(stepback_query)
 
 
 def main() -> None:
@@ -58,33 +67,38 @@ def main() -> None:
         )
     print(f"평가 문항 수: {len(sampled_records)} (도메인 {len(by_domain)}개 x 최대 {SAMPLE_PER_DOMAIN}개)")
 
+    out_path = EXPERIMENTS_ROOT / "query_expansion_eval_stepback.csv"
     rows = []
+    done_ids: set = set()
+    if out_path.exists():
+        existing_df = pd.read_csv(out_path)
+        rows = existing_df.to_dict("records")
+        done_ids = set(existing_df["evaluation_id"])
+        print(f"이어서 진행: 이미 완료된 문항 {len(done_ids)}건 건너뜀")
+
     for i, record in enumerate(sampled_records, 1):
+        if record["evaluation_id"] in done_ids:
+            continue
         question = record["question"]
         gold_ids = record["gold_chunk_ids"]
 
         baseline_ids = evaluate_baseline(question)
-        multi_query_ids = evaluate_multi_query(question)
-        hyde_ids = evaluate_hyde(question)
+        stepback_ids = evaluate_stepback(question)
 
         rows.append({
             "evaluation_id": record["evaluation_id"],
             "baseline_recall@5": recall_at_k(baseline_ids, gold_ids, TOP_K),
-            "multi_query_recall@5": recall_at_k(multi_query_ids, gold_ids, TOP_K),
-            "hyde_recall@5": recall_at_k(hyde_ids, gold_ids, TOP_K),
+            "stepback_recall@5": recall_at_k(stepback_ids, gold_ids, TOP_K),
             "baseline_hit@5": hit_at_k(baseline_ids, gold_ids, TOP_K),
-            "multi_query_hit@5": hit_at_k(multi_query_ids, gold_ids, TOP_K),
-            "hyde_hit@5": hit_at_k(hyde_ids, gold_ids, TOP_K),
+            "stepback_hit@5": hit_at_k(stepback_ids, gold_ids, TOP_K),
         })
         print(f"  {i}/{len(sampled_records)} | baseline={rows[-1]['baseline_recall@5']:.2f} "
-              f"multi_query={rows[-1]['multi_query_recall@5']:.2f} hyde={rows[-1]['hyde_recall@5']:.2f}")
+              f"stepback={rows[-1]['stepback_recall@5']:.2f}")
+        pd.DataFrame(rows).to_csv(out_path, index=False, encoding="utf-8-sig")
 
     df = pd.DataFrame(rows)
     print("\n=== 평균 recall@5 / hit@5 ===")
     print(df[[c for c in df.columns if c != "evaluation_id"]].mean())
-
-    out_path = EXPERIMENTS_ROOT / "query_expansion_eval.csv"
-    df.to_csv(out_path, index=False, encoding="utf-8-sig")
     print(f"\n상세 저장: {out_path}")
 
 
