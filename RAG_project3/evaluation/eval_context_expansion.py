@@ -27,6 +27,9 @@ REFUSAL_TEXT = (
 
 random.seed(RANDOM_SEED)
 gold_records = load_gold_set()
+# 컨텍스트확장은 "청크 하나로는 부족한" 문항에서만 효과가 있을 수 있으므로,
+# 무작위 표본이 아니라 multi_chunk_required=Y 문항만 골라서 검증한다.
+gold_records = [r for r in gold_records if r["multi_chunk_required"]]
 by_domain: dict[str, list[dict]] = {}
 for record in gold_records:
     by_domain.setdefault(record["business_function"], []).append(record)
@@ -118,7 +121,7 @@ def _run_variant(question: str, search_results: list[dict]) -> dict:
     return result
 
 
-detail_path = EXPERIMENTS_ROOT / "context_expansion_comparison.csv"
+detail_path = EXPERIMENTS_ROOT / "context_expansion_comparison_multichunk.csv"
 rows = []
 
 for i, record in enumerate(sampled_records, 1):

@@ -18,6 +18,9 @@ def generate_complaint_template_answer(
     *,
     min_score: float = HCX_RAG_MIN_SCORE_RERANK,
 ) -> str:
+    """호출 전제: classification.pipeline.classify()가 intent="민원처리"로 확정한
+    질문에만 써야 한다. 정보질문(ELIGIBILITY/AMOUNT 등)에 쓰면 절차가 아닌 내용도
+    "① 신청 절차" 라벨 아래 억지로 욱여넣는 오출력이 나온다(세션에서 실측 확인됨)."""
     if (
         not search_results
         or search_results[0]["score"] < min_score
