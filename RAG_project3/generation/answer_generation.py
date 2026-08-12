@@ -71,7 +71,14 @@ def _remove_unsupported_urls_and_phones(
 def _verify_numeric_claims(evidence_text: str, draft_answer: str) -> str:
     """URL/전화번호와 달리 금액·한도·기간·비율은 표현이 다양해 화이트리스트로
     못 거르므로, LLM에게 근거 원문과 한 문장씩 대조시켜 근거에 없는 수치를
-    지우거나 고치게 하는 2차 검수 패스입니다."""
+    지우거나 고치게 하는 2차 검수 패스입니다.
+
+    초안에 숫자가 하나도 없으면 검증할 수치 자체가 없으므로 LLM 호출 없이
+    그대로 반환합니다(지연시간 절감, 정확도 손실 없음 — 숫자가 없으면
+    할루시네이션 위험도 없음)."""
+    if not re.search(r"\d", draft_answer):
+        return draft_answer
+
     return hcx_chat_text(
         system_prompt=(
             "당신은 아래 초안 답변이 근거 원문에 실제로 있는 내용만 담고 "

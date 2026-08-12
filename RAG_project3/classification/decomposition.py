@@ -5,7 +5,36 @@
 # 주입해서 독립적으로 이해 가능하게 만든다(Type B 처리).
 from __future__ import annotations
 
+import re
+
 from core.hcx_api import hcx_chat_text
+
+_LEADING_NUMBER_PATTERN = re.compile(r"^\d+[.)]\s*")
+
+# 규칙 기반 사전필터: 복합질의 신호(체언+와/과, 쉼표, "~하고" 식 동사 연결형)가
+# 하나도 없으면 LLM 호출 없이 바로 단일질의로 처리한다(지연시간 절감).
+# `검색평가데이터셋.xlsx`의 RETRIEVE 180건(단일 105/복합 75)으로 검증: 이 신호가
+# 하나라도 있으면 LLM 판별을 그대로 유지(복합질의의 96%=72/75가 이 신호를 가짐),
+# 신호가 전혀 없으면 스킵(단일질의의 83%=87/105에서 LLM 호출을 절약).
+# 트레이드오프: 신호 없이 실제로는 복합인 질문 3/75(4%)은 분해 없이 그대로
+# 단일 처리된다 — LLM 판별 자체도 recall 96%로 완벽하지 않았으므로 감내 가능한
+# 수준으로 판단(evaluate_decomposition.py로 재검증함).
+_NOUN_CONJUNCTION_PATTERN = re.compile(r"[가-힣]+[와과](?:\s|$)")
+_VERB_CONJUNCTION_PATTERN = re.compile(r"[가-힣]{2,}고(?:\s|,)")
+
+
+def _looks_possibly_compound(question: str) -> bool:
+    return bool(
+        _NOUN_CONJUNCTION_PATTERN.search(question)
+        or _VERB_CONJUNCTION_PATTERN.search(question)
+    ) or "," in question
+
+
+# 실측 확인된 오류: 아주 드물게(180건 중 2건) LLM이 하위질문을 나누는 대신
+# 답변을 통째로 생성해버림(예: "네이버의 CLOVA X가 답변드립니다..." 같은
+# 문장까지 섞여 나옴). 정상적인 질문은 이 길이를 넘지 않으므로, 넘으면
+# 분해 실패로 간주하고 원문 그대로 되돌린다.
+MAX_SUB_QUESTION_LENGTH = 150
 
 _DECOMPOSITION_SYSTEM_PROMPT = """당신은 사용자 질문을 검색하기 좋은 단위로
 정리하는 질의 분해기입니다.
@@ -21,11 +50,21 @@ _DECOMPOSITION_SYSTEM_PROMPT = """당신은 사용자 질문을 검색하기 좋
 
 
 def decompose_query(question: str) -> list[str]:
+    if not _looks_possibly_compound(question):
+        return [question]
+
     raw = hcx_chat_text(
         system_prompt=_DECOMPOSITION_SYSTEM_PROMPT,
         user_prompt=question,
         max_tokens=300,
         temperature=0.0,
     )
-    sub_questions = [line.strip() for line in raw.splitlines() if line.strip()]
-    return sub_questions or [question]
+    sub_questions = [
+        _LEADING_NUMBER_PATTERN.sub("", line.strip())
+        for line in raw.splitlines() if line.strip()
+    ]
+    if not sub_questions:
+        return [question]
+    if any(len(sq) > MAX_SUB_QUESTION_LENGTH for sq in sub_questions):
+        return [question]
+    return sub_questions

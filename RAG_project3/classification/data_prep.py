@@ -21,6 +21,9 @@ INFO_NEED_PATTERN = re.compile(
     r'"information_need":"(OVERVIEW|ELIGIBILITY|APPLICATION|DOCUMENTS|TIME|AMOUNT|STATUS|CONTACT)"'
 )
 BUSINESS_FUNCTION_KEY_PATTERN = re.compile(r'"business_function":"')
+# Phase7 decomposition 품질 평가용: 각 request의 "실제로 뭘 묻는지" 요약 텍스트.
+# information_need처럼 고정된 값 집합이 아니라 자유 텍스트라 느슨하게 매칭한다.
+REQUEST_TEXT_PATTERN = re.compile(r'"request_text":"([^"]+)"')
 
 # 세션에서 실제 문항 샘플로 확정한 매핑 (정보질문: grounded 답변 / 민원처리질문: 절차·서류·페이지연결 템플릿)
 INFO_INTENT_NEEDS = {"OVERVIEW", "ELIGIBILITY", "AMOUNT", "CONTACT", "TIME"}
@@ -31,6 +34,12 @@ def _extract_information_needs(raw: Any) -> list[str]:
     if not isinstance(raw, str) or not raw.strip():
         return []
     return INFO_NEED_PATTERN.findall(raw)
+
+
+def _extract_request_texts(raw: Any) -> list[str]:
+    if not isinstance(raw, str) or not raw.strip():
+        return []
+    return REQUEST_TEXT_PATTERN.findall(raw)
 
 
 def _expected_request_count(raw: Any) -> int:
@@ -81,6 +90,7 @@ def load_routing_eval_set(
             "user_roles": _parse_str_list(row["user_roles"]),
             "missing_slots": missing_slots,
             "information_needs": information_needs,
+            "request_texts": _extract_request_texts(row["requests"]),
             "request_count": len(information_needs),
             "gold_intent": _derive_intent(information_needs),
             # 5번 되묻기는 "업무가 뭔지 불명확할 때" 조건 하나로만 트리거하기로
