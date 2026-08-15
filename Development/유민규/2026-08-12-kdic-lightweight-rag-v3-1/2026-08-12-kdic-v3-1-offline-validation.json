@@ -1,0 +1,41 @@
+{
+  "validation_date": "2026-08-12",
+  "validation_scope": "V3 raw final needs replayed through the V3.1 Hard Filter safety policy; no external API calls",
+  "evaluation_count": 270,
+  "notebook_code_cells_syntax_valid": true,
+  "pipeline_metadata": "v3.1",
+  "hard_filter_policy_metadata": "ALLOW_ONLY_IF_ALL_SAFETY_CHECKS_PASS",
+  "v3_filter_mode_counts": {
+    "HARD": 227,
+    "SOFT": 34,
+    "NONE": 4
+  },
+  "v3_1_replayed_filter_mode_counts": {
+    "HARD": 193,
+    "SOFT": 68,
+    "NONE": 4
+  },
+  "v3_wrong_hard_filter_count": 4,
+  "v3_1_replayed_wrong_hard_filter_count": 0,
+  "critical_cases": {
+    "Q026": {
+      "v3_wrong_hard_filter_plans": 2,
+      "v3_1_replayed_modes": ["SOFT", "SOFT"]
+    },
+    "Q074": {
+      "v3_wrong_hard_filter_plans": 1,
+      "v3_1_replayed_modes": ["SOFT"]
+    },
+    "Q083": {
+      "v3_wrong_hard_filter_plans": 1,
+      "v3_1_replayed_modes": ["SOFT"]
+    }
+  },
+  "critical_case_hard_count": 0,
+  "hard_gate_policy_replay_pass": true,
+  "limitations": [
+    "The replay uses stored V3 model outputs and does not call HCX-007 again.",
+    "End-to-end retrieval fallback cannot be executed because this workspace contains the query analyzer but not the document retriever.",
+    "A new FULL evaluation in Colab is required to confirm V3.1 route, intent, token, latency, and all hard gates on fresh model outputs."
+  ]
+}
