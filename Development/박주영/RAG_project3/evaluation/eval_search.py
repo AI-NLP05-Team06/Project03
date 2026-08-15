@@ -9,11 +9,11 @@ from typing import Any, Callable
 
 import pandas as pd
 
-from core.config import RESULT_ROOT
+from core.config import LOG_ROOT
 
 GOLD_PATH = Path("data/Evaluation_DataSet_v3.xlsx")
 GOLD_SHEET = "평가데이터셋 V4_1"
-EVAL_LOG_PATH = RESULT_ROOT / "search_eval_log.csv"
+EVAL_LOG_PATH = LOG_ROOT / "search_eval_log.csv"
 
 
 def _parse_id_list(value: Any) -> list[str]:

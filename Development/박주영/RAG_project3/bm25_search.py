@@ -4,7 +4,7 @@ from __future__ import annotations
 from kiwipiepy import Kiwi  # pyright: ignore[reportMissingImports]
 from rank_bm25 import BM25Okapi  # pyright: ignore[reportMissingImports]
 
-from core.load_data import RESULT
+from load_data import RESULT  # pyright: ignore[reportMissingImports]
 
 _kiwi = Kiwi()
 

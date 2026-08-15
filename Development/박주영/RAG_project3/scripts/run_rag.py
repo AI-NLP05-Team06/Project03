@@ -1,11 +1,13 @@
 # [8/10] 질문 1건을 받아 검색→답변 생성까지 실행하고 결과를 JSON으로 저장하는 run_kdic_rag()를 정의합니다.
+# 검색은 확정 파이프라인인 Hybrid(Dense+BM25, 7:3, pool=50) + Reranker(N=25)를 씁니다.
 
 import sys as _sys
 from pathlib import Path as _Path
 _sys.path.insert(0, str(_Path(__file__).resolve().parent.parent))
 from core.config import *
 from core.integrity_check import *
-from retrieval.search_answer import *
+from retrieval.reranker import hybrid_rerank_search
+from generation.answer_generation import generate_grounded_hcx_answer
 
 
 def utc_now_iso() -> str:
@@ -40,7 +42,7 @@ def run_kdic_rag(
     *,
     top_k: int = HCX_RAG_TOP_K,
     business_function: str | None = HCX_RAG_BUSINESS_FUNCTION,
-    min_score: float = HCX_RAG_MIN_SCORE,
+    min_score: float = HCX_RAG_MIN_SCORE_RERANK,
     save_result: bool = True,
 ) -> dict[str, Any]:
     question = str(question).strip()
@@ -54,11 +56,10 @@ def run_kdic_rag(
             f"허용값={business_functions}"
         )
 
-    search_results = semantic_search_hcx(
+    search_results = hybrid_rerank_search(
         question,
         top_k=top_k,
         business_function=business_function,
-        min_score=min_score,
     )
     result_rows = build_search_result_rows(search_results)
     result_df = pd.DataFrame(result_rows)
