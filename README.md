@@ -15,10 +15,10 @@ RAG_project3/
 ├── experiments/                # 시행착오·평가용 — production은 이 폴더를 참조하지 않음
 │   ├── evaluation/              # 지표 계산·튜닝 하니스 — eval_search.py(hit@3·recall@5·mrr@10 등), tune_hybrid.py, tune_reranker.py, judge_answer_quality.py(LLM-judge 답변품질) 등
 │   ├── eval01/                   # 검색기법 확정 + 질의분석 raw/qa/hedged 비교 벤치마크(run_bench.py, run_bench_reranked.py)
-│   └── scripts/                   # 단독 평가·측정 스크립트 — run_eval_*.py(Dense/BM25/Hybrid/Rerank baseline), measure_latency.py, compare_parallel_latency.py
+│   ├── scripts/                   # 단독 평가·측정 스크립트 — run_eval_*.py(Dense/BM25/Hybrid/Rerank baseline), measure_latency.py, compare_parallel_latency.py
+│   └── artifacts/                  # 프로젝트 초창기(7/31~8/3, 지금 구조 생기기 전) Dense/BM25/Hybrid 비교 스크래치 결과 — 코드에서 참조 안 함, 기록용
 ├── data/                        # documents.jsonl, chunks.jsonl, chunk_embeddings_hcx.jsonl, 평가 데이터셋(.xlsx) — 로컬 전용, .gitignore 처리
 ├── rag_baseline/                 # uploaded_output(작업용 복사본), results(평가 로그·상세 CSV) — 실행 시 자동 생성
-├── artifacts/                     # 분석용 스크래치 파일
 ├── requirements.txt               # openai·numpy·pandas·FlagEmbedding 등
 └── README.md
 ```
