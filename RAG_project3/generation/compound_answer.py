@@ -13,7 +13,7 @@ from classification.normalization import normalize_colloquial
 from classification.pipeline import classify
 from generation.answer_generation import generate_grounded_hcx_answer
 from generation.complaint_template import generate_complaint_template_answer
-from retrieval.reranker import hybrid_rerank_search
+from retrieval.reranker import hybrid_rerank_search, hybrid_rerank_search_hedged
 
 _DIRECT_RESPONSE_TEXT = "안녕하세요! 예금보험공사 챗봇입니다. 예금자보호, 예금보험금, 미수령금, 착오송금, 채무조정, 은닉재산 신고 관련 문의를 도와드릴 수 있어요."
 _CLARIFY_TEXT = "질문하신 내용이 어떤 업무에 대한 것인지 조금 더 구체적으로 말씀해 주시겠어요?"
@@ -33,12 +33,17 @@ def answer_query(question: str, *, previous_question: str | None = None) -> str:
     # Type A/B 하위질문은 서로 독립적이라 병렬로 처리한다 — 순차 처리 시
     # 하위질문 수만큼 지연이 배로 늘어나는데(실측: 2개=114초), 병렬화하면
     # 가장 느린 하나 수준으로 유지된다(설계 초기부터 계획했으나 누락돼있었음).
+    # original_question=normalized를 넘겨서 하위질문 검색에 원문을 안전망으로
+    # 같이 태운다(hedged, eval01에서 검증된 병합손해 완화책 — 아래 _answer_single 참고).
     with ThreadPoolExecutor(max_workers=len(sub_questions)) as executor:
-        sub_answers = list(executor.map(_answer_single, sub_questions))
+        sub_answers = list(executor.map(
+            lambda subq: _answer_single(subq, original_question=normalized),
+            sub_questions,
+        ))
     return _merge_answers(sub_questions, sub_answers)
 
 
-def _answer_single(question: str) -> str:
+def _answer_single(question: str, *, original_question: str | None = None) -> str:
     result = classify(question)
     route = result["route"]
 
@@ -49,7 +54,16 @@ def _answer_single(question: str) -> str:
     if route == "CLARIFY":
         return _CLARIFY_TEXT
 
-    search_results = hybrid_rerank_search(question, top_k=5, business_function=None)
+    # 복합질의의 하위질문(원문과 다를 때)만 hedged 검색을 쓴다 — 단일질의는
+    # question==original_question이라 hedged를 써도 원문 검색을 두 번 하는
+    # 낭비만 생기고 이득이 없다(eval01에서 확인: 단일질의는 raw와 결과 동일).
+    if original_question and original_question != question:
+        search_results = hybrid_rerank_search_hedged(
+            question, original_question, top_k=5, business_function=None,
+        )
+    else:
+        search_results = hybrid_rerank_search(question, top_k=5, business_function=None)
+
     if result["intent"] == "민원처리":
         return generate_complaint_template_answer(question, search_results)
     return generate_grounded_hcx_answer(question, search_results)
