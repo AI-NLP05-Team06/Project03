@@ -1,0 +1,11 @@
+fastapi>=0.110
+uvicorn[standard]>=0.29
+pydantic>=2.6
+psycopg2-binary>=2.9
+elasticsearch>=8.13,<9
+openai>=1.30
+requests>=2.31
+numpy>=1.26
+pandas>=2.2
+torch>=2.2
+sentence-transformers>=2.6
