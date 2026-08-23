@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KDIC 관리자</title>
+<style>
+  :root{--blue:#0868df;--ink:#10233f;--muted:#73839a;--line:#dce7f5;--soft:#f4f8ff;--danger:#c0392b;--ok:#1a7f37;--page:#f7fbff}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Pretendard","Noto Sans KR",Arial,sans-serif;background:var(--page);color:var(--ink)}
+  header{padding:14px 20px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:5}
+  header h1{font-size:17px;margin:0;margin-right:auto}
+  header input{padding:7px 10px;border:1px solid var(--line);border-radius:6px;width:280px}
+  header button{padding:7px 12px;border:none;border-radius:6px;background:var(--blue);color:#fff;cursor:pointer}
+  nav{display:flex;gap:6px;padding:12px 20px 0}
+  nav button{padding:8px 14px;border:1px solid var(--line);background:#fff;border-radius:8px 8px 0 0;cursor:pointer;font-size:14px}
+  nav button.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+  main{padding:18px 20px 60px;max-width:1100px;margin:0 auto}
+  section{display:none;background:#fff;border:1px solid var(--line);border-radius:0 10px 10px 10px;padding:18px}
+  section.active{display:block}
+  h2{font-size:15px;margin:0 0 12px}
+  .row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;align-items:center}
+  label{font-size:13px;color:var(--muted);display:block;margin-bottom:4px}
+  input,select{padding:7px 9px;border:1px solid var(--line);border-radius:6px;font-size:13px}
+  .btn{padding:7px 14px;border:none;border-radius:6px;background:var(--blue);color:#fff;cursor:pointer;font-size:13px}
+  .btn.secondary{background:#fff;color:var(--blue);border:1px solid var(--blue)}
+  .btn.danger{background:#fff;color:var(--danger);border:1px solid var(--danger)}
+  .btn.ok{background:#fff;color:var(--ok);border:1px solid var(--ok)}
+  .btn:disabled{opacity:.5;cursor:default}
+  table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+  th,td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+  th{background:var(--soft)}
+  pre{background:var(--soft);padding:10px;border-radius:6px;font-size:12px;overflow:auto;max-height:260px;white-space:pre-wrap}
+  .muted{color:var(--muted);font-size:12px}
+  .status-ok{color:var(--ok);font-weight:600}
+  .status-err{color:var(--danger);font-weight:600}
+  .combo-row{display:flex;gap:6px;align-items:center;margin-bottom:6px}
+  .combo-row input{width:90px}
+  .card{border:1px solid var(--line);border-radius:8px;padding:10px;margin-bottom:8px}
+  .toast{position:fixed;bottom:16px;right:16px;background:var(--ink);color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none;max-width:420px}
+  .toast.show{opacity:1}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>KDIC 관리자</h1>
+  <input id="adminToken" type="password" placeholder="관리자 토큰 (Authorization: Bearer ...)">
+  <button onclick="saveToken()">토큰 저장</button>
+  <span id="healthBadge" class="muted">-</span>
+</header>
+
+<nav>
+  <button class="tab-btn active" data-tab="previews">미리보기·URL추가</button>
+  <button class="tab-btn" data-tab="params">파라미터 테스트</button>
+  <button class="tab-btn" data-tab="eval">평가</button>
+  <button class="tab-btn" data-tab="reingest">재수집</button>
+</nav>
+
+<main>
+
+  <!-- ===== 1+2. 미리보기 / 신규 URL 추가 ===== -->
+  <section id="tab-previews" class="active">
+    <h2>신규 URL 추가</h2>
+    <div class="row">
+      <div>
+        <label>URL</label>
+        <input id="newUrlSource" style="width:420px" placeholder="https://www.kdic.or.kr/...">
+      </div>
+      <div>
+        <label>업무 분류</label>
+        <input id="newUrlDomain" style="width:180px" placeholder="예금자보호제도">
+      </div>
+      <div style="align-self:flex-end">
+        <button class="btn" onclick="addUrl()">크롤링 시작</button>
+      </div>
+    </div>
+    <div id="addUrlStatus" class="muted"></div>
+
+    <h2 style="margin-top:20px">미리보기 목록 (승인 대기)</h2>
+    <button class="btn secondary" onclick="loadPreviews()">새로고침</button>
+    <div id="previewList"></div>
+  </section>
+
+  <!-- ===== 3. 파라미터 테스트 ===== -->
+  <section id="tab-params">
+    <h2>파라미터 조합 비교</h2>
+    <div class="row">
+      <div style="flex:1">
+        <label>질문</label>
+        <input id="paramQuestion" style="width:100%" placeholder="예: 착오송금 반환 신청 기한이 어떻게 되나요">
+      </div>
+    </div>
+    <div id="comboRows"></div>
+    <button class="btn secondary" onclick="addComboRow()">+ 조합 추가</button>
+    <button class="btn" onclick="compareParams()">비교 실행</button>
+    <div id="compareResult"></div>
+
+    <h2 style="margin-top:20px">현재 파라미터 이력</h2>
+    <button class="btn secondary" onclick="loadParamsList()">새로고침</button>
+    <div id="paramsList"></div>
+  </section>
+
+  <!-- ===== 5. 평가 ===== -->
+  <section id="tab-eval">
+    <h2>평가 실행</h2>
+    <div class="row">
+      <div>
+        <label>search_params_id</label>
+        <select id="evalParamSelect" style="width:340px"></select>
+      </div>
+      <div style="align-self:flex-end">
+        <button class="btn" onclick="runEval()">평가 실행</button>
+      </div>
+    </div>
+    <div id="evalStatus" class="muted"></div>
+    <div id="evalResult"></div>
+  </section>
+
+  <!-- ===== 4. 재수집 ===== -->
+  <section id="tab-reingest">
+    <h2>기존 URL 재수집</h2>
+    <div class="row">
+      <div>
+        <label>url_id (쉼표로 여러 개, 예: DP-001,DP-002)</label>
+        <input id="reingestIds" style="width:320px" placeholder="DP-001">
+      </div>
+      <div style="align-self:flex-end">
+        <button class="btn" onclick="triggerReingest()">재수집 시작</button>
+      </div>
+    </div>
+    <div id="reingestStatus" class="muted"></div>
+  </section>
+
+</main>
+
+<div id="toast" class="toast"></div>
+
+<script>
+const API_BASE = "";
+
+function getToken(){ return localStorage.getItem("kdic_admin_token") || ""; }
+function saveToken(){
+  const v = document.getElementById("adminToken").value.trim();
+  localStorage.setItem("kdic_admin_token", v);
+  toast("토큰 저장됨");
+  checkHealth();
+}
+document.getElementById("adminToken").value = getToken();
+
+function toast(msg, isError){
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.style.background = isError ? "#c0392b" : "#10233f";
+  el.classList.add("show");
+  setTimeout(()=>el.classList.remove("show"), 3200);
+}
+
+async function api(method, path, body){
+  const headers = {"Content-Type":"application/json"};
+  const token = getToken();
+  if (token) headers["Authorization"] = "Bearer " + token;
+  const res = await fetch(API_BASE + path, {
+    method, headers,
+    body: body !== undefined ? JSON.stringify(body) : undefined,
+  });
+  let data = null;
+  try { data = await res.json(); } catch(e) {}
+  if (!res.ok) {
+    const msg = (data && data.detail) ? (typeof data.detail === "string" ? data.detail : JSON.stringify(data.detail)) : res.status + " " + res.statusText;
+    throw new Error(msg);
+  }
+  return data;
+}
+
+async function checkHealth(){
+  const badge = document.getElementById("healthBadge");
+  try {
+    const h = await api("GET", "/api/health");
+    badge.textContent = "파이프라인: " + h.pipeline + " / jobs: " + h.jobs.job_count;
+    badge.className = "muted";
+  } catch(e) {
+    badge.textContent = "연결 실패: " + e.message;
+    badge.className = "status-err";
+  }
+}
+checkHealth();
+
+// ---- tabs ----
+document.querySelectorAll(".tab-btn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+    document.querySelectorAll("main section").forEach(s=>s.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById("tab-"+btn.dataset.tab).classList.add("active");
+  });
+});
+
+// ===== 1+2. 미리보기 / URL 추가 =====
+async function addUrl(){
+  const source_url = document.getElementById("newUrlSource").value.trim();
+  const business_domain = document.getElementById("newUrlDomain").value.trim();
+  const statusEl = document.getElementById("addUrlStatus");
+  if (!source_url || !business_domain){ toast("URL과 업무 분류를 입력하세요", true); return; }
+  statusEl.textContent = "크롤링 중... (몇 초 걸릴 수 있어요)";
+  try {
+    const r = await api("POST", "/api/admin/urls", {source_url, business_domain, triggered_by:"admin-ui"});
+    statusEl.innerHTML = `<span class="status-ok">완료</span> — url_id=${r.url_id}, preview_id=${r.preview_id}`;
+    toast("크롤링 완료, 미리보기 목록에 추가됨");
+    loadPreviews();
+  } catch(e) {
+    statusEl.innerHTML = `<span class="status-err">실패: ${e.message}</span>`;
+  }
+}
+
+async function loadPreviews(){
+  const listEl = document.getElementById("previewList");
+  listEl.innerHTML = "불러오는 중...";
+  try {
+    const r = await api("GET", "/api/admin/previews");
+    if (!r.items.length){ listEl.innerHTML = '<p class="muted">대기 중인 미리보기가 없습니다.</p>'; return; }
+    listEl.innerHTML = r.items.map(p => `
+      <div class="card">
+        <div><b>${p.source_url}</b></div>
+        <div class="muted">preview_id: ${p.id} · 청크 ${p.chunk_preview.length}개 · ${p.created_at}</div>
+        <details style="margin-top:6px">
+          <summary>청크 미리보기 (${p.chunk_preview.length}개)</summary>
+          <pre>${p.chunk_preview.map(c => `[${c.chunk_id}] ${c.content}`).join("\n\n")}</pre>
+        </details>
+        <div class="row" style="margin-top:8px">
+          <button class="btn ok" onclick="approvePreview('${p.id}')">승인</button>
+          <button class="btn danger" onclick="rejectPreview('${p.id}')">반려</button>
+          <button class="btn" onclick="publishPreview('${p.id}')">발행 (승인된 것만)</button>
+        </div>
+        <div id="previewMsg-${p.id}" class="muted"></div>
+      </div>
+    `).join("");
+  } catch(e) {
+    listEl.innerHTML = `<p class="status-err">불러오기 실패: ${e.message}</p>`;
+  }
+}
+
+async function approvePreview(id){
+  try {
+    await api("POST", `/api/admin/previews/${id}/approve`, {reviewed_by:"admin-ui"});
+    toast("승인됨");
+    loadPreviews();
+  } catch(e) { toast("승인 실패: " + e.message, true); }
+}
+async function rejectPreview(id){
+  try {
+    await api("POST", `/api/admin/previews/${id}/reject`, {reviewed_by:"admin-ui"});
+    toast("반려됨");
+    loadPreviews();
+  } catch(e) { toast("반려 실패: " + e.message, true); }
+}
+async function publishPreview(id){
+  const msgEl = document.getElementById("previewMsg-"+id);
+  if (msgEl) msgEl.textContent = "발행 중... (실제 임베딩 생성 + 검색엔진 반영)";
+  try {
+    const r = await api("POST", `/api/admin/previews/${id}/publish`, undefined);
+    toast(`발행 완료 (청크 ${r.chunk_count}개, 전체 ${r.live_chunk_count}개)`);
+    loadPreviews();
+  } catch(e) {
+    if (msgEl) msgEl.innerHTML = `<span class="status-err">발행 실패: ${e.message}</span>`;
+    toast("발행 실패: " + e.message, true);
+  }
+}
+loadPreviews();
+
+// ===== 3. 파라미터 테스트 =====
+let comboCount = 0;
+function addComboRow(defaults){
+  defaults = defaults || {label:"조합"+(comboCount+1), dense_weight:0.7, bm25_weight:0.3, candidate_depth:20, final_top_k:5, rrf_k:10};
+  const id = "combo-" + (comboCount++);
+  const wrap = document.createElement("div");
+  wrap.className = "combo-row";
+  wrap.id = id;
+  wrap.innerHTML = `
+    라벨 <input class="c-label" value="${defaults.label}">
+    dense <input class="c-dense" type="number" step="0.1" min="0" max="1" value="${defaults.dense_weight}">
+    bm25 <input class="c-bm25" type="number" step="0.1" min="0" max="1" value="${defaults.bm25_weight}">
+    depth <input class="c-depth" type="number" value="${defaults.candidate_depth}">
+    top_k <input class="c-topk" type="number" value="${defaults.final_top_k}">
+    <button class="btn danger" onclick="document.getElementById('${id}').remove()">삭제</button>
+  `;
+  document.getElementById("comboRows").appendChild(wrap);
+}
+addComboRow({label:"dense_heavy", dense_weight:0.9, bm25_weight:0.1, candidate_depth:20, final_top_k:5, rrf_k:10});
+addComboRow({label:"bm25_heavy", dense_weight:0.1, bm25_weight:0.9, candidate_depth:20, final_top_k:5, rrf_k:10});
+
+function readCombos(){
+  return Array.from(document.querySelectorAll(".combo-row")).map(row => ({
+    label: row.querySelector(".c-label").value || "combo",
+    dense_weight: parseFloat(row.querySelector(".c-dense").value),
+    bm25_weight: parseFloat(row.querySelector(".c-bm25").value),
+    candidate_depth: parseInt(row.querySelector(".c-depth").value, 10),
+    final_top_k: parseInt(row.querySelector(".c-topk").value, 10),
+    rrf_k: 10,
+  }));
+}
+
+async function compareParams(){
+  const question = document.getElementById("paramQuestion").value.trim();
+  const resultEl = document.getElementById("compareResult");
+  if (!question){ toast("질문을 입력하세요", true); return; }
+  const combos = readCombos();
+  resultEl.innerHTML = '<p class="muted">비교 중...</p>';
+  try {
+    const r = await api("POST", "/api/admin/params/compare", {question, combos});
+    resultEl.innerHTML = `<table><thead><tr>${r.results.map(x=>`<th>${x.label} (${x.latency_ms.toFixed(0)}ms)<br><button class="btn secondary" style="margin-top:4px" onclick='activateCombo(${JSON.stringify(x.params).replace(/'/g,"&apos;")})'>이 조합 확정</button></th>`).join("")}</tr></thead>
+      <tbody><tr>${r.results.map(x=>`<td>${x.hits.map(h=>`${h.rank}. ${h.chunk_id} (${h.minmax_score.toFixed(3)})`).join("<br>")}</td>`).join("")}</tr></tbody></table>`;
+  } catch(e) {
+    resultEl.innerHTML = `<p class="status-err">비교 실패: ${e.message}</p>`;
+  }
+}
+
+async function activateCombo(params){
+  try {
+    const r = await api("POST", "/api/admin/params/activate", {...params, created_by:"admin-ui"});
+    toast("운영값으로 확정됨: " + r.search_params_id);
+    loadParamsList();
+  } catch(e) { toast("확정 실패: " + e.message, true); }
+}
+
+async function loadParamsList(){
+  const el = document.getElementById("paramsList");
+  el.innerHTML = "불러오는 중...";
+  try {
+    const r = await api("GET", "/api/admin/params");
+    if (!r.items.length){ el.innerHTML = '<p class="muted">없음</p>'; return; }
+    el.innerHTML = `<table><thead><tr><th>라벨</th><th>dense</th><th>bm25</th><th>top_k</th><th>운영중</th><th>생성일</th></tr></thead>
+      <tbody>${r.items.map(p=>`<tr><td>${p.label}</td><td>${p.dense_weight}</td><td>${p.bm25_weight}</td><td>${p.final_top_k}</td><td>${p.is_active?"✅":""}</td><td>${p.created_at}</td></tr>`).join("")}</tbody></table>`;
+  } catch(e) {
+    el.innerHTML = `<p class="status-err">불러오기 실패: ${e.message}</p>`;
+  }
+}
+loadParamsList();
+
+// ===== 5. 평가 =====
+async function loadEvalParamOptions(){
+  const sel = document.getElementById("evalParamSelect");
+  try {
+    const r = await api("GET", "/api/admin/params");
+    sel.innerHTML = r.items.map(p => `<option value="${p.id}">${p.label}${p.is_active?" (운영중)":""}</option>`).join("");
+  } catch(e) { sel.innerHTML = `<option>불러오기 실패</option>`; }
+}
+loadEvalParamOptions();
+
+async function runEval(){
+  const id = document.getElementById("evalParamSelect").value;
+  const statusEl = document.getElementById("evalStatus");
+  const resultEl = document.getElementById("evalResult");
+  if (!id){ toast("파라미터를 먼저 선택하세요", true); return; }
+  statusEl.textContent = "평가 실행 중...";
+  resultEl.innerHTML = "";
+  try {
+    const r = await api("POST", "/api/admin/eval-runs", {search_params_id:id, triggered_by:"admin-ui"});
+    statusEl.innerHTML = `<span class="status-ok">완료</span> (eval_run_id: ${r.eval_run_id})`;
+    const s = r.summary;
+    resultEl.innerHTML = `<table><tr><th>질의 수</th><th>Hit@K</th><th>MRR</th><th>평균 지연(ms)</th></tr>
+      <tr><td>${s.query_count}</td><td>${(s.hit_at_k*100).toFixed(1)}%</td><td>${s.mrr.toFixed(3)}</td><td>${s.avg_latency_ms?.toFixed(1) ?? "-"}</td></tr></table>`;
+  } catch(e) {
+    statusEl.innerHTML = `<span class="status-err">실패: ${e.message}</span>`;
+  }
+}
+
+// ===== 4. 재수집 =====
+async function triggerReingest(){
+  const raw = document.getElementById("reingestIds").value.trim();
+  const statusEl = document.getElementById("reingestStatus");
+  if (!raw){ toast("url_id를 입력하세요", true); return; }
+  const url_ids = raw.split(",").map(s=>s.trim()).filter(Boolean);
+  statusEl.textContent = "재수집 요청 중...";
+  try {
+    const r = await api("POST", "/api/admin/reingest", {url_ids, triggered_by:"admin-ui"});
+    statusEl.innerHTML = `요청됨 (job_id: ${r.job_id}) — 상태 확인 중...`;
+    pollReingestJob(r.job_id, statusEl);
+  } catch(e) {
+    statusEl.innerHTML = `<span class="status-err">실패: ${e.message}</span>`;
+  }
+}
+
+async function pollReingestJob(jobId, statusEl, tries){
+  tries = tries || 0;
+  if (tries > 30){ statusEl.innerHTML += '<br><span class="status-err">시간 초과 (직접 조회 필요)</span>'; return; }
+  try {
+    const job = await api("GET", `/api/admin/db-jobs/${jobId}`);
+    if (job.status === "done"){
+      statusEl.innerHTML = `<span class="status-ok">완료</span> — ${JSON.stringify(job.result)}`;
+      toast("재수집 완료");
+      return;
+    }
+    if (job.status === "failed"){
+      statusEl.innerHTML = `<span class="status-err">실패: ${job.error_message}</span>`;
+      return;
+    }
+    statusEl.innerHTML = `진행 중... (${job.stage || job.status})`;
+    setTimeout(()=>pollReingestJob(jobId, statusEl, tries+1), 1500);
+  } catch(e) {
+    statusEl.innerHTML = `<span class="status-err">조회 실패: ${e.message}</span>`;
+  }
+}
+</script>
+</body>
+</html>
