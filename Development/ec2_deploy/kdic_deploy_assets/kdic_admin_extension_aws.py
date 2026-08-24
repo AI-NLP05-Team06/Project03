@@ -3,7 +3,9 @@ from __future__ import annotations
 import ast
 import base64
 import copy
+import hashlib
 import hmac
+import inspect
 import io
 import json
 import math
@@ -104,6 +106,211 @@ def _clean(value: Any) -> str:
 
 def _safe(value: Any) -> Any:
     return value if value is None or isinstance(value, (str, int, float, bool)) else str(value)
+
+
+DEFAULT_PIPELINE_GRAPH_SPEC: list[dict[str, Any]] = [
+    {
+        "id": "question",
+        "label": "사용자 질문",
+        "stage": "INPUT",
+        "description": "자유 질문, FAQ 선택, 후속 질문을 동일한 진입점으로 받습니다.",
+        "virtual": True,
+    },
+    {
+        "id": "controller",
+        "label": "대화·업무 제어",
+        "stage": "ROUTING",
+        "description": "현재 대화 상태를 확인하고 단일 업무와 교차 업무 처리 경로를 제어합니다.",
+        "symbols": ["execute_dc_variant_v1"],
+    },
+    {
+        "id": "context",
+        "label": "문맥·모호성 판단",
+        "stage": "ANALYSIS",
+        "description": "이전 대화 문맥, 업무 생략, 추가 확인 필요 여부를 판단합니다.",
+        "symbols": ["resolve_context_v2", "resolve_context_v21", "resolve_context_v22"],
+    },
+    {
+        "id": "analysis",
+        "label": "질의 분석·검색 계획",
+        "stage": "ANALYSIS",
+        "description": "업무와 질문 유형을 분석하고 검색용 원질문·재작성 질문을 구성합니다.",
+        "symbols": ["analyze_v15_improved", "analyze_v31_cross_only", "analyze_v15_chat_query"],
+    },
+    {
+        "id": "route",
+        "label": "응답 경로 결정",
+        "stage": "ROUTING",
+        "description": "DIRECT, CLARIFY, OOS, RETRIEVE 중 처리 경로를 결정합니다.",
+        "virtual": True,
+    },
+    {
+        "id": "direct",
+        "label": "직접·추가질문 응답",
+        "stage": "ANSWER",
+        "description": "검색이 필요 없는 안내, 범위 밖 안내, 버튼형 추가 질문을 반환합니다.",
+        "symbols": ["_route_response"],
+    },
+    {
+        "id": "hybrid",
+        "label": "Structured Hybrid 검색",
+        "stage": "RETRIEVAL",
+        "description": "Structured Dense와 BM25-Nori 후보를 결합하고 다중 질의 결과를 융합합니다.",
+        "symbols": ["fuse_query_results", "hybrid_minmax_search", "weighted_minmax"],
+    },
+    {
+        "id": "reranker",
+        "label": "BGE Reranker",
+        "stage": "RETRIEVAL",
+        "description": "Hybrid 후보에 질문-청크 관련성 점수를 다시 매겨 최종 순위를 정합니다.",
+        "symbols": ["rerank_candidates"],
+    },
+    {
+        "id": "parent_child",
+        "label": "Parent-Child 확장",
+        "stage": "EVIDENCE",
+        "description": "상위 Child 청크를 유지하면서 Parent와 인접 문맥을 답변 근거로 확장합니다.",
+        "symbols": ["expand_parent_context"],
+        "enabled_flag": "PARENT_CHILD_ENABLED",
+    },
+    {
+        "id": "evidence",
+        "label": "Evidence Pack 구성",
+        "stage": "EVIDENCE",
+        "description": "검색 근거, 출처 URL, 업무별 Fact를 답변 모델이 사용할 구조로 묶습니다.",
+        "symbols": ["build_compact_parent_evidence_pack_v1", "build_parent_basic_evidence_pack"],
+    },
+    {
+        "id": "answer_c",
+        "label": "단일·동일 업무 C안",
+        "stage": "ANSWER",
+        "description": "한 업무 안에서 근거 기반 기본 답변과 신청·처리 링크를 생성합니다.",
+        "symbols": ["execute_bcd_variant_v3", "generate_answer_c_v3", "generate_basic_answer_b_v2"],
+    },
+    {
+        "id": "answer_dc",
+        "label": "교차 업무 D-C 2Call",
+        "stage": "ANSWER",
+        "description": "서로 다른 업무의 근거를 분리해 구성한 뒤 교차 업무 답변을 생성합니다.",
+        "symbols": ["generate_dc_twocall_v1", "execute_dc_variant_v1"],
+    },
+    {
+        "id": "validation",
+        "label": "출처·주장 안전성 검증",
+        "stage": "VALIDATION",
+        "description": "숫자, 적용 대상, 근거 참조, 허용된 행동 링크를 검증하고 제한 답변을 적용합니다.",
+        "symbols": ["audit_dc_final_references_v1", "audit_numeric_support_dc_v1", "validate_basic_answer"],
+    },
+    {
+        "id": "response",
+        "label": "최종 답변·출처",
+        "stage": "OUTPUT",
+        "description": "검증된 답변, 공식 출처, 신청 링크와 후속 질문을 사용자에게 표시합니다.",
+        "virtual": True,
+    },
+]
+
+DEFAULT_PIPELINE_GRAPH_EDGES: list[tuple[str, str, str]] = [
+    ("question", "controller", "질문 전달"),
+    ("controller", "context", "대화 상태"),
+    ("context", "analysis", "확정·보완된 질문"),
+    ("analysis", "route", "분석 결과"),
+    ("route", "direct", "DIRECT · CLARIFY · OOS"),
+    ("direct", "response", "안내 응답"),
+    ("route", "hybrid", "RETRIEVE"),
+    ("hybrid", "reranker", "후보 청크"),
+    ("reranker", "parent_child", "상위 Child"),
+    ("parent_child", "evidence", "확장 문맥"),
+    ("evidence", "answer_c", "단일·동일 업무"),
+    ("evidence", "answer_dc", "교차 업무"),
+    ("answer_c", "validation", "생성 답변"),
+    ("answer_dc", "validation", "생성 답변"),
+    ("validation", "response", "검증 통과·제한 응답"),
+]
+
+
+def _pipeline_source_descriptor(
+    runtime: Mapping[str, Any], spec: Mapping[str, Any], source_root: Path
+) -> dict[str, Any] | None:
+    for symbol in spec.get("symbols") or []:
+        target = runtime.get(str(symbol))
+        if not callable(target):
+            continue
+        try:
+            source_file = Path(inspect.getsourcefile(target) or "").resolve()
+            if not source_file.is_file() or not source_file.is_relative_to(source_root):
+                continue
+            source_lines, line_start = inspect.getsourcelines(target)
+            source = "".join(source_lines)
+            return {
+                "symbol": getattr(target, "__name__", str(symbol)),
+                "module": getattr(target, "__module__", ""),
+                "file": source_file.relative_to(source_root).as_posix(),
+                "line_start": int(line_start),
+                "line_end": int(line_start + len(source_lines) - 1),
+                "signature": str(inspect.signature(target)),
+                "source_hash": hashlib.sha256(source.encode("utf-8")).hexdigest()[:12],
+                "source": source,
+            }
+        except (OSError, TypeError, ValueError):
+            continue
+    return None
+
+
+def _build_pipeline_graph(runtime: Mapping[str, Any], source_root: Path) -> dict[str, Any]:
+    custom = runtime.get("KDIC_PIPELINE_GRAPH_SPEC")
+    specs = custom.get("nodes") if isinstance(custom, Mapping) else None
+    edges = custom.get("edges") if isinstance(custom, Mapping) else None
+    specs = list(specs) if isinstance(specs, Sequence) and not isinstance(specs, (str, bytes)) else DEFAULT_PIPELINE_GRAPH_SPEC
+    edges = list(edges) if isinstance(edges, Sequence) and not isinstance(edges, (str, bytes)) else DEFAULT_PIPELINE_GRAPH_EDGES
+    nodes: list[dict[str, Any]] = []
+    source_index: dict[str, dict[str, Any]] = {}
+    for raw in specs:
+        spec = dict(raw)
+        node_id = _clean(spec.get("id"))
+        if not node_id:
+            continue
+        descriptor = None if spec.get("virtual") else _pipeline_source_descriptor(runtime, spec, source_root)
+        enabled_flag = _clean(spec.get("enabled_flag"))
+        enabled = bool(runtime.get(enabled_flag)) if enabled_flag else True
+        node = {
+            "id": node_id,
+            "label": _clean(spec.get("label")) or node_id,
+            "stage": _clean(spec.get("stage")) or "PIPELINE",
+            "description": _clean(spec.get("description")),
+            "enabled": enabled,
+            "code_available": descriptor is not None,
+            "source": ({key: descriptor[key] for key in descriptor if key != "source"} if descriptor else None),
+        }
+        nodes.append(node)
+        if descriptor:
+            source_index[node_id] = descriptor
+    valid_ids = {node["id"] for node in nodes}
+    public_edges = []
+    for raw in edges:
+        if isinstance(raw, Mapping):
+            source, target, label = _clean(raw.get("source")), _clean(raw.get("target")), _clean(raw.get("label"))
+        else:
+            values = list(raw)
+            source, target = _clean(values[0] if values else ""), _clean(values[1] if len(values) > 1 else "")
+            label = _clean(values[2] if len(values) > 2 else "")
+        if source in valid_ids and target in valid_ids:
+            public_edges.append({"source": source, "target": target, "label": label})
+    fingerprint_text = json.dumps(
+        [{"id": node["id"], "hash": (node.get("source") or {}).get("source_hash"), "enabled": node["enabled"]} for node in nodes],
+        ensure_ascii=False,
+        sort_keys=True,
+    )
+    return {
+        "pipeline_name": _clean(runtime.get("PIPELINE_VERSION")) or "KDIC Final Runtime",
+        "generated_at": time.time(),
+        "fingerprint": hashlib.sha256(fingerprint_text.encode("utf-8")).hexdigest()[:16],
+        "mode": "RUNTIME_INTROSPECTION" if custom is None else "RUNTIME_REGISTRY",
+        "read_only": True,
+        "nodes": nodes,
+        "edges": public_edges,
+        "_source_index": source_index,
+    }
 
 
 def _api_key_fingerprint(value: str) -> str:
@@ -928,14 +1135,31 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
         history.clear()
         return {"cleared": True, "removed_count": count}
 
+    @app.get("/api/admin-ui/pipeline/graph")
+    def pipeline_graph(_: None = Depends(require_admin_session)):
+        graph = _build_pipeline_graph(runtime_globals, page.parent)
+        return {key: value for key, value in graph.items() if not key.startswith("_")}
+
+    @app.get("/api/admin-ui/pipeline/nodes/{node_id}/source")
+    def pipeline_node_source(node_id: str, _: None = Depends(require_admin_session)):
+        graph = _build_pipeline_graph(runtime_globals, page.parent)
+        descriptor = graph["_source_index"].get(_clean(node_id))
+        if descriptor is None:
+            raise HTTPException(status_code=404, detail="이 노드에 연결된 조회 가능 코드가 없습니다.")
+        return {
+            "node_id": _clean(node_id),
+            "read_only": True,
+            **descriptor,
+        }
+
     @app.get("/api/admin-ui/capabilities")
     def capabilities(_: None = Depends(require_admin_session)):
         base = service_module.admin_capabilities(); features = list(base.get("features") or [])
-        for value in ("chat_pipeline_test", "runtime_config", "evaluation_dataset_upload", "evaluation_run", "evaluation_k_curve", "evaluation_record_delete", "parameter_apply", "chunk_staged_write", "draft_partial_clear", "rollback", "history_delete", "api_key_test", "api_key_runtime_rotation"):
+        for value in ("chat_pipeline_test", "runtime_config", "evaluation_dataset_upload", "evaluation_run", "evaluation_k_curve", "evaluation_record_delete", "parameter_apply", "chunk_staged_write", "draft_partial_clear", "rollback", "history_delete", "api_key_test", "api_key_runtime_rotation", "pipeline_runtime_graph", "pipeline_source_read"):
             if value not in features: features.append(value)
         blocked = [v for v in (base.get("disabled_mutations") or []) if v not in {"document_write", "document_delete", "evaluation_run", "parameter_apply"}]
         return {**base, "admin_mode": "STAGED_WRITE", "features": features, "disabled_mutations": blocked}
 
     return {"installed": True, "page": str(page), "auth": "one_time_bootstrap_to_httponly_cookie",
             "session_ttl_seconds": SESSION_TTL_SECONDS, "mode": "STAGED_WRITE", "evaluation": "isolated_ab",
-            "mutations": "draft_validate_apply_rollback"}
+            "mutations": "draft_validate_apply_rollback", "pipeline_studio": "dynamic_graph_read_only_source"}

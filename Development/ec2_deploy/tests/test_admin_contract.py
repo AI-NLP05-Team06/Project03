@@ -57,6 +57,7 @@ def main() -> None:
         "CHUNKS_BY_ID": {"TEST_chunk_000": {"chunk_id": "TEST_chunk_000", "content": "테스트"}},
     }
     extension = load_extension()
+    runtime["fuse_query_results"] = extension._clean
     policy = extension._validate_evaluation_policy(
         20,
         extension.DEFAULT_METRIC_KS,
@@ -95,6 +96,19 @@ def main() -> None:
         capabilities = client.get("/api/admin-ui/capabilities")
         assert capabilities.status_code == 200
         assert "evaluation_run" in capabilities.json()["features"]
+        assert "pipeline_runtime_graph" in capabilities.json()["features"]
+        graph = client.get("/api/admin-ui/pipeline/graph")
+        assert graph.status_code == 200
+        assert graph.json()["read_only"] is True
+        assert graph.json()["fingerprint"]
+        hybrid = next(node for node in graph.json()["nodes"] if node["id"] == "hybrid")
+        assert hybrid["code_available"] is True
+        source = client.get("/api/admin-ui/pipeline/nodes/hybrid/source")
+        assert source.status_code == 200
+        assert source.json()["read_only"] is True
+        assert source.json()["source_hash"]
+        assert "def _clean" in source.json()["source"]
+        assert client.get("/api/admin-ui/pipeline/nodes/question/source").status_code == 404
         assert client.get("/api/admin-ui/evaluations/jobs").status_code == 200
         config_draft = client.put(
             "/api/admin-ui/draft/config",
@@ -122,6 +136,7 @@ def main() -> None:
         assert "/api/admin-ui/login" in html
         assert "Recall@K 증가 곡선" in html
         assert "평가 검색 깊이" in html
+        assert "PIPELINE STUDIO" in html
 
     print("AWS admin contract test: PASS")
 
