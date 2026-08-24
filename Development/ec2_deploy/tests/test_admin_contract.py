@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import base64
 import os
 import sys
 from pathlib import Path
@@ -53,8 +54,27 @@ def main() -> None:
         "PARENT_CHILD_ENABLED": True,
         "PARENT_CONTEXT_MAX_CHARS": 8192,
         "HCX_API_KEY": os.environ["HCX_API_KEY"],
+        "CHUNKS_BY_ID": {"TEST_chunk_000": {"chunk_id": "TEST_chunk_000", "content": "테스트"}},
     }
     extension = load_extension()
+    policy = extension._validate_evaluation_policy(
+        20,
+        extension.DEFAULT_METRIC_KS,
+        [1, 3, 5, 10, 20],
+        {"candidate_depth": 20},
+        {"candidate_depth": 20},
+    )
+    assert policy["evaluation_depth"] == 20
+    measured = extension._metrics(
+        ["MISS", "TEST_chunk_000"],
+        ["TEST_chunk_000"],
+        False,
+        extension.DEFAULT_METRIC_KS,
+        [1, 3, 5, 10, 20],
+    )
+    assert measured["hit_at_3"] == 1.0
+    assert measured["curve"]["1"]["recall"] == 0.0
+    assert measured["curve"]["3"]["recall"] == 1.0
     installed = extension.install_admin_routes(service, ASSETS / "kdic-admin-ui.html", runtime)
     assert installed["mode"] == "STAGED_WRITE"
 
@@ -75,10 +95,33 @@ def main() -> None:
         capabilities = client.get("/api/admin-ui/capabilities")
         assert capabilities.status_code == 200
         assert "evaluation_run" in capabilities.json()["features"]
+        assert client.get("/api/admin-ui/evaluations/jobs").status_code == 200
+        config_draft = client.put(
+            "/api/admin-ui/draft/config",
+            json={"values": {"dense_weight": 0.6, "bm25_weight": 0.4}},
+        )
+        assert config_draft.status_code == 200
+        assert client.delete("/api/admin-ui/draft/config").status_code == 200
+        added = client.post(
+            "/api/admin-ui/draft/chunks",
+            json={"chunk": {"chunk_id": "NEW_chunk_000", "content": "신규 테스트 청크"}},
+        )
+        assert added.status_code == 200
+        assert client.delete("/api/admin-ui/draft/additions/NEW_chunk_000").status_code == 200
+        csv_bytes = "question_id,question,gold_chunk_ids\nQ1,테스트 질문,TEST_chunk_000\n".encode("utf-8-sig")
+        uploaded = client.post(
+            "/api/admin-ui/evaluations/upload",
+            json={"filename": "test.csv", "content_base64": base64.b64encode(csv_bytes).decode("ascii")},
+        )
+        assert uploaded.status_code == 200
+        dataset_id = uploaded.json()["dataset_id"]
+        assert client.delete(f"/api/admin-ui/evaluations/datasets/{dataset_id}").status_code == 200
         html = (ASSETS / "kdic-admin-ui.html").read_text(encoding="utf-8")
         assert "KDIC AWS ADMIN" in html
         assert "Colab 런타임" not in html
         assert "/api/admin-ui/login" in html
+        assert "Recall@K 증가 곡선" in html
+        assert "평가 검색 깊이" in html
 
     print("AWS admin contract test: PASS")
 

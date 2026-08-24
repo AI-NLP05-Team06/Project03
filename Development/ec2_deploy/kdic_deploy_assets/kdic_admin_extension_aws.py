@@ -30,6 +30,26 @@ ALLOWED_CONFIG = {
     "dense_weight", "bm25_weight", "candidate_depth", "final_top_k",
     "query_fusion_rrf_k", "parent_child", "parent_context_max_chars",
 }
+DEFAULT_METRIC_KS = {
+    "hit": 3,
+    "recall": 5,
+    "mrr": 10,
+    "map": 10,
+    "complete": 5,
+    "ndcg": 5,
+    "precision": 5,
+    "f1": 5,
+}
+METRIC_LABELS = {
+    "hit": "Hit",
+    "recall": "Recall",
+    "mrr": "MRR",
+    "map": "MAP",
+    "complete": "Complete",
+    "ndcg": "nDCG",
+    "precision": "Precision",
+    "f1": "F1",
+}
 
 
 class AdminSearchPayload(BaseModel):
@@ -49,6 +69,9 @@ class EvaluationRunPayload(BaseModel):
     dataset_id: str = Field(min_length=8, max_length=100)
     candidate: dict[str, Any] = Field(default_factory=dict)
     max_questions: int | None = Field(default=None, ge=1, le=5_000)
+    evaluation_depth: int = Field(default=20, ge=1, le=200)
+    metric_ks: dict[str, int] = Field(default_factory=lambda: dict(DEFAULT_METRIC_KS))
+    curve_ks: list[int] = Field(default_factory=lambda: [1, 3, 5, 10, 20])
 
 
 class ConfigDraftPayload(BaseModel):
@@ -229,21 +252,84 @@ def _average_precision(retrieved: list[str], gold: set[str], k: int) -> float:
     return total / min(len(gold), k)
 
 
-def _metrics(retrieved: list[str], gold_ids: list[str], multi_required: bool) -> dict[str, Any]:
+def _validate_evaluation_policy(
+    evaluation_depth: int,
+    metric_ks: Mapping[str, Any],
+    curve_ks: Sequence[Any],
+    *configs: Mapping[str, Any],
+) -> dict[str, Any]:
+    unknown = sorted(set(metric_ks) - set(DEFAULT_METRIC_KS))
+    if unknown:
+        raise ValueError(f"지원하지 않는 평가지표입니다: {unknown}")
+    normalized = {name: int(metric_ks.get(name, default)) for name, default in DEFAULT_METRIC_KS.items()}
+    if any(value < 1 or value > 200 for value in normalized.values()):
+        raise ValueError("평가지표 K는 1~200이어야 합니다.")
+    curve = sorted(set(int(value) for value in curve_ks))
+    if not curve or any(value < 1 or value > 200 for value in curve):
+        raise ValueError("구간 차트 K는 1~200의 값을 하나 이상 지정해야 합니다.")
+    depth = int(evaluation_depth)
+    required_depth = max([*normalized.values(), *curve])
+    if depth < required_depth:
+        raise ValueError(f"평가 검색 깊이는 모든 지표 K 이상이어야 합니다. 최소 {required_depth}이 필요합니다.")
+    candidate_limit = min(int(config["candidate_depth"]) for config in configs) if configs else 200
+    if depth > candidate_limit:
+        raise ValueError(f"평가 검색 깊이 {depth}는 A/B 후보 깊이의 최솟값 {candidate_limit} 이하여야 합니다.")
+    return {
+        "evaluation_depth": depth,
+        "metric_ks": normalized,
+        "curve_ks": curve,
+        "required_depth": required_depth,
+    }
+
+
+def _metric_value(name: str, retrieved: list[str], gold: set[str], k: int, applicable: bool) -> float | None:
+    selected = retrieved[:k]
+    relevance = [1 if chunk_id in gold else 0 for chunk_id in selected]
+    hits = len(set(selected) & gold)
+    recall = hits / len(gold) if gold else 0.0
+    precision = sum(relevance) / k
+    if name == "hit":
+        return float(bool(hits))
+    if name == "recall":
+        return recall
+    if name == "mrr":
+        first = next((rank for rank, chunk_id in enumerate(selected, 1) if chunk_id in gold), None)
+        return 1 / first if first else 0.0
+    if name == "map":
+        return _average_precision(retrieved, gold, k)
+    if name == "complete":
+        return float(gold.issubset(set(selected))) if applicable and gold else None
+    if name == "ndcg":
+        dcg = sum(rel / math.log2(rank + 1) for rank, rel in enumerate(relevance, 1))
+        ideal = sum(1 / math.log2(rank + 1) for rank in range(1, min(len(gold), k) + 1))
+        return dcg / ideal if ideal else 0.0
+    if name == "precision":
+        return precision
+    if name == "f1":
+        return 2 * precision * recall / (precision + recall) if precision + recall else 0.0
+    raise ValueError(f"지원하지 않는 평가지표입니다: {name}")
+
+
+def _metrics(
+    retrieved: list[str],
+    gold_ids: list[str],
+    multi_required: bool,
+    metric_ks: Mapping[str, int] | None = None,
+    curve_ks: Sequence[int] | None = None,
+) -> dict[str, Any]:
     gold = set(gold_ids)
-    rel5 = [1 if cid in gold else 0 for cid in retrieved[:5]]
-    first = next((rank for rank, cid in enumerate(retrieved[:10], 1) if cid in gold), None)
-    recall5 = len(set(retrieved[:5]) & gold) / len(gold) if gold else 0.0
-    precision5 = sum(rel5) / 5
-    f1 = 2 * precision5 * recall5 / (precision5 + recall5) if precision5 + recall5 else 0.0
-    dcg = sum(rel / math.log2(rank + 1) for rank, rel in enumerate(rel5, 1))
-    ideal = sum(1 / math.log2(rank + 1) for rank in range(1, min(len(gold), 5) + 1))
     applicable = bool(multi_required or len(gold) > 1)
-    return {"hit_at_3": float(any(cid in gold for cid in retrieved[:3])) if gold else 0.0,
-            "recall_at_5": recall5, "mrr_at_10": 1 / first if first else 0.0,
-            "map_at_10": _average_precision(retrieved, gold, 10),
-            "complete_at_5": float(gold.issubset(set(retrieved[:5]))) if applicable and gold else None,
-            "ndcg_at_5": dcg / ideal if ideal else 0.0, "precision_at_5": precision5, "f1_at_5": f1}
+    ks = {**DEFAULT_METRIC_KS, **dict(metric_ks or {})}
+    out = {f"{name}_at_{k}": _metric_value(name, retrieved, gold, int(k), applicable) for name, k in ks.items()}
+    out["curve"] = {
+        str(k): {
+            "hit": _metric_value("hit", retrieved, gold, int(k), applicable),
+            "recall": _metric_value("recall", retrieved, gold, int(k), applicable),
+            "precision": _metric_value("precision", retrieved, gold, int(k), applicable),
+        }
+        for k in (curve_ks or [1, 3, 5, 10, 20])
+    }
+    return out
 
 
 def install_admin_routes(service_module: Any, html_path: str | Path, runtime_globals: MutableMapping[str, Any]) -> dict[str, Any]:
@@ -338,14 +424,14 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
             raise ValueError("현재 corpus 기준으로 평가 가능한 질문이 없습니다.")
         return {"sheet_name": sheet, "rows": rows, "usable": usable, "warnings": warnings[:200], "row_count": len(rows), "usable_count": len(usable)}
 
-    def search_one(question: str, config: Mapping[str, Any]) -> tuple[list[str], float]:
+    def search_one(question: str, config: Mapping[str, Any], evaluation_depth: int) -> tuple[list[str], float]:
         started, depth = time.perf_counter(), int(config["candidate_depth"])
         vector = runtime_globals["_normalize_vector"](runtime_globals["embed_hcx_single"](question))
         dense = runtime_globals["dense_search_from_vector"](vector, depth)
         bm25 = runtime_globals["bm25_search"](question, depth)
         fused = runtime_globals["weighted_minmax"](dense, bm25, dense_weight=float(config["dense_weight"]),
                                                     bm25_weight=float(config["bm25_weight"]), top_k=depth)
-        metric_depth = min(depth, max(10, int(config["final_top_k"])))
+        metric_depth = min(depth, int(evaluation_depth))
         if runtime_globals.get("RERANKER_MODEL") is not None and callable(runtime_globals.get("rerank_candidates")):
             fused, _ = runtime_globals["rerank_candidates"](
                 question, fused, chunks_by_id=runtime_globals["CHUNKS_BY_ID"], model=runtime_globals["RERANKER_MODEL"],
@@ -353,36 +439,64 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
                 batch_size=int(runtime_globals.get("RERANKER_BATCH_SIZE", 8)))
         return [str(row["chunk_id"]) for row in fused[:metric_depth]], (time.perf_counter() - started) * 1000
 
-    def aggregate(rows: list[dict[str, Any]], prefix: str) -> dict[str, Any]:
-        keys = ("hit_at_3", "recall_at_5", "mrr_at_10", "map_at_10", "ndcg_at_5", "precision_at_5", "f1_at_5")
-        out = {key: sum(float(row[prefix][key]) for row in rows) / len(rows) for key in keys}
-        complete = [row[prefix]["complete_at_5"] for row in rows if row[prefix]["complete_at_5"] is not None]
-        out.update(complete_at_5=sum(complete) / len(complete) if complete else None, complete_question_count=len(complete),
-                   latency_avg_ms=sum(float(row[f"{prefix}_latency_ms"]) for row in rows) / len(rows), question_count=len(rows))
+    def aggregate(rows: list[dict[str, Any]], prefix: str, policy: Mapping[str, Any]) -> dict[str, Any]:
+        metric_keys = [f"{name}_at_{k}" for name, k in policy["metric_ks"].items()]
+        out: dict[str, Any] = {}
+        for key in metric_keys:
+            values = [row[prefix][key] for row in rows if row[prefix][key] is not None]
+            out[key] = sum(float(value) for value in values) / len(values) if values else None
+        complete_key = f"complete_at_{policy['metric_ks']['complete']}"
+        complete = [row[prefix][complete_key] for row in rows if row[prefix][complete_key] is not None]
+        out.update(
+            complete_question_count=len(complete),
+            latency_avg_ms=sum(float(row[f"{prefix}_latency_ms"]) for row in rows) / len(rows),
+            question_count=len(rows),
+            curve={
+                str(k): {
+                    name: sum(float(row[prefix]["curve"][str(k)][name]) for row in rows) / len(rows)
+                    for name in ("hit", "recall", "precision")
+                }
+                for k in policy["curve_ks"]
+            },
+        )
         return out
 
-    def run_evaluation(job_id: str, dataset_id: str, values: Mapping[str, Any], max_questions: int | None) -> None:
+    def run_evaluation(
+        job_id: str,
+        dataset_id: str,
+        values: Mapping[str, Any],
+        max_questions: int | None,
+        evaluation_depth: int,
+        metric_ks: Mapping[str, int],
+        curve_ks: Sequence[int],
+    ) -> None:
         try:
             record, baseline = datasets[dataset_id], active_config()
             candidate = _validate_config(values, baseline)
+            policy = _validate_evaluation_policy(evaluation_depth, metric_ks, curve_ks, baseline, candidate)
             source = record["usable"][:max_questions] if max_questions else record["usable"]
             details = []
             for index, row in enumerate(source, 1):
-                base_ids, base_ms = search_one(row["question"], baseline)
-                cand_ids, cand_ms = search_one(row["question"], candidate)
+                base_ids, base_ms = search_one(row["question"], baseline, policy["evaluation_depth"])
+                cand_ids, cand_ms = search_one(row["question"], candidate, policy["evaluation_depth"])
                 details.append({**row, "baseline_retrieved": base_ids, "candidate_retrieved": cand_ids,
-                                "baseline": _metrics(base_ids, row["gold_chunk_ids"], row["multi_chunk_required"]),
-                                "candidate": _metrics(cand_ids, row["gold_chunk_ids"], row["multi_chunk_required"]),
+                                "baseline": _metrics(base_ids, row["gold_chunk_ids"], row["multi_chunk_required"], policy["metric_ks"], policy["curve_ks"]),
+                                "candidate": _metrics(cand_ids, row["gold_chunk_ids"], row["multi_chunk_required"], policy["metric_ks"], policy["curve_ks"]),
                                 "baseline_latency_ms": base_ms, "candidate_latency_ms": cand_ms})
                 with eval_lock:
                     eval_jobs[job_id].update(progress=round(index / len(source) * 100), processed=index, updated_at=time.time())
-            base_metrics, cand_metrics = aggregate(details, "baseline"), aggregate(details, "candidate")
+            base_metrics, cand_metrics = aggregate(details, "baseline", policy), aggregate(details, "candidate", policy)
             delta = {key: None if base_metrics.get(key) is None or cand_metrics.get(key) is None else cand_metrics[key] - base_metrics[key]
-                     for key in base_metrics if key not in {"question_count", "complete_question_count"}}
+                     for key in base_metrics if key not in {"question_count", "complete_question_count", "curve"}}
             with eval_lock:
                 eval_jobs[job_id].update(status="done", progress=100, updated_at=time.time(), result={
                     "dataset": dataset_summary(record),
                     "evaluation_scope": "검색 계층 A/B: Structured Dense + BM25-Nori + Min-Max + BGE Reranker (질의분해/답변생성 제외)",
+                    "evaluation_policy": policy,
+                    "metric_definitions": [
+                        {"name": name, "label": METRIC_LABELS[name], "k": k, "key": f"{name}_at_{k}"}
+                        for name, k in policy["metric_ks"].items()
+                    ],
                     "baseline_config": baseline, "candidate_config": candidate, "baseline": base_metrics,
                     "candidate": cand_metrics, "delta": delta, "details": details})
         except Exception as error:
@@ -593,22 +707,79 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
     @app.get("/api/admin-ui/evaluations/datasets")
     def list_datasets(_: None = Depends(require_admin_session)): return {"items": [dataset_summary(row) for row in datasets.values()]}
 
+    @app.delete("/api/admin-ui/evaluations/datasets/{dataset_id}")
+    def delete_dataset(dataset_id: str, _: None = Depends(require_admin_session)):
+        with eval_lock:
+            if dataset_id not in datasets:
+                raise HTTPException(status_code=404, detail="평가데이터셋을 찾지 못했습니다.")
+            if any(job.get("dataset_id") == dataset_id and job.get("status") == "running" for job in eval_jobs.values()):
+                raise HTTPException(status_code=409, detail="이 데이터셋을 사용하는 평가가 실행 중입니다.")
+            datasets.pop(dataset_id, None)
+            removed_jobs = [job_id for job_id, job in eval_jobs.items() if job.get("dataset_id") == dataset_id]
+            for job_id in removed_jobs:
+                eval_jobs.pop(job_id, None)
+        return {"deleted": True, "dataset_id": dataset_id, "removed_jobs": len(removed_jobs)}
+
+    @app.delete("/api/admin-ui/evaluations/datasets")
+    def clear_datasets(_: None = Depends(require_admin_session)):
+        with eval_lock:
+            if any(job.get("status") == "running" for job in eval_jobs.values()):
+                raise HTTPException(status_code=409, detail="실행 중인 평가가 있어 데이터셋을 비울 수 없습니다.")
+            count = len(datasets)
+            datasets.clear()
+            eval_jobs.clear()
+        return {"cleared": True, "dataset_count": count}
+
     @app.post("/api/admin-ui/evaluations/run")
     def start_eval(payload: EvaluationRunPayload, _: None = Depends(require_admin_session)):
         if payload.dataset_id not in datasets: raise HTTPException(status_code=404, detail="평가데이터셋을 찾지 못했습니다.")
-        try: _validate_config(payload.candidate, active_config())
+        try:
+            baseline = active_config()
+            candidate = _validate_config(payload.candidate, baseline)
+            policy = _validate_evaluation_policy(payload.evaluation_depth, payload.metric_ks, payload.curve_ks, baseline, candidate)
         except Exception as error: raise HTTPException(status_code=422, detail=str(error)) from error
         job_id = f"eval-{uuid.uuid4().hex[:12]}"
         eval_jobs[job_id] = {"job_id": job_id, "status": "running", "progress": 0, "processed": 0,
-                             "created_at": time.time(), "updated_at": time.time(), "error": None, "result": None}
-        executor.submit(run_evaluation, job_id, payload.dataset_id, payload.candidate, payload.max_questions)
+                             "dataset_id": payload.dataset_id, "dataset_filename": datasets[payload.dataset_id]["filename"],
+                             "evaluation_policy": policy, "created_at": time.time(), "updated_at": time.time(),
+                             "error": None, "result": None}
+        executor.submit(run_evaluation, job_id, payload.dataset_id, payload.candidate, payload.max_questions,
+                        payload.evaluation_depth, payload.metric_ks, payload.curve_ks)
         return {k: v for k, v in eval_jobs[job_id].items() if k != "result"}
+
+    @app.get("/api/admin-ui/evaluations/jobs")
+    def list_eval_jobs(_: None = Depends(require_admin_session)):
+        with eval_lock:
+            items = [
+                {key: value for key, value in copy.deepcopy(job).items() if key != "result"}
+                for job in eval_jobs.values()
+            ]
+        return {"items": sorted(items, key=lambda row: row["created_at"], reverse=True)}
 
     @app.get("/api/admin-ui/evaluations/jobs/{job_id}")
     def eval_job(job_id: str, _: None = Depends(require_admin_session)):
         with eval_lock: job = copy.deepcopy(eval_jobs.get(job_id))
         if not job: raise HTTPException(status_code=404, detail="평가 작업을 찾지 못했습니다.")
         return job
+
+    @app.delete("/api/admin-ui/evaluations/jobs/{job_id}")
+    def delete_eval_job(job_id: str, _: None = Depends(require_admin_session)):
+        with eval_lock:
+            job = eval_jobs.get(job_id)
+            if not job:
+                raise HTTPException(status_code=404, detail="평가 작업을 찾지 못했습니다.")
+            if job.get("status") == "running":
+                raise HTTPException(status_code=409, detail="실행 중인 평가는 삭제할 수 없습니다.")
+            eval_jobs.pop(job_id, None)
+        return {"deleted": True, "job_id": job_id}
+
+    @app.delete("/api/admin-ui/evaluations/jobs")
+    def clear_eval_jobs(_: None = Depends(require_admin_session)):
+        with eval_lock:
+            removable = [job_id for job_id, job in eval_jobs.items() if job.get("status") != "running"]
+            for job_id in removable:
+                eval_jobs.pop(job_id, None)
+        return {"cleared": True, "removed_count": len(removable)}
 
     @app.get("/api/admin-ui/draft")
     def get_draft(_: None = Depends(require_admin_session)): return draft_public()
@@ -660,6 +831,11 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
         drafts["config"] = {key: candidate[key] for key in payload.values}
         return draft_public()
 
+    @app.delete("/api/admin-ui/draft/config")
+    def clear_config_draft(_: None = Depends(require_admin_session)):
+        drafts["config"].clear()
+        return draft_public()
+
     @app.post("/api/admin-ui/draft/chunks")
     def add_chunk(payload: ChunkAddPayload, _: None = Depends(require_admin_session)):
         chunk, cid = copy.deepcopy(payload.chunk), _clean(payload.chunk.get("chunk_id"))
@@ -676,6 +852,22 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
         if cid in drafts["add"]: drafts["add"].pop(cid, None)
         elif cid in runtime_globals.get("CHUNKS_BY_ID", {}): drafts["remove"].add(cid)
         else: raise HTTPException(status_code=404, detail="청크를 찾지 못했습니다.")
+        return draft_public()
+
+    @app.delete("/api/admin-ui/draft/additions/{chunk_id:path}")
+    def undo_chunk_addition(chunk_id: str, _: None = Depends(require_admin_session)):
+        cid = _clean(chunk_id)
+        if cid not in drafts["add"]:
+            raise HTTPException(status_code=404, detail="추가 초안에서 청크를 찾지 못했습니다.")
+        drafts["add"].pop(cid, None)
+        return draft_public()
+
+    @app.delete("/api/admin-ui/draft/removals/{chunk_id:path}")
+    def undo_chunk_removal(chunk_id: str, _: None = Depends(require_admin_session)):
+        cid = _clean(chunk_id)
+        if cid not in drafts["remove"]:
+            raise HTTPException(status_code=404, detail="제거 초안에서 청크를 찾지 못했습니다.")
+        drafts["remove"].discard(cid)
         return draft_public()
 
     @app.delete("/api/admin-ui/draft")
@@ -722,10 +914,24 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
             except HTTPException: raise
             except Exception as error: raise HTTPException(status_code=500, detail=f"롤백 실패: {type(error).__name__}: {error}") from error
 
+    @app.delete("/api/admin-ui/history/{version_id}")
+    def delete_history(version_id: str, _: None = Depends(require_admin_session)):
+        index = next((idx for idx, item in enumerate(history) if item["version_id"] == version_id), None)
+        if index is None:
+            raise HTTPException(status_code=404, detail="반영 이력을 찾지 못했습니다.")
+        history.pop(index)
+        return {"deleted": True, "version_id": version_id, "remaining": len(history)}
+
+    @app.delete("/api/admin-ui/history")
+    def clear_history(_: None = Depends(require_admin_session)):
+        count = len(history)
+        history.clear()
+        return {"cleared": True, "removed_count": count}
+
     @app.get("/api/admin-ui/capabilities")
     def capabilities(_: None = Depends(require_admin_session)):
         base = service_module.admin_capabilities(); features = list(base.get("features") or [])
-        for value in ("chat_pipeline_test", "runtime_config", "evaluation_dataset_upload", "evaluation_run", "parameter_apply", "chunk_staged_write", "rollback", "api_key_test", "api_key_runtime_rotation"):
+        for value in ("chat_pipeline_test", "runtime_config", "evaluation_dataset_upload", "evaluation_run", "evaluation_k_curve", "evaluation_record_delete", "parameter_apply", "chunk_staged_write", "draft_partial_clear", "rollback", "history_delete", "api_key_test", "api_key_runtime_rotation"):
             if value not in features: features.append(value)
         blocked = [v for v in (base.get("disabled_mutations") or []) if v not in {"document_write", "document_delete", "evaluation_run", "parameter_apply"}]
         return {**base, "admin_mode": "STAGED_WRITE", "features": features, "disabled_mutations": blocked}
