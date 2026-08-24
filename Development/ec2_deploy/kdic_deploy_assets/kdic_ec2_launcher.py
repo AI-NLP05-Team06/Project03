@@ -59,6 +59,19 @@ def main() -> None:
     # 별도 리로드 없이 발행 직후 검색에 바로 반영된다.
     attached["api_module"].set_kdic_raw_pipeline_module(pipeline_module)
 
+    # Latest administrator UI and its staged-write/search-evaluation routes.
+    # The public chatbot continues to use the same pipeline_module instance,
+    # so an approved parameter/chunk change applies to the next chat request.
+    admin_extension = _load_file(
+        "kdic_admin_extension_aws", BASE_DIR / "kdic_admin_extension_aws.py"
+    )
+    admin_install = admin_extension.install_admin_routes(
+        attached["api_module"],
+        BASE_DIR / "kdic-admin-ui.html",
+        vars(pipeline_module),
+    )
+    print(f"KDIC latest admin attached: {admin_install}")
+
     # 3) start_server_in_thread() above only starts a background thread --
     #    keep this process alive so systemd has something to supervise.
     import threading

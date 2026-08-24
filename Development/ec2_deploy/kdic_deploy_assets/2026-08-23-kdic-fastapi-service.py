@@ -327,7 +327,7 @@ def health() -> dict[str, Any]:
         "pipeline": PIPELINE_RUNTIME.name,
         "sessions": SESSION_STORE.stats(),
         "jobs": JOB_STORE.stats(),
-        "admin_mode": "READ_ONLY",
+        "admin_mode": "STAGED_WRITE",
     }
 
 
@@ -452,7 +452,7 @@ def _es_error(error: Exception) -> HTTPException:
 @app.get("/api/admin/capabilities", dependencies=[Depends(require_admin)])
 def admin_capabilities() -> dict[str, Any]:
     return {
-        "mode": "READ_ONLY",
+        "mode": "STAGED_WRITE",
         "features": [
             "runtime_summary",
             "job_audit",
@@ -460,11 +460,19 @@ def admin_capabilities() -> dict[str, Any]:
             "elasticsearch_index_list",
             "elasticsearch_document_search",
             "elasticsearch_document_view",
+            "parameter_compare",
+            "parameter_activate",
+            "evaluation_dataset_upload",
+            "evaluation_run",
+            "url_ingest_preview",
+            "preview_review",
+            "preview_publish",
+            "chunk_staged_write",
+            "rollback",
+            "api_key_test",
+            "api_key_runtime_rotation",
         ],
         "disabled_mutations": [
-            "document_write",
-            "document_delete",
-            "reindex",
             "alias_switch",
             "index_delete",
         ],
@@ -498,7 +506,7 @@ def admin_summary() -> dict[str, Any]:
         "sessions": SESSION_STORE.stats(),
         "jobs": JOB_STORE.stats(),
         "elasticsearch": es_payload,
-        "admin_mode": "READ_ONLY",
+        "admin_mode": "STAGED_WRITE",
     }
 
 
