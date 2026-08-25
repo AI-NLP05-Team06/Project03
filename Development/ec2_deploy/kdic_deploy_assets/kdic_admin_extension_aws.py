@@ -970,7 +970,11 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
 
     def generate_llm_evaluation_report(job_id: str, result: Mapping[str, Any]) -> dict[str, Any]:
         summary = evaluation_change_summary(result)
-        client = runtime_globals.get("HCX_CLIENT") or runtime_globals.get("_HCX_RAW_CLIENT_V3")
+        client = (
+            runtime_globals.get("ANSWER_HCX_CLIENT")
+            or runtime_globals.get("HCX_CLIENT")
+            or runtime_globals.get("_HCX_RAW_CLIENT_V3")
+        )
         if client is None:
             raise RuntimeError("HCX 답변 클라이언트가 연결되지 않았습니다.")
         prompt_data = {
