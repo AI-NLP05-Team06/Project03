@@ -60,11 +60,14 @@ def test_static_contracts() -> dict[str, Any]:
     assert "2026-08-25-kdic-production-overlay.py" in engine
     assert "execute_production_variant_v1" in overlay
     assert "C_DEFAULT_DC2_COMPARE_ONLY_V1" in overlay
+    assert "2026-08-25-business-router-current-scope-v2" in overlay
     assert "DC_1CALL is disabled" in overlay
+    assert "import kdic_lightweight_router_v1 as light_router" in overlay
     assert 'name = "V1.5_C_DEFAULT_DC2_COMPARE_ONLY"' in adapter
     assert '"runtime_build": dict(RUNTIME_BUILD_INFO)' in api
     assert EXPECTED_SOURCE_SHA256 in overlay
     assert EXPECTED_SOURCE_SHA256 in adapter
+    assert "2026-08-25-business-router-current-scope-v2" in adapter
     return {
         "engine_overlay_loader": "passed",
         "overlay_syntax": "passed",
@@ -270,6 +273,81 @@ def test_routing_and_cross_structure() -> dict[str, Any]:
     }
 
 
+def test_current_question_business_mapping() -> dict[str, Any]:
+    overlay = OVERLAY_FILE.read_text(encoding="utf-8")
+    router = _load_module("kdic_lightweight_router_v1", BASE_DIR / "kdic_lightweight_router_v1.py")
+    namespace: dict[str, Any] = {
+        "Any": Any,
+        "Mapping": Mapping,
+        "Sequence": Sequence,
+        "light_router": router,
+        "_clean_text": lambda value: " ".join(str(value or "").split()).strip(),
+    }
+    exec(_function_source(overlay, "_need_business_v5"), namespace)
+    exec(_function_source(overlay, "_cross_business_scope_count_v5"), namespace)
+    need_business = namespace["_need_business_v5"]
+    scope_count = namespace["_cross_business_scope_count_v5"]
+
+    atomic_queries = (
+        "고객 미수령금 신청 방법",
+        "착오송금 반환지원 신청 자격",
+        "예금자보호 한도",
+        "채무조정 신청 서류",
+        "예금보험금 지급 조건",
+        "은닉재산 신고 포상금",
+    )
+    mapped = [need_business(query) for query in atomic_queries]
+    assert all(mapped), mapped
+
+    two_business_question = "고객 미수령금 조회 방법과 채무조정 신청 서류를 함께 알려주세요."
+    plans = [
+        {"source": "ORIGINAL_ANCHOR", "query": two_business_question},
+        {"source": "DECOMPOSED", "query": "고객 미수령금 조회 방법"},
+        {"source": "DECOMPOSED", "query": "채무조정 신청 서류"},
+    ]
+    contaminated_analysis = {
+        "businesses": [
+            "예금자보호제도",
+            "고객 미수령금 신청",
+            "착오송금 반환 신청",
+            "채무조정 안내",
+        ]
+    }
+    count, businesses, decomposed = scope_count(
+        contaminated_analysis,
+        plans,
+        two_business_question,
+    )
+    assert count == 2, (count, businesses)
+    assert decomposed == 2
+    assert businesses == ["고객 미수령금 신청", "채무조정 안내"], businesses
+
+    four_business_question = (
+        "예금자보호 한도, 미수령금 신청, 착오송금 반환지원, 채무조정 서류를 알려주세요."
+    )
+    four_plans = [
+        {"source": "ORIGINAL_ANCHOR", "query": four_business_question},
+        *[
+            {"source": "DECOMPOSED", "query": query}
+            for query in (
+                "예금자보호 한도",
+                "미수령금 신청",
+                "착오송금 반환지원",
+                "채무조정 서류",
+            )
+        ],
+    ]
+    count, businesses, decomposed = scope_count({}, four_plans, four_business_question)
+    assert count == 4, (count, businesses)
+    assert decomposed == 4
+    return {
+        "router_import": "passed",
+        "atomic_need_business_labels": "passed",
+        "two_business_after_context_history": "passed",
+        "four_business_capacity": "blocked",
+    }
+
+
 def test_adapter() -> dict[str, Any]:
     module = _load_module("kdic_ec2_adapter_test", ADAPTER_FILE)
     calls: list[str] = []
@@ -305,6 +383,7 @@ def main() -> None:
         "overlay_exec": test_overlay_exec_contract(),
         "evidence": test_evidence_gate(),
         "routing": test_routing_and_cross_structure(),
+        "business_mapping": test_current_question_business_mapping(),
         "adapter": test_adapter(),
     }
     print(json.dumps({"status": "passed", "result": result}, ensure_ascii=False, indent=2))

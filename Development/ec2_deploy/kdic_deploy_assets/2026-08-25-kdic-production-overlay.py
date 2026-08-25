@@ -6,8 +6,11 @@ This module is executed inside kdic_pipeline_engine globals.
 """
 from __future__ import annotations
 
+import kdic_lightweight_router_v1 as light_router
+
 KDIC_PRODUCTION_OVERLAY_SOURCE_SHA256 = "F9A908D62A43EA3A3566A5D8DF0E982F214373FFF96470A749DC1EFE79E25083"
 KDIC_PRODUCTION_OVERLAY_POLICY = "C_DEFAULT_DC2_COMPARE_ONLY_V1"
+KDIC_PRODUCTION_OVERLAY_REVISION = "2026-08-25-business-router-current-scope-v2"
 
 
 # ==== overlay: how-word-classification ====
@@ -471,10 +474,22 @@ def new_bd_comparison_state() -> dict[str, Any]:
     return new_context_state()
 
 
-def _cross_business_scope_count_v5(analysis: Mapping[str, Any], plans: Sequence[Mapping[str, Any]]) -> tuple[int, list[str], int]:
-    analysis_businesses = list(dict.fromkeys(
-        _clean_text(value) for value in analysis.get("businesses") or [] if _clean_text(value)
-    ))
+def _cross_business_scope_count_v5(
+    analysis: Mapping[str, Any],
+    plans: Sequence[Mapping[str, Any]],
+    question: str = "",
+) -> tuple[int, list[str], int]:
+    # analysis.businesses may include active businesses inherited from earlier
+    # turns. Capacity is a property of the current question, so explicit current
+    # labels and the current decomposition plans take precedence.
+    try:
+        question_businesses = [
+            _clean_text(value)
+            for value in light_router.find_businesses(str(question or "")) or []
+            if _clean_text(value)
+        ]
+    except Exception:
+        question_businesses = []
     plan_businesses = []
     for plan in plans:
         if "DECOMPOSED" not in str(plan.get("source") or "").upper():
@@ -485,11 +500,22 @@ def _cross_business_scope_count_v5(analysis: Mapping[str, Any], plans: Sequence[
             matched = []
         if len(matched) == 1 and _clean_text(matched[0]):
             plan_businesses.append(_clean_text(matched[0]))
-    businesses = list(dict.fromkeys(analysis_businesses + plan_businesses))
     decomposed_count = sum(
         1 for plan in plans if "DECOMPOSED" in str(plan.get("source") or "").upper()
     )
-    scope_count = len(businesses) if businesses else decomposed_count
+    current_businesses = list(dict.fromkeys(question_businesses + plan_businesses))
+    if current_businesses or decomposed_count:
+        businesses = current_businesses
+        scope_count = max(len(current_businesses), decomposed_count)
+    else:
+        # Compatibility fallback for analyzers that do not expose a current
+        # question and do not emit decomposed plans.
+        businesses = list(dict.fromkeys(
+            _clean_text(value)
+            for value in analysis.get("businesses") or []
+            if _clean_text(value)
+        ))
+        scope_count = len(businesses)
     return scope_count, businesses, decomposed_count
 
 
@@ -519,7 +545,11 @@ def prepare_common_retrieval_v1(
         }
 
     plans = list(analysis.get("plans") or [])
-    requested_scope_count, detected_businesses, decomposed_plan_count = _cross_business_scope_count_v5(analysis, plans)
+    requested_scope_count, detected_businesses, decomposed_plan_count = _cross_business_scope_count_v5(
+        analysis,
+        plans,
+        question,
+    )
     if requested_scope_count > 3:
         return {
             "question": question,
@@ -3959,4 +3989,5 @@ def execute_production_variant_v1(
 KDIC_RUNTIME_BUILD_V1.update({
     "build_sha256": KDIC_PRODUCTION_OVERLAY_SOURCE_SHA256,
     "overlay_file": "2026-08-25-kdic-production-overlay.py",
+    "overlay_revision": KDIC_PRODUCTION_OVERLAY_REVISION,
 })
