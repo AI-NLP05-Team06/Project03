@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import ast
+import builtins
 import copy
+import dis
 import hashlib
 import importlib.util
 import json
@@ -60,14 +62,14 @@ def test_static_contracts() -> dict[str, Any]:
     assert "2026-08-25-kdic-production-overlay.py" in engine
     assert "execute_production_variant_v1" in overlay
     assert "C_DEFAULT_DC2_COMPARE_ONLY_V1" in overlay
-    assert "2026-08-25-business-router-current-scope-v2" in overlay
+    assert "2026-08-25-runtime-symbol-completion-v3" in overlay
     assert "DC_1CALL is disabled" in overlay
     assert "import kdic_lightweight_router_v1 as light_router" in overlay
     assert 'name = "V1.5_C_DEFAULT_DC2_COMPARE_ONLY"' in adapter
     assert '"runtime_build": dict(RUNTIME_BUILD_INFO)' in api
     assert EXPECTED_SOURCE_SHA256 in overlay
     assert EXPECTED_SOURCE_SHA256 in adapter
-    assert "2026-08-25-business-router-current-scope-v2" in adapter
+    assert "2026-08-25-runtime-symbol-completion-v3" in adapter
     return {
         "engine_overlay_loader": "passed",
         "overlay_syntax": "passed",
@@ -121,6 +123,12 @@ def test_overlay_exec_contract() -> dict[str, Any]:
             namespace[node.target.id] = (
                 "" if value is None and node.target.id.isupper() else value
             )
+        elif isinstance(node, ast.Import):
+            for alias in node.names:
+                namespace.setdefault(alias.asname or alias.name.split(".")[0], types.SimpleNamespace())
+        elif isinstance(node, ast.ImportFrom):
+            for alias in node.names:
+                namespace.setdefault(alias.asname or alias.name, types.SimpleNamespace())
 
     sys.path.insert(0, str(BASE_DIR))
     exec(compile(overlay, str(OVERLAY_FILE), "exec"), namespace, namespace)
@@ -129,8 +137,24 @@ def test_overlay_exec_contract() -> dict[str, Any]:
         "audit_need_evidence_pack_v5",
         "is_cross_business_dc_v1",
         "generate_c_direct_threeway_v1",
+        "order_businesses_by_question_p0_v1",
     )
     assert all(callable(namespace.get(name)) for name in required)
+    unresolved: dict[str, list[str]] = {}
+    for name, value in namespace.items():
+        code = getattr(value, "__code__", None)
+        if code is None or Path(code.co_filename).name != OVERLAY_FILE.name:
+            continue
+        missing = sorted({
+            str(instruction.argval)
+            for instruction in dis.get_instructions(value)
+            if instruction.opname in {"LOAD_GLOBAL", "LOAD_NAME"}
+            and str(instruction.argval) not in namespace
+            and not hasattr(builtins, str(instruction.argval))
+        })
+        if missing:
+            unresolved[name] = missing
+    assert not unresolved, unresolved
     assert namespace["KDIC_PRODUCTION_OVERLAY_POLICY"] == "C_DEFAULT_DC2_COMPARE_ONLY_V1"
     return {"top_level_wiring": "passed", "required_functions": list(required)}
 
@@ -285,8 +309,10 @@ def test_current_question_business_mapping() -> dict[str, Any]:
     }
     exec(_function_source(overlay, "_need_business_v5"), namespace)
     exec(_function_source(overlay, "_cross_business_scope_count_v5"), namespace)
+    exec(_function_source(overlay, "order_businesses_by_question_p0_v1"), namespace)
     need_business = namespace["_need_business_v5"]
     scope_count = namespace["_cross_business_scope_count_v5"]
+    order_businesses = namespace["order_businesses_by_question_p0_v1"]
 
     atomic_queries = (
         "고객 미수령금 신청 방법",
@@ -298,6 +324,11 @@ def test_current_question_business_mapping() -> dict[str, Any]:
     )
     mapped = [need_business(query) for query in atomic_queries]
     assert all(mapped), mapped
+    reversed_values = ["은닉재산 신고", "예금보험금 안내"]
+    assert order_businesses(
+        "예금보험금 지급 조건과 은닉재산 신고 포상금",
+        reversed_values,
+    ) == ["예금보험금 안내", "은닉재산 신고"]
 
     two_business_question = "고객 미수령금 조회 방법과 채무조정 신청 서류를 함께 알려주세요."
     plans = [

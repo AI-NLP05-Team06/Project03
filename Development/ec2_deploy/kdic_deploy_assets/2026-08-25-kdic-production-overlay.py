@@ -10,7 +10,7 @@ import kdic_lightweight_router_v1 as light_router
 
 KDIC_PRODUCTION_OVERLAY_SOURCE_SHA256 = "F9A908D62A43EA3A3566A5D8DF0E982F214373FFF96470A749DC1EFE79E25083"
 KDIC_PRODUCTION_OVERLAY_POLICY = "C_DEFAULT_DC2_COMPARE_ONLY_V1"
-KDIC_PRODUCTION_OVERLAY_REVISION = "2026-08-25-business-router-current-scope-v2"
+KDIC_PRODUCTION_OVERLAY_REVISION = "2026-08-25-runtime-symbol-completion-v3"
 
 
 # ==== overlay: how-word-classification ====
@@ -2436,6 +2436,30 @@ def classify_dc_response_mode_v1(question: str) -> str:
     if re.search(r"동시에|같이|함께|한\s*번에|둘\s*다|모두\s*신청|연계|병행|받을\s*수\s*있", text):
         return "RELATION"
     return "SEPARATE"
+
+
+def order_businesses_by_question_p0_v1(
+    question: str,
+    businesses: Sequence[str],
+) -> list[str]:
+    """Keep business sections in the same order they appear in the question."""
+
+    positioned = []
+    for original_index, business in enumerate(
+        dict.fromkeys(str(value) for value in businesses if str(value))
+    ):
+        terms = list((light_router.BUSINESS_KEYWORDS or {}).get(business) or [])
+        positions = [
+            question.find(term)
+            for term in terms
+            if term and question.find(term) >= 0
+        ]
+        positioned.append((
+            min(positions) if positions else len(question) + original_index,
+            original_index,
+            business,
+        ))
+    return [business for _position, _index, business in sorted(positioned)]
 
 
 def is_cross_business_dc_v1(common: Mapping[str, Any]) -> tuple[bool, dict[str, Any]]:
