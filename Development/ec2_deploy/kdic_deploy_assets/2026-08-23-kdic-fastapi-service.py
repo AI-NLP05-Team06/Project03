@@ -340,7 +340,7 @@ def health() -> dict[str, Any]:
         "runtime_build": dict(RUNTIME_BUILD_INFO),
         "sessions": SESSION_STORE.stats(),
         "jobs": JOB_STORE.stats(),
-        "admin_mode": "READ_ONLY",
+        "admin_mode": "STAGED_WRITE",
     }
 
 
@@ -379,8 +379,18 @@ def create_job(payload: ChatRequest) -> dict[str, str]:
             status_code=503,
             detail="KDIC 파이프라인이 연결되지 않았습니다.",
         )
+    question = payload.question
+    manager = getattr(RAW_PIPELINE_MODULE, "KDIC_GUARDRAIL_MANAGER", None) if RAW_PIPELINE_MODULE is not None else None
+    if manager is not None:
+        audit = manager.evaluate(question, "input")
+        if audit["blocked"]:
+            raise HTTPException(
+                status_code=400,
+                detail="민감정보 또는 관리자 차단 규칙이 감지되어 질문을 전송하지 않았습니다.",
+            )
+        question = audit["text"]
     try:
-        job_id = JOB_SERVICE.submit(payload.session_id, payload.question)
+        job_id = JOB_SERVICE.submit(payload.session_id, question)
     except ValueError as error:
         raise HTTPException(status_code=400, detail=str(error)) from error
     return {"job_id": job_id}
@@ -466,7 +476,7 @@ def _es_error(error: Exception) -> HTTPException:
 @app.get("/api/admin/capabilities", dependencies=[Depends(require_admin)])
 def admin_capabilities() -> dict[str, Any]:
     return {
-        "mode": "READ_ONLY",
+        "mode": "STAGED_WRITE",
         "features": [
             "runtime_summary",
             "job_audit",
@@ -474,11 +484,19 @@ def admin_capabilities() -> dict[str, Any]:
             "elasticsearch_index_list",
             "elasticsearch_document_search",
             "elasticsearch_document_view",
+            "parameter_compare",
+            "parameter_activate",
+            "evaluation_dataset_upload",
+            "evaluation_run",
+            "url_ingest_preview",
+            "preview_review",
+            "preview_publish",
+            "chunk_staged_write",
+            "rollback",
+            "api_key_test",
+            "api_key_runtime_rotation",
         ],
         "disabled_mutations": [
-            "document_write",
-            "document_delete",
-            "reindex",
             "alias_switch",
             "index_delete",
         ],
@@ -512,7 +530,7 @@ def admin_summary() -> dict[str, Any]:
         "sessions": SESSION_STORE.stats(),
         "jobs": JOB_STORE.stats(),
         "elasticsearch": es_payload,
-        "admin_mode": "READ_ONLY",
+        "admin_mode": "STAGED_WRITE",
     }
 
 
@@ -545,19 +563,31 @@ def admin_search(payload: AdminSearchRequest) -> dict[str, Any]:
     query_text = payload.query.strip()
     query_body: dict[str, Any]
     if query_text:
+        # 현재 운영 인덱스는 원문을 ``search_text``에 적재한다. 과거의
+        # title/content 필드만 검색하면 실제 데이터가 있어도 0건이 반환된다.
+        # 사람이 쓰는 키워드 검색과 도메인 ID 접두사(HP, DA, MT 등) 검색을
+        # 함께 지원해 관리자에서 어느 도메인의 청크인지 바로 확인할 수 있게 한다.
+        should_queries: list[dict[str, Any]] = [
+            {
+                "simple_query_string": {
+                    "query": query_text,
+                    "fields": ["search_text^3", "chunk_id^2"],
+                    "default_operator": "and",
+                }
+            }
+        ]
+        domain_prefix = query_text.upper()
+        # HP 같은 두 글자 도메인뿐 아니라 ADMIN-TEST-001처럼 사람이 입력한
+        # 전체/일부 청크 ID도 접두사로 찾는다. 한글 본문 검색은 위의
+        # search_text 검색이 담당한다.
+        if re.fullmatch(r"[A-Z0-9][A-Z0-9_-]{1,254}", domain_prefix):
+            should_queries.append(
+                {"prefix": {"chunk_id": {"value": f"{domain_prefix}-"}}}
+            )
         query_body = {
-            "simple_query_string": {
-                "query": query_text,
-                "fields": [
-                    "title^3",
-                    "section_title^2",
-                    "content",
-                    "text",
-                    "business_function^2",
-                    "chunk_id",
-                    "parent_id",
-                ],
-                "default_operator": "and",
+            "bool": {
+                "should": should_queries,
+                "minimum_should_match": 1,
             }
         }
     else:

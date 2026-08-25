@@ -95,6 +95,31 @@ class LatestKDICNotebookAdapter:
             state["_kdic_controller"] = holder
         return holder
 
+    def _apply_output_guardrails(self, result: Mapping[str, Any]) -> dict[str, Any]:
+        output = dict(result)
+        manager = self.runtime.get("KDIC_GUARDRAIL_MANAGER")
+        if manager is None:
+            return output
+        audits = []
+        for key in ("answer", "display_answer", "basic_answer", "route_message"):
+            if not isinstance(output.get(key), str):
+                continue
+            audit = manager.evaluate(output[key], "output")
+            output[key] = audit["text"]
+            audits.extend(audit["hits"])
+        payload = output.get("payload")
+        if isinstance(payload, Mapping) and isinstance(payload.get("answer"), str):
+            payload_copy = dict(payload)
+            audit = manager.evaluate(payload_copy["answer"], "output")
+            payload_copy["answer"] = audit["text"]
+            output["payload"] = payload_copy
+            audits.extend(audit["hits"])
+        output["guardrail_audit"] = {
+            "version": manager.public()["active_version"],
+            "output_hit_rule_ids": list(dict.fromkeys(row["rule_id"] for row in audits)),
+        }
+        return output
+
     def configure(self, api_key: str) -> None:
         configure = self.runtime.get("_configure_hcx_runtime")
         if callable(configure):
@@ -111,6 +136,18 @@ class LatestKDICNotebookAdapter:
         )
 
     def __call__(
+        self,
+        question: str,
+        state: MutableMapping[str, Any],
+        progress: Callable[[int, str], None] | None = None,
+    ) -> Mapping[str, Any]:
+        lock = self.runtime.get("KDIC_RUNTIME_EXECUTION_LOCK")
+        if lock is None:
+            return self._execute(question, state, progress)
+        with lock:
+            return self._execute(question, state, progress)
+
+    def _execute(
         self,
         question: str,
         state: MutableMapping[str, Any],
@@ -139,7 +176,7 @@ class LatestKDICNotebookAdapter:
             else:
                 progress(63, "기본 C안으로 공식 근거 답변을 구성하고 있습니다.")
             progress(94, "공식 출처와 후속 행동 링크를 확인하고 있습니다.")
-            return self._with_build_info(result)
+            return self._with_build_info(self._apply_output_guardrails(result))
 
         # Safe compatibility mode for a stale engine. It never guesses that a
         # question is cross-business and therefore never invokes DC1/DC2.
@@ -149,7 +186,7 @@ class LatestKDICNotebookAdapter:
             result = execute_bcd("C", question, holder)
             if not isinstance(result, Mapping):
                 raise TypeError("KDIC C안 호환 실행 결과가 dict가 아닙니다.")
-            output = self._with_build_info(result)
+            output = self._with_build_info(self._apply_output_guardrails(result))
             output["runtime_compatibility_mode"] = "C_ONLY_STALE_ENGINE"
             progress(94, "공식 출처와 후속 행동 링크를 확인하고 있습니다.")
             return output
@@ -161,7 +198,7 @@ class LatestKDICNotebookAdapter:
         if not isinstance(result, Mapping):
             raise TypeError("KDIC 호환 파이프라인 결과가 dict가 아닙니다.")
         progress(94, "공식 출처를 확인하고 있습니다.")
-        output = self._with_build_info(result)
+        output = self._with_build_info(self._apply_output_guardrails(result))
         output["runtime_compatibility_mode"] = "B_FALLBACK_STALE_ENGINE"
         return output
 
