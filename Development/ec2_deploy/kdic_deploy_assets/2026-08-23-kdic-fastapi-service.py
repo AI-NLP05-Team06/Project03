@@ -117,6 +117,14 @@ if os.getenv("KDIC_DATABASE_URL", "").strip():
         ttl_seconds=_env_int("KDIC_JOB_TTL_SECONDS", 86_400, 300, 2_592_000),
         max_jobs=_env_int("KDIC_MAX_JOBS", 5_000, 50, 500_000),
     )
+    SUGGESTION_ANSWER_CACHE = pg_store.PostgresSuggestionAnswerCache(
+        ttl_seconds=_env_int(
+            "KDIC_SUGGESTION_CACHE_TTL_SECONDS", 2_592_000, 60, 31_536_000
+        ),
+        max_entries=_env_int(
+            "KDIC_SUGGESTION_CACHE_MAX_ENTRIES", 2_000, 10, 100_000
+        ),
+    )
 else:
     SESSION_STORE = core.InMemorySessionStore(
         ttl_seconds=_env_int("KDIC_SESSION_TTL_SECONDS", 86_400, 60, 2_592_000),
@@ -126,10 +134,19 @@ else:
         ttl_seconds=_env_int("KDIC_JOB_TTL_SECONDS", 86_400, 300, 2_592_000),
         max_jobs=_env_int("KDIC_MAX_JOBS", 5_000, 50, 500_000),
     )
+    SUGGESTION_ANSWER_CACHE = core.InMemorySuggestionAnswerCache(
+        ttl_seconds=_env_int(
+            "KDIC_SUGGESTION_CACHE_TTL_SECONDS", 2_592_000, 60, 31_536_000
+        ),
+        max_entries=_env_int(
+            "KDIC_SUGGESTION_CACHE_MAX_ENTRIES", 200, 10, 10_000
+        ),
+    )
 JOB_SERVICE = core.KDICJobService(
     runtime=PIPELINE_RUNTIME,
     sessions=SESSION_STORE,
     jobs=JOB_STORE,
+    suggestion_cache=SUGGESTION_ANSWER_CACHE,
     # The current Colab pipeline still records several traces in module globals.
     # Keep one worker until those globals are made request-scoped and concurrency
     # regression tests pass. The service design itself does not require a global lock.
@@ -140,6 +157,7 @@ JOB_SERVICE = core.KDICJobService(
 class ChatRequest(BaseModel):
     session_id: str = Field(min_length=1, max_length=200)
     question: str = Field(min_length=1, max_length=4_000)
+    suggestion_id: str = Field(default="", max_length=100)
 
 
 class ResetRequest(BaseModel):
@@ -340,6 +358,8 @@ def health() -> dict[str, Any]:
         "runtime_build": dict(RUNTIME_BUILD_INFO),
         "sessions": SESSION_STORE.stats(),
         "jobs": JOB_STORE.stats(),
+        "suggestion_answer_cache": SUGGESTION_ANSWER_CACHE.stats(),
+        "suggestion_registry": core.suggestion_registry_stats(),
         "admin_mode": "STAGED_WRITE",
     }
 
@@ -390,7 +410,11 @@ def create_job(payload: ChatRequest) -> dict[str, str]:
             )
         question = audit["text"]
     try:
-        job_id = JOB_SERVICE.submit(payload.session_id, question)
+        job_id = JOB_SERVICE.submit(
+            payload.session_id,
+            question,
+            suggestion_id=payload.suggestion_id,
+        )
     except ValueError as error:
         raise HTTPException(status_code=400, detail=str(error)) from error
     return {"job_id": job_id}

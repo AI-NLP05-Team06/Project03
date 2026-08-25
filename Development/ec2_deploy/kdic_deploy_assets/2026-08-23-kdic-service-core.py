@@ -182,17 +182,85 @@ FOLLOWUP_KEYWORDS: dict[str, tuple[str, ...]] = {
 }
 
 
+FOLLOWUP_CANONICAL_BUSINESSES: dict[str, str] = {
+    "착오송금": "착오송금 반환 신청",
+    "예금보험금": "예금보험금 안내",
+    "예금자보호": "예금자보호제도",
+    "미수령금": "고객 미수령금 신청",
+    "채무조정": "채무조정 안내",
+    "은닉재산": "은닉재산 신고",
+}
+SUGGESTION_CACHE_SCHEMA_VERSION = "kdic-suggestion-answer-bundle-v5.0"
+_SUGGESTION_BY_ID: dict[str, dict[str, str]] = {}
+_SUGGESTIONS_BY_BUSINESS_KEY: dict[str, list[dict[str, str]]] = {}
+
+
+def _suggestion_id(business: str, label: str, query: str) -> str:
+    return "SQ-" + uuid.uuid5(
+        uuid.NAMESPACE_URL,
+        f"kdic://suggestion/{business}/{label}/{query}",
+    ).hex[:16].upper()
+
+
+def _build_suggestion_registry() -> None:
+    for business_key, labels in FOLLOWUP_KEYWORDS.items():
+        business = FOLLOWUP_CANONICAL_BUSINESSES[business_key]
+        rows: list[dict[str, str]] = []
+        for label in labels:
+            query = f"{business}의 {label}을 알려주세요."
+            record = {
+                "suggestion_id": _suggestion_id(business, label, query),
+                "business_key": business_key,
+                "business": business,
+                "label": label,
+                "query": query,
+            }
+            _SUGGESTION_BY_ID[record["suggestion_id"]] = record
+            rows.append(record)
+        _SUGGESTIONS_BY_BUSINESS_KEY[business_key] = rows
+
+
+_build_suggestion_registry()
+
+
+def suggestion_catalog() -> list[dict[str, str]]:
+    return [
+        copy.deepcopy(row)
+        for rows in _SUGGESTIONS_BY_BUSINESS_KEY.values()
+        for row in rows
+    ]
+
+
+def resolve_registered_suggestion(
+    question: str,
+    suggestion_id: str = "",
+) -> dict[str, str] | None:
+    """Accept cache access only when the server ID and canonical query both match."""
+
+    clean_id = _clean_text(suggestion_id).upper()
+    record = _SUGGESTION_BY_ID.get(clean_id)
+    if record is None or record["query"] != _clean_text(question):
+        return None
+    return copy.deepcopy(record)
+
+
+def suggestion_registry_stats() -> dict[str, Any]:
+    return {
+        "schema_version": SUGGESTION_CACHE_SCHEMA_VERSION,
+        "registered_questions": len(_SUGGESTION_BY_ID),
+        "business_count": len(_SUGGESTIONS_BY_BUSINESS_KEY),
+        "requires_exact_id_and_query": True,
+    }
+
+
 def _followup_keywords(businesses: Sequence[str]) -> list[dict[str, str]]:
     output: list[dict[str, str]] = []
     for business in businesses:
-        for key, labels in FOLLOWUP_KEYWORDS.items():
+        for key, rows in _SUGGESTIONS_BY_BUSINESS_KEY.items():
             if key not in business:
                 continue
-            for label in labels:
-                item = {
-                    "label": label,
-                    "query": f"{business}의 {label}을 알려주세요.",
-                }
+            for record in rows:
+                item = copy.deepcopy(record)
                 if item not in output:
                     output.append(item)
     return output[:5]
@@ -361,6 +429,24 @@ class PipelineRuntime:
             return "UNCONFIGURED"
         return _clean_text(getattr(pipeline, "name", None) or pipeline.__class__.__name__)
 
+    @property
+    def cache_namespace(self) -> str:
+        """Identify answer-affecting runtime code so stale bundles cannot be reused."""
+
+        with self._lock:
+            pipeline = self._pipeline
+        build = getattr(pipeline, "build_info", None) if pipeline is not None else None
+        build = dict(build) if isinstance(build, Mapping) else {}
+        return ":".join(
+            value
+            for value in (
+                self.name,
+                _clean_text(build.get("build_sha256")),
+                _clean_text(build.get("overlay_revision")),
+            )
+            if value
+        )
+
     def set(self, pipeline: Callable[..., Mapping[str, Any]]) -> None:
         if not callable(pipeline):
             raise TypeError("pipeline은 호출 가능해야 합니다.")
@@ -385,6 +471,27 @@ class PipelineRuntime:
             if isinstance(payload, Mapping):
                 return dict(payload)
         return default_basis_from_result(result)
+
+    def record_cached_turn(
+        self,
+        question: str,
+        answer: str,
+        state: MutableMapping[str, Any],
+    ) -> None:
+        """Keep a cache-hit turn visible to the next context-dependent question."""
+
+        with self._lock:
+            pipeline = self._pipeline
+        recorder = getattr(pipeline, "record_cached_turn", None) if pipeline else None
+        if callable(recorder):
+            recorder(question, answer, state)
+            return
+        state.setdefault("turns", []).extend(
+            [
+                {"role": "user", "content": _clean_text(question)},
+                {"role": "assistant", "content": str(answer or "").strip()},
+            ]
+        )
 
     def run(
         self,
@@ -484,6 +591,89 @@ class InMemorySessionStore:
 
 
 @dataclass
+class CachedAnswerBundle:
+    cache_key: str
+    suggestion_id: str
+    business: str
+    keyword: str
+    question: str
+    public_result: dict[str, Any]
+    raw_result: dict[str, Any]
+    basis_result: dict[str, Any]
+    pipeline_name: str
+    runtime_revision: str
+    created_at: float = field(default_factory=time.time)
+    updated_at: float = field(default_factory=time.time)
+    hit_count: int = 0
+
+
+class InMemorySuggestionAnswerCache:
+    """Validated recommendation answer bundles for local development and Colab."""
+
+    def __init__(self, ttl_seconds: int = 2_592_000, max_entries: int = 200):
+        self.ttl_seconds = max(60, int(ttl_seconds))
+        self.max_entries = max(10, int(max_entries))
+        self._lock = threading.RLock()
+        self._records: dict[str, CachedAnswerBundle] = {}
+        self._hits = 0
+        self._misses = 0
+        self._stores = 0
+
+    def _cleanup_locked(self) -> None:
+        cutoff = time.time() - self.ttl_seconds
+        for key in [
+            key for key, row in self._records.items() if row.updated_at < cutoff
+        ]:
+            self._records.pop(key, None)
+        if len(self._records) > self.max_entries:
+            ordered = sorted(self._records.values(), key=lambda row: row.updated_at)
+            for row in ordered[: len(self._records) - self.max_entries]:
+                self._records.pop(row.cache_key, None)
+
+    def get(self, cache_key: str) -> CachedAnswerBundle | None:
+        clean_key = _clean_text(cache_key)
+        with self._lock:
+            self._cleanup_locked()
+            row = self._records.get(clean_key)
+            if row is None:
+                self._misses += 1
+                return None
+            row.updated_at = time.time()
+            row.hit_count += 1
+            self._hits += 1
+            return copy.deepcopy(row)
+
+    def peek(self, cache_key: str) -> CachedAnswerBundle | None:
+        with self._lock:
+            self._cleanup_locked()
+            row = self._records.get(_clean_text(cache_key))
+            return copy.deepcopy(row) if row is not None else None
+
+    def put(self, bundle: CachedAnswerBundle) -> None:
+        with self._lock:
+            self._cleanup_locked()
+            self._records[bundle.cache_key] = copy.deepcopy(bundle)
+            self._stores += 1
+            self._cleanup_locked()
+
+    def stats(self) -> dict[str, Any]:
+        with self._lock:
+            self._cleanup_locked()
+            total = self._hits + self._misses
+            return {
+                "backend": "memory",
+                "schema_version": SUGGESTION_CACHE_SCHEMA_VERSION,
+                "entry_count": len(self._records),
+                "hits": self._hits,
+                "misses": self._misses,
+                "stores": self._stores,
+                "hit_rate": round(self._hits / total, 4) if total else 0.0,
+                "ttl_seconds": self.ttl_seconds,
+                "max_entries": self.max_entries,
+            }
+
+
+@dataclass
 class JobRecord:
     job_id: str
     session_id: str
@@ -493,6 +683,8 @@ class JobRecord:
     stage: str = "질문을 전달했습니다."
     created_at: float = field(default_factory=time.time)
     updated_at: float = field(default_factory=time.time)
+    suggestion_id: str = ""
+    cache_key: str = ""
     result: dict[str, Any] | None = None
     raw_result: dict[str, Any] | None = None
     error: str = ""
@@ -545,11 +737,19 @@ class InMemoryJobStore:
             for row in finished[: max(0, len(self._records) - self.max_jobs)]:
                 self._records.pop(row.job_id, None)
 
-    def create(self, session_id: str, question: str) -> JobRecord:
+    def create(
+        self,
+        session_id: str,
+        question: str,
+        suggestion_id: str = "",
+        cache_key: str = "",
+    ) -> JobRecord:
         record = JobRecord(
             job_id=uuid.uuid4().hex,
             session_id=_clean_text(session_id),
             question=_clean_text(question),
+            suggestion_id=_clean_text(suggestion_id).upper(),
+            cache_key=_clean_text(cache_key),
         )
         with self._lock:
             self._cleanup_locked()
@@ -601,23 +801,121 @@ class KDICJobService:
         runtime: PipelineRuntime,
         sessions: InMemorySessionStore | None = None,
         jobs: InMemoryJobStore | None = None,
+        suggestion_cache: InMemorySuggestionAnswerCache | None = None,
         max_workers: int = 2,
     ):
         self.runtime = runtime
         self.sessions = sessions or InMemorySessionStore()
         self.jobs = jobs or InMemoryJobStore()
+        self.suggestion_cache = suggestion_cache or InMemorySuggestionAnswerCache()
         self.executor = ThreadPoolExecutor(
             max_workers=max(1, int(max_workers)), thread_name_prefix="kdic-pipeline"
         )
 
-    def submit(self, session_id: str, question: str) -> str:
+    def _cache_key(self, suggestion_id: str) -> str:
+        return ":".join(
+            [
+                SUGGESTION_CACHE_SCHEMA_VERSION,
+                self.runtime.cache_namespace,
+                _clean_text(suggestion_id).upper(),
+            ]
+        )
+
+    @staticmethod
+    def _cache_eligibility(public: Mapping[str, Any]) -> tuple[bool, str]:
+        if _clean_text(public.get("route")).upper() != "RETRIEVE":
+            return False, "ROUTE_NOT_RETRIEVE"
+        if not str(public.get("answer") or "").strip():
+            return False, "EMPTY_ANSWER"
+        if bool(public.get("context_used")):
+            return False, "CONTEXT_DEPENDENT_ANSWER"
+        if _clean_text(public.get("coverage_status")).upper() in {
+            "INSUFFICIENT",
+            "EVIDENCE_INSUFFICIENT",
+        }:
+            return False, "INSUFFICIENT_COVERAGE"
+        if public.get("validation_passed") is False:
+            return False, "VALIDATION_FAILED"
+        if not list(public.get("sources") or []):
+            return False, "NO_OFFICIAL_SOURCES"
+        return True, "VALIDATED_STANDALONE_RETRIEVE"
+
+    def submit(
+        self,
+        session_id: str,
+        question: str,
+        suggestion_id: str = "",
+    ) -> str:
         clean_question = _clean_text(question)
         if not clean_question:
             raise ValueError("질문이 비어 있습니다.")
         if len(clean_question) > 4_000:
             raise ValueError("질문은 4,000자 이하여야 합니다.")
         session = self.sessions.get(session_id)
-        record = self.jobs.create(session.session_id, clean_question)
+        suggestion = resolve_registered_suggestion(clean_question, suggestion_id)
+        clean_suggestion_id = suggestion.get("suggestion_id", "") if suggestion else ""
+        cache_key = self._cache_key(clean_suggestion_id) if clean_suggestion_id else ""
+        record = self.jobs.create(
+            session.session_id,
+            clean_question,
+            suggestion_id=clean_suggestion_id,
+            cache_key=cache_key,
+        )
+        if cache_key:
+            lookup_started = time.perf_counter()
+            bundle = self.suggestion_cache.get(cache_key)
+            lookup_ms = (time.perf_counter() - lookup_started) * 1000.0
+            if bundle is not None and bundle.question == clean_question:
+                try:
+                    public = copy.deepcopy(bundle.public_result)
+                    public["origin_latency_seconds"] = copy.deepcopy(
+                        public.get("latency_seconds") or {}
+                    )
+                    public["latency_seconds"] = {
+                        "추천 답변 캐시 조회": round(lookup_ms / 1000.0, 4)
+                    }
+                    public["suggestion_cache"] = {
+                        "eligible": True,
+                        "hit": True,
+                        "stored": True,
+                        "suggestion_id": clean_suggestion_id,
+                        "source": str(
+                            self.suggestion_cache.stats().get("backend") or "cache"
+                        ).upper()
+                        + "_ANSWER_BUNDLE",
+                        "lookup_ms": round(lookup_ms, 3),
+                        "age_seconds": round(time.time() - bundle.created_at, 3),
+                        "skipped_stages": [
+                            "질의분석",
+                            "질문 임베딩",
+                            "검색",
+                            "BAAI Reranker",
+                            "답변 LLM",
+                        ],
+                    }
+                    with session.lock:
+                        self.runtime.record_cached_turn(
+                            clean_question,
+                            str(public.get("answer") or ""),
+                            session.state,
+                        )
+                        session.updated_at = time.time()
+                        save = getattr(self.sessions, "save", None)
+                        if callable(save):
+                            save(session)
+                    self.jobs.update(
+                        record.job_id,
+                        status="done",
+                        progress=100,
+                        stage="저장된 검증 답변을 불러왔습니다.",
+                        result=public,
+                        raw_result=copy.deepcopy(bundle.raw_result),
+                    )
+                    return record.job_id
+                except Exception:
+                    # If state recording is incompatible, run the live pipeline
+                    # so the next context-dependent question remains correct.
+                    pass
         self.executor.submit(self._run, record.job_id)
         return record.job_id
 
@@ -653,6 +951,36 @@ class KDICJobService:
                 if callable(save):
                     save(session)
             public = normalize_public_result(raw)
+            if record.cache_key and record.suggestion_id:
+                eligible, reason = self._cache_eligibility(public)
+                stored = False
+                if eligible:
+                    suggestion = _SUGGESTION_BY_ID[record.suggestion_id]
+                    basis_result = self.runtime.basis(raw)
+                    self.suggestion_cache.put(
+                        CachedAnswerBundle(
+                            cache_key=record.cache_key,
+                            suggestion_id=record.suggestion_id,
+                            business=suggestion["business"],
+                            keyword=suggestion["label"],
+                            question=record.question,
+                            public_result=copy.deepcopy(public),
+                            raw_result=copy.deepcopy(raw),
+                            basis_result=copy.deepcopy(basis_result),
+                            pipeline_name=self.runtime.name,
+                            runtime_revision=self.runtime.cache_namespace,
+                        )
+                    )
+                    stored = True
+                public["suggestion_cache"] = {
+                    "eligible": eligible,
+                    "hit": False,
+                    "stored": stored,
+                    "suggestion_id": record.suggestion_id,
+                    "source": "LIVE_PIPELINE",
+                    "reason": reason,
+                    "skipped_stages": [],
+                }
             self.jobs.update(
                 job_id,
                 status="done",
@@ -676,6 +1004,10 @@ class KDICJobService:
             raise KeyError(job_id)
         if record.status != "done" or record.raw_result is None:
             raise RuntimeError("완료된 답변만 근거를 조회할 수 있습니다.")
+        if record.cache_key:
+            bundle = self.suggestion_cache.peek(record.cache_key)
+            if bundle is not None and bundle.basis_result:
+                return copy.deepcopy(bundle.basis_result)
         return self.runtime.basis(record.raw_result)
 
     def shutdown(self) -> None:

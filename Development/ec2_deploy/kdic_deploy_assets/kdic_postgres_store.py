@@ -179,6 +179,8 @@ class JobRecord:
     stage: str = "질문을 전달했습니다."
     created_at: float = field(default_factory=time.time)
     updated_at: float = field(default_factory=time.time)
+    suggestion_id: str = ""
+    cache_key: str = ""
     result: dict[str, Any] | None = None
     raw_result: dict[str, Any] | None = None
     error: str = ""
@@ -221,6 +223,8 @@ def _row_to_job(row: Mapping[str, Any]) -> JobRecord:
         stage=row["stage"] or "",
         created_at=row["created_at"].timestamp() if row["created_at"] else time.time(),
         updated_at=row["created_at"].timestamp() if row["created_at"] else time.time(),
+        suggestion_id=_clean_text(payload.get("suggestion_id")).upper(),
+        cache_key=_clean_text(payload.get("cache_key")),
         result=row["result"],
         raw_result=row["raw_result"],
         error=row["error_message"] or "",
@@ -235,9 +239,19 @@ class PostgresJobStore:
         self.ttl_seconds = max(300, int(ttl_seconds))
         self.max_jobs = max(50, int(max_jobs))
 
-    def create(self, session_id: str, question: str) -> JobRecord:
+    def create(
+        self,
+        session_id: str,
+        question: str,
+        suggestion_id: str = "",
+        cache_key: str = "",
+    ) -> JobRecord:
         job_id = str(uuid.uuid4())
-        payload = {"question": _clean_text(question)}
+        payload = {
+            "question": _clean_text(question),
+            "suggestion_id": _clean_text(suggestion_id).upper(),
+            "cache_key": _clean_text(cache_key),
+        }
         with _cursor() as cur:
             cur.execute(
                 "INSERT INTO jobs (id, job_type, status, session_id, progress, stage, payload) "
@@ -340,4 +354,141 @@ class PostgresJobStore:
             "statuses": statuses,
             "ttl_seconds": self.ttl_seconds,
             "max_jobs": self.max_jobs,
+        }
+
+
+# ============================================================
+# Validated recommendation answer bundles -> suggestion_answer_cache
+# ============================================================
+@dataclass
+class CachedAnswerBundle:
+    cache_key: str
+    suggestion_id: str
+    business: str
+    keyword: str
+    question: str
+    public_result: dict[str, Any]
+    raw_result: dict[str, Any]
+    basis_result: dict[str, Any]
+    pipeline_name: str
+    runtime_revision: str
+    created_at: float = field(default_factory=time.time)
+    updated_at: float = field(default_factory=time.time)
+    hit_count: int = 0
+
+
+def _row_to_cached_bundle(row: Mapping[str, Any]) -> CachedAnswerBundle:
+    return CachedAnswerBundle(
+        cache_key=str(row["cache_key"]),
+        suggestion_id=str(row["suggestion_id"]),
+        business=str(row["business"]),
+        keyword=str(row["keyword"]),
+        question=str(row["question"]),
+        public_result=dict(row["public_result"] or {}),
+        raw_result=dict(row["raw_result"] or {}),
+        basis_result=dict(row["basis_result"] or {}),
+        pipeline_name=str(row["pipeline_name"]),
+        runtime_revision=str(row["runtime_revision"]),
+        created_at=row["created_at"].timestamp(),
+        updated_at=row["updated_at"].timestamp(),
+        hit_count=int(row["hit_count"] or 0),
+    )
+
+
+class PostgresSuggestionAnswerCache:
+    """Persistent cache for exact server-registered recommendation questions."""
+
+    _SELECT_COLUMNS = (
+        "cache_key, suggestion_id, business, keyword, question, public_result, "
+        "raw_result, basis_result, pipeline_name, runtime_revision, created_at, "
+        "updated_at, hit_count"
+    )
+
+    def __init__(self, ttl_seconds: int = 2_592_000, max_entries: int = 2_000):
+        self.ttl_seconds = max(60, int(ttl_seconds))
+        self.max_entries = max(10, int(max_entries))
+
+    def get(self, cache_key: str) -> CachedAnswerBundle | None:
+        with _cursor() as cur:
+            cur.execute(
+                "UPDATE suggestion_answer_cache SET hit_count = hit_count + 1, "
+                "last_hit_at = now(), updated_at = now() "
+                "WHERE cache_key = %s AND validation_status = 'VALIDATED' "
+                "AND expires_at > now() RETURNING " + self._SELECT_COLUMNS,
+                (_clean_text(cache_key),),
+            )
+            row = cur.fetchone()
+        return _row_to_cached_bundle(row) if row else None
+
+    def peek(self, cache_key: str) -> CachedAnswerBundle | None:
+        with _cursor() as cur:
+            cur.execute(
+                "SELECT " + self._SELECT_COLUMNS + " FROM suggestion_answer_cache "
+                "WHERE cache_key = %s AND validation_status = 'VALIDATED' "
+                "AND expires_at > now()",
+                (_clean_text(cache_key),),
+            )
+            row = cur.fetchone()
+        return _row_to_cached_bundle(row) if row else None
+
+    def put(self, bundle: Any) -> None:
+        with _cursor() as cur:
+            cur.execute(
+                "INSERT INTO suggestion_answer_cache ("
+                "cache_key, suggestion_id, business, keyword, question, public_result, "
+                "raw_result, basis_result, pipeline_name, runtime_revision, "
+                "validation_status, expires_at) "
+                "VALUES (%s, %s, %s, %s, %s, %s::jsonb, %s::jsonb, %s::jsonb, "
+                "%s, %s, 'VALIDATED', now() + (%s * interval '1 second')) "
+                "ON CONFLICT (cache_key) DO UPDATE SET "
+                "suggestion_id = EXCLUDED.suggestion_id, business = EXCLUDED.business, "
+                "keyword = EXCLUDED.keyword, question = EXCLUDED.question, "
+                "public_result = EXCLUDED.public_result, raw_result = EXCLUDED.raw_result, "
+                "basis_result = EXCLUDED.basis_result, pipeline_name = EXCLUDED.pipeline_name, "
+                "runtime_revision = EXCLUDED.runtime_revision, validation_status = 'VALIDATED', "
+                "expires_at = EXCLUDED.expires_at, created_at = now(), updated_at = now(), "
+                "last_hit_at = NULL, hit_count = 0",
+                (
+                    _clean_text(bundle.cache_key),
+                    _clean_text(bundle.suggestion_id).upper(),
+                    _clean_text(bundle.business),
+                    _clean_text(bundle.keyword),
+                    _clean_text(bundle.question),
+                    json.dumps(bundle.public_result, ensure_ascii=False),
+                    json.dumps(bundle.raw_result, ensure_ascii=False),
+                    json.dumps(bundle.basis_result, ensure_ascii=False),
+                    _clean_text(bundle.pipeline_name),
+                    _clean_text(bundle.runtime_revision),
+                    self.ttl_seconds,
+                ),
+            )
+            cur.execute("DELETE FROM suggestion_answer_cache WHERE expires_at <= now()")
+            cur.execute("SELECT count(*) AS n FROM suggestion_answer_cache")
+            overflow = max(0, int(cur.fetchone()["n"]) - self.max_entries)
+            if overflow:
+                cur.execute(
+                    "DELETE FROM suggestion_answer_cache WHERE cache_key IN ("
+                    "SELECT cache_key FROM suggestion_answer_cache "
+                    "ORDER BY updated_at ASC LIMIT %s)",
+                    (overflow,),
+                )
+
+    def stats(self) -> dict[str, Any]:
+        with _cursor() as cur:
+            cur.execute(
+                "SELECT count(*) FILTER (WHERE validation_status = 'VALIDATED' "
+                "AND expires_at > now()) AS active, "
+                "coalesce(sum(hit_count), 0) AS hits, "
+                "count(*) FILTER (WHERE expires_at <= now()) AS expired "
+                "FROM suggestion_answer_cache"
+            )
+            row = cur.fetchone()
+        return {
+            "backend": "postgres",
+            "schema_version": "kdic-suggestion-answer-bundle-v5.0",
+            "entry_count": int(row["active"] or 0),
+            "hits": int(row["hits"] or 0),
+            "expired": int(row["expired"] or 0),
+            "ttl_seconds": self.ttl_seconds,
+            "max_entries": self.max_entries,
         }

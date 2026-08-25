@@ -32,7 +32,8 @@ class LatestKDICNotebookAdapter:
         "build_sha256": "F9A908D62A43EA3A3566A5D8DF0E982F214373FFF96470A749DC1EFE79E25083",
         "overlay_file": "2026-08-25-kdic-production-overlay.py",
         "overlay_revision": "2026-08-25-ui-number-and-contact-guard-v5",
-        "adapter_version": "2026-08-25-ec2-production-v5",
+        "adapter_version": "2026-08-26-ec2-production-v6",
+        "suggestion_cache_schema": "kdic-suggestion-answer-bundle-v5.0",
     }
 
     def __init__(self, runtime_globals: Mapping[str, Any]):
@@ -140,6 +141,35 @@ class LatestKDICNotebookAdapter:
             "현재 노트북은 실행 중 API 키 재설정을 지원하지 않습니다. "
             "HCX 키 설정 셀을 먼저 실행한 뒤 API를 연결하세요."
         )
+
+    def record_cached_turn(
+        self,
+        question: str,
+        answer: str,
+        state: MutableMapping[str, Any],
+    ) -> None:
+        """Commit a cached standalone answer to the notebook conversation state."""
+
+        holder = self._holder(state)
+        conversation = holder.get("conversation")
+        if not isinstance(conversation, dict):
+            conversation = {"turns": []}
+            holder["conversation"] = conversation
+        turns = conversation.get("turns")
+        if not isinstance(turns, list):
+            turns = []
+            conversation["turns"] = turns
+        turns.extend(
+            [
+                {"role": "user", "content": _clean(question)},
+                {"role": "assistant", "content": str(answer or "").strip()},
+            ]
+        )
+        holder["current_question"] = _clean(question)
+        holder["common"] = None
+        holder["answer_cache"] = {}
+        holder["committed"] = True
+        holder["committed_variant"] = "SUGGESTION_ANSWER_CACHE"
 
     def __call__(
         self,
