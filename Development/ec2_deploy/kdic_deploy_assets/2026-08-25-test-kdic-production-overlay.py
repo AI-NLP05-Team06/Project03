@@ -64,18 +64,18 @@ def test_static_contracts() -> dict[str, Any]:
     assert "2026-08-25-kdic-production-overlay.py" in engine
     assert "execute_production_variant_v1" in overlay
     assert "C_DEFAULT_DC2_COMPARE_ONLY_V1" in overlay
-    assert "2026-08-26-c-direct-structured-repair-v7" in overlay
+    assert "2026-08-26-c-direct-structured-diagnostics-v8" in overlay
     assert "반드시 유효한 단일 JSON 객체 하나만 출력" in overlay
     assert "C_STRUCTURED_SYSTEM_PROMPT_V3\n    +" not in overlay
     assert "answer_b_core._call_structured(" in overlay
-    assert "C안 구조화 답변 검증에 실패했습니다." in overlay
+    assert "_structured_failure_summary_v2" in overlay
     assert "DC_1CALL is disabled" in overlay
     assert "import kdic_lightweight_router_v1 as light_router" in overlay
     assert 'name = "V1.5_C_DEFAULT_DC2_COMPARE_ONLY"' in adapter
     assert '"runtime_build": dict(RUNTIME_BUILD_INFO)' in api
     assert EXPECTED_SOURCE_SHA256 in overlay
     assert EXPECTED_SOURCE_SHA256 in adapter
-    assert "2026-08-26-c-direct-structured-repair-v7" in adapter
+    assert "2026-08-26-c-direct-structured-diagnostics-v8" in adapter
     return {
         "engine_overlay_loader": "passed",
         "overlay_syntax": "passed",

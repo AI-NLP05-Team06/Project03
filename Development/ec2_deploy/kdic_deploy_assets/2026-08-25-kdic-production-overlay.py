@@ -10,7 +10,7 @@ import kdic_lightweight_router_v1 as light_router
 
 KDIC_PRODUCTION_OVERLAY_SOURCE_SHA256 = "F9A908D62A43EA3A3566A5D8DF0E982F214373FFF96470A749DC1EFE79E25083"
 KDIC_PRODUCTION_OVERLAY_POLICY = "C_DEFAULT_DC2_COMPARE_ONLY_V1"
-KDIC_PRODUCTION_OVERLAY_REVISION = "2026-08-26-c-direct-structured-repair-v7"
+KDIC_PRODUCTION_OVERLAY_REVISION = "2026-08-26-c-direct-structured-diagnostics-v8"
 
 
 # ==== overlay: how-word-classification ====
@@ -3608,6 +3608,33 @@ def _validate_c_direct_json_v2(
     }
 
 
+def _structured_failure_summary_v2(error: Exception) -> list[dict[str, Any]]:
+    text = str(error)
+    marker = "attempts="
+    if marker not in text:
+        return [{"error": type(error).__name__}]
+    try:
+        rows = json.loads(text.split(marker, 1)[1])
+    except (ValueError, TypeError, json.JSONDecodeError):
+        return [{"error": type(error).__name__}]
+    output = []
+    for row in rows if isinstance(rows, list) else []:
+        if not isinstance(row, Mapping):
+            continue
+        output.append({
+            key: row.get(key)
+            for key in (
+                "format",
+                "repair_index",
+                "valid",
+                "fallback_reason",
+                "error",
+            )
+            if row.get(key) is not None
+        })
+    return output or [{"error": type(error).__name__}]
+
+
 def audit_c_direct_references_v1(answer: str, payload: Mapping[str, Any], pack: Mapping[str, Any]) -> dict[str, Any]:
     allowed_evidence = set(answer_b_core._allowed_evidence(pack))
     allowed_facts = set(_allowed_fact_claims_v3(pack))
@@ -3730,7 +3757,11 @@ def generate_c_direct_threeway_v1(question: str, augmented_pack: Mapping[str, An
             ),
         )
     except (ValueError, TypeError, json.JSONDecodeError) as error:
-        raise RuntimeError("C안 구조화 답변 검증에 실패했습니다.") from error
+        failure_summary = _structured_failure_summary_v2(error)
+        raise RuntimeError(
+            "C안 구조화 답변 검증에 실패했습니다: "
+            + _compact_json(failure_summary)
+        ) from error
     trace = dict(_LAST_ANSWER_API_TRACE)
     safe_format_attempts = [
         {
