@@ -31,8 +31,8 @@ class LatestKDICNotebookAdapter:
         "dc1_enabled": False,
         "build_sha256": "F9A908D62A43EA3A3566A5D8DF0E982F214373FFF96470A749DC1EFE79E25083",
         "overlay_file": "2026-08-25-kdic-production-overlay.py",
-        "overlay_revision": "2026-08-26-c-direct-structured-diagnostics-v8",
-        "adapter_version": "2026-08-26-ec2-production-v9",
+        "overlay_revision": "2026-08-26-c-direct-pre-normalize-audit-v9",
+        "adapter_version": "2026-08-26-ec2-production-v10",
         "suggestion_cache_schema": "kdic-suggestion-answer-bundle-v5.0",
     }
 

@@ -10,7 +10,7 @@ import kdic_lightweight_router_v1 as light_router
 
 KDIC_PRODUCTION_OVERLAY_SOURCE_SHA256 = "F9A908D62A43EA3A3566A5D8DF0E982F214373FFF96470A749DC1EFE79E25083"
 KDIC_PRODUCTION_OVERLAY_POLICY = "C_DEFAULT_DC2_COMPARE_ONLY_V1"
-KDIC_PRODUCTION_OVERLAY_REVISION = "2026-08-26-c-direct-structured-diagnostics-v8"
+KDIC_PRODUCTION_OVERLAY_REVISION = "2026-08-26-c-direct-pre-normalize-audit-v9"
 
 
 # ==== overlay: how-word-classification ====
@@ -3586,23 +3586,18 @@ def _validate_c_direct_json_v2(
     allowed_facts = set(_allowed_fact_claims_v3(augmented_pack))
     inline_evidence = set(re.findall(r"\[(E\d+)\]", answer))
     inline_facts = set(re.findall(r"\[(FI-CAND-\d+:F\d+)\]", answer))
-    declared_evidence = set(answer_b_core._clean_list(payload.get("used_evidence_ids")))
-    declared_facts = set(_clean_fact_claim_keys_v3(payload.get("used_fact_claim_ids")))
     if (inline_evidence - allowed_evidence) or (inline_facts - allowed_facts):
         raise ValueError("C안 답변에 허용되지 않은 근거 ID가 있습니다.")
     if not (inline_evidence or inline_facts):
         raise ValueError("C안 답변에 인라인 근거 ID가 없습니다.")
-    if declared_evidence != inline_evidence or declared_facts != inline_facts:
-        raise ValueError("C안 선언 근거 ID와 인라인 근거 ID가 다릅니다.")
-
     coverage = str(payload.get("coverage_status") or "PARTIAL").upper()
     if coverage not in answer_b_core.ALLOWED_COVERAGE_STATUS:
         raise ValueError("C안 coverage_status가 올바르지 않습니다.")
     return {
         "answer": answer,
         "response_mode": actual_mode,
-        "used_evidence_ids": sorted(declared_evidence),
-        "used_fact_claim_ids": sorted(declared_facts),
+        "used_evidence_ids": sorted(inline_evidence),
+        "used_fact_claim_ids": sorted(inline_facts),
         "coverage_status": coverage,
         "missing_information": answer_b_core._clean_list(payload.get("missing_information")),
     }
@@ -3786,12 +3781,15 @@ def generate_c_direct_threeway_v1(question: str, augmented_pack: Mapping[str, An
     post_started = time.perf_counter()
     answer, relation_guard_applied = _relation_safe_answer_v1(answer, relation_constraint)
     answer, applicability_audit, applicability_guard_applied = apply_applicability_scope_guard_dc_v2(question, answer)
+    cited_answer = answer
     answer = normalize_answer_markdown_v3(answer)
     provisional = {
         "declared_evidence_ids": declared_evidence,
         "declared_fact_claim_ids": declared_facts,
     }
-    reference_audit = audit_c_direct_references_v1(answer, provisional, augmented_pack)
+    reference_audit = audit_c_direct_references_v1(
+        cited_answer, provisional, augmented_pack
+    )
     cross_required = len(augmented_pack.get("needs") or []) >= 2
     provisional["reference_audit"] = reference_audit
     need_citation_audit = audit_c_direct_need_citations_v1(

@@ -64,18 +64,20 @@ def test_static_contracts() -> dict[str, Any]:
     assert "2026-08-25-kdic-production-overlay.py" in engine
     assert "execute_production_variant_v1" in overlay
     assert "C_DEFAULT_DC2_COMPARE_ONLY_V1" in overlay
-    assert "2026-08-26-c-direct-structured-diagnostics-v8" in overlay
+    assert "2026-08-26-c-direct-pre-normalize-audit-v9" in overlay
     assert "반드시 유효한 단일 JSON 객체 하나만 출력" in overlay
     assert "C_STRUCTURED_SYSTEM_PROMPT_V3\n    +" not in overlay
     assert "answer_b_core._call_structured(" in overlay
     assert "_structured_failure_summary_v2" in overlay
+    assert "cited_answer = answer" in overlay
+    assert "audit_c_direct_references_v1(\n        cited_answer" in overlay
     assert "DC_1CALL is disabled" in overlay
     assert "import kdic_lightweight_router_v1 as light_router" in overlay
     assert 'name = "V1.5_C_DEFAULT_DC2_COMPARE_ONLY"' in adapter
     assert '"runtime_build": dict(RUNTIME_BUILD_INFO)' in api
     assert EXPECTED_SOURCE_SHA256 in overlay
     assert EXPECTED_SOURCE_SHA256 in adapter
-    assert "2026-08-26-c-direct-structured-diagnostics-v8" in adapter
+    assert "2026-08-26-c-direct-pre-normalize-audit-v9" in adapter
     return {
         "engine_overlay_loader": "passed",
         "overlay_syntax": "passed",
@@ -240,9 +242,11 @@ def test_c_direct_json_validator() -> dict[str, Any]:
         "missing_information": [],
     }
     assert validate(payload, pack, "SEPARATE")["used_evidence_ids"] == ["E1"]
+    declared_mismatch = copy.deepcopy(payload)
+    declared_mismatch["used_evidence_ids"] = []
+    assert validate(declared_mismatch, pack, "SEPARATE")["used_evidence_ids"] == ["E1"]
     for key, value in (
         ("answer", "근거 ID가 없는 답변"),
-        ("used_evidence_ids", []),
         ("response_mode", "COMPARE"),
     ):
         invalid = copy.deepcopy(payload)
@@ -254,7 +258,8 @@ def test_c_direct_json_validator() -> dict[str, Any]:
         raise AssertionError(f"invalid C direct payload was accepted: {key}")
     return {
         "valid_json_and_inline_evidence": "passed",
-        "missing_or_mismatched_evidence": "blocked",
+        "declared_ids_canonicalized_from_inline": "passed",
+        "missing_inline_evidence": "blocked",
         "wrong_response_mode": "blocked",
     }
 
