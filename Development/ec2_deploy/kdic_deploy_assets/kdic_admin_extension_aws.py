@@ -125,6 +125,10 @@ class PromptApplyPayload(BaseModel):
     confirmation: str = Field(min_length=1, max_length=100)
 
 
+class PipelineLabelsPayload(BaseModel):
+    labels: dict[str, str] = Field(default_factory=dict)
+
+
 def _clean(value: Any) -> str:
     return " ".join(str(value or "").split()).strip()
 
@@ -268,13 +272,14 @@ DEFAULT_PIPELINE_GRAPH_EDGES: list[tuple[str, str, str]] = [
 ]
 
 
-def _build_pipeline_graph(runtime: Mapping[str, Any]) -> dict[str, Any]:
+def _build_pipeline_graph(runtime: Mapping[str, Any], labels: Mapping[str, str] | None = None) -> dict[str, Any]:
     custom = runtime.get("KDIC_PIPELINE_GRAPH_SPEC")
     specs = custom.get("nodes") if isinstance(custom, Mapping) else None
     edges = custom.get("edges") if isinstance(custom, Mapping) else None
     specs = list(specs) if isinstance(specs, Sequence) and not isinstance(specs, (str, bytes)) else DEFAULT_PIPELINE_GRAPH_SPEC
     edges = list(edges) if isinstance(edges, Sequence) and not isinstance(edges, (str, bytes)) else DEFAULT_PIPELINE_GRAPH_EDGES
     nodes: list[dict[str, Any]] = []
+    custom_labels = dict(labels or {})
     for raw in specs:
         spec = dict(raw)
         node_id = _clean(spec.get("id"))
@@ -286,7 +291,9 @@ def _build_pipeline_graph(runtime: Mapping[str, Any]) -> dict[str, Any]:
         setting_view = _clean(spec.get("setting_view"))
         node = {
             "id": node_id,
-            "label": _clean(spec.get("label")) or node_id,
+            "label": _clean(custom_labels.get(node_id)) or _clean(spec.get("label")) or node_id,
+            "default_label": _clean(spec.get("label")) or node_id,
+            "custom_label": node_id in custom_labels,
             "stage": _clean(spec.get("stage")) or "PIPELINE",
             "description": _clean(spec.get("description")),
             "enabled": enabled,
@@ -561,6 +568,27 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
     executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="kdic-admin-eval")
     drafts: dict[str, Any] = {"config": {}, "add": {}, "remove": set()}
     history_path = Path(os.getenv("KDIC_ADMIN_HISTORY_PATH", "/opt/kdic/runtime/admin_change_history.pkl")).resolve()
+    pipeline_labels_path = Path(os.getenv("KDIC_PIPELINE_LABELS_PATH", "/opt/kdic/runtime/admin_pipeline_labels.json")).resolve()
+
+    def load_pipeline_labels() -> dict[str, str]:
+        try:
+            loaded = json.loads(pipeline_labels_path.read_text(encoding="utf-8"))
+            if not isinstance(loaded, Mapping):
+                return {}
+            valid_ids = {str(row["id"]) for row in DEFAULT_PIPELINE_GRAPH_SPEC}
+            return {
+                str(key): _clean(value)[:80]
+                for key, value in loaded.items()
+                if str(key) in valid_ids and _clean(value)
+            }
+        except (FileNotFoundError, json.JSONDecodeError, OSError):
+            return {}
+
+    def save_pipeline_labels() -> None:
+        pipeline_labels_path.parent.mkdir(parents=True, exist_ok=True)
+        temp = pipeline_labels_path.with_suffix(pipeline_labels_path.suffix + ".tmp")
+        temp.write_text(json.dumps(pipeline_labels, ensure_ascii=False, indent=2), encoding="utf-8")
+        os.replace(temp, pipeline_labels_path)
 
     def load_history() -> list[dict[str, Any]]:
         try:
@@ -580,6 +608,7 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
         os.replace(temp, history_path)
 
     history: list[dict[str, Any]] = load_history()
+    pipeline_labels: dict[str, str] = load_pipeline_labels()
     initial_key = str(runtime_globals.get("HCX_API_KEY") or os.getenv("HCX_API_KEY") or "").strip()
     api_key_state: dict[str, Any] = {
         "configured": bool(initial_key),
@@ -631,6 +660,91 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
                 "query_fusion_rrf_k": int(runtime_globals.get("QUERY_FUSION_RRF_K", 10)),
                 "parent_child": bool(runtime_globals.get("PARENT_CHILD_ENABLED", True)),
                 "parent_context_max_chars": int(runtime_globals.get("PARENT_CONTEXT_MAX_CHARS", 8192))}
+
+    def monitoring_snapshot(hours: int, limit: int) -> dict[str, Any]:
+        now = time.time()
+        cutoff = now - (hours * 3600)
+        rows = service_module.JOB_STORE.list_public(limit)
+        records: list[dict[str, Any]] = []
+        for public in rows:
+            created_at = float(public.get("created_at") or 0)
+            if created_at < cutoff:
+                continue
+            stored = service_module.JOB_STORE.get(str(public.get("job_id") or ""))
+            raw = stored.raw_result if stored is not None and isinstance(stored.raw_result, Mapping) else {}
+            result = public.get("result") if isinstance(public.get("result"), Mapping) else {}
+            usage = raw.get("usage") if isinstance(raw.get("usage"), Mapping) else {}
+            event = raw.get("event") if isinstance(raw.get("event"), Mapping) else {}
+            latency = raw.get("latency") if isinstance(raw.get("latency"), Mapping) else {}
+            wall_ms = float(event.get("click_wall_ms") or latency.get("click_wall_ms") or 0)
+            businesses = result.get("businesses") if isinstance(result.get("businesses"), Sequence) and not isinstance(result.get("businesses"), (str, bytes)) else []
+            records.append({
+                "job_id": str(public.get("job_id") or ""),
+                "created_at": created_at,
+                "question": _clean(public.get("question"))[:160],
+                "status": _clean(public.get("status")) or "unknown",
+                "route": _clean(result.get("route") or raw.get("route")) or "UNKNOWN",
+                "businesses": [_clean(value) for value in businesses if _clean(value)],
+                "prompt_tokens": int(usage.get("prompt_tokens") or event.get("prompt_tokens") or 0),
+                "completion_tokens": int(usage.get("completion_tokens") or event.get("completion_tokens") or 0),
+                "total_tokens": int(usage.get("total_tokens") or event.get("total_tokens") or 0),
+                "latency_ms": round(wall_ms, 3),
+                "validation_passed": result.get("validation_passed"),
+                "coverage_status": _clean(result.get("coverage_status")),
+            })
+
+        completed = [row for row in records if row["status"] == "done"]
+        failed = [row for row in records if row["status"] == "error"]
+        latency_values = sorted(row["latency_ms"] for row in completed if row["latency_ms"] > 0)
+        token_rows = [row for row in completed if row["total_tokens"] > 0]
+        p95_index = max(0, math.ceil(len(latency_values) * .95) - 1) if latency_values else 0
+        route_counts: dict[str, int] = {}
+        business_counts: dict[str, int] = {}
+        for row in records:
+            route_counts[row["route"]] = route_counts.get(row["route"], 0) + 1
+            for business in row["businesses"] or ["미분류"]:
+                business_counts[business] = business_counts.get(business, 0) + 1
+
+        bucket_seconds = 3600 if hours <= 48 else 86400
+        bucket_count = min(31, math.ceil(hours * 3600 / bucket_seconds))
+        buckets = []
+        start = math.floor(cutoff / bucket_seconds) * bucket_seconds
+        for index in range(bucket_count + 1):
+            bucket_start = start + (index * bucket_seconds)
+            if bucket_start > now:
+                break
+            selected = [row for row in records if bucket_start <= row["created_at"] < bucket_start + bucket_seconds]
+            buckets.append({
+                "timestamp": bucket_start,
+                "questions": len(selected),
+                "tokens": sum(row["total_tokens"] for row in selected),
+                "failures": sum(row["status"] == "error" for row in selected),
+                "avg_latency_ms": round(sum(row["latency_ms"] for row in selected) / len(selected), 3) if selected else 0,
+            })
+
+        total_tokens = sum(row["total_tokens"] for row in completed)
+        return {
+            "generated_at": now,
+            "hours": hours,
+            "retention_notice": "현재 작업 저장소의 보존 범위 안에서 집계합니다.",
+            "summary": {
+                "questions": len(records),
+                "completed": len(completed),
+                "failed": len(failed),
+                "success_rate": len(completed) / len(records) if records else 0,
+                "total_tokens": total_tokens,
+                "prompt_tokens": sum(row["prompt_tokens"] for row in completed),
+                "completion_tokens": sum(row["completion_tokens"] for row in completed),
+                "avg_tokens": total_tokens / len(token_rows) if token_rows else 0,
+                "token_coverage_rate": len(token_rows) / len(completed) if completed else 0,
+                "avg_latency_ms": sum(latency_values) / len(latency_values) if latency_values else 0,
+                "p95_latency_ms": latency_values[p95_index] if latency_values else 0,
+            },
+            "timeseries": buckets,
+            "routes": [{"name": key, "count": value} for key, value in sorted(route_counts.items(), key=lambda item: (-item[1], item[0]))],
+            "businesses": [{"name": key, "count": value} for key, value in sorted(business_counts.items(), key=lambda item: (-item[1], item[0]))],
+            "recent": sorted(records, key=lambda row: row["created_at"], reverse=True)[:30],
+        }
 
     def require_admin_session(request: Request) -> None:
         supplied = _clean(request.cookies.get(COOKIE_NAME))
@@ -1235,7 +1349,36 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
 
     @app.get("/api/admin-ui/pipeline/graph")
     def pipeline_graph(_: None = Depends(require_admin_session)):
-        return _build_pipeline_graph(runtime_globals)
+        return _build_pipeline_graph(runtime_globals, pipeline_labels)
+
+    @app.put("/api/admin-ui/pipeline/labels")
+    def pipeline_label_update(payload: PipelineLabelsPayload, _: None = Depends(require_admin_session)):
+        valid_ids = {str(row["id"]) for row in DEFAULT_PIPELINE_GRAPH_SPEC}
+        updated: dict[str, str] = {}
+        for node_id, value in payload.labels.items():
+            if node_id not in valid_ids:
+                raise HTTPException(status_code=422, detail=f"알 수 없는 파이프라인 블록입니다: {node_id}")
+            label = _clean(value)
+            if not label:
+                pipeline_labels.pop(node_id, None)
+                continue
+            if len(label) > 80:
+                raise HTTPException(status_code=422, detail="표시명은 80자 이하로 입력해 주세요.")
+            pipeline_labels[node_id] = label
+            updated[node_id] = label
+        save_pipeline_labels()
+        return {"updated": updated, "graph": _build_pipeline_graph(runtime_globals, pipeline_labels)}
+
+    @app.delete("/api/admin-ui/pipeline/labels/{node_id}")
+    def pipeline_label_reset(node_id: str, _: None = Depends(require_admin_session)):
+        pipeline_labels.pop(_clean(node_id), None)
+        save_pipeline_labels()
+        return {"reset": True, "graph": _build_pipeline_graph(runtime_globals, pipeline_labels)}
+
+    @app.get("/api/admin-ui/monitoring")
+    def monitoring(hours: int = Query(default=24, ge=1, le=720), limit: int = Query(default=200, ge=1, le=500),
+                   _: None = Depends(require_admin_session)):
+        return monitoring_snapshot(hours, limit)
 
     @app.get("/api/admin-ui/guardrails")
     def guardrails(_: None = Depends(require_admin_session)):
@@ -1345,7 +1488,7 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
     @app.get("/api/admin-ui/capabilities")
     def capabilities(_: None = Depends(require_admin_session)):
         base = service_module.admin_capabilities(); features = list(base.get("features") or [])
-        for value in ("chat_pipeline_test", "chat_pipeline_compare", "runtime_config", "evaluation_dataset_upload", "evaluation_run", "evaluation_k_curve", "evaluation_record_delete", "parameter_apply", "chunk_staged_write", "draft_partial_clear", "rollback", "history_delete", "api_key_test", "api_key_runtime_rotation", "pipeline_runtime_graph", "pipeline_setting_links", "guardrail_draft", "guardrail_test", "guardrail_apply", "guardrail_rollback", "prompt_draft", "prompt_compare"):
+        for value in ("chat_pipeline_test", "chat_pipeline_compare", "runtime_config", "evaluation_dataset_upload", "evaluation_run", "evaluation_k_curve", "evaluation_record_delete", "parameter_apply", "chunk_staged_write", "draft_partial_clear", "rollback", "history_delete", "api_key_test", "api_key_runtime_rotation", "pipeline_runtime_graph", "pipeline_setting_links", "pipeline_label_customization", "operations_monitoring", "guardrail_draft", "guardrail_test", "guardrail_apply", "guardrail_rollback", "prompt_draft", "prompt_compare"):
             if value not in features: features.append(value)
         blocked = [v for v in (base.get("disabled_mutations") or []) if v not in {"document_write", "document_delete", "evaluation_run", "parameter_apply"}]
         return {**base, "admin_mode": "STAGED_WRITE", "features": features, "disabled_mutations": blocked}
