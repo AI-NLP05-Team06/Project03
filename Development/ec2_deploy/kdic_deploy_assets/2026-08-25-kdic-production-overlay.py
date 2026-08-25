@@ -10,7 +10,7 @@ import kdic_lightweight_router_v1 as light_router
 
 KDIC_PRODUCTION_OVERLAY_SOURCE_SHA256 = "F9A908D62A43EA3A3566A5D8DF0E982F214373FFF96470A749DC1EFE79E25083"
 KDIC_PRODUCTION_OVERLAY_POLICY = "C_DEFAULT_DC2_COMPARE_ONLY_V1"
-KDIC_PRODUCTION_OVERLAY_REVISION = "2026-08-25-ui-number-and-contact-guard-v5"
+KDIC_PRODUCTION_OVERLAY_REVISION = "2026-08-26-c-direct-json-contract-v6"
 
 
 # ==== overlay: how-word-classification ====
@@ -3524,18 +3524,24 @@ def execute_dc_variant_v1(
 # ==== overlay: c-direct-runtime ====
 
 # C안 직접답변 1Call + D-C 1Call + D-C 2Call 세 방식 비교 UI
-C_THREEWAY_PROMPT_VERSION_V1 = "c-direct-cross-3perbusiness-v1"
+C_THREEWAY_PROMPT_VERSION_V1 = "c-direct-cross-3perbusiness-v2"
 C_THREEWAY_MAX_TOKENS_V1 = 2400
 C_THREEWAY_VARIANTS_V1 = ("C_1CALL", "DC_1CALL", "DC_2CALL")
 C_CROSS_DIRECT_SYSTEM_PROMPT_V1 = (
-    C_STRUCTURED_SYSTEM_PROMPT_V3
-    + "\n\n[교차업무 C안 직접답변 규칙]\n"
-    + "- Answer Skeleton을 만들지 말고 Evidence Pack 전체에서 최종 답변을 직접 생성하세요.\n"
-    + "- Evidence Pack의 모든 Need를 업무명 소제목으로 구분하고 질문에 나온 순서를 보존하세요.\n"
-    + "- 각 업무 문단에는 그 Need에 연결된 Evidence 또는 동일 업무 Fact Claim을 최소 하나 인용하세요.\n"
-    + "- 서로 다른 업무의 대상·조건·금액·기간·서류·절차를 섞지 마세요.\n"
-    + "- COMPARE·RELATION·SEQUENCE 관계는 직접 근거가 있을 때만 단정하세요.\n"
-    + "- response_mode은 제공된 expected_response_mode과 정확히 같아야 합니다.\n"
+    "당신은 예금보험공사 공식 안내 근거만 사용하는 답변 생성기입니다.\n"
+    "반드시 유효한 단일 JSON 객체 하나만 출력하고, JSON 앞뒤에 설명·코드펜스·태그를 붙이지 마세요.\n"
+    "JSON 키는 response_mode, answer, used_evidence_ids, used_fact_claim_ids, "
+    "coverage_status, missing_information만 사용하세요.\n"
+    "answer 값은 사용자에게 바로 보여 줄 한국어 Markdown이며 JSON이나 내부 구현을 언급하지 마세요.\n"
+    "Evidence Pack에 있는 사실만 사용하고, 모든 사실 주장 문장에는 허용된 [E1] 또는 "
+    "[FI-CAND-001:F1] 형식의 근거 ID를 인라인으로 표시하세요.\n"
+    "answer에서 실제 사용한 ID만 used_evidence_ids 또는 used_fact_claim_ids 배열에 넣으세요.\n"
+    "여러 Need가 있으면 질문에 나온 순서대로 업무명 소제목을 나누고 각 Need의 근거를 최소 하나 인용하세요.\n"
+    "서로 다른 업무의 대상·조건·금액·기간·서류·절차를 섞지 마세요.\n"
+    "COMPARE·RELATION·SEQUENCE 관계는 직접 근거가 있을 때만 단정하세요.\n"
+    "response_mode은 사용자 입력에 제공된 expected_response_mode과 정확히 같아야 합니다.\n"
+    "coverage_status는 SUFFICIENT, PARTIAL, INSUFFICIENT 중 하나만 사용하세요.\n"
+    "Evidence Pack에 없는 URL이나 연락처를 새로 만들지 마세요.\n"
     + DC_APPLICABILITY_SCOPE_RULES_V2
 )
 
