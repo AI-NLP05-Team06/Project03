@@ -10,15 +10,29 @@ def _clean(value: Any) -> str:
 class LatestKDICNotebookAdapter:
     """Bridge the final notebook globals to the shared FastAPI service contract.
 
-    The adapter intentionally contains no query-analysis or answer-generation logic.
-    It selects the already-defined notebook entry points:
+    The notebook owns query analysis, evidence gates and answer generation. The
+    adapter calls one production entrypoint whose routing policy is deliberately
+    narrow:
 
-    * non-cross-business RETRIEVE -> C
-    * cross-business RETRIEVE -> D-C 2Call
+    * every normal question -> C 1Call
+    * valid multi-business COMPARE -> D-C 2Call
+    * D-C 1Call -> disabled
     * CLARIFY / OOS / DIRECT -> route response without answer LLM calls
     """
 
-    name = "V1.5_RELATIONAL_MULTITURN_C_OR_CROSS_DC_2CALL"
+    name = "V1.5_C_DEFAULT_DC2_COMPARE_ONLY"
+    build_info = {
+        "source_notebook": (
+            "2026-08-21-KDIC-D-교차업무전용-1Call-vs-2Call-v1_3-Colab.ipynb"
+        ),
+        "routing_policy": "C_DEFAULT_DC2_COMPARE_ONLY_V1",
+        "default_variant": "C_1CALL",
+        "comparison_variant": "DC_2CALL",
+        "dc1_enabled": False,
+        "build_sha256": "F9A908D62A43EA3A3566A5D8DF0E982F214373FFF96470A749DC1EFE79E25083",
+        "overlay_file": "2026-08-25-kdic-production-overlay.py",
+        "adapter_version": "2026-08-25-ec2-production-v1",
+    }
 
     def __init__(self, runtime_globals: Mapping[str, Any]):
         self.runtime = runtime_globals
@@ -34,15 +48,24 @@ class LatestKDICNotebookAdapter:
         return value
 
     def _validate_runtime(self) -> None:
-        has_final_policy = callable(self.runtime.get("execute_dc_variant_v1")) and callable(
-            self.runtime.get("execute_bcd_variant_v3")
-        )
+        has_production_policy = callable(self.runtime.get("execute_production_variant_v1"))
+        has_c_compatibility = callable(self.runtime.get("execute_bcd_variant_v3"))
         has_b_fallback = callable(self.runtime.get("run_fixed_pipeline"))
-        if not has_final_policy and not has_b_fallback:
+        if not has_production_policy and not has_c_compatibility and not has_b_fallback:
             raise RuntimeError(
                 "연결 가능한 KDIC 실행 함수를 찾지 못했습니다. "
-                "execute_dc_variant_v1 + execute_bcd_variant_v3 또는 run_fixed_pipeline이 필요합니다."
+                "execute_production_variant_v1, execute_bcd_variant_v3 또는 "
+                "run_fixed_pipeline이 필요합니다."
             )
+
+    def _with_build_info(self, result: Mapping[str, Any]) -> dict[str, Any]:
+        output = dict(result)
+        notebook_build = output.get("runtime_build")
+        if not isinstance(notebook_build, Mapping):
+            notebook_build = {}
+        output["runtime_build"] = {**dict(notebook_build), **dict(self.build_info)}
+        output["routing_policy"] = self.build_info["routing_policy"]
+        return output
 
     def _new_holder(self) -> dict[str, Any]:
         for factory_name in (
@@ -97,23 +120,39 @@ class LatestKDICNotebookAdapter:
         holder = self._holder(state)
         progress(10, "질문의 문맥과 업무를 확인하고 있습니다.")
 
-        execute_dc = self.runtime.get("execute_dc_variant_v1")
-        execute_bcd = self.runtime.get("execute_bcd_variant_v3")
-        if callable(execute_dc) and callable(execute_bcd):
-            progress(25, "교차업무 여부와 검색 계획을 확인하고 있습니다.")
-            result = execute_dc("DC_2CALL", question, holder)
-            route = _clean(result.get("route")).upper() if isinstance(result, Mapping) else ""
-            if route == "C_POLICY_TARGET":
-                progress(63, "단일·동일업무 질문을 C안 근거로 답변하고 있습니다.")
-                result = execute_bcd("C", question, holder)
-            elif route == "RETRIEVE":
-                progress(63, "교차업무 근거를 D-C 2Call로 구성하고 있습니다.")
-            else:
-                progress(85, "추가 확인 또는 안내 범위 응답을 정리하고 있습니다.")
+        execute_production = self.runtime.get("execute_production_variant_v1")
+        if callable(execute_production):
+            progress(25, "C 기본·비교형 D-C 2Call 정책으로 근거를 확인하고 있습니다.")
+            result = execute_production(question, holder)
             if not isinstance(result, Mapping):
-                raise TypeError("KDIC 최종 정책 실행 결과가 dict가 아닙니다.")
+                raise TypeError("KDIC 운영 정책 실행 결과가 dict가 아닙니다.")
+            routing = result.get("production_routing")
+            selected_variant = (
+                _clean(routing.get("selected_variant")).upper()
+                if isinstance(routing, Mapping)
+                else _clean(result.get("variant")).upper()
+            )
+            if selected_variant == "DC_1CALL":
+                raise RuntimeError("운영 정책에서 DC_1CALL은 비활성화되어 있습니다.")
+            if selected_variant == "DC_2CALL":
+                progress(63, "다중업무 비교 근거를 D-C 2Call로 구성하고 있습니다.")
+            else:
+                progress(63, "기본 C안으로 공식 근거 답변을 구성하고 있습니다.")
             progress(94, "공식 출처와 후속 행동 링크를 확인하고 있습니다.")
-            return dict(result)
+            return self._with_build_info(result)
+
+        # Safe compatibility mode for a stale engine. It never guesses that a
+        # question is cross-business and therefore never invokes DC1/DC2.
+        execute_bcd = self.runtime.get("execute_bcd_variant_v3")
+        if callable(execute_bcd):
+            progress(35, "호환 모드에서 C안 근거 답변을 구성하고 있습니다.")
+            result = execute_bcd("C", question, holder)
+            if not isinstance(result, Mapping):
+                raise TypeError("KDIC C안 호환 실행 결과가 dict가 아닙니다.")
+            output = self._with_build_info(result)
+            output["runtime_compatibility_mode"] = "C_ONLY_STALE_ENGINE"
+            progress(94, "공식 출처와 후속 행동 링크를 확인하고 있습니다.")
+            return output
 
         progress(35, "호환용 B 파이프라인을 실행하고 있습니다.")
         run_fixed = self._required_callable("run_fixed_pipeline")
@@ -122,7 +161,9 @@ class LatestKDICNotebookAdapter:
         if not isinstance(result, Mapping):
             raise TypeError("KDIC 호환 파이프라인 결과가 dict가 아닙니다.")
         progress(94, "공식 출처를 확인하고 있습니다.")
-        return dict(result)
+        output = self._with_build_info(result)
+        output["runtime_compatibility_mode"] = "B_FALLBACK_STALE_ENGINE"
+        return output
 
 
 def build_latest_kdic_pipeline(

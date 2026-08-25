@@ -8646,3 +8646,24 @@ print({
     "action_link_registry_notice_visible": False,
     "action_link_registry_validation": "preserved",
 })
+
+
+# The EC2 engine keeps its environment-specific initialization above. The
+# generated overlay replaces only the approved retrieval/audit/answer policy
+# functions with the latest notebook implementation.
+_KDIC_PRODUCTION_OVERLAY_PATH = Path(__file__).with_name(
+    "2026-08-25-kdic-production-overlay.py"
+)
+if not _KDIC_PRODUCTION_OVERLAY_PATH.is_file():
+    raise RuntimeError(
+        f"KDIC production overlay is missing: {_KDIC_PRODUCTION_OVERLAY_PATH}"
+    )
+exec(
+    compile(
+        _KDIC_PRODUCTION_OVERLAY_PATH.read_text(encoding="utf-8"),
+        str(_KDIC_PRODUCTION_OVERLAY_PATH),
+        "exec",
+    ),
+    globals(),
+    globals(),
+)

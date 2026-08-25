@@ -72,12 +72,22 @@ def _env_bool(name: str, default: bool = False) -> bool:
     return value.strip().lower() in {"1", "true", "yes", "on"}
 
 
+def _pipeline_build_info(pipeline: Any) -> dict[str, Any]:
+    value = getattr(pipeline, "build_info", None)
+    return dict(value) if isinstance(value, Mapping) else {}
+
+
 PIPELINE_RUNTIME = core.PipelineRuntime()
+RUNTIME_BUILD_INFO: dict[str, Any] = {}
 
 if os.getenv("KDIC_PIPELINE_ENTRYPOINT", "").strip():
-    PIPELINE_RUNTIME.set(core.load_entrypoint(os.environ["KDIC_PIPELINE_ENTRYPOINT"]))
+    _initial_pipeline = core.load_entrypoint(os.environ["KDIC_PIPELINE_ENTRYPOINT"])
+    PIPELINE_RUNTIME.set(_initial_pipeline)
+    RUNTIME_BUILD_INFO = _pipeline_build_info(_initial_pipeline)
 elif _env_bool("KDIC_DEMO_MODE"):
-    PIPELINE_RUNTIME.set(core.DemoKDICPipeline())
+    _initial_pipeline = core.DemoKDICPipeline()
+    PIPELINE_RUNTIME.set(_initial_pipeline)
+    RUNTIME_BUILD_INFO = _pipeline_build_info(_initial_pipeline)
 
 if os.getenv("KDIC_DATABASE_URL", "").strip():
     # Persistent, multi-instance-safe stores backed by the `jobs` /
@@ -223,7 +233,9 @@ if cors_origins:
 def set_kdic_pipeline(pipeline: Any) -> None:
     """Attach the latest KDIC callable when this file is loaded in Colab."""
 
+    global RUNTIME_BUILD_INFO
     PIPELINE_RUNTIME.set(pipeline)
+    RUNTIME_BUILD_INFO = _pipeline_build_info(pipeline)
 
 
 # PIPELINE_RUNTIME above wraps the *adapter* (route/answer selection only) --
@@ -325,6 +337,7 @@ def health() -> dict[str, Any]:
         "ok": True,
         "pipeline_configured": PIPELINE_RUNTIME.configured,
         "pipeline": PIPELINE_RUNTIME.name,
+        "runtime_build": dict(RUNTIME_BUILD_INFO),
         "sessions": SESSION_STORE.stats(),
         "jobs": JOB_STORE.stats(),
         "admin_mode": "READ_ONLY",
@@ -337,6 +350,7 @@ def config() -> dict[str, Any]:
         "configured": PIPELINE_RUNTIME.configured,
         "bootstrap_available": bool(os.getenv("HCX_API_KEY", "").strip()),
         "pipeline": PIPELINE_RUNTIME.name,
+        "runtime_build": dict(RUNTIME_BUILD_INFO),
     }
 
 
