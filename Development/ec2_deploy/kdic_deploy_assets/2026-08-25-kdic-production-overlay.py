@@ -10,7 +10,7 @@ import kdic_lightweight_router_v1 as light_router
 
 KDIC_PRODUCTION_OVERLAY_SOURCE_SHA256 = "F9A908D62A43EA3A3566A5D8DF0E982F214373FFF96470A749DC1EFE79E25083"
 KDIC_PRODUCTION_OVERLAY_POLICY = "C_DEFAULT_DC2_COMPARE_ONLY_V1"
-KDIC_PRODUCTION_OVERLAY_REVISION = "2026-08-26-structured-repair-feedback-v10"
+KDIC_PRODUCTION_OVERLAY_REVISION = "2026-08-26-explicit-allowed-citation-ids-v11"
 
 
 # ==== overlay: how-word-classification ====
@@ -3524,7 +3524,7 @@ def execute_dc_variant_v1(
 # ==== overlay: c-direct-runtime ====
 
 # C안 직접답변 1Call + D-C 1Call + D-C 2Call 세 방식 비교 UI
-C_THREEWAY_PROMPT_VERSION_V1 = "c-direct-cross-3perbusiness-v3"
+C_THREEWAY_PROMPT_VERSION_V1 = "c-direct-cross-3perbusiness-v4"
 C_THREEWAY_MAX_TOKENS_V1 = 2400
 C_THREEWAY_VARIANTS_V1 = ("C_1CALL", "DC_1CALL", "DC_2CALL")
 C_CROSS_DIRECT_SYSTEM_PROMPT_V1 = (
@@ -3734,8 +3734,10 @@ def generate_c_direct_threeway_v1(question: str, augmented_pack: Mapping[str, An
         for row in augmented_pack.get("needs") or []
     ]
     relation_constraint = relation_constraint_v1(question, augmented_pack)
+    allowed_evidence_ids = sorted(answer_b_core._allowed_evidence(augmented_pack))
+    allowed_fact_claim_ids = sorted(_allowed_fact_claims_v3(augmented_pack))
     prompt_started = time.perf_counter()
-    prompt = f"""[사용자 질문]\n{_clean_text(question)}\n\n[expected_response_mode]\n{expected_mode}\n\n[업무별 Answer Needs]\n{_compact_json(answer_needs)}\n\n[관계 주장 안전조건]\n{_compact_json(relation_constraint)}\n\n[동일 공통 Fact Index 보강 Evidence Pack]\n{_compact_json(augmented_pack)}\n\n[출력 JSON]\n{{\"response_mode\":\"{expected_mode}\",\"answer\":\"업무별 소제목을 포함한 최종 Markdown 답변\",\"used_evidence_ids\":[\"E1\"],\"used_fact_claim_ids\":[\"FI-CAND-001:F1\"],\"coverage_status\":\"SUFFICIENT|PARTIAL|INSUFFICIENT\",\"missing_information\":[]}}"""
+    prompt = f"""[사용자 질문]\n{_clean_text(question)}\n\n[expected_response_mode]\n{expected_mode}\n\n[허용 Evidence ID - 이 목록 밖의 ID 사용 금지]\n{_compact_json(allowed_evidence_ids)}\n\n[허용 Fact Claim ID - 이 목록 밖의 ID 사용 금지]\n{_compact_json(allowed_fact_claim_ids)}\n\n[업무별 Answer Needs]\n{_compact_json(answer_needs)}\n\n[관계 주장 안전조건]\n{_compact_json(relation_constraint)}\n\n[동일 공통 Fact Index 보강 Evidence Pack]\n{_compact_json(augmented_pack)}\n\n[출력 JSON]\n{{\"response_mode\":\"{expected_mode}\",\"answer\":\"업무별 소제목을 포함한 최종 Markdown 답변\",\"used_evidence_ids\":[\"E1\"],\"used_fact_claim_ids\":[\"FI-CAND-001:F1\"],\"coverage_status\":\"SUFFICIENT|PARTIAL|INSUFFICIENT\",\"missing_information\":[]}}"""
     prompt_ms = (time.perf_counter() - prompt_started) * 1000
     parse_started = time.perf_counter()
     try:
