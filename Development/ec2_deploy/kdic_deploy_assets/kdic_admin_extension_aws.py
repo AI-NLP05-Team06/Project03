@@ -582,6 +582,7 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
     executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="kdic-admin-eval")
     drafts: dict[str, Any] = {"config": {}, "add": {}, "remove": set()}
     history_path = Path(os.getenv("KDIC_ADMIN_HISTORY_PATH", "/opt/kdic/runtime/admin_change_history.pkl")).resolve()
+    default_snapshot_path = Path(os.getenv("KDIC_ADMIN_DEFAULT_SNAPSHOT_PATH", "/opt/kdic/runtime/admin_default_snapshot.pkl")).resolve()
     pipeline_labels_path = Path(os.getenv("KDIC_PIPELINE_LABELS_PATH", "/opt/kdic/runtime/admin_pipeline_labels.json")).resolve()
 
     def load_pipeline_labels() -> dict[str, str]:
@@ -1167,6 +1168,26 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
                 "prompts": prompt_snapshot,
                 "vectors": {cid: np.asarray(vec, dtype=np.float32).copy() for cid, vec in runtime_globals["DENSE_VECTOR_BY_ID"].items()}}
 
+    def load_default_snapshot() -> dict[str, Any]:
+        """Load the immutable operating baseline, falling back to the first pre-apply snapshot."""
+        try:
+            loaded = pickle.loads(default_snapshot_path.read_bytes())
+            if isinstance(loaded, Mapping) and isinstance(loaded.get("chunks"), Sequence) and isinstance(loaded.get("vectors"), Mapping):
+                return copy.deepcopy(dict(loaded))
+        except (FileNotFoundError, OSError, pickle.PickleError, EOFError):
+            pass
+        # Existing installations already have a first history snapshot. It is
+        # the true baseline before their first administrator change, so retain
+        # it instead of capturing a possibly modified current runtime.
+        fallback = history[0]["snapshot"] if history else snapshot()
+        default_snapshot_path.parent.mkdir(parents=True, exist_ok=True)
+        temp = default_snapshot_path.with_suffix(default_snapshot_path.suffix + ".tmp")
+        temp.write_bytes(pickle.dumps(fallback, protocol=pickle.HIGHEST_PROTOCOL))
+        os.replace(temp, default_snapshot_path)
+        return copy.deepcopy(fallback)
+
+    default_snapshot = load_default_snapshot()
+
     def set_config(config: Mapping[str, Any]) -> None:
         mapping = {"DENSE_WEIGHT": "dense_weight", "BM25_WEIGHT": "bm25_weight", "CANDIDATE_DEPTH": "candidate_depth",
                    "FINAL_TOP_K": "final_top_k", "QUERY_FUSION_RRF_K": "query_fusion_rrf_k",
@@ -1530,6 +1551,48 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
                     except Exception: pass
                 if isinstance(error, HTTPException): raise
                 raise HTTPException(status_code=500, detail=f"반영 실패, 기존 상태 복구 시도 완료: {type(error).__name__}: {error}") from error
+
+    @app.post("/api/admin-ui/reset-defaults")
+    def reset_defaults(payload: ApplyPayload, _: None = Depends(require_admin_session)):
+        if payload.confirmation != "운영 기본값 초기화":
+            raise HTTPException(status_code=422, detail="확인 문구로 '운영 기본값 초기화'를 입력해 주세요.")
+        with mutation_lock, execution_lock:
+            before = None
+            try:
+                no_chat_jobs_running()
+                before = snapshot()
+                apply_snapshot(default_snapshot, archive_prompts=True)
+                version_id = f"reset-{time.strftime('%Y%m%d-%H%M%S')}-{uuid.uuid4().hex[:6]}"
+                history.append({
+                    "version_id": version_id,
+                    "created_at": time.time(),
+                    "snapshot": before,
+                    "active": True,
+                    "summary": {
+                        "config": {}, "added": [], "removed": [], "prompts": [],
+                        "label": "기본값 초기화 직전 상태",
+                    },
+                })
+                history[:] = history[-10:]
+                for row in history[:-1]:
+                    row["active"] = False
+                drafts["config"].clear(); drafts["add"].clear(); drafts["remove"].clear()
+                if prompt_manager is not None:
+                    prompt_manager.clear_draft()
+                save_history()
+                return {
+                    "reset": True,
+                    "version_id": version_id,
+                    "chunk_count": len(runtime_globals["CHUNKS"]),
+                    "active_config": active_config(),
+                }
+            except Exception as error:
+                if before is not None:
+                    try: apply_snapshot(before, archive_prompts=False)
+                    except Exception: pass
+                if isinstance(error, HTTPException):
+                    raise
+                raise HTTPException(status_code=500, detail=f"운영 기본값 초기화 실패: {type(error).__name__}: {error}") from error
 
     @app.post("/api/admin-ui/rollback/{version_id}")
     def rollback(version_id: str, _: None = Depends(require_admin_session)):

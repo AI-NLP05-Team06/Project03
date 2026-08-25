@@ -563,7 +563,10 @@ def admin_search(payload: AdminSearchRequest) -> dict[str, Any]:
             }
         ]
         domain_prefix = query_text.upper()
-        if re.fullmatch(r"[A-Z]{2}", domain_prefix):
+        # HP 같은 두 글자 도메인뿐 아니라 ADMIN-TEST-001처럼 사람이 입력한
+        # 전체/일부 청크 ID도 접두사로 찾는다. 한글 본문 검색은 위의
+        # search_text 검색이 담당한다.
+        if re.fullmatch(r"[A-Z0-9][A-Z0-9_-]{1,254}", domain_prefix):
             should_queries.append(
                 {"prefix": {"chunk_id": {"value": f"{domain_prefix}-"}}}
             )
