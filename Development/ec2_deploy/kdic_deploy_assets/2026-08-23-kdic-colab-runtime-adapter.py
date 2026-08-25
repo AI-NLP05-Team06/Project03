@@ -118,6 +118,18 @@ class LatestKDICNotebookAdapter:
         state: MutableMapping[str, Any],
         progress: Callable[[int, str], None] | None = None,
     ) -> Mapping[str, Any]:
+        lock = self.runtime.get("KDIC_RUNTIME_EXECUTION_LOCK")
+        if lock is None:
+            return self._execute(question, state, progress)
+        with lock:
+            return self._execute(question, state, progress)
+
+    def _execute(
+        self,
+        question: str,
+        state: MutableMapping[str, Any],
+        progress: Callable[[int, str], None] | None = None,
+    ) -> Mapping[str, Any]:
         progress = progress or (lambda *_: None)
         holder = self._holder(state)
         progress(10, "질문의 문맥과 업무를 확인하고 있습니다.")

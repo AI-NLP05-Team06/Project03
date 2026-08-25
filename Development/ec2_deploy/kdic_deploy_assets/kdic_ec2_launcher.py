@@ -20,6 +20,7 @@ from __future__ import annotations
 import importlib.util
 import os
 import sys
+import threading
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -38,6 +39,7 @@ def _load_file(name: str, path: Path):
 def main() -> None:
     # 1) Load the EC2-cleaned pipeline engine (real network/ES calls happen here)
     pipeline_module = _load_file("kdic_pipeline_engine", BASE_DIR / "kdic_pipeline_engine.py")
+    pipeline_module.KDIC_RUNTIME_EXECUTION_LOCK = threading.RLock()
 
     # Public chat and administrator UI share one versioned guardrail manager.
     guardrail_module = _load_file("kdic_guardrails", BASE_DIR / "kdic_guardrails.py")
@@ -84,8 +86,6 @@ def main() -> None:
 
     # 3) start_server_in_thread() above only starts a background thread --
     #    keep this process alive so systemd has something to supervise.
-    import threading
-
     threading.Event().wait()
 
 

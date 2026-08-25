@@ -5,11 +5,11 @@ import base64
 import copy
 import hashlib
 import hmac
-import inspect
 import io
 import json
 import math
 import os
+import pickle
 import secrets
 import threading
 import time
@@ -182,6 +182,8 @@ DEFAULT_PIPELINE_GRAPH_SPEC: list[dict[str, Any]] = [
         "stage": "RETRIEVAL",
         "description": "Structured Dense와 BM25-Nori 후보를 결합하고 다중 질의 결과를 융합합니다.",
         "symbols": ["fuse_query_results", "hybrid_minmax_search", "weighted_minmax"],
+        "setting_view": "runtime",
+        "settings": ["dense_weight", "bm25_weight", "candidate_depth", "query_fusion_rrf_k"],
     },
     {
         "id": "reranker",
@@ -189,6 +191,8 @@ DEFAULT_PIPELINE_GRAPH_SPEC: list[dict[str, Any]] = [
         "stage": "RETRIEVAL",
         "description": "Hybrid 후보에 질문-청크 관련성 점수를 다시 매겨 최종 순위를 정합니다.",
         "symbols": ["rerank_candidates"],
+        "setting_view": "runtime",
+        "settings": ["candidate_depth", "final_top_k"],
     },
     {
         "id": "parent_child",
@@ -197,6 +201,8 @@ DEFAULT_PIPELINE_GRAPH_SPEC: list[dict[str, Any]] = [
         "description": "상위 Child 청크를 유지하면서 Parent와 인접 문맥을 답변 근거로 확장합니다.",
         "symbols": ["expand_parent_context"],
         "enabled_flag": "PARENT_CHILD_ENABLED",
+        "setting_view": "runtime",
+        "settings": ["parent_child", "parent_context_max_chars"],
     },
     {
         "id": "evidence",
@@ -204,6 +210,8 @@ DEFAULT_PIPELINE_GRAPH_SPEC: list[dict[str, Any]] = [
         "stage": "EVIDENCE",
         "description": "검색 근거, 출처 URL, 업무별 Fact를 답변 모델이 사용할 구조로 묶습니다.",
         "symbols": ["build_compact_parent_evidence_pack_v1", "build_parent_basic_evidence_pack"],
+        "setting_view": "runtime",
+        "settings": ["final_top_k", "parent_context_max_chars"],
     },
     {
         "id": "answer_c",
@@ -211,6 +219,8 @@ DEFAULT_PIPELINE_GRAPH_SPEC: list[dict[str, Any]] = [
         "stage": "ANSWER",
         "description": "한 업무 안에서 근거 기반 기본 답변과 신청·처리 링크를 생성합니다.",
         "symbols": ["execute_bcd_variant_v3", "generate_answer_c_v3", "generate_basic_answer_b_v2"],
+        "setting_view": "prompts",
+        "settings": ["C_STRUCTURED_SYSTEM_PROMPT_V3"],
     },
     {
         "id": "answer_dc",
@@ -218,6 +228,8 @@ DEFAULT_PIPELINE_GRAPH_SPEC: list[dict[str, Any]] = [
         "stage": "ANSWER",
         "description": "서로 다른 업무의 근거를 분리해 구성한 뒤 교차 업무 답변을 생성합니다.",
         "symbols": ["generate_dc_twocall_v1", "execute_dc_variant_v1"],
+        "setting_view": "prompts",
+        "settings": ["DC_SKELETON_SYSTEM_PROMPT_V1", "DC_FINAL_SYSTEM_PROMPT_V1"],
     },
     {
         "id": "validation",
@@ -225,6 +237,8 @@ DEFAULT_PIPELINE_GRAPH_SPEC: list[dict[str, Any]] = [
         "stage": "VALIDATION",
         "description": "숫자, 적용 대상, 근거 참조, 허용된 행동 링크를 검증하고 제한 답변을 적용합니다.",
         "symbols": ["audit_dc_final_references_v1", "audit_numeric_support_dc_v1", "validate_basic_answer"],
+        "setting_view": "guardrails",
+        "settings": ["PII_MASKING", "FORBIDDEN_WORDS"],
     },
     {
         "id": "response",
@@ -254,62 +268,33 @@ DEFAULT_PIPELINE_GRAPH_EDGES: list[tuple[str, str, str]] = [
 ]
 
 
-def _pipeline_source_descriptor(
-    runtime: Mapping[str, Any], spec: Mapping[str, Any], source_root: Path
-) -> dict[str, Any] | None:
-    for symbol in spec.get("symbols") or []:
-        target = runtime.get(str(symbol))
-        if not callable(target):
-            continue
-        try:
-            source_file = Path(inspect.getsourcefile(target) or "").resolve()
-            if not source_file.is_file() or not source_file.is_relative_to(source_root):
-                continue
-            source_lines, line_start = inspect.getsourcelines(target)
-            source = "".join(source_lines)
-            return {
-                "symbol": getattr(target, "__name__", str(symbol)),
-                "module": getattr(target, "__module__", ""),
-                "file": source_file.relative_to(source_root).as_posix(),
-                "line_start": int(line_start),
-                "line_end": int(line_start + len(source_lines) - 1),
-                "signature": str(inspect.signature(target)),
-                "source_hash": hashlib.sha256(source.encode("utf-8")).hexdigest()[:12],
-                "source": source,
-            }
-        except (OSError, TypeError, ValueError):
-            continue
-    return None
-
-
-def _build_pipeline_graph(runtime: Mapping[str, Any], source_root: Path) -> dict[str, Any]:
+def _build_pipeline_graph(runtime: Mapping[str, Any]) -> dict[str, Any]:
     custom = runtime.get("KDIC_PIPELINE_GRAPH_SPEC")
     specs = custom.get("nodes") if isinstance(custom, Mapping) else None
     edges = custom.get("edges") if isinstance(custom, Mapping) else None
     specs = list(specs) if isinstance(specs, Sequence) and not isinstance(specs, (str, bytes)) else DEFAULT_PIPELINE_GRAPH_SPEC
     edges = list(edges) if isinstance(edges, Sequence) and not isinstance(edges, (str, bytes)) else DEFAULT_PIPELINE_GRAPH_EDGES
     nodes: list[dict[str, Any]] = []
-    source_index: dict[str, dict[str, Any]] = {}
     for raw in specs:
         spec = dict(raw)
         node_id = _clean(spec.get("id"))
         if not node_id:
             continue
-        descriptor = None if spec.get("virtual") else _pipeline_source_descriptor(runtime, spec, source_root)
         enabled_flag = _clean(spec.get("enabled_flag"))
         enabled = bool(runtime.get(enabled_flag)) if enabled_flag else True
+        settings = [str(value) for value in spec.get("settings") or [] if str(value)]
+        setting_view = _clean(spec.get("setting_view"))
         node = {
             "id": node_id,
             "label": _clean(spec.get("label")) or node_id,
             "stage": _clean(spec.get("stage")) or "PIPELINE",
             "description": _clean(spec.get("description")),
             "enabled": enabled,
-            "code_available": descriptor is not None,
-            "source": ({key: descriptor[key] for key in descriptor if key != "source"} if descriptor else None),
+            "configurable": bool(settings and setting_view),
+            "setting_view": setting_view or None,
+            "settings": settings,
         }
         nodes.append(node)
-        if descriptor:
-            source_index[node_id] = descriptor
     valid_ids = {node["id"] for node in nodes}
     public_edges = []
     for raw in edges:
@@ -322,7 +307,7 @@ def _build_pipeline_graph(runtime: Mapping[str, Any], source_root: Path) -> dict
         if source in valid_ids and target in valid_ids:
             public_edges.append({"source": source, "target": target, "label": label})
     fingerprint_text = json.dumps(
-        [{"id": node["id"], "hash": (node.get("source") or {}).get("source_hash"), "enabled": node["enabled"]} for node in nodes],
+        [{"id": node["id"], "settings": node["settings"], "enabled": node["enabled"]} for node in nodes],
         ensure_ascii=False,
         sort_keys=True,
     )
@@ -331,10 +316,10 @@ def _build_pipeline_graph(runtime: Mapping[str, Any], source_root: Path) -> dict
         "generated_at": time.time(),
         "fingerprint": hashlib.sha256(fingerprint_text.encode("utf-8")).hexdigest()[:16],
         "mode": "RUNTIME_INTROSPECTION" if custom is None else "RUNTIME_REGISTRY",
-        "read_only": True,
+        "read_only": False,
+        "code_access": False,
         "nodes": nodes,
         "edges": public_edges,
-        "_source_index": source_index,
     }
 
 
@@ -575,7 +560,26 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
     eval_jobs: dict[str, dict[str, Any]] = {}
     executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="kdic-admin-eval")
     drafts: dict[str, Any] = {"config": {}, "add": {}, "remove": set()}
-    history: list[dict[str, Any]] = []
+    history_path = Path(os.getenv("KDIC_ADMIN_HISTORY_PATH", "/opt/kdic/runtime/admin_change_history.pkl")).resolve()
+
+    def load_history() -> list[dict[str, Any]]:
+        try:
+            if not history_path.is_file():
+                return []
+            loaded = pickle.loads(history_path.read_bytes())
+            if not isinstance(loaded, list):
+                return []
+            return [row for row in loaded if isinstance(row, dict) and isinstance(row.get("snapshot"), Mapping)][-10:]
+        except Exception:
+            return []
+
+    def save_history() -> None:
+        history_path.parent.mkdir(parents=True, exist_ok=True)
+        temp = history_path.with_suffix(history_path.suffix + ".tmp")
+        temp.write_bytes(pickle.dumps(history[-10:], protocol=pickle.HIGHEST_PROTOCOL))
+        os.replace(temp, history_path)
+
+    history: list[dict[str, Any]] = load_history()
     initial_key = str(runtime_globals.get("HCX_API_KEY") or os.getenv("HCX_API_KEY") or "").strip()
     api_key_state: dict[str, Any] = {
         "configured": bool(initial_key),
@@ -586,6 +590,10 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
     }
     guardrail_manager = runtime_globals.get("KDIC_GUARDRAIL_MANAGER")
     prompt_manager = runtime_globals.get("KDIC_PROMPT_MANAGER")
+    execution_lock = runtime_globals.get("KDIC_RUNTIME_EXECUTION_LOCK")
+    if execution_lock is None:
+        execution_lock = threading.RLock()
+        runtime_globals["KDIC_RUNTIME_EXECUTION_LOCK"] = execution_lock
 
     def require_guardrail_manager() -> Any:
         if guardrail_manager is None:
@@ -639,9 +647,11 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
         return {key: row[key] for key in ("dataset_id", "filename", "sheet_name", "row_count", "usable_count", "warnings", "created_at")}
 
     def draft_public() -> dict[str, Any]:
+        prompt_state = prompt_manager.public() if prompt_manager is not None else {"has_changes": False, "slots": []}
         return {"active_config": active_config(), "candidate_config": _validate_config(drafts["config"], active_config()),
                 "add": list(drafts["add"].values()), "remove": sorted(drafts["remove"]),
-                "has_changes": bool(drafts["config"] or drafts["add"] or drafts["remove"]),
+                "prompt_changes": [row["slot"] for row in prompt_state.get("slots") or [] if row.get("changed")],
+                "has_changes": bool(drafts["config"] or drafts["add"] or drafts["remove"] or prompt_state.get("has_changes")),
                 "history": [{k: v for k, v in row.items() if k != "snapshot"} for row in history[-10:]][::-1]}
 
     def normalize_dataset(data: bytes, filename: str, requested_sheet: str | None) -> dict[str, Any]:
@@ -859,7 +869,12 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
         runtime_globals["PARENT_CHILDREN_BY_ID"], runtime_globals["CHUNK_PARENT_ID"] = parents, parent_ids
 
     def snapshot() -> dict[str, Any]:
+        prompt_snapshot = None
+        if prompt_manager is not None:
+            prompt_public = prompt_manager.public()
+            prompt_snapshot = {"version": prompt_public["active_version"], "values": prompt_manager.active_values()}
         return {"config": active_config(), "chunks": copy.deepcopy(list(runtime_globals["CHUNKS"])),
+                "prompts": prompt_snapshot,
                 "vectors": {cid: np.asarray(vec, dtype=np.float32).copy() for cid, vec in runtime_globals["DENSE_VECTOR_BY_ID"].items()}}
 
     def set_config(config: Mapping[str, Any]) -> None:
@@ -876,7 +891,7 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
             kw.update(top_k=int(config["final_top_k"]), rrf_k=int(config["query_fusion_rrf_k"]))
             fuse.__kwdefaults__ = kw
 
-    def apply_snapshot(target: Mapping[str, Any]) -> None:
+    def apply_snapshot(target: Mapping[str, Any], *, archive_prompts: bool = False) -> None:
         es, index = runtime_globals["ES"], str(runtime_globals["ES_INDEX_NAME"])
         current, desired = set(map(str, runtime_globals["CHUNKS_BY_ID"])), set(map(str, target["vectors"]))
         for cid in current - desired:
@@ -890,6 +905,13 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
         es.indices.refresh(index=index)
         rebuild_maps(copy.deepcopy(target["chunks"]), target["vectors"])
         set_config(target["config"])
+        prompt_target = target.get("prompts")
+        if prompt_manager is not None and isinstance(prompt_target, Mapping):
+            prompt_manager.activate(
+                prompt_target.get("values") or {},
+                version=str(prompt_target.get("version") or "prompt-restored"),
+                archive_current=archive_prompts,
+            )
 
     @app.get("/admin/bootstrap", include_in_schema=False)
     def admin_bootstrap(admin_token: str = Query(min_length=20, max_length=300)):
@@ -1067,7 +1089,7 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
         if payload.confirmation != "API 키 교체":
             raise HTTPException(status_code=422, detail="확인 문구로 'API 키 교체'를 입력해 주세요.")
         key = _validate_api_key_text(payload.api_key.get_secret_value())
-        with mutation_lock:
+        with mutation_lock, execution_lock:
             old_key = str(runtime_globals.get("HCX_API_KEY") or "")
             try:
                 no_chat_jobs_running()
@@ -1091,9 +1113,10 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
 
     @app.put("/api/admin-ui/draft/config")
     def put_config(payload: ConfigDraftPayload, _: None = Depends(require_admin_session)):
-        try: candidate = _validate_config(payload.values, active_config())
+        merged = {**dict(drafts["config"]), **dict(payload.values)}
+        try: candidate = _validate_config(merged, active_config())
         except Exception as error: raise HTTPException(status_code=422, detail=str(error)) from error
-        drafts["config"] = {key: candidate[key] for key in payload.values}
+        drafts["config"] = {key: candidate[key] for key in merged}
         return draft_public()
 
     @app.delete("/api/admin-ui/draft/config")
@@ -1137,13 +1160,17 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
 
     @app.delete("/api/admin-ui/draft")
     def clear_draft(_: None = Depends(require_admin_session)):
-        drafts["config"].clear(); drafts["add"].clear(); drafts["remove"].clear(); return draft_public()
+        drafts["config"].clear(); drafts["add"].clear(); drafts["remove"].clear()
+        if prompt_manager is not None:
+            prompt_manager.clear_draft()
+        return draft_public()
 
     @app.post("/api/admin-ui/apply")
     def apply(payload: ApplyPayload, _: None = Depends(require_admin_session)):
         if payload.confirmation != "운영 반영": raise HTTPException(status_code=422, detail="확인 문구로 '운영 반영'을 입력해 주세요.")
         if not draft_public()["has_changes"]: raise HTTPException(status_code=409, detail="반영할 초안이 없습니다.")
-        with mutation_lock:
+        with mutation_lock, execution_lock:
+            before = None
             try:
                 no_chat_jobs_running(); before = snapshot()
                 target_chunks = [copy.deepcopy(row) for row in runtime_globals["CHUNKS"] if str(row["chunk_id"]) not in drafts["remove"]]
@@ -1153,28 +1180,39 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
                     if vector.shape != (int(runtime_globals["DENSE_DIMENSION"]),): raise ValueError(f"{cid} 임베딩 차원 오류: {vector.shape}")
                     target_chunks = [row for row in target_chunks if str(row["chunk_id"]) != cid] + [copy.deepcopy(chunk)]
                     target_vectors[cid] = vector
-                target = {"config": _validate_config(drafts["config"], active_config()), "chunks": target_chunks, "vectors": target_vectors}
-                apply_snapshot(target)
                 version_id = f"ver-{time.strftime('%Y%m%d-%H%M%S')}-{uuid.uuid4().hex[:6]}"
+                prompt_changes = list(draft_public().get("prompt_changes") or [])
+                prompt_target = None
+                if prompt_manager is not None:
+                    prompt_target = {"version": f"{version_id}-prompt", "values": prompt_manager.draft_values()}
+                target = {"config": _validate_config(drafts["config"], active_config()), "chunks": target_chunks,
+                          "vectors": target_vectors, "prompts": prompt_target}
+                apply_snapshot(target, archive_prompts=bool(prompt_changes))
                 history.append({"version_id": version_id, "created_at": time.time(), "snapshot": before, "active": True,
-                                "summary": {"config": copy.deepcopy(drafts["config"]), "added": sorted(drafts["add"]), "removed": sorted(drafts["remove"])}})
+                                "summary": {"config": copy.deepcopy(drafts["config"]), "added": sorted(drafts["add"]),
+                                            "removed": sorted(drafts["remove"]), "prompts": prompt_changes,
+                                            "label": "초기 운영 상태" if not history else "이전 운영 상태"}})
+                history[:] = history[-10:]
                 for row in history[:-1]: row["active"] = False
                 drafts["config"].clear(); drafts["add"].clear(); drafts["remove"].clear()
+                save_history()
                 return {"applied": True, "version_id": version_id, "chunk_count": len(target_chunks), "active_config": active_config()}
             except Exception as error:
-                try: apply_snapshot(before)
-                except Exception: pass
+                if before is not None:
+                    try: apply_snapshot(before, archive_prompts=False)
+                    except Exception: pass
                 if isinstance(error, HTTPException): raise
                 raise HTTPException(status_code=500, detail=f"반영 실패, 기존 상태 복구 시도 완료: {type(error).__name__}: {error}") from error
 
     @app.post("/api/admin-ui/rollback/{version_id}")
     def rollback(version_id: str, _: None = Depends(require_admin_session)):
-        with mutation_lock:
+        with mutation_lock, execution_lock:
             try:
                 no_chat_jobs_running(); row = next((item for item in history if item["version_id"] == version_id), None)
                 if not row: raise HTTPException(status_code=404, detail="롤백 버전을 찾지 못했습니다.")
-                apply_snapshot(row["snapshot"])
+                apply_snapshot(row["snapshot"], archive_prompts=True)
                 for item in history: item["active"] = False
+                save_history()
                 return {"rolled_back": True, "version_id": version_id, "chunk_count": len(runtime_globals["CHUNKS"]), "active_config": active_config()}
             except HTTPException: raise
             except Exception as error: raise HTTPException(status_code=500, detail=f"롤백 실패: {type(error).__name__}: {error}") from error
@@ -1185,30 +1223,19 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
         if index is None:
             raise HTTPException(status_code=404, detail="반영 이력을 찾지 못했습니다.")
         history.pop(index)
+        save_history()
         return {"deleted": True, "version_id": version_id, "remaining": len(history)}
 
     @app.delete("/api/admin-ui/history")
     def clear_history(_: None = Depends(require_admin_session)):
         count = len(history)
         history.clear()
+        save_history()
         return {"cleared": True, "removed_count": count}
 
     @app.get("/api/admin-ui/pipeline/graph")
     def pipeline_graph(_: None = Depends(require_admin_session)):
-        graph = _build_pipeline_graph(runtime_globals, page.parent)
-        return {key: value for key, value in graph.items() if not key.startswith("_")}
-
-    @app.get("/api/admin-ui/pipeline/nodes/{node_id}/source")
-    def pipeline_node_source(node_id: str, _: None = Depends(require_admin_session)):
-        graph = _build_pipeline_graph(runtime_globals, page.parent)
-        descriptor = graph["_source_index"].get(_clean(node_id))
-        if descriptor is None:
-            raise HTTPException(status_code=404, detail="이 노드에 연결된 조회 가능 코드가 없습니다.")
-        return {
-            "node_id": _clean(node_id),
-            "read_only": True,
-            **descriptor,
-        }
+        return _build_pipeline_graph(runtime_globals)
 
     @app.get("/api/admin-ui/guardrails")
     def guardrails(_: None = Depends(require_admin_session)):
@@ -1282,27 +1309,47 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
         finally:
             prompt_compare_lock.release()
 
-    @app.post("/api/admin-ui/prompts/apply")
-    def prompts_apply(payload: PromptApplyPayload, _: None = Depends(require_admin_session)):
-        if payload.confirmation != "프롬프트 반영":
-            raise HTTPException(status_code=422, detail="확인 문구 '프롬프트 반영'을 정확히 입력해 주세요.")
-        return require_prompt_manager().apply_draft()
-
-    @app.post("/api/admin-ui/prompts/rollback/{version}")
-    def prompts_rollback(version: str, _: None = Depends(require_admin_session)):
+    @app.post("/api/admin-ui/chat/compare")
+    def chat_compare(payload: PromptComparePayload, _: None = Depends(require_admin_session)):
+        manager = require_prompt_manager()
+        guard = require_guardrail_manager().evaluate(payload.question, "input")
+        if guard["blocked"]:
+            raise HTTPException(status_code=400, detail="가드레일 차단 규칙에 해당하는 질문입니다.")
+        if not prompt_compare_lock.acquire(blocking=False):
+            raise HTTPException(status_code=409, detail="다른 최종 답변 A/B 비교가 실행 중입니다.")
         try:
-            return require_prompt_manager().rollback(version)
-        except KeyError as error:
-            raise HTTPException(status_code=404, detail="프롬프트 버전 이력을 찾지 못했습니다.") from error
+            before_config = active_config()
+            candidate_config = _validate_config(drafts["config"], before_config)
+            question = str(guard["text"])
+            with execution_lock:
+                set_config(before_config)
+                baseline = run_prompt_variant(question, manager.active_values())
+                set_config(candidate_config)
+                candidate = run_prompt_variant(question, manager.draft_values())
+            return {
+                "question": question,
+                "guardrail_hits": guard["hits"],
+                "baseline_config": before_config,
+                "candidate_config": candidate_config,
+                "changed_parameters": [key for key in before_config if before_config[key] != candidate_config[key]],
+                "changed_prompts": draft_public().get("prompt_changes") or [],
+                "baseline": baseline,
+                "candidate": candidate,
+            }
+        finally:
+            if "before_config" in locals():
+                with execution_lock:
+                    set_config(before_config)
+            prompt_compare_lock.release()
 
     @app.get("/api/admin-ui/capabilities")
     def capabilities(_: None = Depends(require_admin_session)):
         base = service_module.admin_capabilities(); features = list(base.get("features") or [])
-        for value in ("chat_pipeline_test", "runtime_config", "evaluation_dataset_upload", "evaluation_run", "evaluation_k_curve", "evaluation_record_delete", "parameter_apply", "chunk_staged_write", "draft_partial_clear", "rollback", "history_delete", "api_key_test", "api_key_runtime_rotation", "pipeline_runtime_graph", "pipeline_source_read", "guardrail_draft", "guardrail_test", "guardrail_apply", "guardrail_rollback", "prompt_draft", "prompt_compare", "prompt_apply", "prompt_rollback"):
+        for value in ("chat_pipeline_test", "chat_pipeline_compare", "runtime_config", "evaluation_dataset_upload", "evaluation_run", "evaluation_k_curve", "evaluation_record_delete", "parameter_apply", "chunk_staged_write", "draft_partial_clear", "rollback", "history_delete", "api_key_test", "api_key_runtime_rotation", "pipeline_runtime_graph", "pipeline_setting_links", "guardrail_draft", "guardrail_test", "guardrail_apply", "guardrail_rollback", "prompt_draft", "prompt_compare"):
             if value not in features: features.append(value)
         blocked = [v for v in (base.get("disabled_mutations") or []) if v not in {"document_write", "document_delete", "evaluation_run", "parameter_apply"}]
         return {**base, "admin_mode": "STAGED_WRITE", "features": features, "disabled_mutations": blocked}
 
     return {"installed": True, "page": str(page), "auth": "one_time_bootstrap_to_httponly_cookie",
             "session_ttl_seconds": SESSION_TTL_SECONDS, "mode": "STAGED_WRITE", "evaluation": "isolated_ab",
-            "mutations": "draft_validate_apply_rollback", "pipeline_studio": "dynamic_graph_read_only_source"}
+            "mutations": "draft_validate_apply_rollback", "pipeline_studio": "dynamic_graph_safe_settings"}

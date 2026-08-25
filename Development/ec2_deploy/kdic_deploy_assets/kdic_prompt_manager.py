@@ -148,6 +148,30 @@ class PromptManager:
             self._write(self.state)
             return self.public()
 
+    def activate(
+        self,
+        values: Mapping[str, Any],
+        *,
+        version: str | None = None,
+        archive_current: bool = True,
+    ) -> dict[str, Any]:
+        """Activate validated values for a unified administrator release."""
+        validated = _validate_values(values)
+        with self.lock:
+            if archive_current:
+                previous = {
+                    "version": self.state["active_version"],
+                    "values": copy.deepcopy(self.state["active_values"]),
+                    "archived_at": time.time(),
+                }
+                self.state["history"] = (list(self.state.get("history") or []) + [previous])[-20:]
+            self.state["active_version"] = version or f"prompt-{time.strftime('%Y%m%d-%H%M%S')}"
+            self.state["active_values"] = copy.deepcopy(validated)
+            self.state["draft_values"] = copy.deepcopy(validated)
+            self.state["updated_at"] = time.time()
+            self._write(self.state)
+            return self.public()
+
     def rollback(self, version: str) -> dict[str, Any]:
         with self.lock:
             row = next((item for item in self.state.get("history") or [] if item.get("version") == version), None)
