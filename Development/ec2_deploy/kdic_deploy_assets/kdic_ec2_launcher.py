@@ -39,6 +39,10 @@ def main() -> None:
     # 1) Load the EC2-cleaned pipeline engine (real network/ES calls happen here)
     pipeline_module = _load_file("kdic_pipeline_engine", BASE_DIR / "kdic_pipeline_engine.py")
 
+    # Public chat and administrator UI share one versioned guardrail manager.
+    guardrail_module = _load_file("kdic_guardrails", BASE_DIR / "kdic_guardrails.py")
+    pipeline_module.KDIC_GUARDRAIL_MANAGER = guardrail_module.build_guardrail_manager()
+
     # 2) Reuse the existing, already environment-agnostic launcher helper
     launcher = _load_file(
         "kdic_colab_launcher", BASE_DIR / "2026-08-23-kdic-colab-launcher.py"

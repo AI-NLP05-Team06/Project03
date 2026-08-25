@@ -4,6 +4,7 @@ import importlib.util
 import base64
 import os
 import sys
+import tempfile
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -18,6 +19,16 @@ ASSETS = ROOT / "kdic_deploy_assets"
 def load_extension():
     path = ASSETS / "kdic_admin_extension_aws.py"
     spec = importlib.util.spec_from_file_location("kdic_admin_extension_aws_test", path)
+    assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def load_guardrails():
+    path = ASSETS / "kdic_guardrails.py"
+    spec = importlib.util.spec_from_file_location("kdic_guardrails_test", path)
     assert spec and spec.loader
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module
@@ -57,6 +68,15 @@ def main() -> None:
         "CHUNKS_BY_ID": {"TEST_chunk_000": {"chunk_id": "TEST_chunk_000", "content": "테스트"}},
     }
     extension = load_extension()
+    guardrails_module = load_guardrails()
+    guardrail_dir = tempfile.TemporaryDirectory()
+    guardrail_manager = guardrails_module.GuardrailManager(Path(guardrail_dir.name) / "guardrails.json")
+    phone = guardrail_manager.evaluate("연락처는 010-1234-5678입니다", "input")
+    assert phone["text"] == "연락처는 [전화번호]입니다"
+    assert phone["blocked"] is False
+    secret = guardrail_manager.evaluate("키 nv-1234567890abcdefghijkl을 확인해줘", "input")
+    assert secret["blocked"] is True
+    runtime["KDIC_GUARDRAIL_MANAGER"] = guardrail_manager
     runtime["fuse_query_results"] = extension._clean
     policy = extension._validate_evaluation_policy(
         20,
@@ -109,6 +129,18 @@ def main() -> None:
         assert source.json()["source_hash"]
         assert "def _clean" in source.json()["source"]
         assert client.get("/api/admin-ui/pipeline/nodes/question/source").status_code == 404
+        guardrail_state = client.get("/api/admin-ui/guardrails")
+        assert guardrail_state.status_code == 200
+        assert len(guardrail_state.json()["active_rules"]) >= 4
+        tested = client.post(
+            "/api/admin-ui/guardrails/test",
+            json={"text": "010-1234-5678", "scope": "input"},
+        )
+        assert tested.status_code == 200
+        assert tested.json()["text"] == "[전화번호]"
+        assert client.post(
+            "/api/admin-ui/guardrails/apply", json={"confirmation": "잘못된 문구"}
+        ).status_code == 422
         assert client.get("/api/admin-ui/evaluations/jobs").status_code == 200
         config_draft = client.put(
             "/api/admin-ui/draft/config",
@@ -137,6 +169,9 @@ def main() -> None:
         assert "Recall@K 증가 곡선" in html
         assert "평가 검색 깊이" in html
         assert "PIPELINE STUDIO" in html
+        assert "가드레일 관리" in html
+
+    guardrail_dir.cleanup()
 
     print("AWS admin contract test: PASS")
 

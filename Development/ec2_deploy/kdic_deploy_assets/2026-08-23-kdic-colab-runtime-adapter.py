@@ -72,6 +72,31 @@ class LatestKDICNotebookAdapter:
             state["_kdic_controller"] = holder
         return holder
 
+    def _apply_output_guardrails(self, result: Mapping[str, Any]) -> dict[str, Any]:
+        output = dict(result)
+        manager = self.runtime.get("KDIC_GUARDRAIL_MANAGER")
+        if manager is None:
+            return output
+        audits = []
+        for key in ("answer", "display_answer", "basic_answer", "route_message"):
+            if not isinstance(output.get(key), str):
+                continue
+            audit = manager.evaluate(output[key], "output")
+            output[key] = audit["text"]
+            audits.extend(audit["hits"])
+        payload = output.get("payload")
+        if isinstance(payload, Mapping) and isinstance(payload.get("answer"), str):
+            payload_copy = dict(payload)
+            audit = manager.evaluate(payload_copy["answer"], "output")
+            payload_copy["answer"] = audit["text"]
+            output["payload"] = payload_copy
+            audits.extend(audit["hits"])
+        output["guardrail_audit"] = {
+            "version": manager.public()["active_version"],
+            "output_hit_rule_ids": list(dict.fromkeys(row["rule_id"] for row in audits)),
+        }
+        return output
+
     def configure(self, api_key: str) -> None:
         configure = self.runtime.get("_configure_hcx_runtime")
         if callable(configure):
@@ -113,7 +138,7 @@ class LatestKDICNotebookAdapter:
             if not isinstance(result, Mapping):
                 raise TypeError("KDIC 최종 정책 실행 결과가 dict가 아닙니다.")
             progress(94, "공식 출처와 후속 행동 링크를 확인하고 있습니다.")
-            return dict(result)
+            return self._apply_output_guardrails(result)
 
         progress(35, "호환용 B 파이프라인을 실행하고 있습니다.")
         run_fixed = self._required_callable("run_fixed_pipeline")
@@ -122,7 +147,7 @@ class LatestKDICNotebookAdapter:
         if not isinstance(result, Mapping):
             raise TypeError("KDIC 호환 파이프라인 결과가 dict가 아닙니다.")
         progress(94, "공식 출처를 확인하고 있습니다.")
-        return dict(result)
+        return self._apply_output_guardrails(result)
 
 
 def build_latest_kdic_pipeline(

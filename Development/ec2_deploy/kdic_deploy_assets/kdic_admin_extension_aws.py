@@ -100,6 +100,19 @@ class AdminLoginPayload(BaseModel):
     admin_token: SecretStr
 
 
+class GuardrailDraftPayload(BaseModel):
+    rules: list[dict[str, Any]] = Field(default_factory=list, max_length=100)
+
+
+class GuardrailTestPayload(BaseModel):
+    text: str = Field(min_length=1, max_length=10_000)
+    scope: str = Field(default="input", pattern="^(input|output)$")
+
+
+class GuardrailApplyPayload(BaseModel):
+    confirmation: str = Field(min_length=1, max_length=100)
+
+
 def _clean(value: Any) -> str:
     return " ".join(str(value or "").split()).strip()
 
@@ -558,6 +571,12 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
         "source": "AWS_ENV_FILE_OR_STARTUP",
         "scope": "AWS_RUNTIME_AND_ENV_FILE",
     }
+    guardrail_manager = runtime_globals.get("KDIC_GUARDRAIL_MANAGER")
+
+    def require_guardrail_manager() -> Any:
+        if guardrail_manager is None:
+            raise HTTPException(status_code=503, detail="가드레일 관리자가 현재 챗봇 런타임에 연결되지 않았습니다.")
+        return guardrail_manager
 
     def active_config() -> dict[str, Any]:
         return {"dense_weight": float(runtime_globals.get("DENSE_WEIGHT", .7)), "bm25_weight": float(runtime_globals.get("BM25_WEIGHT", .3)),
@@ -1152,10 +1171,42 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
             **descriptor,
         }
 
+    @app.get("/api/admin-ui/guardrails")
+    def guardrails(_: None = Depends(require_admin_session)):
+        return require_guardrail_manager().public()
+
+    @app.put("/api/admin-ui/guardrails/draft")
+    def guardrails_save_draft(payload: GuardrailDraftPayload, _: None = Depends(require_admin_session)):
+        try:
+            return require_guardrail_manager().save_draft(payload.rules)
+        except ValueError as error:
+            raise HTTPException(status_code=422, detail=str(error)) from error
+
+    @app.delete("/api/admin-ui/guardrails/draft")
+    def guardrails_clear_draft(_: None = Depends(require_admin_session)):
+        return require_guardrail_manager().clear_draft()
+
+    @app.post("/api/admin-ui/guardrails/test")
+    def guardrails_test(payload: GuardrailTestPayload, _: None = Depends(require_admin_session)):
+        return require_guardrail_manager().evaluate(payload.text, payload.scope, use_draft=True)
+
+    @app.post("/api/admin-ui/guardrails/apply")
+    def guardrails_apply(payload: GuardrailApplyPayload, _: None = Depends(require_admin_session)):
+        if payload.confirmation != "가드레일 반영":
+            raise HTTPException(status_code=422, detail="확인 문구 '가드레일 반영'을 정확히 입력해 주세요.")
+        return require_guardrail_manager().apply_draft()
+
+    @app.post("/api/admin-ui/guardrails/rollback/{version}")
+    def guardrails_rollback(version: str, _: None = Depends(require_admin_session)):
+        try:
+            return require_guardrail_manager().rollback(version)
+        except KeyError as error:
+            raise HTTPException(status_code=404, detail="가드레일 버전 이력을 찾지 못했습니다.") from error
+
     @app.get("/api/admin-ui/capabilities")
     def capabilities(_: None = Depends(require_admin_session)):
         base = service_module.admin_capabilities(); features = list(base.get("features") or [])
-        for value in ("chat_pipeline_test", "runtime_config", "evaluation_dataset_upload", "evaluation_run", "evaluation_k_curve", "evaluation_record_delete", "parameter_apply", "chunk_staged_write", "draft_partial_clear", "rollback", "history_delete", "api_key_test", "api_key_runtime_rotation", "pipeline_runtime_graph", "pipeline_source_read"):
+        for value in ("chat_pipeline_test", "runtime_config", "evaluation_dataset_upload", "evaluation_run", "evaluation_k_curve", "evaluation_record_delete", "parameter_apply", "chunk_staged_write", "draft_partial_clear", "rollback", "history_delete", "api_key_test", "api_key_runtime_rotation", "pipeline_runtime_graph", "pipeline_source_read", "guardrail_draft", "guardrail_test", "guardrail_apply", "guardrail_rollback"):
             if value not in features: features.append(value)
         blocked = [v for v in (base.get("disabled_mutations") or []) if v not in {"document_write", "document_delete", "evaluation_run", "parameter_apply"}]
         return {**base, "admin_mode": "STAGED_WRITE", "features": features, "disabled_mutations": blocked}

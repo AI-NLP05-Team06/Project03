@@ -365,8 +365,18 @@ def create_job(payload: ChatRequest) -> dict[str, str]:
             status_code=503,
             detail="KDIC 파이프라인이 연결되지 않았습니다.",
         )
+    question = payload.question
+    manager = getattr(RAW_PIPELINE_MODULE, "KDIC_GUARDRAIL_MANAGER", None) if RAW_PIPELINE_MODULE is not None else None
+    if manager is not None:
+        audit = manager.evaluate(question, "input")
+        if audit["blocked"]:
+            raise HTTPException(
+                status_code=400,
+                detail="민감정보 또는 관리자 차단 규칙이 감지되어 질문을 전송하지 않았습니다.",
+            )
+        question = audit["text"]
     try:
-        job_id = JOB_SERVICE.submit(payload.session_id, payload.question)
+        job_id = JOB_SERVICE.submit(payload.session_id, question)
     except ValueError as error:
         raise HTTPException(status_code=400, detail=str(error)) from error
     return {"job_id": job_id}
