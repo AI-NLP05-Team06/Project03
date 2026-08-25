@@ -113,6 +113,18 @@ class GuardrailApplyPayload(BaseModel):
     confirmation: str = Field(min_length=1, max_length=100)
 
 
+class PromptDraftPayload(BaseModel):
+    values: dict[str, str]
+
+
+class PromptComparePayload(BaseModel):
+    question: str = Field(min_length=2, max_length=4_000)
+
+
+class PromptApplyPayload(BaseModel):
+    confirmation: str = Field(min_length=1, max_length=100)
+
+
 def _clean(value: Any) -> str:
     return " ".join(str(value or "").split()).strip()
 
@@ -557,6 +569,7 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
     app, page = service_module.app, Path(html_path).resolve()
     sessions: dict[str, float] = {}
     auth_lock, mutation_lock, eval_lock = threading.RLock(), threading.RLock(), threading.RLock()
+    prompt_compare_lock = threading.Lock()
     bootstrap_state = {"used": False}
     datasets: dict[str, dict[str, Any]] = {}
     eval_jobs: dict[str, dict[str, Any]] = {}
@@ -572,11 +585,37 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
         "scope": "AWS_RUNTIME_AND_ENV_FILE",
     }
     guardrail_manager = runtime_globals.get("KDIC_GUARDRAIL_MANAGER")
+    prompt_manager = runtime_globals.get("KDIC_PROMPT_MANAGER")
 
     def require_guardrail_manager() -> Any:
         if guardrail_manager is None:
             raise HTTPException(status_code=503, detail="가드레일 관리자가 현재 챗봇 런타임에 연결되지 않았습니다.")
         return guardrail_manager
+
+    def require_prompt_manager() -> Any:
+        if prompt_manager is None:
+            raise HTTPException(status_code=503, detail="프롬프트 관리자가 현재 챗봇 런타임에 연결되지 않았습니다.")
+        return prompt_manager
+
+    def run_prompt_variant(question: str, values: Mapping[str, str]) -> dict[str, Any]:
+        override = runtime_globals.get("kdic_prompt_overrides")
+        if not callable(override):
+            raise HTTPException(status_code=503, detail="프롬프트 격리 실행기가 연결되지 않았습니다.")
+        started = time.perf_counter()
+        with override(dict(values)):
+            raw = service_module.PIPELINE_RUNTIME.run(question, {}, lambda *_: None)
+        public = service_module.core.normalize_public_result(raw)
+        return {
+            "route": public.get("route"),
+            "answer": public.get("answer"),
+            "answer_system": public.get("answer_system"),
+            "businesses": public.get("businesses") or [],
+            "sources": public.get("sources") or [],
+            "coverage_status": public.get("coverage_status"),
+            "validation_passed": public.get("validation_passed"),
+            "latency_seconds": public.get("latency_seconds") or {},
+            "wall_seconds": round(time.perf_counter() - started, 3),
+        }
 
     def active_config() -> dict[str, Any]:
         return {"dense_weight": float(runtime_globals.get("DENSE_WEIGHT", .7)), "bm25_weight": float(runtime_globals.get("BM25_WEIGHT", .3)),
@@ -1203,10 +1242,63 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
         except KeyError as error:
             raise HTTPException(status_code=404, detail="가드레일 버전 이력을 찾지 못했습니다.") from error
 
+    @app.get("/api/admin-ui/prompts")
+    def prompts(_: None = Depends(require_admin_session)):
+        return require_prompt_manager().public()
+
+    @app.put("/api/admin-ui/prompts/draft")
+    def prompts_save_draft(payload: PromptDraftPayload, _: None = Depends(require_admin_session)):
+        try:
+            return require_prompt_manager().save_draft(payload.values)
+        except ValueError as error:
+            raise HTTPException(status_code=422, detail=str(error)) from error
+
+    @app.delete("/api/admin-ui/prompts/draft")
+    def prompts_clear_draft(_: None = Depends(require_admin_session)):
+        return require_prompt_manager().clear_draft()
+
+    @app.post("/api/admin-ui/prompts/compare")
+    def prompts_compare(payload: PromptComparePayload, _: None = Depends(require_admin_session)):
+        manager = require_prompt_manager()
+        guard = require_guardrail_manager().evaluate(payload.question, "input")
+        if guard["blocked"]:
+            raise HTTPException(status_code=400, detail="가드레일 차단 규칙에 해당하는 질문입니다.")
+        if not prompt_compare_lock.acquire(blocking=False):
+            raise HTTPException(status_code=409, detail="다른 프롬프트 A/B 비교가 실행 중입니다.")
+        try:
+            question = str(guard["text"])
+            active = manager.active_values()
+            draft = manager.draft_values()
+            baseline = run_prompt_variant(question, active)
+            candidate = run_prompt_variant(question, draft)
+            return {
+                "question": question,
+                "guardrail_hits": guard["hits"],
+                "active_version": manager.public()["active_version"],
+                "baseline": baseline,
+                "candidate": candidate,
+                "changed_slots": [slot for slot in active if active[slot] != draft[slot]],
+            }
+        finally:
+            prompt_compare_lock.release()
+
+    @app.post("/api/admin-ui/prompts/apply")
+    def prompts_apply(payload: PromptApplyPayload, _: None = Depends(require_admin_session)):
+        if payload.confirmation != "프롬프트 반영":
+            raise HTTPException(status_code=422, detail="확인 문구 '프롬프트 반영'을 정확히 입력해 주세요.")
+        return require_prompt_manager().apply_draft()
+
+    @app.post("/api/admin-ui/prompts/rollback/{version}")
+    def prompts_rollback(version: str, _: None = Depends(require_admin_session)):
+        try:
+            return require_prompt_manager().rollback(version)
+        except KeyError as error:
+            raise HTTPException(status_code=404, detail="프롬프트 버전 이력을 찾지 못했습니다.") from error
+
     @app.get("/api/admin-ui/capabilities")
     def capabilities(_: None = Depends(require_admin_session)):
         base = service_module.admin_capabilities(); features = list(base.get("features") or [])
-        for value in ("chat_pipeline_test", "runtime_config", "evaluation_dataset_upload", "evaluation_run", "evaluation_k_curve", "evaluation_record_delete", "parameter_apply", "chunk_staged_write", "draft_partial_clear", "rollback", "history_delete", "api_key_test", "api_key_runtime_rotation", "pipeline_runtime_graph", "pipeline_source_read", "guardrail_draft", "guardrail_test", "guardrail_apply", "guardrail_rollback"):
+        for value in ("chat_pipeline_test", "runtime_config", "evaluation_dataset_upload", "evaluation_run", "evaluation_k_curve", "evaluation_record_delete", "parameter_apply", "chunk_staged_write", "draft_partial_clear", "rollback", "history_delete", "api_key_test", "api_key_runtime_rotation", "pipeline_runtime_graph", "pipeline_source_read", "guardrail_draft", "guardrail_test", "guardrail_apply", "guardrail_rollback", "prompt_draft", "prompt_compare", "prompt_apply", "prompt_rollback"):
             if value not in features: features.append(value)
         blocked = [v for v in (base.get("disabled_mutations") or []) if v not in {"document_write", "document_delete", "evaluation_run", "parameter_apply"}]
         return {**base, "admin_mode": "STAGED_WRITE", "features": features, "disabled_mutations": blocked}

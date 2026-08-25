@@ -43,6 +43,12 @@ def main() -> None:
     guardrail_module = _load_file("kdic_guardrails", BASE_DIR / "kdic_guardrails.py")
     pipeline_module.KDIC_GUARDRAIL_MANAGER = guardrail_module.build_guardrail_manager()
 
+    # Only the three prompts used by the currently active answer routes are
+    # versioned.  The pipeline reads active values at call time, while A/B tests
+    # use a context-local override and never overwrite public-chat globals.
+    prompt_module = _load_file("kdic_prompt_manager", BASE_DIR / "kdic_prompt_manager.py")
+    pipeline_module.KDIC_PROMPT_MANAGER = prompt_module.build_prompt_manager(vars(pipeline_module))
+
     # 2) Reuse the existing, already environment-agnostic launcher helper
     launcher = _load_file(
         "kdic_colab_launcher", BASE_DIR / "2026-08-23-kdic-colab-launcher.py"

@@ -5,6 +5,8 @@ interactive code replaced by environment-variable-driven config.
 from __future__ import annotations
 
 import os
+import contextvars
+from contextlib import contextmanager
 
 # ==== cell 7 ====
 
@@ -27,6 +29,36 @@ from elasticsearch import Elasticsearch, helpers
 from IPython.display import JSON, Markdown, clear_output, display
 from openai import BadRequestError, OpenAI
 from tqdm.auto import tqdm
+
+
+# 관리자 프롬프트 A/B 비교는 운영 프롬프트 전역값을 덮어쓰지 않는다.
+# ContextVar로 현재 요청 스레드에만 후보 프롬프트를 주입하고, 일반 챗봇
+# 요청은 KDIC_PROMPT_MANAGER의 운영 버전을 매 호출 시 읽는다.
+_KDIC_PROMPT_OVERRIDES: contextvars.ContextVar[dict[str, str] | None] = (
+    contextvars.ContextVar("kdic_prompt_overrides", default=None)
+)
+
+
+def _managed_prompt(name: str, default: str) -> str:
+    overrides = _KDIC_PROMPT_OVERRIDES.get()
+    if isinstance(overrides, dict) and name in overrides:
+        return str(overrides[name])
+    manager = globals().get("KDIC_PROMPT_MANAGER")
+    if manager is not None:
+        values = manager.active_values()
+        if name in values:
+            return str(values[name])
+    return str(default)
+
+
+@contextmanager
+def kdic_prompt_overrides(values: dict[str, str] | None):
+    """Temporarily apply prompt values to this execution context only."""
+    token = _KDIC_PROMPT_OVERRIDES.set(dict(values or {}))
+    try:
+        yield
+    finally:
+        _KDIC_PROMPT_OVERRIDES.reset(token)
 
 try:
     from google.colab import output as colab_output
@@ -4991,7 +5023,7 @@ def generate_answer_c_v3(
     prompt_ms = (time.perf_counter() - prompt_started) * 1000
 
     raw, usage, api_ms, trace = _call_answer_api_v1(
-        system_prompt=C_STRUCTURED_SYSTEM_PROMPT_V3,
+        system_prompt=_managed_prompt("C_STRUCTURED_SYSTEM_PROMPT_V3", C_STRUCTURED_SYSTEM_PROMPT_V3),
         user_prompt=prompt,
         max_tokens=1600,
     )
@@ -7330,7 +7362,7 @@ def generate_dc_twocall_v1(
     skeleton_prompt = _dc_skeleton_prompt_v1(question, answer_needs, relation_constraint, augmented_pack)
     skeleton_prompt_ms = (time.perf_counter() - skeleton_prompt_started) * 1000
     raw_skeleton, usage1, skeleton_api_ms, trace1 = _call_answer_api_v1(
-        system_prompt=DC_SKELETON_SYSTEM_PROMPT_V1,
+        system_prompt=_managed_prompt("DC_SKELETON_SYSTEM_PROMPT_V1", DC_SKELETON_SYSTEM_PROMPT_V1),
         user_prompt=skeleton_prompt,
         max_tokens=DC_SKELETON_MAX_TOKENS_V1,
     )
@@ -7348,7 +7380,7 @@ def generate_dc_twocall_v1(
     final_prompt = f"""[사용자 질문]\n{_clean_text(question)}\n\n[Answer Needs]\n{_compact_json(answer_needs)}\n\n[관계 주장 안전조건]\n{_compact_json(relation_constraint)}\n\n[검증된 Answer Skeleton]\n{_compact_json(skeleton)}\n\n[Skeleton 선택 C안 Evidence Pack]\n{_compact_json(selected_pack)}\n\n모든 Answer Need를 반영한 최종 Markdown 답변만 작성하세요."""
     final_prompt_ms = (time.perf_counter() - final_prompt_started) * 1000
     raw_answer, usage2, final_api_ms, trace2 = _call_answer_api_v1(
-        system_prompt=DC_FINAL_SYSTEM_PROMPT_V1,
+        system_prompt=_managed_prompt("DC_FINAL_SYSTEM_PROMPT_V1", DC_FINAL_SYSTEM_PROMPT_V1),
         user_prompt=final_prompt,
         max_tokens=DC_FINAL_MAX_TOKENS_V1,
     )
