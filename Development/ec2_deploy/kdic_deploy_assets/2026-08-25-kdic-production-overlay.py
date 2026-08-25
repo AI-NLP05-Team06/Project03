@@ -10,7 +10,7 @@ import kdic_lightweight_router_v1 as light_router
 
 KDIC_PRODUCTION_OVERLAY_SOURCE_SHA256 = "F9A908D62A43EA3A3566A5D8DF0E982F214373FFF96470A749DC1EFE79E25083"
 KDIC_PRODUCTION_OVERLAY_POLICY = "C_DEFAULT_DC2_COMPARE_ONLY_V1"
-KDIC_PRODUCTION_OVERLAY_REVISION = "2026-08-26-c-direct-json-contract-v6"
+KDIC_PRODUCTION_OVERLAY_REVISION = "2026-08-26-c-direct-structured-repair-v7"
 
 
 # ==== overlay: how-word-classification ====
@@ -3524,7 +3524,7 @@ def execute_dc_variant_v1(
 # ==== overlay: c-direct-runtime ====
 
 # C안 직접답변 1Call + D-C 1Call + D-C 2Call 세 방식 비교 UI
-C_THREEWAY_PROMPT_VERSION_V1 = "c-direct-cross-3perbusiness-v2"
+C_THREEWAY_PROMPT_VERSION_V1 = "c-direct-cross-3perbusiness-v3"
 C_THREEWAY_MAX_TOKENS_V1 = 2400
 C_THREEWAY_VARIANTS_V1 = ("C_1CALL", "DC_1CALL", "DC_2CALL")
 C_CROSS_DIRECT_SYSTEM_PROMPT_V1 = (
@@ -3544,6 +3544,68 @@ C_CROSS_DIRECT_SYSTEM_PROMPT_V1 = (
     "Evidence Pack에 없는 URL이나 연락처를 새로 만들지 마세요.\n"
     + DC_APPLICABILITY_SCOPE_RULES_V2
 )
+
+C_DIRECT_JSON_SCHEMA_V2 = {
+    "type": "object",
+    "properties": {
+        "response_mode": {"type": "string"},
+        "answer": {"type": "string"},
+        "used_evidence_ids": {"type": "array", "items": {"type": "string"}},
+        "used_fact_claim_ids": {"type": "array", "items": {"type": "string"}},
+        "coverage_status": {
+            "type": "string",
+            "enum": ["SUFFICIENT", "PARTIAL", "INSUFFICIENT"],
+        },
+        "missing_information": {"type": "array", "items": {"type": "string"}},
+    },
+    "required": [
+        "response_mode",
+        "answer",
+        "used_evidence_ids",
+        "used_fact_claim_ids",
+        "coverage_status",
+        "missing_information",
+    ],
+    "additionalProperties": False,
+}
+
+
+def _validate_c_direct_json_v2(
+    payload: Mapping[str, Any],
+    augmented_pack: Mapping[str, Any],
+    expected_mode: str,
+) -> dict[str, Any]:
+    answer = answer_b_core._strip_model_urls(str(payload.get("answer") or "").strip())
+    if not answer:
+        raise ValueError("C안 직접답변이 비어 있습니다.")
+    actual_mode = str(payload.get("response_mode") or "").upper()
+    if actual_mode != expected_mode:
+        raise ValueError("C안 response_mode이 예상 형식과 다릅니다.")
+
+    allowed_evidence = set(answer_b_core._allowed_evidence(augmented_pack))
+    allowed_facts = set(_allowed_fact_claims_v3(augmented_pack))
+    inline_evidence = set(re.findall(r"\[(E\d+)\]", answer))
+    inline_facts = set(re.findall(r"\[(FI-CAND-\d+:F\d+)\]", answer))
+    declared_evidence = set(answer_b_core._clean_list(payload.get("used_evidence_ids")))
+    declared_facts = set(_clean_fact_claim_keys_v3(payload.get("used_fact_claim_ids")))
+    if (inline_evidence - allowed_evidence) or (inline_facts - allowed_facts):
+        raise ValueError("C안 답변에 허용되지 않은 근거 ID가 있습니다.")
+    if not (inline_evidence or inline_facts):
+        raise ValueError("C안 답변에 인라인 근거 ID가 없습니다.")
+    if declared_evidence != inline_evidence or declared_facts != inline_facts:
+        raise ValueError("C안 선언 근거 ID와 인라인 근거 ID가 다릅니다.")
+
+    coverage = str(payload.get("coverage_status") or "PARTIAL").upper()
+    if coverage not in answer_b_core.ALLOWED_COVERAGE_STATUS:
+        raise ValueError("C안 coverage_status가 올바르지 않습니다.")
+    return {
+        "answer": answer,
+        "response_mode": actual_mode,
+        "used_evidence_ids": sorted(declared_evidence),
+        "used_fact_claim_ids": sorted(declared_facts),
+        "coverage_status": coverage,
+        "missing_information": answer_b_core._clean_list(payload.get("missing_information")),
+    }
 
 
 def audit_c_direct_references_v1(answer: str, payload: Mapping[str, Any], pack: Mapping[str, Any]) -> dict[str, Any]:
@@ -3653,41 +3715,41 @@ def generate_c_direct_threeway_v1(question: str, augmented_pack: Mapping[str, An
     prompt_started = time.perf_counter()
     prompt = f"""[사용자 질문]\n{_clean_text(question)}\n\n[expected_response_mode]\n{expected_mode}\n\n[업무별 Answer Needs]\n{_compact_json(answer_needs)}\n\n[관계 주장 안전조건]\n{_compact_json(relation_constraint)}\n\n[동일 공통 Fact Index 보강 Evidence Pack]\n{_compact_json(augmented_pack)}\n\n[출력 JSON]\n{{\"response_mode\":\"{expected_mode}\",\"answer\":\"업무별 소제목을 포함한 최종 Markdown 답변\",\"used_evidence_ids\":[\"E1\"],\"used_fact_claim_ids\":[\"FI-CAND-001:F1\"],\"coverage_status\":\"SUFFICIENT|PARTIAL|INSUFFICIENT\",\"missing_information\":[]}}"""
     prompt_ms = (time.perf_counter() - prompt_started) * 1000
-    raw, usage, api_ms, trace = _call_answer_api_v1(
-        system_prompt=C_CROSS_DIRECT_SYSTEM_PROMPT_V1,
-        user_prompt=prompt,
-        max_tokens=C_THREEWAY_MAX_TOKENS_V1,
-    )
     parse_started = time.perf_counter()
-    local_recovery = False
     try:
-        parsed = answer_b_core._extract_json_object(raw)
-        answer = answer_b_core._strip_model_urls(str(parsed.get("answer") or "").strip())
-        if not answer:
-            raise ValueError("C안 직접답변이 비어 있습니다.")
-        actual_mode = str(parsed.get("response_mode") or "").upper()
-        declared_evidence = [
-            value for value in answer_b_core._clean_list(parsed.get("used_evidence_ids"))
-            if value in answer_b_core._allowed_evidence(augmented_pack)
-        ]
-        declared_facts = [
-            value for value in _clean_fact_claim_keys_v3(parsed.get("used_fact_claim_ids"))
-            if value in _allowed_fact_claims_v3(augmented_pack)
-        ]
-        coverage = str(parsed.get("coverage_status") or "PARTIAL").upper()
-        if coverage not in answer_b_core.ALLOWED_COVERAGE_STATUS:
-            coverage = "PARTIAL"
-        missing = answer_b_core._clean_list(parsed.get("missing_information"))
-    except (ValueError, TypeError, json.JSONDecodeError):
-        local_recovery = True
-        answer = _extract_final_answer_from_tagged_raw_dc_v3(raw) or answer_b_core._strip_model_urls(str(raw).strip())
-        if not answer:
-            raise ValueError("C안 직접답변 출력이 비어 있습니다.")
-        actual_mode = "UNKNOWN"
-        declared_evidence = []
-        declared_facts = []
-        coverage = "PARTIAL"
-        missing = ["C안 JSON 출력 계약을 로컬 복구함"]
+        parsed, usage, api_ms, format_attempts = answer_b_core._call_structured(
+            client=ANSWER_HCX_CLIENT,
+            model=HCX_CHAT_MODEL,
+            system_prompt=C_CROSS_DIRECT_SYSTEM_PROMPT_V1,
+            user_prompt=prompt,
+            schema_name="kdic_c_direct_answer_v2",
+            schema=C_DIRECT_JSON_SCHEMA_V2,
+            max_tokens=C_THREEWAY_MAX_TOKENS_V1,
+            validator=lambda value: _validate_c_direct_json_v2(
+                value, augmented_pack, expected_mode
+            ),
+        )
+    except (ValueError, TypeError, json.JSONDecodeError) as error:
+        raise RuntimeError("C안 구조화 답변 검증에 실패했습니다.") from error
+    trace = dict(_LAST_ANSWER_API_TRACE)
+    safe_format_attempts = [
+        {
+            key: value
+            for key, value in row.items()
+            if key != "raw_output_preview"
+        }
+        for row in format_attempts
+    ]
+    structured_repair_used = any(
+        int(row.get("repair_index") or 0) > 0 for row in format_attempts
+    )
+    local_recovery = False
+    answer = parsed["answer"]
+    actual_mode = parsed["response_mode"]
+    declared_evidence = parsed["used_evidence_ids"]
+    declared_facts = parsed["used_fact_claim_ids"]
+    coverage = parsed["coverage_status"]
+    missing = parsed["missing_information"]
     parse_ms = (time.perf_counter() - parse_started) * 1000
 
     post_started = time.perf_counter()
@@ -3756,11 +3818,17 @@ def generate_c_direct_threeway_v1(question: str, augmented_pack: Mapping[str, An
         "output_contract_passed": output_contract_passed,
         "skeleton_source": "NONE_DIRECT_C",
         "plain_answer_fallback": local_recovery,
+        "structured_repair_used": structured_repair_used,
         "selected_evidence_pack": augmented_pack,
         "latency_ms": total_ms,
         "usage": usage,
         "api_calls": 1,
-        "attempts": [{"stage": "answer_c_direct", "latency_ms": api_ms, "trace": trace}],
+        "attempts": [{
+            "stage": "answer_c_direct",
+            "latency_ms": api_ms,
+            "trace": trace,
+            "format_attempts": safe_format_attempts,
+        }],
         "local_recovery": local_recovery,
         "stage_latency_ms": {
             "direct_prompt_build_ms": prompt_ms,
