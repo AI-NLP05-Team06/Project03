@@ -73,6 +73,8 @@ class EvaluationRunPayload(BaseModel):
     max_questions: int | None = Field(default=None, ge=1, le=5_000)
     evaluation_depth: int = Field(default=20, ge=1, le=200)
     metric_ks: dict[str, int] = Field(default_factory=lambda: dict(DEFAULT_METRIC_KS))
+    baseline_metric_ks: dict[str, int] | None = None
+    candidate_metric_ks: dict[str, int] | None = None
     curve_ks: list[int] = Field(default_factory=lambda: [1, 3, 5, 10, 20])
 
 
@@ -482,21 +484,27 @@ def _average_precision(retrieved: list[str], gold: set[str], k: int) -> float:
 
 def _validate_evaluation_policy(
     evaluation_depth: int,
-    metric_ks: Mapping[str, Any],
+    baseline_metric_ks: Mapping[str, Any],
+    candidate_metric_ks: Mapping[str, Any],
     curve_ks: Sequence[Any],
     *configs: Mapping[str, Any],
 ) -> dict[str, Any]:
-    unknown = sorted(set(metric_ks) - set(DEFAULT_METRIC_KS))
-    if unknown:
-        raise ValueError(f"지원하지 않는 평가지표입니다: {unknown}")
-    normalized = {name: int(metric_ks.get(name, default)) for name, default in DEFAULT_METRIC_KS.items()}
-    if any(value < 1 or value > 200 for value in normalized.values()):
-        raise ValueError("평가지표 K는 1~200이어야 합니다.")
+    def normalize(values: Mapping[str, Any], label: str) -> dict[str, int]:
+        unknown = sorted(set(values) - set(DEFAULT_METRIC_KS))
+        if unknown:
+            raise ValueError(f"{label}에서 지원하지 않는 평가지표입니다: {unknown}")
+        normalized = {name: int(values.get(name, default)) for name, default in DEFAULT_METRIC_KS.items()}
+        if any(value < 1 or value > 200 for value in normalized.values()):
+            raise ValueError(f"{label} 평가지표 K는 1~200이어야 합니다.")
+        return normalized
+
+    baseline_ks = normalize(baseline_metric_ks, "현재안")
+    candidate_ks = normalize(candidate_metric_ks, "개선안")
     curve = sorted(set(int(value) for value in curve_ks))
     if not curve or any(value < 1 or value > 200 for value in curve):
         raise ValueError("구간 차트 K는 1~200의 값을 하나 이상 지정해야 합니다.")
     depth = int(evaluation_depth)
-    required_depth = max([*normalized.values(), *curve])
+    required_depth = max([*baseline_ks.values(), *candidate_ks.values(), *curve])
     if depth < required_depth:
         raise ValueError(f"평가 검색 깊이는 모든 지표 K 이상이어야 합니다. 최소 {required_depth}이 필요합니다.")
     candidate_limit = min(int(config["candidate_depth"]) for config in configs) if configs else 200
@@ -504,7 +512,8 @@ def _validate_evaluation_policy(
         raise ValueError(f"평가 검색 깊이 {depth}는 A/B 후보 깊이의 최솟값 {candidate_limit} 이하여야 합니다.")
     return {
         "evaluation_depth": depth,
-        "metric_ks": normalized,
+        "baseline_metric_ks": baseline_ks,
+        "candidate_metric_ks": candidate_ks,
         "curve_ks": curve,
         "required_depth": required_depth,
     }
@@ -838,13 +847,18 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
             fused = [row for row in fused if float(score_fn(row)) >= threshold]
         return [str(row["chunk_id"]) for row in fused[:metric_depth]], (time.perf_counter() - started) * 1000
 
-    def aggregate(rows: list[dict[str, Any]], prefix: str, policy: Mapping[str, Any]) -> dict[str, Any]:
-        metric_keys = [f"{name}_at_{k}" for name, k in policy["metric_ks"].items()]
+    def aggregate(
+        rows: list[dict[str, Any]],
+        prefix: str,
+        metric_ks: Mapping[str, int],
+        curve_ks: Sequence[int],
+    ) -> dict[str, Any]:
+        metric_keys = [f"{name}_at_{k}" for name, k in metric_ks.items()]
         out: dict[str, Any] = {}
         for key in metric_keys:
             values = [row[prefix][key] for row in rows if row[prefix][key] is not None]
             out[key] = sum(float(value) for value in values) / len(values) if values else None
-        complete_key = f"complete_at_{policy['metric_ks']['complete']}"
+        complete_key = f"complete_at_{metric_ks['complete']}"
         complete = [row[prefix][complete_key] for row in rows if row[prefix][complete_key] is not None]
         out.update(
             complete_question_count=len(complete),
@@ -855,7 +869,7 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
                     name: sum(float(row[prefix]["curve"][str(k)][name]) for row in rows) / len(rows)
                     for name in ("hit", "recall", "precision")
                 }
-                for k in policy["curve_ks"]
+                for k in curve_ks
             },
         )
         return out
@@ -866,36 +880,58 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
         values: Mapping[str, Any],
         max_questions: int | None,
         evaluation_depth: int,
-        metric_ks: Mapping[str, int],
+        baseline_metric_ks: Mapping[str, int],
+        candidate_metric_ks: Mapping[str, int],
         curve_ks: Sequence[int],
     ) -> None:
         try:
             record, baseline = datasets[dataset_id], active_config()
             candidate = _validate_config(values, baseline)
-            policy = _validate_evaluation_policy(evaluation_depth, metric_ks, curve_ks, baseline, candidate)
+            policy = _validate_evaluation_policy(
+                evaluation_depth, baseline_metric_ks, candidate_metric_ks, curve_ks, baseline, candidate
+            )
+            baseline_ks = policy["baseline_metric_ks"]
+            candidate_ks = policy["candidate_metric_ks"]
             source = record["usable"][:max_questions] if max_questions else record["usable"]
             details = []
             for index, row in enumerate(source, 1):
                 base_ids, base_ms = search_one(row["question"], baseline, policy["evaluation_depth"])
                 cand_ids, cand_ms = search_one(row["question"], candidate, policy["evaluation_depth"])
                 details.append({**row, "baseline_retrieved": base_ids, "candidate_retrieved": cand_ids,
-                                "baseline": _metrics(base_ids, row["gold_chunk_ids"], row["multi_chunk_required"], policy["metric_ks"], policy["curve_ks"]),
-                                "candidate": _metrics(cand_ids, row["gold_chunk_ids"], row["multi_chunk_required"], policy["metric_ks"], policy["curve_ks"]),
+                                "baseline": _metrics(base_ids, row["gold_chunk_ids"], row["multi_chunk_required"], baseline_ks, policy["curve_ks"]),
+                                "candidate": _metrics(cand_ids, row["gold_chunk_ids"], row["multi_chunk_required"], candidate_ks, policy["curve_ks"]),
                                 "baseline_latency_ms": base_ms, "candidate_latency_ms": cand_ms})
                 with eval_lock:
                     eval_jobs[job_id].update(progress=round(index / len(source) * 100), processed=index, updated_at=time.time())
-            base_metrics, cand_metrics = aggregate(details, "baseline", policy), aggregate(details, "candidate", policy)
-            delta = {key: None if base_metrics.get(key) is None or cand_metrics.get(key) is None else cand_metrics[key] - base_metrics[key]
-                     for key in base_metrics if key not in {"question_count", "complete_question_count", "curve"}}
+            base_metrics = aggregate(details, "baseline", baseline_ks, policy["curve_ks"])
+            cand_metrics = aggregate(details, "candidate", candidate_ks, policy["curve_ks"])
+            definitions = [
+                {
+                    "name": name,
+                    "label": METRIC_LABELS[name],
+                    "baseline_k": baseline_ks[name],
+                    "candidate_k": candidate_ks[name],
+                    "baseline_key": f"{name}_at_{baseline_ks[name]}",
+                    "candidate_key": f"{name}_at_{candidate_ks[name]}",
+                }
+                for name in DEFAULT_METRIC_KS
+            ]
+            delta = {
+                definition["name"]: (
+                    None
+                    if base_metrics.get(definition["baseline_key"]) is None
+                    or cand_metrics.get(definition["candidate_key"]) is None
+                    else cand_metrics[definition["candidate_key"]] - base_metrics[definition["baseline_key"]]
+                )
+                for definition in definitions
+            }
+            delta["latency_avg_ms"] = cand_metrics["latency_avg_ms"] - base_metrics["latency_avg_ms"]
             with eval_lock:
                 eval_jobs[job_id].update(status="done", progress=100, updated_at=time.time(), result={
                     "dataset": dataset_summary(record),
                     "evaluation_scope": "검색 계층 A/B: Structured Dense + BM25-Nori + Min-Max + BGE Reranker (질의분해/답변생성 제외)",
                     "evaluation_policy": policy,
-                    "metric_definitions": [
-                        {"name": name, "label": METRIC_LABELS[name], "k": k, "key": f"{name}_at_{k}"}
-                        for name, k in policy["metric_ks"].items()
-                    ],
+                    "metric_definitions": definitions,
                     "baseline_config": baseline, "candidate_config": candidate, "baseline": base_metrics,
                     "candidate": cand_metrics, "delta": delta, "details": details})
         except Exception as error:
@@ -911,9 +947,10 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
         for detail in result.get("details") or []:
             current_values, improvement_values = [], []
             for definition in definitions:
-                key = str(definition.get("key") or "")
-                current = (detail.get("baseline") or {}).get(key)
-                improvement = (detail.get("candidate") or {}).get(key)
+                baseline_key = str(definition.get("baseline_key") or definition.get("key") or "")
+                candidate_key = str(definition.get("candidate_key") or definition.get("key") or "")
+                current = (detail.get("baseline") or {}).get(baseline_key)
+                improvement = (detail.get("candidate") or {}).get(candidate_key)
                 if current is None or improvement is None:
                     continue
                 current_values.append(float(current))
@@ -942,12 +979,15 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
         counts = {name: sum(row["verdict"] == name for row in rows) for name in ("improved", "degraded", "unchanged")}
         metric_changes = []
         for definition in definitions:
-            key = str(definition.get("key") or "")
+            baseline_key = str(definition.get("baseline_key") or definition.get("key") or "")
+            candidate_key = str(definition.get("candidate_key") or definition.get("key") or "")
+            baseline_k = definition.get("baseline_k", definition.get("k"))
+            candidate_k = definition.get("candidate_k", definition.get("k"))
             metric_changes.append({
-                "metric": f"{definition.get('label')}@{definition.get('k')}",
-                "current": (result.get("baseline") or {}).get(key),
-                "improvement": (result.get("candidate") or {}).get(key),
-                "delta": (result.get("delta") or {}).get(key),
+                "metric": f"{definition.get('label')} (현재 @{baseline_k} / 개선 @{candidate_k})",
+                "current": (result.get("baseline") or {}).get(baseline_key),
+                "improvement": (result.get("candidate") or {}).get(candidate_key),
+                "delta": (result.get("delta") or {}).get(definition.get("name")),
             })
         latency_delta = (result.get("delta") or {}).get("latency_avg_ms")
         return {
@@ -1275,7 +1315,16 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
         try:
             baseline = active_config()
             candidate = _validate_config(payload.candidate, baseline)
-            policy = _validate_evaluation_policy(payload.evaluation_depth, payload.metric_ks, payload.curve_ks, baseline, candidate)
+            baseline_metric_ks = payload.baseline_metric_ks or payload.metric_ks
+            candidate_metric_ks = payload.candidate_metric_ks or payload.metric_ks
+            policy = _validate_evaluation_policy(
+                payload.evaluation_depth,
+                baseline_metric_ks,
+                candidate_metric_ks,
+                payload.curve_ks,
+                baseline,
+                candidate,
+            )
         except Exception as error: raise HTTPException(status_code=422, detail=str(error)) from error
         job_id = f"eval-{uuid.uuid4().hex[:12]}"
         eval_jobs[job_id] = {"job_id": job_id, "status": "running", "progress": 0, "processed": 0,
@@ -1283,7 +1332,7 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
                              "evaluation_policy": policy, "created_at": time.time(), "updated_at": time.time(),
                              "error": None, "result": None}
         executor.submit(run_evaluation, job_id, payload.dataset_id, payload.candidate, payload.max_questions,
-                        payload.evaluation_depth, payload.metric_ks, payload.curve_ks)
+                        payload.evaluation_depth, baseline_metric_ks, candidate_metric_ks, payload.curve_ks)
         return {k: v for k, v in eval_jobs[job_id].items() if k != "result"}
 
     @app.get("/api/admin-ui/evaluations/jobs")
