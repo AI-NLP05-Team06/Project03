@@ -31,8 +31,8 @@ class LatestKDICNotebookAdapter:
         "dc1_enabled": False,
         "build_sha256": "F9A908D62A43EA3A3566A5D8DF0E982F214373FFF96470A749DC1EFE79E25083",
         "overlay_file": "2026-08-25-kdic-production-overlay.py",
-        "overlay_revision": "2026-08-25-runtime-symbol-completion-v3",
-        "adapter_version": "2026-08-25-ec2-production-v3",
+        "overlay_revision": "2026-08-25-context-scope-and-fallback-v4",
+        "adapter_version": "2026-08-25-ec2-production-v4",
     }
 
     def __init__(self, runtime_globals: Mapping[str, Any]):

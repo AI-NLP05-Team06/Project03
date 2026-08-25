@@ -10,7 +10,7 @@ import kdic_lightweight_router_v1 as light_router
 
 KDIC_PRODUCTION_OVERLAY_SOURCE_SHA256 = "F9A908D62A43EA3A3566A5D8DF0E982F214373FFF96470A749DC1EFE79E25083"
 KDIC_PRODUCTION_OVERLAY_POLICY = "C_DEFAULT_DC2_COMPARE_ONLY_V1"
-KDIC_PRODUCTION_OVERLAY_REVISION = "2026-08-25-runtime-symbol-completion-v3"
+KDIC_PRODUCTION_OVERLAY_REVISION = "2026-08-25-context-scope-and-fallback-v4"
 
 
 # ==== overlay: how-word-classification ====
@@ -474,6 +474,64 @@ def new_bd_comparison_state() -> dict[str, Any]:
     return new_context_state()
 
 
+def _current_question_scoped_analysis_v1(
+    question: str,
+    analysis: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Prevent explicit current-question businesses from inheriting old scope."""
+
+    output = dict(analysis)
+    if str(output.get("route") or "").upper() != "RETRIEVE":
+        return output
+    try:
+        current_businesses = order_businesses_by_question_p0_v1(
+            question,
+            list(light_router.find_businesses(question) or []),
+        )
+    except Exception:
+        current_businesses = []
+    if not 1 <= len(current_businesses) <= NEED_BATCH_MAX_BUSINESSES_V5:
+        return output
+
+    if len(current_businesses) == 1:
+        subqueries: list[str] = []
+        plans = [{"query": question, "weight": 1.0, "source": "ORIGINAL"}]
+    else:
+        subqueries = build_p0_cross_business_subqueries_v1(question, current_businesses)
+        if len(subqueries) != len(current_businesses):
+            return output
+        sub_weight = V15_SUBQUERY_TOTAL_WEIGHT / len(subqueries)
+        plans = [{
+            "query": question,
+            "weight": V15_ORIGINAL_WEIGHT,
+            "source": "ORIGINAL_ANCHOR",
+        }]
+        plans.extend({
+            "query": subquery,
+            "weight": sub_weight,
+            "source": "P0_RULE_DECOMPOSED",
+        } for subquery in subqueries)
+
+    output.update({
+        "resolved_question": question,
+        "normalized_question": question,
+        "businesses": current_businesses,
+        "question_businesses": current_businesses,
+        "cross_business_candidate": len(current_businesses) >= 2,
+        "p0_cross_preserved": len(current_businesses) >= 2,
+        "decomposition_source": (
+            "P0_RULE_CROSS_PRESERVED" if len(current_businesses) >= 2 else "NOT_REQUIRED"
+        ),
+        "decomposition_accepted": bool(subqueries),
+        "subqueries": subqueries,
+        "plans": plans,
+        "query_plan_valid": True,
+        "context_used": False,
+        "context_override_reason": "EXPLICIT_CURRENT_BUSINESS_SCOPE",
+    })
+    return output
+
+
 def _cross_business_scope_count_v5(
     analysis: Mapping[str, Any],
     plans: Sequence[Mapping[str, Any]],
@@ -529,7 +587,10 @@ def prepare_common_retrieval_v1(
     _LAST_RERANK_TRACE = {}
     _LAST_PARENT_CHILD_TRACE = {}
 
-    analysis = ANALYZER_FUNCTIONS["v15"](question, state)
+    analysis = _current_question_scoped_analysis_v1(
+        question,
+        ANALYZER_FUNCTIONS["v15"](question, state),
+    )
     analysis_ms = (time.perf_counter() - total_started) * 1000
     if analysis["route"] != "RETRIEVE":
         return {
@@ -760,7 +821,7 @@ ANSWER_PROMPT_VERSION = (
     f"-score{NEED_BATCH_MIN_RERANKER_SCORE_V5:.6f}"
 )
 
-_FUSE_QUERY_RESULTS_V4_1 = fuse_query_results
+_FUSE_QUERY_RESULTS_V4_1 = globals().get("_FUSE_QUERY_RESULTS_V4_1") or fuse_query_results
 _LAST_NEED_BATCH_CONTEXT_V5: dict[str, Any] = {}
 
 
@@ -2462,6 +2523,73 @@ def order_businesses_by_question_p0_v1(
     return [business for _position, _index, business in sorted(positioned)]
 
 
+def _business_local_segments_p0_v1(
+    question: str,
+    businesses: Sequence[str],
+) -> dict[str, str]:
+    anchors = []
+    for business in businesses:
+        terms = list((light_router.BUSINESS_KEYWORDS or {}).get(business) or [])
+        positions = [
+            (question.find(term), term)
+            for term in terms
+            if term and question.find(term) >= 0
+        ]
+        if positions:
+            position, term = min(positions, key=lambda row: row[0])
+            anchors.append((position, business, term))
+    anchors.sort(key=lambda row: row[0])
+    segments = {}
+    for index, (start, business, _term) in enumerate(anchors):
+        end = anchors[index + 1][0] if index + 1 < len(anchors) else len(question)
+        segments[business] = question[start:end]
+    return segments
+
+
+def _business_need_topic_p0_v1(local_text: str, full_question: str) -> str:
+    local = str(local_text or "")
+    full = str(full_question or "")
+    if re.search(r"포상금|회수기여|신고.*금액", local):
+        return "신고 포상금 지급 기준과 금액"
+    if re.search(r"조회|확인", local):
+        return "조회 방법과 확인 절차"
+    if re.search(r"서류|구비|준비물|양식", local):
+        return "필요 서류와 준비 절차"
+    if re.search(r"지급\s*조건", local):
+        return "지급 조건"
+    if re.search(r"대상|자격|조건", local) or re.search(r"신청\s*대상|자격", full):
+        return "신청 대상과 자격 조건"
+    if re.search(r"한도|금액|얼마", local):
+        return "금액과 한도"
+    if re.search(r"기간|기한|언제|얼마나\s*걸", local):
+        return "신청 기한과 처리 기간"
+    if re.search(r"신청|접수|청구|신고|하려면", local):
+        return "신청 대상 조건과 신청 절차"
+    if re.search(r"동시에|같이|함께|한\s*번에|병행", full):
+        return "신청 대상 조건과 신청 절차"
+    if HOW_COMPARE_PATTERN_V1.search(full):
+        return "제도 개요와 주요 대상 및 이용 목적"
+    return "제도 개요와 이용 절차"
+
+
+def build_p0_cross_business_subqueries_v1(
+    question: str,
+    businesses: Sequence[str],
+) -> list[str]:
+    ordered = list(dict.fromkeys(str(value) for value in businesses if str(value)))
+    if not 2 <= len(ordered) <= NEED_BATCH_MAX_BUSINESSES_V5:
+        return []
+    segments = _business_local_segments_p0_v1(question, ordered)
+    subqueries = [
+        f"{business} {_business_need_topic_p0_v1(segments.get(business, ''), question)}"
+        for business in ordered
+    ]
+    detected = [list(light_router.find_businesses(query) or []) for query in subqueries]
+    if any(values != [business] for values, business in zip(detected, ordered)):
+        return []
+    return subqueries
+
+
 def is_cross_business_dc_v1(common: Mapping[str, Any]) -> tuple[bool, dict[str, Any]]:
     analysis = dict(common.get("analysis") or {})
     pack = dict(common.get("evidence_pack") or {})
@@ -2566,7 +2694,7 @@ DC_ONECALL_SYSTEM_PROMPT_V1 = (
 )
 
 
-_VALIDATE_DC_SKELETON_GENERAL_V1 = validate_dc_skeleton_v1
+_VALIDATE_DC_SKELETON_GENERAL_V1 = globals().get("_VALIDATE_DC_SKELETON_GENERAL_V1") or validate_dc_skeleton_v1
 
 
 def _fact_claim_business_map_dc_v1(pack: Mapping[str, Any]) -> dict[str, str]:
@@ -2667,7 +2795,7 @@ def _dc_skeleton_prompt_v1(
     return f"""[사용자 질문]\n{_clean_text(question)}\n\n[expected_response_mode]\n{expected_mode}\n\n[업무별 Answer Needs]\n{_compact_json(answer_needs)}\n\n[관계 주장 안전조건]\n{_compact_json(relation_constraint)}\n\n[C안 Fact Index 보강 Evidence Pack]\n{_compact_json(augmented_pack)}\n\n[출력 JSON]\n{{\"response_mode\":\"{expected_mode}\",\"core_answer\":\"핵심 결론\",\"answer_items\":[{{\"need_id\":\"N1\",\"business_function\":\"업무명\",\"topic\":\"항목\",\"status\":\"ANSWERED|PARTIAL|UNSUPPORTED\",\"claim\":\"근거 사실\",\"conditions\":[],\"details\":[],\"evidence_ids\":[\"E1\"],\"fact_claim_ids\":[\"FI-CAND-001:F1\"],\"missing_reason\":\"\"}}],\"cross_need_relation\":{{\"requested\":false,\"supported\":false,\"claim\":\"\",\"evidence_ids\":[],\"fact_claim_ids\":[],\"missing_reason\":\"\"}},\"uncertainties\":[],\"conflicts\":[]}}"""
 
 
-_GENERATE_DC_TWOCALL_GENERAL_V1 = generate_dc_twocall_v1
+_GENERATE_DC_TWOCALL_GENERAL_V1 = globals().get("_GENERATE_DC_TWOCALL_GENERAL_V1") or generate_dc_twocall_v1
 
 
 def generate_dc_twocall_v1(
@@ -2796,7 +2924,7 @@ def generate_dc_onecall_v1(
     }
 
 
-_EXECUTE_DC_GENERAL_V1 = execute_dc_variant_v1
+_EXECUTE_DC_GENERAL_V1 = globals().get("_EXECUTE_DC_GENERAL_V1") or execute_dc_variant_v1
 
 
 def execute_dc_variant_v1(
@@ -2917,7 +3045,7 @@ DC_FINAL_SYSTEM_PROMPT_V1 = DC_FINAL_SYSTEM_PROMPT_V1 + "\n\n" + DC_APPLICABILIT
 DC_ONECALL_SYSTEM_PROMPT_V1 = DC_ONECALL_SYSTEM_PROMPT_V1 + "\n\n" + DC_APPLICABILITY_SCOPE_RULES_V2
 
 
-_PARSE_ONECALL_STRICT_BEFORE_FALLBACK_V2 = _parse_onecall_output_dc_v2
+_PARSE_ONECALL_STRICT_BEFORE_FALLBACK_V2 = globals().get("_PARSE_ONECALL_STRICT_BEFORE_FALLBACK_V2") or _parse_onecall_output_dc_v2
 
 
 def _parse_onecall_output_dc_v2(raw: str) -> dict[str, Any]:
@@ -3080,8 +3208,8 @@ def apply_applicability_scope_guard_dc_v2(
     return corrected, audit, True
 
 
-_GENERATE_DC_ONECALL_BEFORE_SAFETY_V2 = generate_dc_onecall_v1
-_GENERATE_DC_TWOCALL_BEFORE_SAFETY_V2 = generate_dc_twocall_v1
+_GENERATE_DC_ONECALL_BEFORE_SAFETY_V2 = globals().get("_GENERATE_DC_ONECALL_BEFORE_SAFETY_V2") or generate_dc_onecall_v1
+_GENERATE_DC_TWOCALL_BEFORE_SAFETY_V2 = globals().get("_GENERATE_DC_TWOCALL_BEFORE_SAFETY_V2") or generate_dc_twocall_v1
 
 
 def _rebuild_plain_fallback_payload_dc_v2(
@@ -3163,7 +3291,7 @@ def generate_dc_twocall_v1(
     return _apply_scope_safety_to_result_dc_v2(result, question)
 
 
-_EXECUTE_DC_BEFORE_SAFETY_AUDIT_V2 = execute_dc_variant_v1
+_EXECUTE_DC_BEFORE_SAFETY_AUDIT_V2 = globals().get("_EXECUTE_DC_BEFORE_SAFETY_AUDIT_V2") or execute_dc_variant_v1
 
 
 def execute_dc_variant_v1(
@@ -3196,7 +3324,7 @@ def execute_dc_variant_v1(
 # ==== overlay: dc-cross-tagged-guard ====
 
 # v1.3: 태그 포함 fallback 정리 + 미지원 관계 추론 차단 + Registry 내부 안내 미노출
-_PARSE_ONECALL_BEFORE_TAGGED_FALLBACK_V3 = _parse_onecall_output_dc_v2
+_PARSE_ONECALL_BEFORE_TAGGED_FALLBACK_V3 = globals().get("_PARSE_ONECALL_BEFORE_TAGGED_FALLBACK_V3") or _parse_onecall_output_dc_v2
 
 
 def _extract_final_answer_from_tagged_raw_dc_v3(raw: str) -> str:
@@ -3298,8 +3426,8 @@ def _remove_unsupported_relation_speculation_dc_v3(
     return corrected, audit, True
 
 
-_GENERATE_DC_ONECALL_BEFORE_RELATION_GUARD_V3 = generate_dc_onecall_v1
-_GENERATE_DC_TWOCALL_BEFORE_RELATION_GUARD_V3 = generate_dc_twocall_v1
+_GENERATE_DC_ONECALL_BEFORE_RELATION_GUARD_V3 = globals().get("_GENERATE_DC_ONECALL_BEFORE_RELATION_GUARD_V3") or generate_dc_onecall_v1
+_GENERATE_DC_TWOCALL_BEFORE_RELATION_GUARD_V3 = globals().get("_GENERATE_DC_TWOCALL_BEFORE_RELATION_GUARD_V3") or generate_dc_twocall_v1
 
 
 def _apply_relation_speculation_guard_to_result_dc_v3(
@@ -3349,7 +3477,7 @@ def generate_dc_twocall_v1(
     return _apply_relation_speculation_guard_to_result_dc_v3(result, question, augmented_pack)
 
 
-_ACTION_LINKS_MARKDOWN_BEFORE_NOTICE_REMOVAL_V3 = action_links_markdown_v1
+_ACTION_LINKS_MARKDOWN_BEFORE_NOTICE_REMOVAL_V3 = globals().get("_ACTION_LINKS_MARKDOWN_BEFORE_NOTICE_REMOVAL_V3") or action_links_markdown_v1
 
 
 def action_links_markdown_v1(action_links: Sequence[Mapping[str, Any]]) -> str:
@@ -3363,7 +3491,7 @@ def action_links_markdown_v1(action_links: Sequence[Mapping[str, Any]]) -> str:
     return "\n".join(visible_lines).rstrip()
 
 
-_EXECUTE_DC_BEFORE_V3_AUDIT = execute_dc_variant_v1
+_EXECUTE_DC_BEFORE_V3_AUDIT = globals().get("_EXECUTE_DC_BEFORE_V3_AUDIT") or execute_dc_variant_v1
 
 
 def execute_dc_variant_v1(
@@ -3828,7 +3956,7 @@ def _execute_c_threeway_v1(
     return result
 
 
-_EXECUTE_DC_BEFORE_C_THREEWAY_V1 = execute_dc_variant_v1
+_EXECUTE_DC_BEFORE_C_THREEWAY_V1 = globals().get("_EXECUTE_DC_BEFORE_C_THREEWAY_V1") or execute_dc_variant_v1
 
 
 def execute_dc_variant_v1(

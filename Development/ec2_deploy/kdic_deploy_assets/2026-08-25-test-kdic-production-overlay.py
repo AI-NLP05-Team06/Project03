@@ -7,6 +7,7 @@ import dis
 import hashlib
 import importlib.util
 import json
+import math
 import re
 import sys
 import time
@@ -62,14 +63,14 @@ def test_static_contracts() -> dict[str, Any]:
     assert "2026-08-25-kdic-production-overlay.py" in engine
     assert "execute_production_variant_v1" in overlay
     assert "C_DEFAULT_DC2_COMPARE_ONLY_V1" in overlay
-    assert "2026-08-25-runtime-symbol-completion-v3" in overlay
+    assert "2026-08-25-context-scope-and-fallback-v4" in overlay
     assert "DC_1CALL is disabled" in overlay
     assert "import kdic_lightweight_router_v1 as light_router" in overlay
     assert 'name = "V1.5_C_DEFAULT_DC2_COMPARE_ONLY"' in adapter
     assert '"runtime_build": dict(RUNTIME_BUILD_INFO)' in api
     assert EXPECTED_SOURCE_SHA256 in overlay
     assert EXPECTED_SOURCE_SHA256 in adapter
-    assert "2026-08-25-runtime-symbol-completion-v3" in adapter
+    assert "2026-08-25-context-scope-and-fallback-v4" in adapter
     return {
         "engine_overlay_loader": "passed",
         "overlay_syntax": "passed",
@@ -92,6 +93,7 @@ def test_overlay_exec_contract() -> dict[str, Any]:
         "time": time,
         "copy": copy,
         "hashlib": hashlib,
+        "math": math,
         "OrderedDict": OrderedDict,
         "defaultdict": defaultdict,
         "Any": Any,
@@ -130,6 +132,27 @@ def test_overlay_exec_contract() -> dict[str, Any]:
             for alias in node.names:
                 namespace.setdefault(alias.asname or alias.name, types.SimpleNamespace())
 
+    snapshot_names = (
+        "_FUSE_QUERY_RESULTS_V4_1",
+        "_VALIDATE_DC_SKELETON_GENERAL_V1",
+        "_GENERATE_DC_TWOCALL_GENERAL_V1",
+        "_EXECUTE_DC_GENERAL_V1",
+        "_PARSE_ONECALL_STRICT_BEFORE_FALLBACK_V2",
+        "_GENERATE_DC_ONECALL_BEFORE_SAFETY_V2",
+        "_GENERATE_DC_TWOCALL_BEFORE_SAFETY_V2",
+        "_EXECUTE_DC_BEFORE_SAFETY_AUDIT_V2",
+        "_PARSE_ONECALL_BEFORE_TAGGED_FALLBACK_V3",
+        "_GENERATE_DC_ONECALL_BEFORE_RELATION_GUARD_V3",
+        "_GENERATE_DC_TWOCALL_BEFORE_RELATION_GUARD_V3",
+        "_ACTION_LINKS_MARKDOWN_BEFORE_NOTICE_REMOVAL_V3",
+        "_EXECUTE_DC_BEFORE_V3_AUDIT",
+        "_EXECUTE_DC_BEFORE_C_THREEWAY_V1",
+    )
+    sentinels = {
+        name: (lambda *args, _name=name, **kwargs: ({"baseline": _name}, []))
+        for name in snapshot_names
+    }
+    namespace.update(sentinels)
     sys.path.insert(0, str(BASE_DIR))
     exec(compile(overlay, str(OVERLAY_FILE), "exec"), namespace, namespace)
     required = (
@@ -138,6 +161,8 @@ def test_overlay_exec_contract() -> dict[str, Any]:
         "is_cross_business_dc_v1",
         "generate_c_direct_threeway_v1",
         "order_businesses_by_question_p0_v1",
+        "build_p0_cross_business_subqueries_v1",
+        "_current_question_scoped_analysis_v1",
     )
     assert all(callable(namespace.get(name)) for name in required)
     unresolved: dict[str, list[str]] = {}
@@ -155,6 +180,11 @@ def test_overlay_exec_contract() -> dict[str, Any]:
         if missing:
             unresolved[name] = missing
     assert not unresolved, unresolved
+    assert all(namespace[name] is sentinel for name, sentinel in sentinels.items())
+    single_result = namespace["fuse_query_results"]([
+        {"query": "고객 미수령금 조회", "weight": 1.0, "source": "ORIGINAL"}
+    ])
+    assert single_result[0]["baseline"] == "_FUSE_QUERY_RESULTS_V4_1"
     assert namespace["KDIC_PRODUCTION_OVERLAY_POLICY"] == "C_DEFAULT_DC2_COMPARE_ONLY_V1"
     return {"top_level_wiring": "passed", "required_functions": list(required)}
 
@@ -305,14 +335,24 @@ def test_current_question_business_mapping() -> dict[str, Any]:
         "Mapping": Mapping,
         "Sequence": Sequence,
         "light_router": router,
+        "re": re,
         "_clean_text": lambda value: " ".join(str(value or "").split()).strip(),
+        "NEED_BATCH_MAX_BUSINESSES_V5": 3,
+        "V15_ORIGINAL_WEIGHT": 0.40,
+        "V15_SUBQUERY_TOTAL_WEIGHT": 0.60,
+        "HOW_COMPARE_PATTERN_V1": re.compile(r"어떻게\s*(?:다르|다른|달라|구분|비교)|어떤\s*차이", re.I),
     }
     exec(_function_source(overlay, "_need_business_v5"), namespace)
     exec(_function_source(overlay, "_cross_business_scope_count_v5"), namespace)
     exec(_function_source(overlay, "order_businesses_by_question_p0_v1"), namespace)
+    exec(_function_source(overlay, "_business_local_segments_p0_v1"), namespace)
+    exec(_function_source(overlay, "_business_need_topic_p0_v1"), namespace)
+    exec(_function_source(overlay, "build_p0_cross_business_subqueries_v1"), namespace)
+    exec(_function_source(overlay, "_current_question_scoped_analysis_v1"), namespace)
     need_business = namespace["_need_business_v5"]
     scope_count = namespace["_cross_business_scope_count_v5"]
     order_businesses = namespace["order_businesses_by_question_p0_v1"]
+    scope_analysis = namespace["_current_question_scoped_analysis_v1"]
 
     atomic_queries = (
         "고객 미수령금 신청 방법",
@@ -337,6 +377,8 @@ def test_current_question_business_mapping() -> dict[str, Any]:
         {"source": "DECOMPOSED", "query": "채무조정 신청 서류"},
     ]
     contaminated_analysis = {
+        "route": "RETRIEVE",
+        "resolved_question": "이전 네 업무가 합쳐진 질문",
         "businesses": [
             "예금자보호제도",
             "고객 미수령금 신청",
@@ -352,6 +394,27 @@ def test_current_question_business_mapping() -> dict[str, Any]:
     assert count == 2, (count, businesses)
     assert decomposed == 2
     assert businesses == ["고객 미수령금 신청", "채무조정 안내"], businesses
+    repaired = scope_analysis(two_business_question, contaminated_analysis)
+    assert repaired["resolved_question"] == two_business_question
+    assert repaired["businesses"] == ["고객 미수령금 신청", "채무조정 안내"]
+    assert repaired["context_used"] is False
+    assert [row["source"] for row in repaired["plans"]] == [
+        "ORIGINAL_ANCHOR",
+        "P0_RULE_DECOMPOSED",
+        "P0_RULE_DECOMPOSED",
+    ]
+    assert [router.find_businesses(row["query"]) for row in repaired["plans"][1:]] == [
+        ["고객 미수령금 신청"],
+        ["채무조정 안내"],
+    ]
+
+    single_question = "고객 미수령금은 어디에서 조회할 수 있나요?"
+    repaired_single = scope_analysis(single_question, contaminated_analysis)
+    assert repaired_single["businesses"] == ["고객 미수령금 신청"]
+    assert repaired_single["resolved_question"] == single_question
+    assert repaired_single["plans"] == [
+        {"query": single_question, "weight": 1.0, "source": "ORIGINAL"}
+    ]
 
     four_business_question = (
         "예금자보호 한도, 미수령금 신청, 착오송금 반환지원, 채무조정 서류를 알려주세요."
@@ -375,6 +438,8 @@ def test_current_question_business_mapping() -> dict[str, Any]:
         "router_import": "passed",
         "atomic_need_business_labels": "passed",
         "two_business_after_context_history": "passed",
+        "explicit_current_scope_repair": "passed",
+        "single_business_original_plan": "passed",
         "four_business_capacity": "blocked",
     }
 
