@@ -123,6 +123,11 @@ class PromptComparePayload(BaseModel):
     question: str = Field(min_length=2, max_length=4_000)
 
 
+class ChatComparePayload(PromptComparePayload):
+    candidate_config: dict[str, Any] | None = None
+    candidate_source: str = Field(default="저장된 개선안", max_length=100)
+
+
 class PromptApplyPayload(BaseModel):
     confirmation: str = Field(min_length=1, max_length=100)
 
@@ -1729,7 +1734,7 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
             prompt_compare_lock.release()
 
     @app.post("/api/admin-ui/chat/compare")
-    def chat_compare(payload: PromptComparePayload, _: None = Depends(require_admin_session)):
+    def chat_compare(payload: ChatComparePayload, _: None = Depends(require_admin_session)):
         manager = require_prompt_manager()
         guard = require_guardrail_manager().evaluate(payload.question, "input")
         if guard["blocked"]:
@@ -1738,7 +1743,8 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
             raise HTTPException(status_code=409, detail="다른 최종 답변 A/B 비교가 실행 중입니다.")
         try:
             before_config = active_config()
-            candidate_config = _validate_config(drafts["config"], before_config)
+            requested_config = payload.candidate_config if isinstance(payload.candidate_config, Mapping) else drafts["config"]
+            candidate_config = _validate_config(requested_config, before_config)
             question = str(guard["text"])
             with execution_lock:
                 set_config(before_config)
@@ -1750,6 +1756,7 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
                 "guardrail_hits": guard["hits"],
                 "baseline_config": before_config,
                 "candidate_config": candidate_config,
+                "candidate_source": _clean(payload.candidate_source) or "저장된 개선안",
                 "changed_parameters": [key for key in before_config if before_config[key] != candidate_config[key]],
                 "changed_prompts": draft_public().get("prompt_changes") or [],
                 "baseline": baseline,
