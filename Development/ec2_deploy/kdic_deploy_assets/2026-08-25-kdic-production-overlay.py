@@ -10,7 +10,7 @@ import kdic_lightweight_router_v1 as light_router
 
 KDIC_PRODUCTION_OVERLAY_SOURCE_SHA256 = "F9A908D62A43EA3A3566A5D8DF0E982F214373FFF96470A749DC1EFE79E25083"
 KDIC_PRODUCTION_OVERLAY_POLICY = "C_DEFAULT_DC2_COMPARE_ONLY_V1"
-KDIC_PRODUCTION_OVERLAY_REVISION = "2026-08-25-context-scope-and-fallback-v4"
+KDIC_PRODUCTION_OVERLAY_REVISION = "2026-08-25-ui-number-and-contact-guard-v5"
 
 
 # ==== overlay: how-word-classification ====
@@ -4137,6 +4137,17 @@ def execute_production_variant_v1(
         event["production_selection_reason"] = decision["selection_reason"]
         event["dc1_enabled"] = False
     return output
+
+
+_NORMALIZE_ANSWER_BEFORE_OFFICIAL_CONTACT_GUARD_V5 = normalize_answer_markdown_v3
+
+
+def normalize_answer_markdown_v3(text: Any) -> str:
+    """Preserve answer formatting and repair one invalidly merged KDIC phone number."""
+
+    value = _NORMALIZE_ANSWER_BEFORE_OFFICIAL_CONTACT_GUARD_V5(text)
+    return re.sub(r"(?<!\d)02[\s-]*1588[\s-]*0037(?!\d)", "1588-0037", value)
+
 
 KDIC_RUNTIME_BUILD_V1.update({
     "build_sha256": KDIC_PRODUCTION_OVERLAY_SOURCE_SHA256,

@@ -68,9 +68,9 @@ function md(text=''){
   for(const raw of lines){
     const line=raw.trim();
     if(!line){closeList();continue}
-    const ordered=line.match(/^\d{1,2}[.)]\s+(.+)$/);
+    const ordered=line.match(/^(\d{1,2})[.)]\s+(.+)$/);
     const bullet=line.match(/^[-•]\s+(.+)$/);
-    if(ordered){if(listType!=='ol'){closeList();html+='<ol>';listType='ol'}html+=`<li>${inline(ordered[1])}</li>`;continue}
+    if(ordered){const number=Number(ordered[1]);if(listType!=='ol'){closeList();html+=`<ol start="${number}">`;listType='ol'}html+=`<li value="${number}">${inline(ordered[2])}</li>`;continue}
     if(bullet){if(listType!=='ul'){closeList();html+='<ul>';listType='ul'}html+=`<li>${inline(bullet[1])}</li>`;continue}
     closeList();
     if(line.startsWith('### ')){html+=`<h3>${inline(line.slice(4))}</h3>`;continue}

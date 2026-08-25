@@ -22,6 +22,7 @@ ENGINE_FILE = BASE_DIR / "kdic_pipeline_engine.py"
 OVERLAY_FILE = BASE_DIR / "2026-08-25-kdic-production-overlay.py"
 ADAPTER_FILE = BASE_DIR / "2026-08-23-kdic-colab-runtime-adapter.py"
 FASTAPI_FILE = BASE_DIR / "2026-08-23-kdic-fastapi-service.py"
+CHAT_UI_FILE = BASE_DIR / "2026-08-23-kdic-chat-ui.html"
 EXPECTED_SOURCE_SHA256 = (
     "F9A908D62A43EA3A3566A5D8DF0E982F214373FFF96470A749DC1EFE79E25083"
 )
@@ -63,14 +64,14 @@ def test_static_contracts() -> dict[str, Any]:
     assert "2026-08-25-kdic-production-overlay.py" in engine
     assert "execute_production_variant_v1" in overlay
     assert "C_DEFAULT_DC2_COMPARE_ONLY_V1" in overlay
-    assert "2026-08-25-context-scope-and-fallback-v4" in overlay
+    assert "2026-08-25-ui-number-and-contact-guard-v5" in overlay
     assert "DC_1CALL is disabled" in overlay
     assert "import kdic_lightweight_router_v1 as light_router" in overlay
     assert 'name = "V1.5_C_DEFAULT_DC2_COMPARE_ONLY"' in adapter
     assert '"runtime_build": dict(RUNTIME_BUILD_INFO)' in api
     assert EXPECTED_SOURCE_SHA256 in overlay
     assert EXPECTED_SOURCE_SHA256 in adapter
-    assert "2026-08-25-context-scope-and-fallback-v4" in adapter
+    assert "2026-08-25-ui-number-and-contact-guard-v5" in adapter
     return {
         "engine_overlay_loader": "passed",
         "overlay_syntax": "passed",
@@ -153,6 +154,7 @@ def test_overlay_exec_contract() -> dict[str, Any]:
         for name in snapshot_names
     }
     namespace.update(sentinels)
+    namespace["normalize_answer_markdown_v3"] = lambda text: str(text or "")
     sys.path.insert(0, str(BASE_DIR))
     exec(compile(overlay, str(OVERLAY_FILE), "exec"), namespace, namespace)
     required = (
@@ -186,7 +188,27 @@ def test_overlay_exec_contract() -> dict[str, Any]:
     ])
     assert single_result[0]["baseline"] == "_FUSE_QUERY_RESULTS_V4_1"
     assert namespace["KDIC_PRODUCTION_OVERLAY_POLICY"] == "C_DEFAULT_DC2_COMPARE_ONLY_V1"
-    return {"top_level_wiring": "passed", "required_functions": list(required)}
+    normalized = namespace["normalize_answer_markdown_v3"](
+        "고객센터 02-1588-0037 또는 02-758-1000"
+    )
+    assert normalized == "고객센터 1588-0037 또는 02-758-1000"
+    return {
+        "top_level_wiring": "passed",
+        "required_functions": list(required),
+        "official_contact_guard": "passed",
+    }
+
+
+def test_chat_ui_numbering_contract() -> dict[str, Any]:
+    ui = CHAT_UI_FILE.read_text(encoding="utf-8")
+    assert r"const ordered=line.match(/^(\d{1,2})[.)]\s+(.+)$/);" in ui
+    assert 'html+=`<ol start="${number}">`' in ui
+    assert 'html+=`<li value="${number}">${inline(ordered[2])}</li>`' in ui
+    assert "inline(ordered[1])" not in ui
+    return {
+        "ordered_list_start_preserved": "passed",
+        "ordered_list_item_value_preserved": "passed",
+    }
 
 
 def _evidence_namespace(overlay: str) -> dict[str, Any]:
@@ -496,6 +518,7 @@ def main() -> None:
     result = {
         "static": test_static_contracts(),
         "overlay_exec": test_overlay_exec_contract(),
+        "chat_ui": test_chat_ui_numbering_contract(),
         "evidence": test_evidence_gate(),
         "routing": test_routing_and_cross_structure(),
         "business_mapping": test_current_question_business_mapping(),
