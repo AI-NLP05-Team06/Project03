@@ -549,19 +549,28 @@ def admin_search(payload: AdminSearchRequest) -> dict[str, Any]:
     query_text = payload.query.strip()
     query_body: dict[str, Any]
     if query_text:
+        # 현재 운영 인덱스는 원문을 ``search_text``에 적재한다. 과거의
+        # title/content 필드만 검색하면 실제 데이터가 있어도 0건이 반환된다.
+        # 사람이 쓰는 키워드 검색과 도메인 ID 접두사(HP, DA, MT 등) 검색을
+        # 함께 지원해 관리자에서 어느 도메인의 청크인지 바로 확인할 수 있게 한다.
+        should_queries: list[dict[str, Any]] = [
+            {
+                "simple_query_string": {
+                    "query": query_text,
+                    "fields": ["search_text^3", "chunk_id^2"],
+                    "default_operator": "and",
+                }
+            }
+        ]
+        domain_prefix = query_text.upper()
+        if re.fullmatch(r"[A-Z]{2}", domain_prefix):
+            should_queries.append(
+                {"prefix": {"chunk_id": {"value": f"{domain_prefix}-"}}}
+            )
         query_body = {
-            "simple_query_string": {
-                "query": query_text,
-                "fields": [
-                    "title^3",
-                    "section_title^2",
-                    "content",
-                    "text",
-                    "business_function^2",
-                    "chunk_id",
-                    "parent_id",
-                ],
-                "default_operator": "and",
+            "bool": {
+                "should": should_queries,
+                "minimum_should_match": 1,
             }
         }
     else:
