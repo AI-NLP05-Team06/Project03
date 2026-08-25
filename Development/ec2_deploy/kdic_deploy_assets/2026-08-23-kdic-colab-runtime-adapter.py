@@ -91,8 +91,13 @@ class LatestKDICNotebookAdapter:
 
     def _holder(self, state: MutableMapping[str, Any]) -> dict[str, Any]:
         holder = state.get("_kdic_controller")
-        if not isinstance(holder, dict):
+        runtime_revision = str(self.build_info["overlay_revision"])
+        if (
+            not isinstance(holder, dict)
+            or holder.get("_runtime_revision") != runtime_revision
+        ):
             holder = self._new_holder()
+            holder["_runtime_revision"] = runtime_revision
             state["_kdic_controller"] = holder
         return holder
 

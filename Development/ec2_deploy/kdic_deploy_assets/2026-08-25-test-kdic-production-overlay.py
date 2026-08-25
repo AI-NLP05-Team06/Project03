@@ -351,6 +351,7 @@ def test_current_question_business_mapping() -> dict[str, Any]:
 def test_adapter() -> dict[str, Any]:
     module = _load_module("kdic_ec2_adapter_test", ADAPTER_FILE)
     calls: list[str] = []
+    holders: list[dict[str, Any]] = []
 
     def holder() -> dict[str, Any]:
         return {"conversation": {"turns": []}, "answer_cache": {}, "events": []}
@@ -358,6 +359,7 @@ def test_adapter() -> dict[str, Any]:
     def production(question: str, state: dict[str, Any]) -> dict[str, Any]:
         variant = "DC_2CALL" if "비교" in question else "C_1CALL"
         calls.append(variant)
+        holders.append(state)
         return {
             "variant": variant,
             "route": "RETRIEVE",
@@ -371,10 +373,27 @@ def test_adapter() -> dict[str, Any]:
     })
     first = adapter("단일질의", {})
     second = adapter("업무 비교", {})
-    assert calls == ["C_1CALL", "DC_2CALL"]
+    stale_state = {
+        "_kdic_controller": {
+            "_runtime_revision": "stale-revision",
+            "current_question": "단일질의",
+            "common": {"route": "EVIDENCE_INSUFFICIENT"},
+        }
+    }
+    adapter("단일질의", stale_state)
+    assert calls == ["C_1CALL", "DC_2CALL", "C_1CALL"]
     assert first["runtime_build"]["dc1_enabled"] is False
     assert second["routing_policy"] == "C_DEFAULT_DC2_COMPARE_ONLY_V1"
-    return {"c_default": "passed", "dc2_compare": "passed", "build_info": "passed"}
+    refreshed = stale_state["_kdic_controller"]
+    assert refreshed.get("_runtime_revision") == adapter.build_info["overlay_revision"]
+    assert refreshed.get("common") != {"route": "EVIDENCE_INSUFFICIENT"}
+    assert holders[-1] is refreshed
+    return {
+        "c_default": "passed",
+        "dc2_compare": "passed",
+        "stale_controller_cache": "invalidated",
+        "build_info": "passed",
+    }
 
 
 def main() -> None:
