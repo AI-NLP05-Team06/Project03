@@ -562,6 +562,7 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
     sessions: dict[str, float] = {}
     auth_lock, mutation_lock, eval_lock = threading.RLock(), threading.RLock(), threading.RLock()
     prompt_compare_lock = threading.Lock()
+    report_lock = threading.Lock()
     bootstrap_state = {"used": False}
     datasets: dict[str, dict[str, Any]] = {}
     eval_jobs: dict[str, dict[str, Any]] = {}
@@ -892,6 +893,128 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
             with eval_lock:
                 eval_jobs[job_id].update(status="error", error=f"{type(error).__name__}: {error}", updated_at=time.time())
 
+    def evaluation_change_summary(result: Mapping[str, Any]) -> dict[str, Any]:
+        """Calculate whole-dataset changes before asking the LLM to interpret them."""
+        definitions = list(result.get("metric_definitions") or [])
+        rows: list[dict[str, Any]] = []
+        domain_counts: dict[str, dict[str, int]] = {}
+        tolerance = 0.005
+        for detail in result.get("details") or []:
+            current_values, improvement_values = [], []
+            for definition in definitions:
+                key = str(definition.get("key") or "")
+                current = (detail.get("baseline") or {}).get(key)
+                improvement = (detail.get("candidate") or {}).get(key)
+                if current is None or improvement is None:
+                    continue
+                current_values.append(float(current))
+                improvement_values.append(float(improvement))
+            current_score = sum(current_values) / len(current_values) if current_values else 0.0
+            improvement_score = sum(improvement_values) / len(improvement_values) if improvement_values else 0.0
+            delta = improvement_score - current_score
+            verdict = "improved" if delta > tolerance else "degraded" if delta < -tolerance else "unchanged"
+            domain = _clean(detail.get("domain")) or "미분류"
+            counts = domain_counts.setdefault(domain, {"total": 0, "improved": 0, "degraded": 0, "unchanged": 0})
+            counts["total"] += 1
+            counts[verdict] += 1
+            rows.append({
+                "question_id": _clean(detail.get("question_id")),
+                "question": _clean(detail.get("question")),
+                "domain": domain,
+                "verdict": verdict,
+                "score_delta": round(delta, 6),
+                "current_score": round(current_score, 6),
+                "improvement_score": round(improvement_score, 6),
+                "gold_chunk_ids": list(detail.get("gold_chunk_ids") or []),
+                "current_top": list(detail.get("baseline_retrieved") or [])[:5],
+                "improvement_top": list(detail.get("candidate_retrieved") or [])[:5],
+            })
+        total = len(rows)
+        counts = {name: sum(row["verdict"] == name for row in rows) for name in ("improved", "degraded", "unchanged")}
+        metric_changes = []
+        for definition in definitions:
+            key = str(definition.get("key") or "")
+            metric_changes.append({
+                "metric": f"{definition.get('label')}@{definition.get('k')}",
+                "current": (result.get("baseline") or {}).get(key),
+                "improvement": (result.get("candidate") or {}).get(key),
+                "delta": (result.get("delta") or {}).get(key),
+            })
+        latency_delta = (result.get("delta") or {}).get("latency_avg_ms")
+        return {
+            "question_count": total,
+            "classification_rule": "질문별 적용 가능 검색지표의 단순평균 변화가 ±0.5%p를 넘으면 개선/악화, 이하는 동일",
+            "counts": counts,
+            "rates": {name: (counts[name] / total if total else 0.0) for name in counts},
+            "metric_changes": metric_changes,
+            "latency": {
+                "current_ms": (result.get("baseline") or {}).get("latency_avg_ms"),
+                "improvement_ms": (result.get("candidate") or {}).get("latency_avg_ms"),
+                "delta_ms": latency_delta,
+            },
+            "config_changes": {
+                key: {"current": value, "improvement": (result.get("candidate_config") or {}).get(key)}
+                for key, value in (result.get("baseline_config") or {}).items()
+                if (result.get("candidate_config") or {}).get(key) != value
+            },
+            "domains": domain_counts,
+            "representative_improvements": sorted(
+                (row for row in rows if row["verdict"] == "improved"),
+                key=lambda row: row["score_delta"], reverse=True,
+            )[:5],
+            "representative_degradations": sorted(
+                (row for row in rows if row["verdict"] == "degraded"),
+                key=lambda row: row["score_delta"],
+            )[:5],
+        }
+
+    def generate_llm_evaluation_report(job_id: str, result: Mapping[str, Any]) -> dict[str, Any]:
+        summary = evaluation_change_summary(result)
+        client = runtime_globals.get("HCX_CLIENT") or runtime_globals.get("_HCX_RAW_CLIENT_V3")
+        if client is None:
+            raise RuntimeError("HCX 답변 클라이언트가 연결되지 않았습니다.")
+        prompt_data = {
+            "evaluation_scope": result.get("evaluation_scope"),
+            "dataset": result.get("dataset"),
+            "summary": summary,
+        }
+        system_prompt = (
+            "당신은 공공기관 RAG 검색 품질 검토자입니다. 제공된 수치만 사용하고 추측하지 마세요. "
+            "전체 테스트셋 집계는 이미 코드로 계산되었으므로 수치를 다시 만들지 말고 해석하세요. "
+            "반드시 한국어로 작성하며, 1) 결론 2) 품질 변화 3) 대표 개선 사례 "
+            "4) 대표 악화 사례 5) 권장 설정과 적용 조건 6) 적용 전 확인사항 순서로 간결하게 작성하세요. "
+            "성능 향상과 지연시간 증가의 교환관계를 함께 판단하고, 근거가 부족하면 명시하세요."
+        )
+        started = time.perf_counter()
+        response = client.chat.completions.create(
+            model=runtime_globals["HCX_CHAT_MODEL"],
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": json.dumps(prompt_data, ensure_ascii=False)},
+            ],
+            temperature=0.1,
+            max_tokens=1800,
+        )
+        if not response.choices:
+            raise RuntimeError("LLM 리포트 응답이 비어 있습니다.")
+        usage = getattr(response, "usage", None)
+        report = {
+            "job_id": job_id,
+            "generated_at": time.time(),
+            "model": str(runtime_globals["HCX_CHAT_MODEL"]),
+            "latency_ms": round((time.perf_counter() - started) * 1000, 1),
+            "usage": {
+                "prompt_tokens": int(getattr(usage, "prompt_tokens", 0) or 0),
+                "completion_tokens": int(getattr(usage, "completion_tokens", 0) or 0),
+                "total_tokens": int(getattr(usage, "total_tokens", 0) or 0),
+            },
+            "summary": summary,
+            "report_markdown": str(response.choices[0].message.content or "").strip(),
+        }
+        if not report["report_markdown"]:
+            raise RuntimeError("LLM 리포트 본문이 비어 있습니다.")
+        return report
+
     def no_chat_jobs_running() -> None:
         statuses = service_module.JOB_STORE.stats().get("statuses", {})
         active = int(statuses.get("queued", 0)) + int(statuses.get("running", 0))
@@ -1162,6 +1285,32 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
         with eval_lock: job = copy.deepcopy(eval_jobs.get(job_id))
         if not job: raise HTTPException(status_code=404, detail="평가 작업을 찾지 못했습니다.")
         return job
+
+    @app.post("/api/admin-ui/evaluations/jobs/{job_id}/llm-report")
+    def create_eval_llm_report(job_id: str, _: None = Depends(require_admin_session)):
+        if not report_lock.acquire(blocking=False):
+            raise HTTPException(status_code=409, detail="다른 LLM 품질 리포트를 생성하고 있습니다. 잠시 후 다시 시도해 주세요.")
+        try:
+            with eval_lock:
+                job = copy.deepcopy(eval_jobs.get(job_id))
+            if not job:
+                raise HTTPException(status_code=404, detail="평가 작업을 찾지 못했습니다.")
+            if job.get("status") != "done" or not job.get("result"):
+                raise HTTPException(status_code=409, detail="완료된 검색 평가에서만 LLM 품질 리포트를 만들 수 있습니다.")
+            try:
+                report = generate_llm_evaluation_report(job_id, job["result"])
+            except HTTPException:
+                raise
+            except Exception as error:
+                raise HTTPException(status_code=502, detail=f"LLM 리포트 생성 실패: {type(error).__name__}: {error}") from error
+            with eval_lock:
+                current = eval_jobs.get(job_id)
+                if current and current.get("result"):
+                    current["result"]["llm_report"] = copy.deepcopy(report)
+                    current["updated_at"] = time.time()
+            return report
+        finally:
+            report_lock.release()
 
     @app.delete("/api/admin-ui/evaluations/jobs/{job_id}")
     def delete_eval_job(job_id: str, _: None = Depends(require_admin_session)):
