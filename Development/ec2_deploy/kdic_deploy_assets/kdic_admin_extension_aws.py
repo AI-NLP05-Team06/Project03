@@ -30,7 +30,7 @@ SESSION_TTL_SECONDS = 8 * 60 * 60
 MAX_DATASET_BYTES = 25 * 1024 * 1024
 ALLOWED_CONFIG = {
     "dense_weight", "bm25_weight", "candidate_depth", "final_top_k",
-    "query_fusion_rrf_k", "parent_child", "parent_context_max_chars",
+    "query_fusion_rrf_k", "min_relevance_score", "parent_child", "parent_context_max_chars",
 }
 DEFAULT_METRIC_KS = {
     "hit": 3,
@@ -187,7 +187,7 @@ DEFAULT_PIPELINE_GRAPH_SPEC: list[dict[str, Any]] = [
         "description": "Structured Dense와 BM25-Nori 후보를 결합하고 다중 질의 결과를 융합합니다.",
         "symbols": ["fuse_query_results", "hybrid_minmax_search", "weighted_minmax"],
         "setting_view": "runtime",
-        "settings": ["dense_weight", "bm25_weight", "candidate_depth", "query_fusion_rrf_k"],
+        "settings": ["dense_weight", "bm25_weight", "candidate_depth", "query_fusion_rrf_k", "min_relevance_score"],
     },
     {
         "id": "reranker",
@@ -196,7 +196,7 @@ DEFAULT_PIPELINE_GRAPH_SPEC: list[dict[str, Any]] = [
         "description": "Hybrid 후보에 질문-청크 관련성 점수를 다시 매겨 최종 순위를 정합니다.",
         "symbols": ["rerank_candidates"],
         "setting_view": "runtime",
-        "settings": ["candidate_depth", "final_top_k"],
+        "settings": ["candidate_depth", "final_top_k", "min_relevance_score"],
     },
     {
         "id": "parent_child",
@@ -391,6 +391,7 @@ def _runtime_config(runtime: Mapping[str, Any]) -> dict[str, Any]:
             "query_fusion_rrf_k": _safe(runtime.get("QUERY_FUSION_RRF_K")),
             "candidate_depth": _safe(runtime.get("CANDIDATE_DEPTH")),
             "final_top_k": _safe(runtime.get("FINAL_TOP_K")),
+            "min_relevance_score": _safe(runtime.get("MIN_RELEVANCE_SCORE")),
             "reranker_model": _safe(runtime.get("RERANKER_MODEL_NAME")),
             "reranker_candidate_depth": _safe(runtime.get("RERANKER_CANDIDATE_DEPTH")),
             "parent_child": bool(runtime.get("PARENT_CHILD_ENABLED")),
@@ -458,10 +459,13 @@ def _validate_config(values: Mapping[str, Any], current: Mapping[str, Any]) -> d
         raise ValueError("최종 Top-K는 1~20이며 후보 깊이 이하여야 합니다.")
     if not 1 <= int(merged["query_fusion_rrf_k"]) <= 200:
         raise ValueError("RRF K는 1~200이어야 합니다.")
+    if not 0.0 <= float(merged["min_relevance_score"]) <= 1.0:
+        raise ValueError("최소 관련성 점수는 0~1이어야 합니다.")
     if not 500 <= int(merged["parent_context_max_chars"]) <= 30_000:
         raise ValueError("Parent 문맥 한도는 500~30,000자여야 합니다.")
     return {"dense_weight": dense, "bm25_weight": bm25, "candidate_depth": depth, "final_top_k": top_k,
-            "query_fusion_rrf_k": int(merged["query_fusion_rrf_k"]), "parent_child": bool(merged["parent_child"]),
+            "query_fusion_rrf_k": int(merged["query_fusion_rrf_k"]),
+            "min_relevance_score": float(merged["min_relevance_score"]), "parent_child": bool(merged["parent_child"]),
             "parent_context_max_chars": int(merged["parent_context_max_chars"])}
 
 
@@ -659,6 +663,7 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
         return {"dense_weight": float(runtime_globals.get("DENSE_WEIGHT", .7)), "bm25_weight": float(runtime_globals.get("BM25_WEIGHT", .3)),
                 "candidate_depth": int(runtime_globals.get("CANDIDATE_DEPTH", 20)), "final_top_k": int(runtime_globals.get("FINAL_TOP_K", 5)),
                 "query_fusion_rrf_k": int(runtime_globals.get("QUERY_FUSION_RRF_K", 10)),
+                "min_relevance_score": float(runtime_globals.get("MIN_RELEVANCE_SCORE", 0.0)),
                 "parent_child": bool(runtime_globals.get("PARENT_CHILD_ENABLED", True)),
                 "parent_context_max_chars": int(runtime_globals.get("PARENT_CONTEXT_MAX_CHARS", 8192))}
 
@@ -827,6 +832,10 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
                 question, fused, chunks_by_id=runtime_globals["CHUNKS_BY_ID"], model=runtime_globals["RERANKER_MODEL"],
                 text_builder=runtime_globals["_reranker_passage"], candidate_depth=depth, final_top_k=metric_depth,
                 batch_size=int(runtime_globals.get("RERANKER_BATCH_SIZE", 8)))
+        threshold = float(config.get("min_relevance_score", 0.0))
+        score_fn = runtime_globals.get("retrieval_relevance_score")
+        if callable(score_fn):
+            fused = [row for row in fused if float(score_fn(row)) >= threshold]
         return [str(row["chunk_id"]) for row in fused[:metric_depth]], (time.perf_counter() - started) * 1000
 
     def aggregate(rows: list[dict[str, Any]], prefix: str, policy: Mapping[str, Any]) -> dict[str, Any]:
@@ -1121,9 +1130,11 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
     def set_config(config: Mapping[str, Any]) -> None:
         mapping = {"DENSE_WEIGHT": "dense_weight", "BM25_WEIGHT": "bm25_weight", "CANDIDATE_DEPTH": "candidate_depth",
                    "FINAL_TOP_K": "final_top_k", "QUERY_FUSION_RRF_K": "query_fusion_rrf_k",
+                   "MIN_RELEVANCE_SCORE": "min_relevance_score",
                    "PARENT_CHILD_ENABLED": "parent_child", "PARENT_CONTEXT_MAX_CHARS": "parent_context_max_chars"}
+        fallback = active_config()
         for target, source in mapping.items():
-            runtime_globals[target] = config[source]
+            runtime_globals[target] = config.get(source, fallback[source])
         runtime_globals["RERANKER_CANDIDATE_DEPTH"] = int(config["candidate_depth"])
         runtime_globals["DENSE_KNN_NUM_CANDIDATES"] = max(int(runtime_globals.get("DENSE_KNN_NUM_CANDIDATES", 100)), int(config["candidate_depth"]))
         fuse = runtime_globals.get("fuse_query_results")

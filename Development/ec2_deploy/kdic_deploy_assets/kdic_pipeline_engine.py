@@ -94,6 +94,9 @@ BM25_WEIGHT = 0.3
 QUERY_FUSION_RRF_K = 10
 CANDIDATE_DEPTH = 20
 FINAL_TOP_K = 5
+# BGE Reranker raw logit을 sigmoid로 0~1 변환한 뒤 적용합니다.
+# 0.0은 기존 동작을 그대로 유지하며, 운영 반영 전 평가데이터셋 비교가 필요합니다.
+MIN_RELEVANCE_SCORE = 0.0
 
 # ---------- Reranker ----------
 RERANKER_MODEL_NAME = "BAAI/bge-reranker-v2-m3"
@@ -123,6 +126,30 @@ assert QUERY_FUSION_RRF_K > 0 and CANDIDATE_DEPTH > 0 and FINAL_TOP_K > 0
 assert RERANKER_CANDIDATE_DEPTH == CANDIDATE_DEPTH
 assert RERANKER_CANDIDATE_DEPTH >= FINAL_TOP_K
 assert DENSE_KNN_NUM_CANDIDATES >= CANDIDATE_DEPTH
+assert 0.0 <= MIN_RELEVANCE_SCORE <= 1.0
+
+
+def retrieval_relevance_score(row: Mapping[str, Any]) -> float:
+    """Return a comparable 0..1 relevance value for threshold filtering."""
+    if row.get("reranker_score") is not None:
+        raw = max(-60.0, min(60.0, float(row["reranker_score"])))
+        return 1.0 / (1.0 + math.exp(-raw))
+    return max(0.0, min(1.0, float(row.get("minmax_score") or 0.0)))
+
+
+def filter_search_results_by_relevance(
+    rows: Sequence[Mapping[str, Any]],
+    threshold: float | None = None,
+) -> list[dict[str, Any]]:
+    minimum = MIN_RELEVANCE_SCORE if threshold is None else float(threshold)
+    if not 0.0 <= minimum <= 1.0:
+        raise ValueError("최소 관련성 점수는 0~1이어야 합니다.")
+    filtered = []
+    for row in rows:
+        score = retrieval_relevance_score(row)
+        if score >= minimum:
+            filtered.append({**dict(row), "relevance_score": score})
+    return [{**row, "rank": rank} for rank, row in enumerate(filtered, start=1)]
 
 print({
     "answer_method": "B_BASIC_EVIDENCE_PACK",
@@ -135,6 +162,7 @@ print({
     "query_fusion_rrf_k": QUERY_FUSION_RRF_K,
     "candidate_depth": CANDIDATE_DEPTH,
     "final_top_k": FINAL_TOP_K,
+    "min_relevance_score": MIN_RELEVANCE_SCORE,
     "reranker": RERANKER_MODEL_NAME,
     "parent_child": PARENT_CHILD_ENABLED,
     "parent_context_max_chars": PARENT_CONTEXT_MAX_CHARS,
@@ -2450,8 +2478,46 @@ def run_fixed_pipeline(
 
     search_started = time.perf_counter()
     search_results, per_query = fuse_query_results(plans)
+    before_threshold_count = len(search_results)
+    search_results = filter_search_results_by_relevance(search_results)
     child_search_ms = (time.perf_counter() - search_started) * 1000
     reranker_trace = dict(_LAST_RERANK_TRACE)
+    reranker_trace.update({
+        "min_relevance_score": float(MIN_RELEVANCE_SCORE),
+        "before_threshold_count": before_threshold_count,
+        "after_threshold_count": len(search_results),
+    })
+
+    if not search_results:
+        message = (
+            "공식 근거에서 충분히 관련된 내용을 찾지 못했습니다. "
+            "질문에 업무명이나 신청 상황을 조금 더 구체적으로 적어 주세요."
+        )
+        return {
+            "analyzer_key": analyzer_key,
+            "analyzer_label": ANALYZER_LABELS[analyzer_key],
+            "question": question,
+            "resolved_question": analysis.get("resolved_question") or question,
+            "route": "DIRECT",
+            "analysis": analysis,
+            "display_answer": message,
+            "basic_answer": message,
+            "basic_answer_payload": None,
+            "evidence_explanation_payload": None,
+            "search_plans": plans,
+            "search_results": [],
+            "per_query_search": per_query,
+            "reranker": reranker_trace,
+            "evidence_pack": None,
+            "sources": [],
+            "latency_ms": {
+                "문맥 처리": float(analysis.get("context_latency_ms") or 0),
+                "질의분석": float(analysis.get("core_analysis_latency_ms") or 0),
+                "검색": child_search_ms,
+                "전체": (time.perf_counter() - total_started) * 1000,
+            },
+            "success": True,
+        }
 
     parent_started = time.perf_counter()
     search_results = expand_parent_context(search_results)
@@ -3662,8 +3728,36 @@ def prepare_common_retrieval_v1(
 
     search_started = time.perf_counter()
     search_results, per_query = fuse_query_results(plans)
+    before_threshold_count = len(search_results)
+    search_results = filter_search_results_by_relevance(search_results)
     child_search_ms = (time.perf_counter() - search_started) * 1000
     reranker_trace = dict(_LAST_RERANK_TRACE)
+    reranker_trace.update({
+        "min_relevance_score": float(MIN_RELEVANCE_SCORE),
+        "before_threshold_count": before_threshold_count,
+        "after_threshold_count": len(search_results),
+    })
+
+    if not search_results:
+        return {
+            "question": question,
+            "resolved_question": analysis.get("resolved_question") or question,
+            "route": "DIRECT",
+            "analysis": analysis,
+            "route_message": (
+                "공식 근거에서 충분히 관련된 내용을 찾지 못했습니다. "
+                "질문에 업무명이나 신청 상황을 조금 더 구체적으로 적어 주세요."
+            ),
+            "plans": plans,
+            "search_results": [],
+            "per_query": per_query,
+            "reranker": reranker_trace,
+            "latency_ms": {
+                "질의분석": analysis_ms,
+                "검색": child_search_ms,
+                "공통 준비 전체": (time.perf_counter() - total_started) * 1000,
+            },
+        }
 
     parent_started = time.perf_counter()
     search_results = expand_parent_context(search_results)
@@ -5876,6 +5970,7 @@ def _common_request_key_c1(question: str, state: Mapping[str, Any]) -> str:
         "dense_weight": DENSE_WEIGHT,
         "bm25_weight": BM25_WEIGHT,
         "candidate_depth": CANDIDATE_DEPTH,
+        "min_relevance_score": MIN_RELEVANCE_SCORE,
         "reranker_model": RERANKER_MODEL_NAME,
         "parent_context_max_chars": PARENT_CONTEXT_MAX_CHARS,
         "dense_cache_version": DENSE_CACHE_VERSION,
