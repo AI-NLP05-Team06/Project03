@@ -447,11 +447,15 @@ def _call_structured(
     unsupported_formats: set[str] = set()
     for format_name, response_format in formats:
         previous_output = ""
-        for repair_index in range(2):
+        previous_error = ""
+        for repair_index in range(3):
             prompt = user_prompt if repair_index == 0 else f"""
 [작업]
 직전 출력은 JSON 파싱 또는 Evidence 검증에 실패했습니다.
 원래 Evidence의 사실 범위를 바꾸지 말고 지정된 JSON 객체로 한 번만 교정하세요.
+
+[검증 실패 이유]
+{previous_error}
 
 [원래 요청]
 {user_prompt}
@@ -487,6 +491,7 @@ def _call_structured(
                 validated = validator(_extract_json_object(raw))
             except (ValueError, TypeError) as error:
                 previous_output = raw
+                previous_error = f"{type(error).__name__}: {error}"
                 attempts.append({
                     "format": format_name, "repair_index": repair_index,
                     "valid": False, "error": f"{type(error).__name__}: {error}",

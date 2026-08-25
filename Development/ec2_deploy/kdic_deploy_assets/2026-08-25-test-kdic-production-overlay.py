@@ -23,6 +23,7 @@ OVERLAY_FILE = BASE_DIR / "2026-08-25-kdic-production-overlay.py"
 ADAPTER_FILE = BASE_DIR / "2026-08-23-kdic-colab-runtime-adapter.py"
 FASTAPI_FILE = BASE_DIR / "2026-08-23-kdic-fastapi-service.py"
 CHAT_UI_FILE = BASE_DIR / "2026-08-23-kdic-chat-ui.html"
+ANSWER_CORE_FILE = BASE_DIR / "kdic_v15_answer_b_core.py"
 EXPECTED_SOURCE_SHA256 = (
     "F9A908D62A43EA3A3566A5D8DF0E982F214373FFF96470A749DC1EFE79E25083"
 )
@@ -54,17 +55,19 @@ def test_static_contracts() -> dict[str, Any]:
     overlay = OVERLAY_FILE.read_text(encoding="utf-8")
     adapter = ADAPTER_FILE.read_text(encoding="utf-8")
     api = FASTAPI_FILE.read_text(encoding="utf-8")
+    answer_core = ANSWER_CORE_FILE.read_text(encoding="utf-8")
     for path, source in (
         (ENGINE_FILE, engine),
         (OVERLAY_FILE, overlay),
         (ADAPTER_FILE, adapter),
         (FASTAPI_FILE, api),
+        (ANSWER_CORE_FILE, answer_core),
     ):
         ast.parse(source, filename=str(path))
     assert "2026-08-25-kdic-production-overlay.py" in engine
     assert "execute_production_variant_v1" in overlay
     assert "C_DEFAULT_DC2_COMPARE_ONLY_V1" in overlay
-    assert "2026-08-26-c-direct-pre-normalize-audit-v9" in overlay
+    assert "2026-08-26-structured-repair-feedback-v10" in overlay
     assert "반드시 유효한 단일 JSON 객체 하나만 출력" in overlay
     assert "C_STRUCTURED_SYSTEM_PROMPT_V3\n    +" not in overlay
     assert "answer_b_core._call_structured(" in overlay
@@ -77,7 +80,9 @@ def test_static_contracts() -> dict[str, Any]:
     assert '"runtime_build": dict(RUNTIME_BUILD_INFO)' in api
     assert EXPECTED_SOURCE_SHA256 in overlay
     assert EXPECTED_SOURCE_SHA256 in adapter
-    assert "2026-08-26-c-direct-pre-normalize-audit-v9" in adapter
+    assert "2026-08-26-structured-repair-feedback-v10" in adapter
+    assert "for repair_index in range(3):" in answer_core
+    assert "[검증 실패 이유]" in answer_core
     return {
         "engine_overlay_loader": "passed",
         "overlay_syntax": "passed",
