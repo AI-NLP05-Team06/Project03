@@ -67,7 +67,7 @@ def test_static_contracts() -> dict[str, Any]:
     assert "2026-08-25-kdic-production-overlay.py" in engine
     assert "execute_production_variant_v1" in overlay
     assert "C_DEFAULT_DC2_COMPARE_ONLY_V1" in overlay
-    assert "2026-08-26-explicit-allowed-citation-ids-v11" in overlay
+    assert "2026-08-26-declared-citation-canonicalization-v12" in overlay
     assert "반드시 유효한 단일 JSON 객체 하나만 출력" in overlay
     assert "C_STRUCTURED_SYSTEM_PROMPT_V3\n    +" not in overlay
     assert "answer_b_core._call_structured(" in overlay
@@ -82,7 +82,8 @@ def test_static_contracts() -> dict[str, Any]:
     assert '"runtime_build": dict(RUNTIME_BUILD_INFO)' in api
     assert EXPECTED_SOURCE_SHA256 in overlay
     assert EXPECTED_SOURCE_SHA256 in adapter
-    assert "2026-08-26-explicit-allowed-citation-ids-v11" in adapter
+    assert "2026-08-26-declared-citation-canonicalization-v12" in adapter
+    assert "cache_compatible_overlay_revisions" in adapter
     assert "for repair_index in range(3):" in answer_core
     assert "[검증 실패 이유]" in answer_core
     return {
@@ -249,15 +250,24 @@ def test_c_direct_json_validator() -> dict[str, Any]:
         "missing_information": [],
     }
     assert validate(payload, pack, "SEPARATE")["used_evidence_ids"] == ["E1"]
-    declared_mismatch = copy.deepcopy(payload)
-    declared_mismatch["used_evidence_ids"] = []
-    assert validate(declared_mismatch, pack, "SEPARATE")["used_evidence_ids"] == ["E1"]
-    for key, value in (
-        ("answer", "근거 ID가 없는 답변"),
-        ("response_mode", "COMPARE"),
-    ):
-        invalid = copy.deepcopy(payload)
-        invalid[key] = value
+    declared_only = copy.deepcopy(payload)
+    declared_only["answer"] = "선언된 공식 근거에 따른 답변입니다."
+    declared_result = validate(declared_only, pack, "SEPARATE")
+    assert declared_result["used_evidence_ids"] == ["E1"]
+    assert declared_result["answer"].endswith("[E1]")
+    invalid_cases = []
+    missing_all = copy.deepcopy(payload)
+    missing_all["answer"] = "근거 ID가 없는 답변"
+    missing_all["used_evidence_ids"] = []
+    invalid_cases.append(("missing_all_evidence", missing_all))
+    wrong_mode = copy.deepcopy(payload)
+    wrong_mode["response_mode"] = "COMPARE"
+    invalid_cases.append(("response_mode", wrong_mode))
+    invalid_id = copy.deepcopy(payload)
+    invalid_id["answer"] = "허용되지 않은 근거를 선언한 답변"
+    invalid_id["used_evidence_ids"] = ["E9"]
+    invalid_cases.append(("invalid_evidence_id", invalid_id))
+    for key, invalid in invalid_cases:
         try:
             validate(invalid, pack, "SEPARATE")
         except ValueError:
@@ -265,7 +275,7 @@ def test_c_direct_json_validator() -> dict[str, Any]:
         raise AssertionError(f"invalid C direct payload was accepted: {key}")
     return {
         "valid_json_and_inline_evidence": "passed",
-        "declared_ids_canonicalized_from_inline": "passed",
+        "declared_ids_canonicalized_into_answer": "passed",
         "missing_inline_evidence": "blocked",
         "wrong_response_mode": "blocked",
     }

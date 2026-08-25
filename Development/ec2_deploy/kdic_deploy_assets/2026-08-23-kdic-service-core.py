@@ -190,6 +190,15 @@ FOLLOWUP_CANONICAL_BUSINESSES: dict[str, str] = {
     "채무조정": "채무조정 안내",
     "은닉재산": "은닉재산 신고",
 }
+FOLLOWUP_QUERY_OVERRIDES: dict[tuple[str, str], str] = {
+    ("예금자보호", "제외 상품"): (
+        "예금자보호제도에서 보호되지 않는 금융상품을 알려주세요."
+    ),
+    ("미수령금", "조회 방법"): "본인 명의 고객 미수령금 조회 방법을 알려주세요.",
+    ("미수령금", "필요 서류"): (
+        "본인 명의 고객 미수령금 신청에 필요한 서류를 알려주세요."
+    ),
+}
 SUGGESTION_CACHE_SCHEMA_VERSION = "kdic-suggestion-answer-bundle-v5.0"
 _SUGGESTION_BY_ID: dict[str, dict[str, str]] = {}
 _SUGGESTIONS_BY_BUSINESS_KEY: dict[str, list[dict[str, str]]] = {}
@@ -207,7 +216,9 @@ def _build_suggestion_registry() -> None:
         business = FOLLOWUP_CANONICAL_BUSINESSES[business_key]
         rows: list[dict[str, str]] = []
         for label in labels:
-            query = f"{business}의 {label}을 알려주세요."
+            query = FOLLOWUP_QUERY_OVERRIDES.get(
+                (business_key, label), f"{business}의 {label}을 알려주세요."
+            )
             record = {
                 "suggestion_id": _suggestion_id(business, label, query),
                 "business_key": business_key,

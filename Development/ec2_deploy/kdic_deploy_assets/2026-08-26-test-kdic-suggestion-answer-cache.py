@@ -92,6 +92,7 @@ def test_static_contracts() -> dict[str, str]:
     api = API_FILE.read_text(encoding="utf-8")
     ui = UI_FILE.read_text(encoding="utf-8")
     postgres = POSTGRES_FILE.read_text(encoding="utf-8")
+    prewarm = PREWARM_FILE.read_text(encoding="utf-8")
     migration = MIGRATION_FILE.read_text(encoding="utf-8")
     assert "suggestion_id: str = Field" in api
     assert "suggestion_cache=SUGGESTION_ANSWER_CACHE" in api
@@ -100,6 +101,7 @@ def test_static_contracts() -> dict[str, str]:
     assert "⚡ 저장된 빠른 답변" in ui
     assert "class PostgresSuggestionAnswerCache" in postgres
     assert "CREATE TABLE IF NOT EXISTS suggestion_answer_cache" in migration
+    assert "compatible_overlay_revisions" in prewarm
     return {
         "python_syntax": "passed",
         "api_ui_wiring": "passed",
@@ -113,6 +115,10 @@ def test_registry(core) -> dict[str, Any]:
     assert len({row["suggestion_id"] for row in catalog}) == 26
     assert len({row["query"] for row in catalog}) == 26
     assert len({row["business_key"] for row in catalog}) == 6
+    by_key = {(row["business_key"], row["label"]): row for row in catalog}
+    assert by_key[("예금자보호", "제외 상품")]["query"].startswith("예금자보호제도에서")
+    assert "본인 명의" in by_key[("미수령금", "조회 방법")]["query"]
+    assert "본인 명의" in by_key[("미수령금", "필요 서류")]["query"]
     for row in catalog:
         assert core.resolve_registered_suggestion(
             row["query"], row["suggestion_id"]

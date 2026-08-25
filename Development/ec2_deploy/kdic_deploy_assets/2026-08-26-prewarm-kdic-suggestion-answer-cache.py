@@ -78,7 +78,11 @@ def _basis_for_job(base_url: str, job_id: str) -> dict[str, Any]:
         return {}
 
 
-def _latest_reusable_job(question: str, expected_build: Mapping[str, Any]):
+def _latest_reusable_job(
+    question: str,
+    expected_build: Mapping[str, Any],
+    compatible_overlay_revisions: set[str],
+):
     connection = psycopg2.connect(os.environ["KDIC_DATABASE_URL"])
     try:
         cursor = connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
@@ -98,7 +102,7 @@ def _latest_reusable_job(question: str, expected_build: Mapping[str, Any]):
             ):
                 continue
             if expected_build.get("overlay_revision") and (
-                build.get("overlay_revision") != expected_build.get("overlay_revision")
+                build.get("overlay_revision") not in compatible_overlay_revisions
             ):
                 continue
             yield str(row["id"]), dict(row["result"] or {}), raw
@@ -133,6 +137,12 @@ def main() -> None:
         raise RuntimeError("KDIC API health check failed")
     runtime_namespace = _runtime_namespace(health)
     runtime_build = dict(health.get("runtime_build") or {})
+    compatible_overlay_revisions = {
+        str(value).strip()
+        for value in runtime_build.get("cache_compatible_overlay_revisions") or []
+        if str(value).strip()
+    }
+    compatible_overlay_revisions.add(str(runtime_build.get("overlay_revision") or ""))
     cache = postgres.PostgresSuggestionAnswerCache(
         ttl_seconds=int(os.getenv("KDIC_SUGGESTION_CACHE_TTL_SECONDS", "2592000")),
         max_entries=int(os.getenv("KDIC_SUGGESTION_CACHE_MAX_ENTRIES", "2000")),
@@ -162,7 +172,7 @@ def main() -> None:
         seeded = False
         if not args.skip_existing_job_seed:
             for job_id, public, raw in _latest_reusable_job(
-                suggestion["query"], runtime_build
+                suggestion["query"], runtime_build, compatible_overlay_revisions
             ):
                 eligible, _ = core.KDICJobService._cache_eligibility(public)
                 if not eligible:

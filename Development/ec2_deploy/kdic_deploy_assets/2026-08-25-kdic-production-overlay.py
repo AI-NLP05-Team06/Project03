@@ -10,7 +10,7 @@ import kdic_lightweight_router_v1 as light_router
 
 KDIC_PRODUCTION_OVERLAY_SOURCE_SHA256 = "F9A908D62A43EA3A3566A5D8DF0E982F214373FFF96470A749DC1EFE79E25083"
 KDIC_PRODUCTION_OVERLAY_POLICY = "C_DEFAULT_DC2_COMPARE_ONLY_V1"
-KDIC_PRODUCTION_OVERLAY_REVISION = "2026-08-26-explicit-allowed-citation-ids-v11"
+KDIC_PRODUCTION_OVERLAY_REVISION = "2026-08-26-declared-citation-canonicalization-v12"
 
 
 # ==== overlay: how-word-classification ====
@@ -3586,18 +3586,33 @@ def _validate_c_direct_json_v2(
     allowed_facts = set(_allowed_fact_claims_v3(augmented_pack))
     inline_evidence = set(re.findall(r"\[(E\d+)\]", answer))
     inline_facts = set(re.findall(r"\[(FI-CAND-\d+:F\d+)\]", answer))
-    if (inline_evidence - allowed_evidence) or (inline_facts - allowed_facts):
+    declared_evidence = set(answer_b_core._clean_list(payload.get("used_evidence_ids")))
+    declared_facts = set(_clean_fact_claim_keys_v3(payload.get("used_fact_claim_ids")))
+    if (
+        (inline_evidence - allowed_evidence)
+        or (inline_facts - allowed_facts)
+        or (declared_evidence - allowed_evidence)
+        or (declared_facts - allowed_facts)
+    ):
         raise ValueError("C안 답변에 허용되지 않은 근거 ID가 있습니다.")
-    if not (inline_evidence or inline_facts):
+    citation_evidence = inline_evidence | declared_evidence
+    citation_facts = inline_facts | declared_facts
+    if not (citation_evidence or citation_facts):
         raise ValueError("C안 답변에 인라인 근거 ID가 없습니다.")
+    missing_markers = [
+        f"[{value}]"
+        for value in sorted((citation_evidence - inline_evidence) | (citation_facts - inline_facts))
+    ]
+    if missing_markers:
+        answer = answer.rstrip() + " " + " ".join(missing_markers)
     coverage = str(payload.get("coverage_status") or "PARTIAL").upper()
     if coverage not in answer_b_core.ALLOWED_COVERAGE_STATUS:
         raise ValueError("C안 coverage_status가 올바르지 않습니다.")
     return {
         "answer": answer,
         "response_mode": actual_mode,
-        "used_evidence_ids": sorted(inline_evidence),
-        "used_fact_claim_ids": sorted(inline_facts),
+        "used_evidence_ids": sorted(citation_evidence),
+        "used_fact_claim_ids": sorted(citation_facts),
         "coverage_status": coverage,
         "missing_information": answer_b_core._clean_list(payload.get("missing_information")),
     }
