@@ -677,6 +677,68 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
                 "parent_child": bool(runtime_globals.get("PARENT_CHILD_ENABLED", True)),
                 "parent_context_max_chars": int(runtime_globals.get("PARENT_CONTEXT_MAX_CHARS", 8192))}
 
+    def job_telemetry(public: Mapping[str, Any], stored: Any) -> dict[str, Any]:
+        """Return request-time metrics without confusing a cache hit with its origin run."""
+
+        result = public.get("result") if isinstance(public.get("result"), Mapping) else {}
+        raw = getattr(stored, "raw_result", None)
+        raw = raw if isinstance(raw, Mapping) else {}
+        cache = result.get("suggestion_cache") if isinstance(result.get("suggestion_cache"), Mapping) else {}
+        usage = raw.get("usage") if isinstance(raw.get("usage"), Mapping) else {}
+        event = raw.get("event") if isinstance(raw.get("event"), Mapping) else {}
+        latency = raw.get("latency") if isinstance(raw.get("latency"), Mapping) else {}
+
+        def number(value: Any) -> float:
+            try:
+                return float(value or 0)
+            except (TypeError, ValueError):
+                return 0.0
+
+        origin_prompt = int(number(usage.get("prompt_tokens") or event.get("prompt_tokens")))
+        origin_completion = int(number(usage.get("completion_tokens") or event.get("completion_tokens")))
+        origin_total = int(number(usage.get("total_tokens") or event.get("total_tokens")))
+        origin_latency_ms = number(event.get("click_wall_ms") or latency.get("click_wall_ms"))
+        cache_hit = bool(cache.get("hit"))
+
+        if cache_hit:
+            request_latency_ms = number(cache.get("lookup_ms"))
+            if request_latency_ms <= 0:
+                current_latency = result.get("latency_seconds")
+                current_latency = current_latency if isinstance(current_latency, Mapping) else {}
+                request_latency_ms = sum(
+                    number(value) * 1000.0
+                    for value in current_latency.values()
+                )
+            prompt_tokens = completion_tokens = total_tokens = 0
+        else:
+            request_latency_ms = origin_latency_ms
+            prompt_tokens, completion_tokens, total_tokens = (
+                origin_prompt,
+                origin_completion,
+                origin_total,
+            )
+
+        return {
+            "cache_hit": cache_hit,
+            "cache_source": str(cache.get("source") or "").strip(),
+            "request_latency_ms": round(request_latency_ms, 3),
+            "prompt_tokens": prompt_tokens,
+            "completion_tokens": completion_tokens,
+            "total_tokens": total_tokens,
+            "origin_latency_ms": round(origin_latency_ms, 3),
+            "origin_prompt_tokens": origin_prompt,
+            "origin_completion_tokens": origin_completion,
+            "origin_total_tokens": origin_total,
+            "saved_latency_ms": round(max(0.0, origin_latency_ms - request_latency_ms), 3) if cache_hit else 0.0,
+            "saved_tokens": origin_total if cache_hit else 0,
+        }
+
+    def job_public_with_telemetry(public: Mapping[str, Any]) -> dict[str, Any]:
+        item = dict(public)
+        stored = service_module.JOB_STORE.get(str(item.get("job_id") or ""))
+        item["telemetry"] = job_telemetry(item, stored)
+        return item
+
     def monitoring_snapshot(hours: int, limit: int) -> dict[str, Any]:
         now = time.time()
         cutoff = now - (hours * 3600)
@@ -687,12 +749,8 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
             if created_at < cutoff:
                 continue
             stored = service_module.JOB_STORE.get(str(public.get("job_id") or ""))
-            raw = stored.raw_result if stored is not None and isinstance(stored.raw_result, Mapping) else {}
             result = public.get("result") if isinstance(public.get("result"), Mapping) else {}
-            usage = raw.get("usage") if isinstance(raw.get("usage"), Mapping) else {}
-            event = raw.get("event") if isinstance(raw.get("event"), Mapping) else {}
-            latency = raw.get("latency") if isinstance(raw.get("latency"), Mapping) else {}
-            wall_ms = float(event.get("click_wall_ms") or latency.get("click_wall_ms") or 0)
+            telemetry = job_telemetry(public, stored)
             businesses = result.get("businesses") if isinstance(result.get("businesses"), Sequence) and not isinstance(result.get("businesses"), (str, bytes)) else []
             records.append({
                 "job_id": str(public.get("job_id") or ""),
@@ -701,10 +759,8 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
                 "status": _clean(public.get("status")) or "unknown",
                 "route": _clean(result.get("route") or raw.get("route")) or "UNKNOWN",
                 "businesses": [_clean(value) for value in businesses if _clean(value)],
-                "prompt_tokens": int(usage.get("prompt_tokens") or event.get("prompt_tokens") or 0),
-                "completion_tokens": int(usage.get("completion_tokens") or event.get("completion_tokens") or 0),
-                "total_tokens": int(usage.get("total_tokens") or event.get("total_tokens") or 0),
-                "latency_ms": round(wall_ms, 3),
+                **telemetry,
+                "latency_ms": telemetry["request_latency_ms"],
                 "validation_passed": result.get("validation_passed"),
                 "coverage_status": _clean(result.get("coverage_status")),
             })
@@ -739,6 +795,7 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
             })
 
         total_tokens = sum(row["total_tokens"] for row in completed)
+        cache_hits = sum(bool(row["cache_hit"]) for row in completed)
         return {
             "generated_at": now,
             "hours": hours,
@@ -755,6 +812,11 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
                 "token_coverage_rate": len(token_rows) / len(completed) if completed else 0,
                 "avg_latency_ms": sum(latency_values) / len(latency_values) if latency_values else 0,
                 "p95_latency_ms": latency_values[p95_index] if latency_values else 0,
+                "cache_hits": cache_hits,
+                "cache_misses": len(completed) - cache_hits,
+                "cache_hit_rate": cache_hits / len(completed) if completed else 0,
+                "cache_saved_tokens": sum(row["saved_tokens"] for row in completed),
+                "cache_saved_latency_ms": sum(row["saved_latency_ms"] for row in completed),
             },
             "timeseries": buckets,
             "routes": [{"name": key, "count": value} for key, value in sorted(route_counts.items(), key=lambda item: (-item[1], item[0]))],
@@ -1277,7 +1339,13 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
                 "datasets": [dataset_summary(row) for row in datasets.values()]}
 
     @app.get("/api/admin-ui/jobs")
-    def jobs(limit: int = Query(default=100, ge=1, le=500), _: None = Depends(require_admin_session)): return service_module.admin_jobs(limit)
+    def jobs(limit: int = Query(default=100, ge=1, le=500), _: None = Depends(require_admin_session)):
+        payload = service_module.admin_jobs(limit)
+        items = payload.get("items") if isinstance(payload.get("items"), Sequence) else []
+        return {
+            **payload,
+            "items": [job_public_with_telemetry(item) for item in items if isinstance(item, Mapping)],
+        }
 
     @app.get("/api/admin-ui/indices")
     def indices(_: None = Depends(require_admin_session)): return service_module.admin_indices()
