@@ -130,9 +130,12 @@ def test_static_contracts() -> dict[str, str]:
     assert "본인인증 필요" in ui
     assert 'rel="noopener noreferrer"' in ui
     assert "host==='kdic.or.kr'||host.endsWith('.kdic.or.kr')" in ui
-    assert "const PROGRESS_STAGE_DWELL_MS=320" in ui
+    assert "const PROGRESS_STAGE_DWELL_MS=280,CACHE_STAGE_DWELL_MS=140" in ui
     assert "async function completeProgress(row)" in ui
-    assert "await completeProgress(row);renderResult" in ui
+    assert "async function completeCachedProgress(row)" in ui
+    assert "async function advanceProgress(row,p,stage" in ui
+    assert "if(cacheHit)await completeCachedProgress(row);else await completeProgress(row)" in ui
+    assert "else if(preview==='cache-progress')" in ui
     assert "function basisHtml(d)" in ui
     assert "이 답변을 이렇게 안내한 이유예요" in ui
     assert "근거가 된 공식 정보" in ui
@@ -177,8 +180,9 @@ def test_registry(core) -> dict[str, Any]:
 
 def test_user_basis_contract(core) -> dict[str, str]:
     raw_result = {
-        "answer": "공식 신청 대상과 확인사항을 안내합니다.",
+        "answer": "착오송금 반환지원은 자진반환 및 지급명령으로 회수되면 신청 접수일로부터 2개월 내외가 예상됩니다.",
         "analysis": {"businesses": ["착오송금 반환 신청"]},
+        "common": {"resolved_question": "착오송금 반환지원 신청부터 실제 반환까지 얼마나 걸리나요?"},
         "payload": {
             "used_evidence_ids": ["E1"],
             "missing_information": ["개별 거래 조건을 확인해 주세요."],
@@ -187,8 +191,8 @@ def test_user_basis_contract(core) -> dict[str, str]:
             "evidence": [
                 {
                     "evidence_id": "E1",
-                    "section_title": "반환지원 신청 대상",
-                    "content": "공식 안내에 신청 대상과 확인 조건이 제시되어 있습니다.",
+                    "section_title": "1. 반환 기간은? · 2. 지원 대상은? · 3. 신청 방법은?",
+                    "content": "[MT-005_chunk_000] 착오송금 반환지원 주요 FAQ / 1. 신청 접수부터 실제 반환까지 얼마나 걸리나요? ### Q. 1. 신청 접수부터 실제 반환까지 얼마나 걸리나요? 자진반환 및 지급명령을 통해 회수 가능한 경우 신청 접수일로부터 2개월 내외로 예상됩니다. [MT-005_chunk_001] 착오송금 반환지원 주요 FAQ / 2. 지원 대상이 아닌 경우는 무엇인가요?",
                 },
                 {
                     "evidence_id": "E2",
@@ -202,11 +206,16 @@ def test_user_basis_contract(core) -> dict[str, str]:
         ],
     }
     fallback = core.default_basis_from_result(raw_result)
-    assert fallback["schema_version"] == "kdic-basis-explanation-v1"
+    assert core.SUGGESTION_CACHE_SCHEMA_VERSION == "kdic-suggestion-answer-bundle-v5.1"
+    assert fallback["schema_version"] == "kdic-basis-explanation-v2"
     assert len(fallback["items"]) == 1
     assert fallback["items"][0]["evidence_ids"] == ["E1"]
     assert "E2" not in json.dumps(fallback, ensure_ascii=False)
     assert fallback["items"][0]["user_meaning"]
+    assert "예상 처리 기간" in fallback["items"][0]["user_meaning"]
+    assert "2개월" in fallback["items"][0]["evidence_summary"]
+    assert "chunk_" not in json.dumps(fallback, ensure_ascii=False)
+    assert "2. 지원 대상" not in fallback["items"][0]["answer_point"]
     assert fallback["checkpoints"] == ["개별 거래 조건을 확인해 주세요."]
     assert fallback["mappings"] == fallback["items"]
 

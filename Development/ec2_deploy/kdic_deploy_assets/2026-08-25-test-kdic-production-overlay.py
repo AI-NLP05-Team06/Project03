@@ -99,10 +99,12 @@ def test_static_contracts() -> dict[str, Any]:
     assert 'system_prompt=_managed_prompt("DC_FINAL_SYSTEM_PROMPT_V1", DC_FINAL_SYSTEM_PROMPT_V1)' in overlay
     assert '"settings": ["C_CROSS_DIRECT_SYSTEM_PROMPT_V1"]' in admin_extension
     assert "BASIS_EXPLAINER_SYSTEM_PROMPT_V1" in overlay
-    assert "내부 사고과정이나 검색 기술정보를 공개하지 말고" in overlay
+    assert "내부 사고과정, Evidence·chunk·parent·need ID" in overlay
+    assert "Reranker 같은 검색 기술정보를 공개하지 말고" in overlay
     assert "def generate_user_basis_explanation_v1(" in overlay
-    assert 'schema_name="kdic_user_basis_explanation_v1"' in overlay
+    assert 'schema_name="kdic_user_basis_explanation_v2"' in overlay
     assert "공식 근거에 없는 숫자가 근거 해설에 포함되어 있습니다." in overlay
+    assert "근거 해설에 내부 검색 식별자가 포함되어 있습니다." in overlay
     return {
         "engine_overlay_loader": "passed",
         "overlay_syntax": "passed",
@@ -316,7 +318,7 @@ def test_overlay_exec_contract() -> dict[str, Any]:
             return copy.deepcopy(self.parsed), {}, 0.0, []
 
     base_basis = {
-        "schema_version": "kdic-basis-explanation-v1",
+        "schema_version": "kdic-basis-explanation-v2",
         "summary": "착오송금 반환지원 공식 근거를 확인했습니다.",
         "items": [{
             "answer_point": "신청 대상을 확인했습니다.",
@@ -364,6 +366,11 @@ def test_overlay_exec_contract() -> dict[str, Any]:
     unsupported_url = namespace["generate_user_basis_explanation_v1"](raw_result, base_basis)
     assert unsupported_url["summary"] == base_basis["summary"]
     assert "example.com" not in json.dumps(unsupported_url, ensure_ascii=False)
+
+    basis_stub.parsed["items"][0]["user_meaning"] = "MT-005_chunk_000 근거를 사용했습니다."
+    internal_id = namespace["generate_user_basis_explanation_v1"](raw_result, base_basis)
+    assert internal_id["summary"] == base_basis["summary"]
+    assert "chunk_000" not in json.dumps(internal_id, ensure_ascii=False)
     return {
         "top_level_wiring": "passed",
         "required_functions": list(required),
@@ -378,9 +385,13 @@ def test_chat_ui_numbering_contract() -> dict[str, Any]:
     assert 'html+=`<ol start="${number}">`' in ui
     assert 'html+=`<li value="${number}">${inline(ordered[2])}</li>`' in ui
     assert "inline(ordered[1])" not in ui
-    assert "const PROGRESS_STAGE_DWELL_MS=320" in ui
+    assert "const PROGRESS_STAGE_DWELL_MS=280,CACHE_STAGE_DWELL_MS=140" in ui
     assert "async function completeProgress(row)" in ui
-    assert "await completeProgress(row);renderResult" in ui
+    assert "async function completeCachedProgress(row)" in ui
+    assert "async function advanceProgress(row,p,stage" in ui
+    assert "if(cacheHit)await completeCachedProgress(row);else await completeProgress(row)" in ui
+    assert "키워드와 저장 질의를 확인하고 있어요" in ui
+    assert "공식 근거와 조건을 검증하고 있어요" in ui
     assert "Math.max(previous" in ui
     assert "1/4단계" in ui
     assert "function basisHtml(d)" in ui
@@ -390,6 +401,7 @@ def test_chat_ui_numbering_contract() -> dict[str, Any]:
     assert "추가로 확인해 주세요" in ui
     assert "officialRows(d.sources,10)" in ui
     assert "window.__KDIC_PROGRESS_PREVIEW=completeProgress(previewRow)" in ui
+    assert "else if(preview==='cache-progress')" in ui
     assert "else if(preview==='basis')" in ui
     return {
         "ordered_list_start_preserved": "passed",

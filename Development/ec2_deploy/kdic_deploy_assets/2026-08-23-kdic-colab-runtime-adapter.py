@@ -37,7 +37,7 @@ class LatestKDICNotebookAdapter:
             "2026-08-26-declared-citation-canonicalization-v12",
         ],
         "adapter_version": "2026-08-26-ec2-production-v13",
-        "suggestion_cache_schema": "kdic-suggestion-answer-bundle-v5.0",
+        "suggestion_cache_schema": "kdic-suggestion-answer-bundle-v5.1",
     }
 
     def __init__(self, runtime_globals: Mapping[str, Any]):

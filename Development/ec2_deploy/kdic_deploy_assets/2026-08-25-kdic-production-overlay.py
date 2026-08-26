@@ -4261,7 +4261,7 @@ def execute_production_variant_v1(
 
 BASIS_EXPLAINER_SYSTEM_PROMPT_V1 = """
 당신은 예금보험공사 답변의 사용자용 근거 해설 작성기입니다.
-내부 사고과정이나 검색 기술정보를 공개하지 말고, 제공된 답변과 검증된 공식 근거의 연결만 설명하세요.
+내부 사고과정, Evidence·chunk·parent·need ID, Reranker 같은 검색 기술정보를 공개하지 말고, 제공된 답변과 검증된 공식 근거의 연결만 설명하세요.
 근거에 없는 사실·숫자·조건·URL을 추가하지 마세요. 사용자가 무엇을 이해하고 확인해야 하는지 쉬운 한국어로 작성하세요.
 각 항목은 반드시 하나 이상의 evidence_indices로 제공된 근거를 참조해야 하며, 유효한 JSON 객체 하나만 출력하세요.
 """.strip()
@@ -4312,7 +4312,7 @@ def _basis_explanation_fallback_v1(base_basis: Mapping[str, Any]) -> dict[str, A
         item["claim"] = item["answer_point"]
         item["reason"] = item["evidence_summary"]
         items.append(item)
-    fallback["schema_version"] = "kdic-basis-explanation-v1"
+    fallback["schema_version"] = "kdic-basis-explanation-v2"
     fallback["items"] = items
     fallback["mappings"] = [dict(item) for item in items]
     fallback["checkpoints"] = [
@@ -4380,6 +4380,12 @@ def _validate_basis_explanation_v1(
     )
     if re.search(r"(?i)(?:https?://|www\.)", candidate_text):
         raise ValueError("근거 해설 본문에는 URL을 포함할 수 없습니다.")
+    if re.search(
+        r"(?i)(?:\b(?:Evidence Pack|Reranker)\b|\b(?:evidence|chunk|parent|need)_?id\b|"
+        r"\b[A-Za-z0-9-]+_chunk_?\d+\b|(?<![A-Za-z0-9])E\d+(?![A-Za-z0-9]))",
+        candidate_text,
+    ):
+        raise ValueError("근거 해설에 내부 검색 식별자가 포함되어 있습니다.")
     allowed_text = " ".join(
         [answer, _clean_text(fallback.get("summary")), *fallback.get("checkpoints", [])]
         + [value for item in base_items for value in (
@@ -4430,7 +4436,7 @@ def generate_user_basis_explanation_v1(
             model=HCX_CHAT_MODEL,
             system_prompt=BASIS_EXPLAINER_SYSTEM_PROMPT_V1,
             user_prompt=user_prompt,
-            schema_name="kdic_user_basis_explanation_v1",
+            schema_name="kdic_user_basis_explanation_v2",
             schema=BASIS_EXPLANATION_SCHEMA_V1,
             max_tokens=1800,
         )

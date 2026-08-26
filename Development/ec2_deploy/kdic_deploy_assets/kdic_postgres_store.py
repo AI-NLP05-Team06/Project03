@@ -485,7 +485,7 @@ class PostgresSuggestionAnswerCache:
             row = cur.fetchone()
         return {
             "backend": "postgres",
-            "schema_version": "kdic-suggestion-answer-bundle-v5.0",
+            "schema_version": "kdic-suggestion-answer-bundle-v5.1",
             "entry_count": int(row["active"] or 0),
             "hits": int(row["hits"] or 0),
             "expired": int(row["expired"] or 0),

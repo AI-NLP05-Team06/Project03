@@ -202,7 +202,8 @@ FOLLOWUP_QUERY_OVERRIDES: dict[tuple[str, str], str] = {
         "예금보험금으로 지급되는 1인당 최대 금액을 알려주세요."
     ),
 }
-SUGGESTION_CACHE_SCHEMA_VERSION = "kdic-suggestion-answer-bundle-v5.0"
+SUGGESTION_CACHE_SCHEMA_VERSION = "kdic-suggestion-answer-bundle-v5.1"
+BASIS_EXPLANATION_SCHEMA_VERSION = "kdic-basis-explanation-v2"
 _SUGGESTION_BY_ID: dict[str, dict[str, str]] = {}
 _SUGGESTIONS_BY_BUSINESS_KEY: dict[str, list[dict[str, str]]] = {}
 
@@ -335,6 +336,95 @@ def normalize_public_result(result: Mapping[str, Any]) -> dict[str, Any]:
     }
 
 
+_BASIS_STOPWORDS = {
+    "그리고", "그러나", "대한", "관련", "안내", "어떻게", "알려주세요", "무엇인가요",
+    "있습니다", "합니다", "되는", "위한", "경우", "질문", "답변", "공식",
+}
+
+
+def _basis_public_text(value: Any) -> str:
+    text = str(value or "")
+    text = re.sub(r"\[(?:[^\]\s]*_)?chunk_?\d+\]", " ", text, flags=re.IGNORECASE)
+    text = re.sub(r"\b[A-Za-z0-9-]+_chunk_?\d+\b", " ", text, flags=re.IGNORECASE)
+    text = re.sub(
+        r"\b(?:evidence|chunk|parent|need)_?id\s*[:=]\s*[^\s,;]+",
+        " ",
+        text,
+        flags=re.IGNORECASE,
+    )
+    text = re.sub(r"(?<![A-Za-z0-9])E\d+(?![A-Za-z0-9])", " ", text)
+    text = re.sub(r"(?m)^\s*#{1,6}\s*", "", text)
+    text = re.sub(r"(?i)\b(?:Evidence Pack|Reranker)\b", " ", text)
+    return _clean_text(text)
+
+
+def _basis_terms(value: Any) -> set[str]:
+    return {
+        token
+        for token in re.findall(r"[가-힣A-Za-z0-9]{2,}", _basis_public_text(value).lower())
+        if token not in _BASIS_STOPWORDS
+    }
+
+
+def _basis_relevant_excerpt(content: Any, question: str, answer: str) -> str:
+    raw = str(content or "")
+    candidates = re.split(
+        r"(?=\[(?:[^\]\s]*_)?chunk_?\d+\])|(?=(?:^|\s)#{1,6}\s*Q\.\s*)",
+        raw,
+        flags=re.IGNORECASE,
+    )
+    candidates = [_basis_public_text(value) for value in candidates]
+    candidates = [value for value in candidates if len(value) >= 20]
+    if not candidates:
+        candidates = [_basis_public_text(raw)] if _basis_public_text(raw) else []
+    target_terms = _basis_terms(question) | _basis_terms(answer)
+
+    def score(value: str) -> tuple[int, int]:
+        overlap = len(_basis_terms(value) & target_terms)
+        question_bonus = 4 if question and _clean_text(question)[:35] in value else 0
+        return overlap + question_bonus, -len(value)
+
+    selected = max(candidates, key=score, default="")
+    q_parts = re.split(r"(?:^|\s)Q\.\s*", selected, flags=re.IGNORECASE)
+    if len(q_parts) > 1 and _clean_text(q_parts[-1]):
+        selected = _clean_text(q_parts[-1])
+    selected = re.sub(r"^\d{1,2}[.)]\s*", "", selected)
+    return selected[:320] + ("…" if len(selected) > 320 else "")
+
+
+def _basis_answer_point(answer: str, excerpt: str, fallback_title: str) -> str:
+    raw_answer = re.sub(r"https?://\S+", " ", str(answer or ""))
+    candidates = []
+    for line in raw_answer.splitlines() or [raw_answer]:
+        for value in re.split(r"(?<=[.!?])\s+", line):
+            clean_value = _basis_public_text(value)
+            if 12 <= len(clean_value) <= 220:
+                candidates.append(clean_value)
+    excerpt_terms = _basis_terms(excerpt)
+    if candidates:
+        selected = max(candidates, key=lambda value: len(_basis_terms(value) & excerpt_terms))
+        return selected[:180]
+    title = _basis_public_text(fallback_title)
+    if "?" in title:
+        title = title.split("?", 1)[0] + "?"
+    return (title or "답변에서 안내한 핵심 내용")[:180]
+
+
+def _basis_user_meaning(answer_point: str, evidence_summary: str) -> str:
+    text = f"{answer_point} {evidence_summary}"
+    if re.search(r"기간|며칠|개월|소요|시기|언제", text):
+        return "신청일과 현재 진행 상태를 기준으로 예상 처리 기간을 확인할 때 필요한 정보입니다."
+    if re.search(r"금액|한도|원|포상금|비율", text):
+        return "본인의 금액이 안내된 범위와 계산 기준에 해당하는지 확인할 때 필요한 정보입니다."
+    if re.search(r"대상|자격|조건|요건", text):
+        return "본인의 상황이 신청 대상과 조건에 해당하는지 판단할 때 확인해야 하는 정보입니다."
+    if re.search(r"서류|증빙|준비", text):
+        return "신청 전에 빠뜨리지 않고 준비해야 할 자료를 확인하는 데 필요한 정보입니다."
+    if re.search(r"신청|조회|절차|방법", text):
+        return "실제 신청이나 조회를 진행할 때 순서와 확인사항을 파악하는 데 필요한 정보입니다."
+    return "답변의 핵심 내용을 본인의 상황에 적용하기 전에 공식 기준과 대조할 때 필요한 정보입니다."
+
+
 def default_basis_from_result(result: Mapping[str, Any]) -> dict[str, Any]:
     """Build a verified user explanation from the Evidence Pack without an LLM."""
 
@@ -347,7 +437,14 @@ def default_basis_from_result(result: Mapping[str, Any]) -> dict[str, Any]:
         or result.get("evidence_pack")
     )
     allowed_ids = set(_clean_list(payload.get("used_evidence_ids") or result.get("used_evidence_ids")))
+    answer = _answer_from_result(result)
+    question = _clean_text(
+        result.get("question")
+        or common.get("resolved_question")
+        or common.get("current_question")
+    )
     mappings: list[dict[str, Any]] = []
+    seen_items: set[str] = set()
     for evidence in pack.get("evidence") or []:
         if not isinstance(evidence, Mapping):
             continue
@@ -361,26 +458,32 @@ def default_basis_from_result(result: Mapping[str, Any]) -> dict[str, Any]:
             or evidence_id
             or "공식 근거"
         )
-        content = _clean_text(
+        raw_content = (
             evidence.get("content")
             or evidence.get("parent_context")
             or evidence.get("context")
             or evidence.get("text")
         )
-        if content:
-            content = content[:280] + ("…" if len(content) > 280 else "")
+        content = _basis_relevant_excerpt(raw_content, question, answer)
+        if not content:
+            continue
+        answer_point = _basis_answer_point(answer, content, title)
+        signature = re.sub(r"\W+", "", f"{answer_point}{content}").lower()[:180]
+        if not signature or signature in seen_items:
+            continue
+        seen_items.add(signature)
         mappings.append(
             {
-                "claim": title,
-                "reason": content or "답변 생성에 사용된 공식 검색 근거입니다.",
-                "answer_point": title,
-                "evidence_summary": content or "답변에 연결된 공식 안내입니다.",
-                "user_meaning": f"이 공식 정보는 답변에서 '{title}'에 관한 내용을 안내한 근거입니다.",
+                "claim": answer_point,
+                "reason": content,
+                "answer_point": answer_point,
+                "evidence_summary": content,
+                "user_meaning": _basis_user_meaning(answer_point, content),
                 "caveat": "",
                 "evidence_ids": [evidence_id] if evidence_id else [],
             }
         )
-        if len(mappings) >= 6:
+        if len(mappings) >= 4:
             break
     if not mappings:
         for source in _sources_from_result(result)[:5]:
@@ -399,8 +502,8 @@ def default_basis_from_result(result: Mapping[str, Any]) -> dict[str, Any]:
     businesses = _businesses_from_result(result)
     subject = "·".join(businesses[:3]) if businesses else "질문과 관련된 업무"
     return {
-        "schema_version": "kdic-basis-explanation-v1",
-        "summary": f"{subject}에 관한 공식 안내 중 실제 답변에 연결된 근거를 확인해 안내했습니다.",
+        "schema_version": BASIS_EXPLANATION_SCHEMA_VERSION,
+        "summary": f"{subject} 답변에 실제로 사용된 공식 정보와 사용자가 확인할 내용을 연결했습니다.",
         "items": copy.deepcopy(mappings),
         "mappings": mappings,
         "conditions": [],
@@ -1043,7 +1146,12 @@ class KDICJobService:
             raise RuntimeError("완료된 답변만 근거를 조회할 수 있습니다.")
         if record.cache_key:
             bundle = self.suggestion_cache.peek(record.cache_key)
-            if bundle is not None and bundle.basis_result:
+            if (
+                bundle is not None
+                and bundle.basis_result
+                and _clean_text(bundle.basis_result.get("schema_version"))
+                == BASIS_EXPLANATION_SCHEMA_VERSION
+            ):
                 return copy.deepcopy(bundle.basis_result)
         return self.runtime.basis(record.raw_result)
 
