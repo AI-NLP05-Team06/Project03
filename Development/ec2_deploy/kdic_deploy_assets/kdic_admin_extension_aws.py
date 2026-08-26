@@ -28,6 +28,7 @@ from pydantic import BaseModel, Field, SecretStr
 COOKIE_NAME = "kdic_admin_session"
 SESSION_TTL_SECONDS = 8 * 60 * 60
 MAX_DATASET_BYTES = 25 * 1024 * 1024
+MAX_PARAMETER_PRESETS = 30
 ALLOWED_CONFIG = {
     "dense_weight", "bm25_weight", "candidate_depth", "final_top_k",
     "query_fusion_rrf_k", "min_relevance_score", "parent_child", "parent_context_max_chars",
@@ -79,6 +80,11 @@ class EvaluationRunPayload(BaseModel):
 
 
 class ConfigDraftPayload(BaseModel):
+    values: dict[str, Any]
+
+
+class ParameterPresetPayload(BaseModel):
+    name: str = Field(min_length=1, max_length=60)
     values: dict[str, Any]
 
 
@@ -189,7 +195,7 @@ DEFAULT_PIPELINE_GRAPH_SPEC: list[dict[str, Any]] = [
         "description": "Structured Dense와 BM25-Nori 후보를 결합하고 다중 질의 결과를 융합합니다.",
         "symbols": ["fuse_query_results", "hybrid_minmax_search", "weighted_minmax"],
         "setting_view": "runtime",
-        "settings": ["dense_weight", "bm25_weight", "candidate_depth", "query_fusion_rrf_k", "min_relevance_score"],
+        "settings": ["dense_weight", "bm25_weight", "candidate_depth", "min_relevance_score"],
     },
     {
         "id": "reranker",
@@ -501,10 +507,10 @@ def _validate_evaluation_policy(
     baseline_ks = normalize(baseline_metric_ks, "현재안")
     candidate_ks = normalize(candidate_metric_ks, "개선안")
     curve = sorted(set(int(value) for value in curve_ks))
-    if not curve or any(value < 1 or value > 200 for value in curve):
-        raise ValueError("구간 차트 K는 1~200의 값을 하나 이상 지정해야 합니다.")
+    if any(value < 1 or value > 200 for value in curve):
+        raise ValueError("구간 차트 K는 1~200 범위여야 합니다.")
     depth = int(evaluation_depth)
-    required_depth = max([*baseline_ks.values(), *candidate_ks.values(), *curve])
+    required_depth = max([*baseline_ks.values(), *candidate_ks.values()])
     if depth < required_depth:
         raise ValueError(f"평가 검색 깊이는 모든 지표 K 이상이어야 합니다. 최소 {required_depth}이 필요합니다.")
     candidate_limit = min(int(config["candidate_depth"]) for config in configs) if configs else 200
@@ -584,6 +590,7 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
     history_path = Path(os.getenv("KDIC_ADMIN_HISTORY_PATH", "/opt/kdic/runtime/admin_change_history.pkl")).resolve()
     default_snapshot_path = Path(os.getenv("KDIC_ADMIN_DEFAULT_SNAPSHOT_PATH", "/opt/kdic/runtime/admin_default_snapshot.pkl")).resolve()
     pipeline_labels_path = Path(os.getenv("KDIC_PIPELINE_LABELS_PATH", "/opt/kdic/runtime/admin_pipeline_labels.json")).resolve()
+    parameter_presets_path = Path(os.getenv("KDIC_PARAMETER_PRESETS_PATH", "/opt/kdic/runtime/admin_parameter_presets.json")).resolve()
 
     def load_pipeline_labels() -> dict[str, str]:
         try:
@@ -604,6 +611,51 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
         temp = pipeline_labels_path.with_suffix(pipeline_labels_path.suffix + ".tmp")
         temp.write_text(json.dumps(pipeline_labels, ensure_ascii=False, indent=2), encoding="utf-8")
         os.replace(temp, pipeline_labels_path)
+
+    def load_parameter_presets() -> dict[str, dict[str, Any]]:
+        try:
+            loaded = json.loads(parameter_presets_path.read_text(encoding="utf-8"))
+            rows = loaded.get("items") if isinstance(loaded, Mapping) else loaded
+            if not isinstance(rows, Sequence) or isinstance(rows, (str, bytes)):
+                return {}
+            records: dict[str, dict[str, Any]] = {}
+            baseline = active_config()
+            for row in rows:
+                if not isinstance(row, Mapping):
+                    continue
+                preset_id, name = _clean(row.get("preset_id")), _clean(row.get("name"))
+                if not preset_id or not name or len(name) > 60:
+                    continue
+                try:
+                    values = _validate_config(dict(row.get("values") or {}), baseline)
+                except Exception:
+                    continue
+                records[preset_id] = {
+                    "preset_id": preset_id,
+                    "name": name,
+                    "values": values,
+                    "created_at": float(row.get("created_at") or time.time()),
+                    "updated_at": float(row.get("updated_at") or row.get("created_at") or time.time()),
+                }
+            return records
+        except (FileNotFoundError, json.JSONDecodeError, OSError, TypeError, ValueError):
+            return {}
+
+    def save_parameter_presets() -> None:
+        parameter_presets_path.parent.mkdir(parents=True, exist_ok=True)
+        ordered = sorted(parameter_presets.values(), key=lambda row: float(row.get("updated_at") or 0), reverse=True)
+        temp = parameter_presets_path.with_suffix(parameter_presets_path.suffix + ".tmp")
+        temp.write_text(json.dumps({"items": ordered[:MAX_PARAMETER_PRESETS]}, ensure_ascii=False, indent=2), encoding="utf-8")
+        os.replace(temp, parameter_presets_path)
+
+    def parameter_preset_public(row: Mapping[str, Any]) -> dict[str, Any]:
+        return {
+            "preset_id": str(row["preset_id"]),
+            "name": str(row["name"]),
+            "values": copy.deepcopy(dict(row["values"])),
+            "created_at": float(row.get("created_at") or 0),
+            "updated_at": float(row.get("updated_at") or 0),
+        }
 
     def load_history() -> list[dict[str, Any]]:
         try:
@@ -676,6 +728,8 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
                 "min_relevance_score": float(runtime_globals.get("MIN_RELEVANCE_SCORE", 0.0)),
                 "parent_child": bool(runtime_globals.get("PARENT_CHILD_ENABLED", True)),
                 "parent_context_max_chars": int(runtime_globals.get("PARENT_CONTEXT_MAX_CHARS", 8192))}
+
+    parameter_presets: dict[str, dict[str, Any]] = load_parameter_presets()
 
     def job_telemetry(public: Mapping[str, Any], stored: Any) -> dict[str, Any]:
         """Return request-time metrics without confusing a cache hit with its origin run."""
@@ -1496,6 +1550,51 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
             for job_id in removable:
                 eval_jobs.pop(job_id, None)
         return {"cleared": True, "removed_count": len(removable)}
+
+    @app.get("/api/admin-ui/parameter-presets")
+    def list_parameter_presets(_: None = Depends(require_admin_session)):
+        items = sorted(parameter_presets.values(), key=lambda row: float(row.get("updated_at") or 0), reverse=True)
+        return {"items": [parameter_preset_public(row) for row in items], "limit": MAX_PARAMETER_PRESETS}
+
+    @app.post("/api/admin-ui/parameter-presets")
+    def create_parameter_preset(payload: ParameterPresetPayload, _: None = Depends(require_admin_session)):
+        name = _clean(payload.name)
+        if not name:
+            raise HTTPException(status_code=422, detail="파라미터 설정 이름을 입력해 주세요.")
+        with mutation_lock:
+            duplicate = next((row for row in parameter_presets.values() if _clean(row.get("name")) == name), None)
+            if duplicate is not None:
+                raise HTTPException(status_code=409, detail="같은 이름의 파라미터 설정이 이미 있습니다. 다른 이름을 사용해 주세요.")
+            if len(parameter_presets) >= MAX_PARAMETER_PRESETS:
+                raise HTTPException(status_code=409, detail=f"파라미터 설정은 최대 {MAX_PARAMETER_PRESETS}개까지 저장할 수 있습니다.")
+            try:
+                values = _validate_config(payload.values, active_config())
+            except Exception as error:
+                raise HTTPException(status_code=422, detail=str(error)) from error
+            now = time.time()
+            row = {"preset_id": f"preset-{uuid.uuid4().hex[:12]}", "name": name, "values": values,
+                   "created_at": now, "updated_at": now}
+            parameter_presets[row["preset_id"]] = row
+            save_parameter_presets()
+        return parameter_preset_public(row)
+
+    @app.delete("/api/admin-ui/parameter-presets/{preset_id}")
+    def delete_parameter_preset(preset_id: str, _: None = Depends(require_admin_session)):
+        with mutation_lock:
+            row = parameter_presets.pop(_clean(preset_id), None)
+            if row is None:
+                raise HTTPException(status_code=404, detail="파라미터 설정을 찾지 못했습니다.")
+            save_parameter_presets()
+        return {"deleted": True, "preset_id": str(row["preset_id"])}
+
+    @app.post("/api/admin-ui/parameter-presets/{preset_id}/load-draft")
+    def load_parameter_preset_to_draft(preset_id: str, _: None = Depends(require_admin_session)):
+        row = parameter_presets.get(_clean(preset_id))
+        if row is None:
+            raise HTTPException(status_code=404, detail="파라미터 설정을 찾지 못했습니다.")
+        with mutation_lock:
+            drafts["config"] = copy.deepcopy(dict(row["values"]))
+        return {"preset": parameter_preset_public(row), "draft": draft_public()}
 
     @app.get("/api/admin-ui/draft")
     def get_draft(_: None = Depends(require_admin_session)): return draft_public()
