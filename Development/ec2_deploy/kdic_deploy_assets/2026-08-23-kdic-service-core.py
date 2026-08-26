@@ -336,7 +336,7 @@ def normalize_public_result(result: Mapping[str, Any]) -> dict[str, Any]:
 
 
 def default_basis_from_result(result: Mapping[str, Any]) -> dict[str, Any]:
-    """Build a non-LLM, user-readable basis response from the stored Evidence Pack."""
+    """Build a verified user explanation from the Evidence Pack without an LLM."""
 
     common = _common_from_result(result)
     payload = _mapping(result.get("payload"))
@@ -346,8 +346,8 @@ def default_basis_from_result(result: Mapping[str, Any]) -> dict[str, Any]:
         or common.get("evidence_pack")
         or result.get("evidence_pack")
     )
-    allowed_ids = set(_clean_list(payload.get("used_evidence_ids")))
-    mappings: list[dict[str, str]] = []
+    allowed_ids = set(_clean_list(payload.get("used_evidence_ids") or result.get("used_evidence_ids")))
+    mappings: list[dict[str, Any]] = []
     for evidence in pack.get("evidence") or []:
         if not isinstance(evidence, Mapping):
             continue
@@ -373,6 +373,11 @@ def default_basis_from_result(result: Mapping[str, Any]) -> dict[str, Any]:
             {
                 "claim": title,
                 "reason": content or "답변 생성에 사용된 공식 검색 근거입니다.",
+                "answer_point": title,
+                "evidence_summary": content or "답변에 연결된 공식 안내입니다.",
+                "user_meaning": f"이 공식 정보는 답변에서 '{title}'에 관한 내용을 안내한 근거입니다.",
+                "caveat": "",
+                "evidence_ids": [evidence_id] if evidence_id else [],
             }
         )
         if len(mappings) >= 6:
@@ -383,17 +388,26 @@ def default_basis_from_result(result: Mapping[str, Any]) -> dict[str, Any]:
                 {
                     "claim": source["title"],
                     "reason": "답변에 연결된 공식 원문 페이지입니다.",
+                    "answer_point": source["title"],
+                    "evidence_summary": "답변에 연결된 예금보험공사 공식 안내입니다.",
+                    "user_meaning": "세부 조건과 최신 안내는 연결된 공식 페이지에서 다시 확인할 수 있습니다.",
+                    "caveat": "",
+                    "evidence_ids": [],
                 }
             )
+    missing = _clean_list(payload.get("missing_information"))
+    businesses = _businesses_from_result(result)
+    subject = "·".join(businesses[:3]) if businesses else "질문과 관련된 업무"
     return {
-        "summary": "검색·재정렬 후 선택된 공식 근거와 검증 정보를 바탕으로 답변했습니다.",
+        "schema_version": "kdic-basis-explanation-v1",
+        "summary": f"{subject}에 관한 공식 안내 중 실제 답변에 연결된 근거를 확인해 안내했습니다.",
+        "items": copy.deepcopy(mappings),
         "mappings": mappings,
         "conditions": [],
         "exceptions": [],
-        "limitations": _clean_list(payload.get("missing_information")),
-        "additional_information_needed": _clean_list(
-            payload.get("missing_information")
-        ),
+        "checkpoints": missing,
+        "limitations": missing,
+        "additional_information_needed": missing,
         "sources": _sources_from_result(result),
     }
 
@@ -483,12 +497,17 @@ class PipelineRuntime:
     def basis(self, result: Mapping[str, Any]) -> dict[str, Any]:
         with self._lock:
             pipeline = self._pipeline
+        fallback = default_basis_from_result(result)
         basis = getattr(pipeline, "basis", None) if pipeline is not None else None
         if callable(basis):
-            payload = basis(result)
+            try:
+                parameters = inspect.signature(basis).parameters
+            except (TypeError, ValueError):
+                parameters = {}
+            payload = basis(result, base_basis=fallback) if "base_basis" in parameters else basis(result)
             if isinstance(payload, Mapping):
                 return dict(payload)
-        return default_basis_from_result(result)
+        return fallback
 
     def record_cached_turn(
         self,

@@ -139,6 +139,22 @@ class LatestKDICNotebookAdapter:
         }
         return output
 
+    def basis(
+        self,
+        result: Mapping[str, Any],
+        *,
+        base_basis: Mapping[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        fallback = dict(base_basis or {})
+        explainer = self.runtime.get("generate_user_basis_explanation_v1")
+        if not callable(explainer):
+            return fallback
+        try:
+            explained = explainer(result, fallback)
+        except Exception:
+            return fallback
+        return dict(explained) if isinstance(explained, Mapping) else fallback
+
     def configure(self, api_key: str) -> None:
         configure = self.runtime.get("_configure_hcx_runtime")
         if callable(configure):

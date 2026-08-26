@@ -4259,6 +4259,186 @@ def execute_production_variant_v1(
     return output
 
 
+BASIS_EXPLAINER_SYSTEM_PROMPT_V1 = """
+당신은 예금보험공사 답변의 사용자용 근거 해설 작성기입니다.
+내부 사고과정이나 검색 기술정보를 공개하지 말고, 제공된 답변과 검증된 공식 근거의 연결만 설명하세요.
+근거에 없는 사실·숫자·조건·URL을 추가하지 마세요. 사용자가 무엇을 이해하고 확인해야 하는지 쉬운 한국어로 작성하세요.
+각 항목은 반드시 하나 이상의 evidence_indices로 제공된 근거를 참조해야 하며, 유효한 JSON 객체 하나만 출력하세요.
+""".strip()
+
+BASIS_EXPLANATION_SCHEMA_V1 = {
+    "type": "object",
+    "properties": {
+        "summary": {"type": "string"},
+        "items": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "answer_point": {"type": "string"},
+                    "evidence_summary": {"type": "string"},
+                    "user_meaning": {"type": "string"},
+                    "caveat": {"type": "string"},
+                    "evidence_indices": {"type": "array", "items": {"type": "integer"}},
+                },
+                "required": ["answer_point", "evidence_summary", "user_meaning", "caveat", "evidence_indices"],
+                "additionalProperties": False,
+            },
+        },
+        "checkpoints": {"type": "array", "items": {"type": "string"}},
+    },
+    "required": ["summary", "items", "checkpoints"],
+    "additionalProperties": False,
+}
+
+
+def _basis_explanation_fallback_v1(base_basis: Mapping[str, Any]) -> dict[str, Any]:
+    fallback = dict(base_basis or {})
+    items = []
+    for raw in list(fallback.get("items") or fallback.get("mappings") or [])[:6]:
+        if not isinstance(raw, Mapping):
+            continue
+        answer_point = _clean_text(raw.get("answer_point") or raw.get("claim") or "공식 안내")
+        evidence_summary = _clean_text(raw.get("evidence_summary") or raw.get("reason"))
+        if not evidence_summary:
+            continue
+        item = {
+            "answer_point": answer_point[:180],
+            "evidence_summary": evidence_summary[:320],
+            "user_meaning": _clean_text(raw.get("user_meaning") or f"이 정보는 답변에서 '{answer_point}'을 안내한 근거입니다.")[:260],
+            "caveat": _clean_text(raw.get("caveat"))[:220],
+            "evidence_ids": [_clean_text(value) for value in raw.get("evidence_ids") or [] if _clean_text(value)],
+        }
+        item["claim"] = item["answer_point"]
+        item["reason"] = item["evidence_summary"]
+        items.append(item)
+    fallback["schema_version"] = "kdic-basis-explanation-v1"
+    fallback["items"] = items
+    fallback["mappings"] = [dict(item) for item in items]
+    fallback["checkpoints"] = [
+        _clean_text(value)[:220]
+        for value in fallback.get("checkpoints") or fallback.get("limitations") or []
+        if _clean_text(value)
+    ][:5]
+    return fallback
+
+
+def _validate_basis_explanation_v1(
+    parsed: Mapping[str, Any],
+    base_basis: Mapping[str, Any],
+    answer: str,
+) -> dict[str, Any]:
+    fallback = _basis_explanation_fallback_v1(base_basis)
+    base_items = list(fallback.get("items") or [])
+    if not isinstance(parsed, Mapping) or not base_items:
+        raise ValueError("근거 해설 입력이 비어 있습니다.")
+    summary = _clean_text(parsed.get("summary"))[:320]
+    raw_items = list(parsed.get("items") or [])
+    if not summary or not raw_items or len(raw_items) > 6:
+        raise ValueError("근거 해설 항목 구성이 올바르지 않습니다.")
+    normalized_items = []
+    for raw in raw_items:
+        if not isinstance(raw, Mapping):
+            raise ValueError("근거 해설 항목 형식이 올바르지 않습니다.")
+        indices = []
+        for value in raw.get("evidence_indices") or []:
+            try:
+                index = int(value)
+            except (TypeError, ValueError):
+                continue
+            if 1 <= index <= len(base_items) and index not in indices:
+                indices.append(index)
+        if not indices:
+            raise ValueError("근거를 참조하지 않은 해설 항목이 있습니다.")
+        answer_point = _clean_text(raw.get("answer_point"))[:180]
+        evidence_summary = _clean_text(raw.get("evidence_summary"))[:320]
+        user_meaning = _clean_text(raw.get("user_meaning"))[:260]
+        caveat = _clean_text(raw.get("caveat"))[:220]
+        if not answer_point or not evidence_summary or not user_meaning:
+            raise ValueError("사용자용 근거 해설의 필수 문장이 비어 있습니다.")
+        evidence_ids = []
+        for index in indices:
+            for evidence_id in base_items[index - 1].get("evidence_ids") or []:
+                clean_id = _clean_text(evidence_id)
+                if clean_id and clean_id not in evidence_ids:
+                    evidence_ids.append(clean_id)
+        normalized_items.append({
+            "answer_point": answer_point,
+            "evidence_summary": evidence_summary,
+            "user_meaning": user_meaning,
+            "caveat": caveat,
+            "evidence_ids": evidence_ids,
+            "claim": answer_point,
+            "reason": evidence_summary,
+        })
+    checkpoints = [_clean_text(value)[:220] for value in parsed.get("checkpoints") or [] if _clean_text(value)][:5]
+    candidate_text = " ".join(
+        [summary, *checkpoints]
+        + [value for item in normalized_items for value in (
+            item["answer_point"], item["evidence_summary"], item["user_meaning"], item["caveat"]
+        )]
+    )
+    if re.search(r"(?i)(?:https?://|www\.)", candidate_text):
+        raise ValueError("근거 해설 본문에는 URL을 포함할 수 없습니다.")
+    allowed_text = " ".join(
+        [answer, _clean_text(fallback.get("summary")), *fallback.get("checkpoints", [])]
+        + [value for item in base_items for value in (
+            item.get("answer_point", ""), item.get("evidence_summary", ""), item.get("user_meaning", ""), item.get("caveat", "")
+        )]
+    )
+    number_pattern = r"(?<![A-Za-z])\d+(?:[.,]\d+)?(?:%|원|만원|억원|일|개월|년|시|분)?"
+    extra_numbers = set(re.findall(number_pattern, candidate_text)) - set(re.findall(number_pattern, allowed_text))
+    if extra_numbers:
+        raise ValueError("공식 근거에 없는 숫자가 근거 해설에 포함되어 있습니다.")
+    return {
+        **fallback,
+        "summary": summary,
+        "items": normalized_items,
+        "mappings": [dict(item) for item in normalized_items],
+        "checkpoints": checkpoints,
+    }
+
+
+def generate_user_basis_explanation_v1(
+    result: Mapping[str, Any],
+    base_basis: Mapping[str, Any],
+) -> dict[str, Any]:
+    fallback = _basis_explanation_fallback_v1(base_basis)
+    base_items = list(fallback.get("items") or [])
+    if not base_items:
+        return fallback
+    payload = result.get("payload") if isinstance(result.get("payload"), Mapping) else {}
+    answer = _clean_text(
+        result.get("answer")
+        or result.get("display_answer")
+        or result.get("basic_answer")
+        or payload.get("answer")
+    )
+    evidence_input = [
+        {
+            "evidence_index": index,
+            "answer_point": item.get("answer_point"),
+            "official_information": item.get("evidence_summary"),
+            "existing_caveat": item.get("caveat"),
+        }
+        for index, item in enumerate(base_items, start=1)
+    ]
+    user_prompt = f"""[사용자에게 제공한 답변]\n{answer}\n\n[검증된 공식 근거]\n{_compact_json(evidence_input)}\n\n[이미 확인된 제한사항]\n{_compact_json(fallback.get('checkpoints') or [])}\n\n답변 내용, 공식 근거, 사용자에게 필요한 의미와 확인사항을 연결해 JSON으로 설명하세요."""
+    try:
+        parsed, _, _, _ = answer_b_core._call_structured(
+            client=ANSWER_HCX_CLIENT,
+            model=HCX_CHAT_MODEL,
+            system_prompt=BASIS_EXPLAINER_SYSTEM_PROMPT_V1,
+            user_prompt=user_prompt,
+            schema_name="kdic_user_basis_explanation_v1",
+            schema=BASIS_EXPLANATION_SCHEMA_V1,
+            max_tokens=1800,
+        )
+        return _validate_basis_explanation_v1(parsed, fallback, answer)
+    except Exception:
+        return fallback
+
+
 _NORMALIZE_ANSWER_BEFORE_OFFICIAL_CONTACT_GUARD_V5 = normalize_answer_markdown_v3
 
 

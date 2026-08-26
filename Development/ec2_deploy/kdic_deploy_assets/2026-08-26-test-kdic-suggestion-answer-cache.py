@@ -130,6 +130,14 @@ def test_static_contracts() -> dict[str, str]:
     assert "본인인증 필요" in ui
     assert 'rel="noopener noreferrer"' in ui
     assert "host==='kdic.or.kr'||host.endsWith('.kdic.or.kr')" in ui
+    assert "const PROGRESS_STAGE_DWELL_MS=320" in ui
+    assert "async function completeProgress(row)" in ui
+    assert "await completeProgress(row);renderResult" in ui
+    assert "function basisHtml(d)" in ui
+    assert "이 답변을 이렇게 안내한 이유예요" in ui
+    assert "근거가 된 공식 정보" in ui
+    assert "사용자에게 어떤 의미인가요?" in ui
+    assert "officialRows(d.sources,10)" in ui
     assert "class PostgresSuggestionAnswerCache" in postgres
     assert "CREATE TABLE IF NOT EXISTS suggestion_answer_cache" in migration
     assert "compatible_overlay_revisions" in prewarm
@@ -164,6 +172,64 @@ def test_registry(core) -> dict[str, Any]:
         "unique_ids": "passed",
         "exact_id_and_query": "passed",
         "forged_cache_access": "blocked",
+    }
+
+
+def test_user_basis_contract(core) -> dict[str, str]:
+    raw_result = {
+        "answer": "공식 신청 대상과 확인사항을 안내합니다.",
+        "analysis": {"businesses": ["착오송금 반환 신청"]},
+        "payload": {
+            "used_evidence_ids": ["E1"],
+            "missing_information": ["개별 거래 조건을 확인해 주세요."],
+        },
+        "evidence_pack": {
+            "evidence": [
+                {
+                    "evidence_id": "E1",
+                    "section_title": "반환지원 신청 대상",
+                    "content": "공식 안내에 신청 대상과 확인 조건이 제시되어 있습니다.",
+                },
+                {
+                    "evidence_id": "E2",
+                    "section_title": "사용하지 않은 근거",
+                    "content": "최종 답변에서 참조하지 않은 공식 정보입니다.",
+                },
+            ]
+        },
+        "sources": [
+            {"title": "예금보험공사 공식 안내", "url": "https://www.kdic.or.kr/example"}
+        ],
+    }
+    fallback = core.default_basis_from_result(raw_result)
+    assert fallback["schema_version"] == "kdic-basis-explanation-v1"
+    assert len(fallback["items"]) == 1
+    assert fallback["items"][0]["evidence_ids"] == ["E1"]
+    assert "E2" not in json.dumps(fallback, ensure_ascii=False)
+    assert fallback["items"][0]["user_meaning"]
+    assert fallback["checkpoints"] == ["개별 거래 조건을 확인해 주세요."]
+    assert fallback["mappings"] == fallback["items"]
+
+    class BaseAwarePipeline:
+        name = "BASIS_TEST"
+
+        def __init__(self) -> None:
+            self.received: dict[str, Any] | None = None
+
+        def basis(self, result: Mapping[str, Any], *, base_basis=None) -> dict[str, Any]:
+            self.received = dict(base_basis or {})
+            output = dict(base_basis or {})
+            output["summary"] = "사용자 관점으로 정리한 공식 근거입니다."
+            return output
+
+    pipeline = BaseAwarePipeline()
+    explained = core.PipelineRuntime(pipeline).basis(raw_result)
+    assert pipeline.received and pipeline.received["items"][0]["evidence_ids"] == ["E1"]
+    assert explained["summary"] == "사용자 관점으로 정리한 공식 근거입니다."
+    return {
+        "verified_evidence_only": "passed",
+        "backward_compatible_schema": "passed",
+        "base_basis_handoff": "passed",
     }
 
 
@@ -275,6 +341,7 @@ def main() -> None:
     result = {
         "static": test_static_contracts(),
         "registry": test_registry(core),
+        "basis": test_user_basis_contract(core),
         "cache_flow": test_memory_cache_flow(core),
         "adapter": test_adapter_cached_turn(),
     }

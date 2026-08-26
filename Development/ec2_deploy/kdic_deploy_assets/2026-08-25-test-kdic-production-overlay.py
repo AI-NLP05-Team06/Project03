@@ -98,6 +98,11 @@ def test_static_contracts() -> dict[str, Any]:
     assert 'system_prompt=_managed_prompt("DC_SKELETON_SYSTEM_PROMPT_V1", DC_SKELETON_SYSTEM_PROMPT_V1)' in overlay
     assert 'system_prompt=_managed_prompt("DC_FINAL_SYSTEM_PROMPT_V1", DC_FINAL_SYSTEM_PROMPT_V1)' in overlay
     assert '"settings": ["C_CROSS_DIRECT_SYSTEM_PROMPT_V1"]' in admin_extension
+    assert "BASIS_EXPLAINER_SYSTEM_PROMPT_V1" in overlay
+    assert "내부 사고과정이나 검색 기술정보를 공개하지 말고" in overlay
+    assert "def generate_user_basis_explanation_v1(" in overlay
+    assert 'schema_name="kdic_user_basis_explanation_v1"' in overlay
+    assert "공식 근거에 없는 숫자가 근거 해설에 포함되어 있습니다." in overlay
     return {
         "engine_overlay_loader": "passed",
         "overlay_syntax": "passed",
@@ -272,6 +277,7 @@ def test_overlay_exec_contract() -> dict[str, Any]:
         "order_businesses_by_question_p0_v1",
         "build_p0_cross_business_subqueries_v1",
         "_current_question_scoped_analysis_v1",
+        "generate_user_basis_explanation_v1",
     )
     assert all(callable(namespace.get(name)) for name in required)
     unresolved: dict[str, list[str]] = {}
@@ -299,10 +305,70 @@ def test_overlay_exec_contract() -> dict[str, Any]:
         "고객센터 02-1588-0037 또는 02-758-1000"
     )
     assert normalized == "고객센터 1588-0037 또는 02-758-1000"
+
+    class StructuredBasisStub:
+        def __init__(self) -> None:
+            self.parsed: dict[str, Any] = {}
+            self.calls: list[dict[str, Any]] = []
+
+        def _call_structured(self, **kwargs: Any):
+            self.calls.append(kwargs)
+            return copy.deepcopy(self.parsed), {}, 0.0, []
+
+    base_basis = {
+        "schema_version": "kdic-basis-explanation-v1",
+        "summary": "착오송금 반환지원 공식 근거를 확인했습니다.",
+        "items": [{
+            "answer_point": "신청 대상을 확인했습니다.",
+            "evidence_summary": "공식 안내에 신청 대상이 제시되어 있습니다.",
+            "user_meaning": "본인이 대상에 해당하는지 확인할 수 있습니다.",
+            "caveat": "개별 조건은 공식 안내에서 확인해 주세요.",
+            "evidence_ids": ["E1"],
+        }],
+        "checkpoints": ["신청 전에 대상 조건을 확인해 주세요."],
+        "sources": [{"title": "공식 안내", "url": "https://www.kdic.or.kr/example"}],
+    }
+    raw_result = {
+        "answer": "공식 신청 대상에 해당하면 반환지원을 신청할 수 있습니다.",
+        "payload": {"used_evidence_ids": ["E1"]},
+    }
+    namespace["_clean_text"] = lambda value: str(value or "").strip()
+    namespace["_compact_json"] = lambda value: json.dumps(
+        value, ensure_ascii=False, separators=(",", ":")
+    )
+    basis_stub = StructuredBasisStub()
+    namespace["answer_b_core"] = basis_stub
+    basis_stub.parsed = {
+        "summary": "신청 가능 여부를 공식 대상 기준과 연결해 설명했습니다.",
+        "items": [{
+            "answer_point": "신청 대상 여부를 먼저 확인합니다.",
+            "evidence_summary": "공식 안내에 신청 대상이 제시되어 있습니다.",
+            "user_meaning": "본인의 조건을 공식 대상 기준과 대조하면 됩니다.",
+            "caveat": "개별 조건은 공식 안내에서 확인해 주세요.",
+            "evidence_indices": [1],
+        }],
+        "checkpoints": ["신청 전에 대상 조건을 확인해 주세요."],
+    }
+    explained = namespace["generate_user_basis_explanation_v1"](raw_result, base_basis)
+    assert explained["items"][0]["evidence_ids"] == ["E1"]
+    assert "본인의 조건" in explained["items"][0]["user_meaning"]
+    assert basis_stub.calls[-1]["system_prompt"] == namespace["BASIS_EXPLAINER_SYSTEM_PROMPT_V1"]
+    assert basis_stub.calls[-1]["schema"] == namespace["BASIS_EXPLANATION_SCHEMA_V1"]
+
+    basis_stub.parsed["items"][0]["user_meaning"] = "999원 조건을 새로 적용합니다."
+    unsupported_number = namespace["generate_user_basis_explanation_v1"](raw_result, base_basis)
+    assert unsupported_number["summary"] == base_basis["summary"]
+    assert "999원" not in json.dumps(unsupported_number, ensure_ascii=False)
+
+    basis_stub.parsed["items"][0]["user_meaning"] = "자세한 내용은 https://example.com 에서 봅니다."
+    unsupported_url = namespace["generate_user_basis_explanation_v1"](raw_result, base_basis)
+    assert unsupported_url["summary"] == base_basis["summary"]
+    assert "example.com" not in json.dumps(unsupported_url, ensure_ascii=False)
     return {
         "top_level_wiring": "passed",
         "required_functions": list(required),
         "official_contact_guard": "passed",
+        "basis_explanation": "validated_with_safe_fallback",
     }
 
 
@@ -312,9 +378,24 @@ def test_chat_ui_numbering_contract() -> dict[str, Any]:
     assert 'html+=`<ol start="${number}">`' in ui
     assert 'html+=`<li value="${number}">${inline(ordered[2])}</li>`' in ui
     assert "inline(ordered[1])" not in ui
+    assert "const PROGRESS_STAGE_DWELL_MS=320" in ui
+    assert "async function completeProgress(row)" in ui
+    assert "await completeProgress(row);renderResult" in ui
+    assert "Math.max(previous" in ui
+    assert "1/4단계" in ui
+    assert "function basisHtml(d)" in ui
+    assert "이 답변을 이렇게 안내한 이유예요" in ui
+    assert "근거가 된 공식 정보" in ui
+    assert "사용자에게 어떤 의미인가요?" in ui
+    assert "추가로 확인해 주세요" in ui
+    assert "officialRows(d.sources,10)" in ui
+    assert "window.__KDIC_PROGRESS_PREVIEW=completeProgress(previewRow)" in ui
+    assert "else if(preview==='basis')" in ui
     return {
         "ordered_list_start_preserved": "passed",
         "ordered_list_item_value_preserved": "passed",
+        "visible_four_stage_progress": "passed",
+        "user_basis_explanation": "passed",
     }
 
 
