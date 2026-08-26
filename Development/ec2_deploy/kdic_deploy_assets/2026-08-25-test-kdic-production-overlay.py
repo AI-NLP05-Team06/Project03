@@ -395,6 +395,7 @@ def test_chat_ui_numbering_contract() -> dict[str, Any]:
     assert "Math.max(previous" in ui
     assert "1/4단계" in ui
     assert "function basisHtml(d)" in ui
+    assert "function stripDocumentFormattingArtifacts(text='')" in ui
     assert "쉬운 요약 보기" in ui
     assert "쉬운 요약 접기" in ui
     assert "답변을 쉽게 이해하기" in ui

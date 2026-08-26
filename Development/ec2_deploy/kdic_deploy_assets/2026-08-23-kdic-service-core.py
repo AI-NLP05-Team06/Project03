@@ -127,11 +127,35 @@ def _route_from_result(result: Mapping[str, Any]) -> str:
     return _clean_text(_common_from_result(result).get("route") or "RETRIEVE").upper()
 
 
+def _strip_document_formatting_artifacts(value: Any) -> str:
+    """Remove non-Markdown styling remnants copied from converted documents."""
+
+    text = str(value or "")
+    text = re.sub(
+        r"\[([^\]\n]*)\]\{[^{}\n]*\.underline[^{}\n]*\}",
+        r"\1",
+        text,
+        flags=re.IGNORECASE,
+    )
+    text = re.sub(
+        r"\{[^{}\n]*\.underline[^{}\n]*\}",
+        "",
+        text,
+        flags=re.IGNORECASE,
+    )
+    return re.sub(r"\(\s*\)", "", text).strip()
+
+
 def _normalize_answer_text(value: Any) -> str:
     """Return markdown text without leaking Python list representations."""
 
     if isinstance(value, (list, tuple)):
-        sections = [str(item).strip() for item in value if isinstance(item, str) and item.strip()]
+        sections = [
+            _strip_document_formatting_artifacts(item)
+            for item in value
+            if isinstance(item, str) and item.strip()
+        ]
+        sections = [section for section in sections if section]
         return "\n\n".join(sections)
     text = str(value or "").strip()
     if len(text) >= 2 and text[0] in "[(" and text[-1] in "])":
@@ -142,10 +166,15 @@ def _normalize_answer_text(value: Any) -> str:
         if isinstance(parsed, (list, tuple)) and all(
             isinstance(item, str) for item in parsed
         ):
-            sections = [item.strip() for item in parsed if item.strip()]
+            sections = [
+                _strip_document_formatting_artifacts(item)
+                for item in parsed
+                if item.strip()
+            ]
+            sections = [section for section in sections if section]
             if sections:
                 return "\n\n".join(sections)
-    return text
+    return _strip_document_formatting_artifacts(text)
 
 
 def _answer_from_result(result: Mapping[str, Any]) -> str:

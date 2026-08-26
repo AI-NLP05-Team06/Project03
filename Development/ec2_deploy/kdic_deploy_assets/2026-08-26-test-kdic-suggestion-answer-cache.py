@@ -124,6 +124,7 @@ def test_static_contracts() -> dict[str, str]:
     assert "catch(e){ openKey(); }" not in ui
     assert "function officialUrl(raw)" in ui
     assert "function answerWithoutUrls(text='')" in ui
+    assert "function stripDocumentFormattingArtifacts(text='')" in ui
     assert "function sourceLinksHtml(sources,visible=3)" in ui
     assert "function bindSourceToggles(root)" in ui
     assert "md(answerWithoutUrls(result.answer||'답변을 준비하지 못했습니다.'))" in ui
@@ -261,12 +262,25 @@ def test_answer_normalization(core) -> dict[str, str]:
     assert core._answer_from_result({"answer": [first, second]}) == expected
     ordinary = "## 공식 안내\n\n일반 Markdown 답변입니다."
     assert core._normalize_answer_text(ordinary) == ordinary
+    pandoc_empty = "금융안심포털([]{.underline})에 접속해 조회합니다."
+    assert core._normalize_answer_text(pandoc_empty) == (
+        "금융안심포털에 접속해 조회합니다."
+    )
+    pandoc_label = "[금융안심포털]{#portal .underline}에서 확인합니다."
+    assert core._normalize_answer_text(pandoc_label) == (
+        "금융안심포털에서 확인합니다."
+    )
+    assert core._normalize_answer_text("신청 조건은 {개별 상황}입니다.") == (
+        "신청 조건은 {개별 상황}입니다."
+    )
     unsafe = "[__import__('os').system('echo unsafe')]"
     assert core._normalize_answer_text(unsafe) == unsafe
     return {
         "list_answer_joined": "passed",
         "stringified_list_joined": "passed",
         "ordinary_markdown_preserved": "passed",
+        "pandoc_underline_artifact_removed": "passed",
+        "unrelated_braces_preserved": "passed",
         "literal_eval_only": "passed",
     }
 
@@ -308,7 +322,10 @@ def test_memory_cache_flow(core) -> dict[str, str]:
     cached_bundle = cache.peek(service._cache_key(first["suggestion_id"]))
     assert cached_bundle is not None
     cached_bundle.public_result["answer"] = repr(
-        ["**첫 번째 안내**\n\n첫 번째 내용", "**두 번째 안내**\n\n두 번째 내용"]
+        [
+            "**첫 번째 안내**\n\n금융안심포털([]{.underline})에서 확인합니다.",
+            "**두 번째 안내**\n\n두 번째 내용",
+        ]
     )
     cache.put(cached_bundle)
 
@@ -320,8 +337,10 @@ def test_memory_cache_flow(core) -> dict[str, str]:
     assert hit_job.result["sources"] == live_job.result["sources"]
     assert hit_job.result["action_links"] == live_job.result["action_links"]
     assert hit_job.result["answer"] == (
-        "**첫 번째 안내**\n\n첫 번째 내용\n\n**두 번째 안내**\n\n두 번째 내용"
+        "**첫 번째 안내**\n\n금융안심포털에서 확인합니다.\n\n"
+        "**두 번째 안내**\n\n두 번째 내용"
     )
+    assert ".underline" not in hit_job.result["answer"]
     assert pipeline.cached_turns[-1][0] == first["query"]
     assert pipeline.cached_turns[-1][1] == hit_job.result["answer"]
     assert len(sessions.get("hit-session").state["turns"]) == 2
