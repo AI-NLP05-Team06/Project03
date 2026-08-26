@@ -110,6 +110,8 @@ def test_static_contracts() -> dict[str, str]:
     migration = MIGRATION_FILE.read_text(encoding="utf-8")
     assert "suggestion_id: str = Field" in api
     assert "suggestion_cache=SUGGESTION_ANSWER_CACHE" in api
+    assert '"suggestion_cache_runtime_namespace": PIPELINE_RUNTIME.cache_namespace' in api
+    assert 'health.get("suggestion_cache_runtime_namespace")' in prewarm
     assert 'data-suggestion-id="${esc(x.suggestion_id||\'\')}"' in ui
     assert "suggestion_id:String(suggestionId||'')" in ui
     assert "⚡ 저장된 빠른 답변" not in ui

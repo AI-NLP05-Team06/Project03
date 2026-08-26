@@ -53,6 +53,11 @@ def _request_json(
 
 
 def _runtime_namespace(health: Mapping[str, Any]) -> str:
+    service_namespace = str(
+        health.get("suggestion_cache_runtime_namespace") or ""
+    ).strip()
+    if service_namespace:
+        return service_namespace
     build = health.get("runtime_build")
     build = dict(build) if isinstance(build, Mapping) else {}
     return ":".join(

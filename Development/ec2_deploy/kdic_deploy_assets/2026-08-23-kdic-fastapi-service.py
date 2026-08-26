@@ -371,6 +371,7 @@ def health() -> dict[str, Any]:
         "jobs": JOB_STORE.stats(),
         "suggestion_answer_cache": SUGGESTION_ANSWER_CACHE.stats(),
         "suggestion_registry": core.suggestion_registry_stats(),
+        "suggestion_cache_runtime_namespace": PIPELINE_RUNTIME.cache_namespace,
         "admin_mode": "STAGED_WRITE",
     }
 
