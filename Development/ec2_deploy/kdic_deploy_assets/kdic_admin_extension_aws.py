@@ -749,6 +749,8 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
             if created_at < cutoff:
                 continue
             stored = service_module.JOB_STORE.get(str(public.get("job_id") or ""))
+            raw = getattr(stored, "raw_result", None)
+            raw = raw if isinstance(raw, Mapping) else {}
             result = public.get("result") if isinstance(public.get("result"), Mapping) else {}
             telemetry = job_telemetry(public, stored)
             businesses = result.get("businesses") if isinstance(result.get("businesses"), Sequence) and not isinstance(result.get("businesses"), (str, bytes)) else []
