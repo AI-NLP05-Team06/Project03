@@ -116,8 +116,11 @@ def test_static_contracts() -> dict[str, str]:
     assert "$('#bootRetry').onclick=bootstrapApp" in ui
     assert "catch(e){ openKey(); }" not in ui
     assert "function officialUrl(raw)" in ui
+    assert "function answerWithoutUrls(text='')" in ui
+    assert "md(answerWithoutUrls(result.answer||'답변을 준비하지 못했습니다.'))" in ui
     assert "officialRows(result.sources)" in ui
     assert "officialRows(result.action_links,3)" in ui
+    assert ui.index("officialRows(result.action_links,3)") < ui.index("officialRows(result.sources)")
     assert "관련 공식 서비스" in ui
     assert "본인인증 필요" in ui
     assert 'rel="noopener noreferrer"' in ui

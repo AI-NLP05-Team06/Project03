@@ -98,20 +98,21 @@ function progressCard(){return assistantShell(`<div class="progress-card"><h2 cl
 function updateProgress(row,p,stage){row.querySelector('.bar-fill').style.width=`${Math.max(8,p)}%`;row.querySelector('.live-stage').textContent=stage||'';const steps=[...row.querySelectorAll('.step')];let activeIndex=0;steps.forEach((s,i)=>{const min=+s.dataset.min,next=i<steps.length-1?+steps[i+1].dataset.min:101;const done=p>=next,active=p>=min&&p<next;if(active)activeIndex=i;s.classList.toggle('done',done);s.classList.toggle('active',active);const icon=s.querySelector('.step-icon');icon.innerHTML=done?'✓':active?'<span class="spinner-ring"></span>':'<span class="pending-dot"></span>'});row.querySelector('.stage-count').textContent=`${p>=100?4:activeIndex+1}/4단계`}
 function officialUrl(raw){try{const url=new URL(String(raw||''),location.origin),host=url.hostname.toLowerCase();return url.protocol==='https:'&&(host==='kdic.or.kr'||host.endsWith('.kdic.or.kr'))?url.href:''}catch{return ''}}
 function officialRows(rows,limit=20){const seen=new Set(),output=[];for(const raw of Array.isArray(rows)?rows:[]){const row=raw&&typeof raw==='object'?raw:{},url=officialUrl(row.url);if(!url||seen.has(url))continue;seen.add(url);output.push({...row,url});if(output.length>=limit)break}return output}
+function answerWithoutUrls(text=''){let value=String(text||''),urlChars='[A-Za-z0-9\\-._~:/?#\\[\\]@!$&()*+,;=%]+';value=value.replace(new RegExp(`\\[([^\\]\\n]+)\\]\\(\\s*(?:https?:\\/\\/|www\\.)${urlChars}(?:\\s+"[^"]*")?\\s*\\)`,'gi'),'$1');value=value.replace(new RegExp(`\\(\\s*(?:https?:\\/\\/|www\\.)${urlChars}\\s*\\)`,'gi'),'');value=value.replace(new RegExp(`<(?:https?:\\/\\/|www\\.)${urlChars}>`,'gi'),'예금보험공사 홈페이지');value=value.replace(new RegExp(`(?:https?:\\/\\/|www\\.)${urlChars}`,'gi'),raw=>{const punctuation=raw.match(/[),.;!?]+$/),tail=punctuation?punctuation[0]:'',core=tail?raw.slice(0,-tail.length):raw,normalized=/^www\./i.test(core)?`https://${core}`:core;return `${officialUrl(normalized)?'예금보험공사 홈페이지':'관련 안내 페이지'}${tail}`});return value.replace(/\(\s*\)/g,'').replace(/[ \t]+([,.;!?])/g,'$1').replace(/[ \t]{2,}/g,' ')}
 function renderResult(row,result,jobId){
   const route=result.route||'';
-  let body=`<div class="answer-main"><span class="route-pill">${route==='CLARIFY'?'추가 확인':route==='OUT_OF_SCOPE'?'안내 범위 확인':'공식 안내'}</span><div class="answer-body">${md(result.answer||'답변을 준비하지 못했습니다.')}</div></div>`;
+  let body=`<div class="answer-main"><span class="route-pill">${route==='CLARIFY'?'추가 확인':route==='OUT_OF_SCOPE'?'안내 범위 확인':'공식 안내'}</span><div class="answer-body">${md(answerWithoutUrls(result.answer||'답변을 준비하지 못했습니다.'))}</div></div>`;
   if(route==='RETRIEVE'){
-    const sources=officialRows(result.sources);
-    if(sources.length){
-      body+=`<section class="resource-group official-sources"><div class="resource-title">공식 출처</div>`;
-      body+=sources.map(source=>`<a class="source-link" href="${esc(source.url)}" target="_blank" rel="noopener noreferrer"><span class="source-icon">▤</span><span><span class="source-name">${esc(source.title||'공식 안내')}</span><span class="source-meta">예금보험공사 공식 안내</span></span><span class="source-arrow">›</span></a>`).join('');
-      body+='</section>';
-    }
     const actionLinks=officialRows(result.action_links,3);
     if(actionLinks.length){
       body+=`<section class="resource-group official-services"><div class="resource-title">관련 공식 서비스</div>`;
       body+=actionLinks.map(link=>{const description=link.description?`<span class="service-description">${esc(link.description)}</span>`:'',auth=link.requires_auth?'<span class="auth-badge">본인인증 필요</span>':'';return `<a class="source-link service-link" href="${esc(link.url)}" target="_blank" rel="noopener noreferrer"><span class="source-icon">↗</span><span><span class="source-name">${esc(link.label||'공식 서비스 열기')}</span>${description}${auth}</span><span class="source-arrow">›</span></a>`}).join('');
+      body+='</section>';
+    }
+    const sources=officialRows(result.sources);
+    if(sources.length){
+      body+=`<section class="resource-group official-sources"><div class="resource-title">공식 출처</div>`;
+      body+=sources.map(source=>`<a class="source-link" href="${esc(source.url)}" target="_blank" rel="noopener noreferrer"><span class="source-icon">▤</span><span><span class="source-name">${esc(source.title||'공식 안내')}</span><span class="source-meta">예금보험공사 공식 안내</span></span><span class="source-arrow">›</span></a>`).join('');
       body+='</section>';
     }
     body+=`<div class="answer-actions"><button class="action-btn basis-btn">답변 근거 보기</button><div class="basis-slot"></div></div>`;
@@ -141,7 +142,7 @@ else if(preview==='answer'){
   const previewRow=progressCard();
   renderResult(previewRow,{
     route:'RETRIEVE',
-    answer:"은닉재산 신고 시 필요한 자료에 대한 구체적인 정보는 제공된 공식 안내에 포함되어 있지 않습니다. 따라서 정확한 필요 자료를 바로 안내드리기는 어렵습니다. 하지만 다음 방법으로 자세한 내용을 확인할 수 있습니다: 1. 예금보험공사 홈페이지: 홈페이지 내 '금융부실관련자 은닉재산 신고센터'를 확인하세요. 2. 상담전화: 1588-0037 또는 02-758-0102~4로 문의하세요.",
+    answer:"은닉재산 신고 시 필요한 자료는 [예금보험공사 홈페이지](https://www.kdic.or.kr/sp/sprtfund/SprtCncmDclrInqGudn/selectScrn.do)에서 확인할 수 있습니다. 자세한 내용은 https://www.kdic.or.kr/sp/sprtfund/SprtCncmDclrInqGudn/selectScrn.do에서 확인하세요. 상담전화는 1588-0037 또는 02-758-0102~4입니다.",
     businesses:['은닉재산 신고'],
     sources:[{title:'은닉재산 신고 공식 안내',url:'https://www.kdic.or.kr/sp/sprtfund/SprtCncmDclrInqGudn/selectScrn.do'},{title:'비공식 출처',url:'https://example.com/not-official'}],
     action_links:[{label:'은닉재산 신고·조회',description:'은닉재산을 신고하거나 기존 신고 관련 조회 화면으로 이동합니다.',url:'https://www.kdic.or.kr/sp/sprtfund/SprtCncmDclrInqGudn/selectScrn.do',requires_auth:false},{label:'본인인증 서비스',description:'본인인증 후 신고 내용을 확인합니다.',url:'https://fins.kdic.or.kr/example',requires_auth:true},{label:'잘못된 바로가기',url:'javascript:alert(1)'}],
