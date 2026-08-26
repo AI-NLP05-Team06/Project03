@@ -934,13 +934,24 @@ class InMemoryJobStore:
             record.updated_at = time.time()
             return record
 
-    def list_public(self, limit: int = 100) -> list[dict[str, Any]]:
+    def list_public(self, limit: int = 100, offset: int = 0, since: float | None = None) -> list[dict[str, Any]]:
         with self._lock:
             self._cleanup_locked()
             rows = sorted(
                 self._records.values(), key=lambda row: row.created_at, reverse=True
-            )[: max(1, min(int(limit), 500))]
+            )
+            if since is not None:
+                rows = [row for row in rows if row.created_at >= float(since)]
+            start = max(0, int(offset))
+            rows = rows[start:start + max(1, min(int(limit), 5_000))]
             return [row.public() for row in rows]
+
+    def count_public(self, since: float | None = None) -> int:
+        with self._lock:
+            self._cleanup_locked()
+            if since is None:
+                return len(self._records)
+            return sum(row.created_at >= float(since) for row in self._records.values())
 
     def stats(self) -> dict[str, Any]:
         with self._lock:

@@ -327,16 +327,33 @@ class PostgresJobStore:
                 raise KeyError(job_id)
         return _row_to_job(row)
 
-    def list_public(self, limit: int = 100) -> list[dict[str, Any]]:
+    def list_public(self, limit: int = 100, offset: int = 0, since: float | None = None) -> list[dict[str, Any]]:
+        clauses = ["job_type = 'chat'"]
+        params: list[Any] = []
+        if since is not None:
+            clauses.append("created_at >= to_timestamp(%s)")
+            params.append(float(since))
+        params.extend([max(1, min(int(limit), 5_000)), max(0, int(offset))])
         with _cursor() as cur:
             cur.execute(
                 "SELECT id, session_id, status, progress, stage, payload, result, "
                 "raw_result, error_message, created_at FROM jobs "
-                "WHERE job_type = 'chat' ORDER BY created_at DESC LIMIT %s",
-                (max(1, min(int(limit), 500)),),
+                f"WHERE {' AND '.join(clauses)} ORDER BY created_at DESC LIMIT %s OFFSET %s",
+                params,
             )
             rows = cur.fetchall()
         return [_row_to_job(row).public() for row in rows]
+
+    def count_public(self, since: float | None = None) -> int:
+        clauses = ["job_type = 'chat'"]
+        params: list[Any] = []
+        if since is not None:
+            clauses.append("created_at >= to_timestamp(%s)")
+            params.append(float(since))
+        with _cursor() as cur:
+            cur.execute(f"SELECT count(*) AS n FROM jobs WHERE {' AND '.join(clauses)}", params)
+            row = cur.fetchone()
+        return int((row or {}).get("n") or 0)
 
     def stats(self) -> dict[str, Any]:
         with _cursor() as cur:

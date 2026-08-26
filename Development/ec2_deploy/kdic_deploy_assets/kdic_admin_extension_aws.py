@@ -578,7 +578,6 @@ def _metrics(
 def install_admin_routes(service_module: Any, html_path: str | Path, runtime_globals: MutableMapping[str, Any]) -> dict[str, Any]:
     """Cookie-authenticated admin UI with isolated A/B eval and staged apply/rollback."""
     app, page = service_module.app, Path(html_path).resolve()
-    sessions: dict[str, float] = {}
     auth_lock, mutation_lock, eval_lock = threading.RLock(), threading.RLock(), threading.RLock()
     prompt_compare_lock = threading.Lock()
     report_lock = threading.Lock()
@@ -591,6 +590,53 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
     default_snapshot_path = Path(os.getenv("KDIC_ADMIN_DEFAULT_SNAPSHOT_PATH", "/opt/kdic/runtime/admin_default_snapshot.pkl")).resolve()
     pipeline_labels_path = Path(os.getenv("KDIC_PIPELINE_LABELS_PATH", "/opt/kdic/runtime/admin_pipeline_labels.json")).resolve()
     parameter_presets_path = Path(os.getenv("KDIC_PARAMETER_PRESETS_PATH", "/opt/kdic/runtime/admin_parameter_presets.json")).resolve()
+    admin_sessions_path = Path(os.getenv("KDIC_ADMIN_SESSIONS_PATH", "/opt/kdic/runtime/admin_sessions.json")).resolve()
+    evaluation_state_path = Path(os.getenv("KDIC_ADMIN_EVALUATIONS_PATH", "/opt/kdic/runtime/admin_evaluations.pkl")).resolve()
+
+    def load_admin_sessions() -> dict[str, float]:
+        try:
+            loaded = json.loads(admin_sessions_path.read_text(encoding="utf-8"))
+            now = time.time()
+            return {
+                str(token): float(expires_at)
+                for token, expires_at in dict(loaded or {}).items()
+                if str(token) and float(expires_at) > now
+            }
+        except (FileNotFoundError, json.JSONDecodeError, OSError, TypeError, ValueError):
+            return {}
+
+    def save_admin_sessions() -> None:
+        admin_sessions_path.parent.mkdir(parents=True, exist_ok=True)
+        temp = admin_sessions_path.with_suffix(admin_sessions_path.suffix + ".tmp")
+        temp.write_text(json.dumps(sessions, ensure_ascii=False), encoding="utf-8")
+        try:
+            os.chmod(temp, 0o600)
+        except OSError:
+            pass
+        os.replace(temp, admin_sessions_path)
+
+    def load_evaluation_state() -> tuple[dict[str, dict[str, Any]], dict[str, dict[str, Any]]]:
+        try:
+            loaded = pickle.loads(evaluation_state_path.read_bytes())
+            raw_datasets = loaded.get("datasets") if isinstance(loaded, Mapping) else {}
+            raw_jobs = loaded.get("eval_jobs") if isinstance(loaded, Mapping) else {}
+            saved_datasets = {str(key): dict(value) for key, value in dict(raw_datasets or {}).items() if isinstance(value, Mapping)}
+            saved_jobs = {str(key): dict(value) for key, value in dict(raw_jobs or {}).items() if isinstance(value, Mapping)}
+            for job in saved_jobs.values():
+                if job.get("status") == "running":
+                    job.update(status="error", error="서버 재시작으로 진행 중이던 평가가 중단되었습니다. 다시 실행해 주세요.", updated_at=time.time())
+            return saved_datasets, saved_jobs
+        except (FileNotFoundError, OSError, TypeError, ValueError, pickle.PickleError):
+            return {}, {}
+
+    def save_evaluation_state() -> None:
+        evaluation_state_path.parent.mkdir(parents=True, exist_ok=True)
+        temp = evaluation_state_path.with_suffix(evaluation_state_path.suffix + ".tmp")
+        temp.write_bytes(pickle.dumps({"datasets": datasets, "eval_jobs": eval_jobs}, protocol=pickle.HIGHEST_PROTOCOL))
+        os.replace(temp, evaluation_state_path)
+
+    sessions: dict[str, float] = load_admin_sessions()
+    datasets, eval_jobs = load_evaluation_state()
 
     def load_pipeline_labels() -> dict[str, str]:
         try:
@@ -793,10 +839,16 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
         item["telemetry"] = job_telemetry(item, stored)
         return item
 
-    def monitoring_snapshot(hours: int, limit: int) -> dict[str, Any]:
+    def monitoring_snapshot(hours: float, limit: int, offset: int = 0) -> dict[str, Any]:
         now = time.time()
         cutoff = now - (hours * 3600)
-        rows = service_module.JOB_STORE.list_public(limit)
+        try:
+            rows = service_module.JOB_STORE.list_public(5_000, since=cutoff)
+            total_available = int(service_module.JOB_STORE.count_public(since=cutoff))
+        except TypeError:
+            # 이전 로컬 개발용 저장소와도 호환되도록 유지한다.
+            rows = service_module.JOB_STORE.list_public(5_000)
+            total_available = None
         records: list[dict[str, Any]] = []
         for public in rows:
             created_at = float(public.get("created_at") or 0)
@@ -857,7 +909,7 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
             "hours": hours,
             "retention_notice": "현재 작업 저장소의 보존 범위 안에서 집계합니다.",
             "summary": {
-                "questions": len(records),
+                "questions": total_available if total_available is not None else len(records),
                 "completed": len(completed),
                 "failed": len(failed),
                 "success_rate": len(completed) / len(records) if records else 0,
@@ -877,17 +929,24 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
             "timeseries": buckets,
             "routes": [{"name": key, "count": value} for key, value in sorted(route_counts.items(), key=lambda item: (-item[1], item[0]))],
             "businesses": [{"name": key, "count": value} for key, value in sorted(business_counts.items(), key=lambda item: (-item[1], item[0]))],
-            "recent": sorted(records, key=lambda row: row["created_at"], reverse=True)[:30],
+            "recent": sorted(records, key=lambda row: row["created_at"], reverse=True)[max(0, offset):max(0, offset) + limit],
+            "recent_total": total_available if total_available is not None else len(records),
+            "recent_offset": max(0, offset),
+            "recent_limit": limit,
         }
 
     def require_admin_session(request: Request) -> None:
         supplied = _clean(request.cookies.get(COOKIE_NAME))
         with auth_lock:
             now = time.time()
+            expired = False
             for token, expires in list(sessions.items()):
                 if expires <= now:
                     sessions.pop(token, None)
+                    expired = True
             expires_at = sessions.get(supplied)
+            if expired:
+                save_admin_sessions()
         if not supplied or not expires_at or expires_at <= time.time():
             raise HTTPException(status_code=401, detail="관리자 세션이 없거나 만료되었습니다.")
 
@@ -1053,9 +1112,11 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
                     "metric_definitions": definitions,
                     "baseline_config": baseline, "candidate_config": candidate, "baseline": base_metrics,
                     "candidate": cand_metrics, "delta": delta, "details": details})
+                save_evaluation_state()
         except Exception as error:
             with eval_lock:
                 eval_jobs[job_id].update(status="error", error=f"{type(error).__name__}: {error}", updated_at=time.time())
+                save_evaluation_state()
 
     def evaluation_change_summary(result: Mapping[str, Any]) -> dict[str, Any]:
         """Calculate whole-dataset changes before asking the LLM to interpret them."""
@@ -1065,6 +1126,7 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
         tolerance = 0.005
         for detail in result.get("details") or []:
             current_values, improvement_values = [], []
+            metric_deltas = []
             for definition in definitions:
                 baseline_key = str(definition.get("baseline_key") or definition.get("key") or "")
                 candidate_key = str(definition.get("candidate_key") or definition.get("key") or "")
@@ -1072,8 +1134,17 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
                 improvement = (detail.get("candidate") or {}).get(candidate_key)
                 if current is None or improvement is None:
                     continue
-                current_values.append(float(current))
-                improvement_values.append(float(improvement))
+                current_value, improvement_value = float(current), float(improvement)
+                current_values.append(current_value)
+                improvement_values.append(improvement_value)
+                metric_deltas.append({
+                    "metric": str(definition.get("label") or definition.get("name") or baseline_key),
+                    "current": round(current_value, 6),
+                    "improvement": round(improvement_value, 6),
+                    "delta": round(improvement_value - current_value, 6),
+                    "baseline_k": definition.get("baseline_k", definition.get("k")),
+                    "candidate_k": definition.get("candidate_k", definition.get("k")),
+                })
             current_score = sum(current_values) / len(current_values) if current_values else 0.0
             improvement_score = sum(improvement_values) / len(improvement_values) if improvement_values else 0.0
             delta = improvement_score - current_score
@@ -1090,6 +1161,7 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
                 "score_delta": round(delta, 6),
                 "current_score": round(current_score, 6),
                 "improvement_score": round(improvement_score, 6),
+                "metric_deltas": metric_deltas,
                 "gold_chunk_ids": list(detail.get("gold_chunk_ids") or []),
                 "current_top": list(detail.get("baseline_retrieved") or [])[:5],
                 "improvement_top": list(detail.get("candidate_retrieved") or [])[:5],
@@ -1354,7 +1426,7 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
                 raise HTTPException(status_code=410, detail="관리자 일회용 접속 링크가 이미 사용되었습니다.")
             if not hmac.compare_digest(admin_token, expected):
                 raise HTTPException(status_code=401, detail="관리자 일회용 접속 토큰이 올바르지 않습니다.")
-            token = secrets.token_urlsafe(48); sessions[token] = time.time() + SESSION_TTL_SECONDS; bootstrap_state["used"] = True
+            token = secrets.token_urlsafe(48); sessions[token] = time.time() + SESSION_TTL_SECONDS; save_admin_sessions(); bootstrap_state["used"] = True
         response = RedirectResponse(url="/admin", status_code=303)
         response.set_cookie(COOKIE_NAME, token, max_age=SESSION_TTL_SECONDS, httponly=True, secure=True, samesite="lax", path="/")
         return response
@@ -1370,6 +1442,7 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
         token = secrets.token_urlsafe(48)
         with auth_lock:
             sessions[token] = time.time() + SESSION_TTL_SECONDS
+            save_admin_sessions()
         response = JSONResponse({"authenticated": True, "expires_in_seconds": SESSION_TTL_SECONDS})
         response.set_cookie(COOKIE_NAME, token, max_age=SESSION_TTL_SECONDS, httponly=True, secure=True, samesite="strict", path="/")
         return response
@@ -1392,7 +1465,9 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
 
     @app.post("/api/admin-ui/logout", include_in_schema=False)
     def logout(request: Request, _: None = Depends(require_admin_session)):
-        with auth_lock: sessions.pop(_clean(request.cookies.get(COOKIE_NAME)), None)
+        with auth_lock:
+            sessions.pop(_clean(request.cookies.get(COOKIE_NAME)), None)
+            save_admin_sessions()
         response = RedirectResponse(url="/", status_code=303)
         response.delete_cookie(COOKIE_NAME, path="/", secure=True, httponly=True, samesite="lax")
         return response
@@ -1406,12 +1481,22 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
                 "datasets": [dataset_summary(row) for row in datasets.values()]}
 
     @app.get("/api/admin-ui/jobs")
-    def jobs(limit: int = Query(default=100, ge=1, le=500), _: None = Depends(require_admin_session)):
-        payload = service_module.admin_jobs(limit)
-        items = payload.get("items") if isinstance(payload.get("items"), Sequence) else []
+    def jobs(limit: int = Query(default=25, ge=1, le=100), offset: int = Query(default=0, ge=0),
+             hours: float = Query(default=24, ge=.25, le=720), _: None = Depends(require_admin_session)):
+        cutoff = time.time() - (hours * 3600)
+        try:
+            items = service_module.JOB_STORE.list_public(limit, offset=offset, since=cutoff)
+            total = int(service_module.JOB_STORE.count_public(since=cutoff))
+        except TypeError:
+            all_items = [row for row in service_module.JOB_STORE.list_public(500) if float(row.get("created_at") or 0) >= cutoff]
+            items, total = all_items[offset:offset + limit], len(all_items)
         return {
-            **payload,
+            "stats": service_module.JOB_STORE.stats(),
             "items": [job_public_with_telemetry(item) for item in items if isinstance(item, Mapping)],
+            "total": total,
+            "offset": offset,
+            "limit": limit,
+            "hours": hours,
         }
 
     @app.get("/api/admin-ui/indices")
@@ -1436,7 +1521,9 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
             raise HTTPException(status_code=422, detail=str(error)) from error
         dataset_id = f"ds-{uuid.uuid4().hex[:12]}"
         record = {"dataset_id": dataset_id, "filename": payload.filename, "created_at": time.time(), **parsed}
-        datasets[dataset_id] = record
+        with eval_lock:
+            datasets[dataset_id] = record
+            save_evaluation_state()
         return dataset_summary(record)
 
     @app.get("/api/admin-ui/evaluations/datasets")
@@ -1453,6 +1540,7 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
             removed_jobs = [job_id for job_id, job in eval_jobs.items() if job.get("dataset_id") == dataset_id]
             for job_id in removed_jobs:
                 eval_jobs.pop(job_id, None)
+            save_evaluation_state()
         return {"deleted": True, "dataset_id": dataset_id, "removed_jobs": len(removed_jobs)}
 
     @app.delete("/api/admin-ui/evaluations/datasets")
@@ -1463,6 +1551,7 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
             count = len(datasets)
             datasets.clear()
             eval_jobs.clear()
+            save_evaluation_state()
         return {"cleared": True, "dataset_count": count}
 
     @app.post("/api/admin-ui/evaluations/run")
@@ -1483,10 +1572,12 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
             )
         except Exception as error: raise HTTPException(status_code=422, detail=str(error)) from error
         job_id = f"eval-{uuid.uuid4().hex[:12]}"
-        eval_jobs[job_id] = {"job_id": job_id, "status": "running", "progress": 0, "processed": 0,
-                             "dataset_id": payload.dataset_id, "dataset_filename": datasets[payload.dataset_id]["filename"],
-                             "evaluation_policy": policy, "created_at": time.time(), "updated_at": time.time(),
-                             "error": None, "result": None}
+        with eval_lock:
+            eval_jobs[job_id] = {"job_id": job_id, "status": "running", "progress": 0, "processed": 0,
+                                 "dataset_id": payload.dataset_id, "dataset_filename": datasets[payload.dataset_id]["filename"],
+                                 "evaluation_policy": policy, "created_at": time.time(), "updated_at": time.time(),
+                                 "error": None, "result": None}
+            save_evaluation_state()
         executor.submit(run_evaluation, job_id, payload.dataset_id, payload.candidate, payload.max_questions,
                         payload.evaluation_depth, baseline_metric_ks, candidate_metric_ks, payload.curve_ks)
         return {k: v for k, v in eval_jobs[job_id].items() if k != "result"}
@@ -1528,6 +1619,7 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
                 if current and current.get("result"):
                     current["result"]["llm_report"] = copy.deepcopy(report)
                     current["updated_at"] = time.time()
+                    save_evaluation_state()
             return report
         finally:
             report_lock.release()
@@ -1541,6 +1633,7 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
             if job.get("status") == "running":
                 raise HTTPException(status_code=409, detail="실행 중인 평가는 삭제할 수 없습니다.")
             eval_jobs.pop(job_id, None)
+            save_evaluation_state()
         return {"deleted": True, "job_id": job_id}
 
     @app.delete("/api/admin-ui/evaluations/jobs")
@@ -1549,6 +1642,7 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
             removable = [job_id for job_id, job in eval_jobs.items() if job.get("status") != "running"]
             for job_id in removable:
                 eval_jobs.pop(job_id, None)
+            save_evaluation_state()
         return {"cleared": True, "removed_count": len(removable)}
 
     @app.get("/api/admin-ui/parameter-presets")
@@ -1832,9 +1926,10 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
         return {"reset": True, "graph": _build_pipeline_graph(runtime_globals, pipeline_labels)}
 
     @app.get("/api/admin-ui/monitoring")
-    def monitoring(hours: int = Query(default=24, ge=1, le=720), limit: int = Query(default=200, ge=1, le=500),
+    def monitoring(hours: float = Query(default=24, ge=.25, le=720), limit: int = Query(default=30, ge=1, le=100),
+                   offset: int = Query(default=0, ge=0),
                    _: None = Depends(require_admin_session)):
-        return monitoring_snapshot(hours, limit)
+        return monitoring_snapshot(hours, limit, offset)
 
     @app.get("/api/admin-ui/guardrails")
     def guardrails(_: None = Depends(require_admin_session)):
