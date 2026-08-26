@@ -198,6 +198,9 @@ FOLLOWUP_QUERY_OVERRIDES: dict[tuple[str, str], str] = {
     ("미수령금", "필요 서류"): (
         "본인 명의 고객 미수령금 신청에 필요한 서류를 알려주세요."
     ),
+    ("예금보험금", "보호 한도"): (
+        "예금보험금으로 지급되는 1인당 최대 금액을 알려주세요."
+    ),
 }
 SUGGESTION_CACHE_SCHEMA_VERSION = "kdic-suggestion-answer-bundle-v5.0"
 _SUGGESTION_BY_ID: dict[str, dict[str, str]] = {}

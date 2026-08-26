@@ -119,6 +119,7 @@ def test_registry(core) -> dict[str, Any]:
     assert by_key[("예금자보호", "제외 상품")]["query"].startswith("예금자보호제도에서")
     assert "본인 명의" in by_key[("미수령금", "조회 방법")]["query"]
     assert "본인 명의" in by_key[("미수령금", "필요 서류")]["query"]
+    assert "1인당 최대 금액" in by_key[("예금보험금", "보호 한도")]["query"]
     for row in catalog:
         assert core.resolve_registered_suggestion(
             row["query"], row["suggestion_id"]
