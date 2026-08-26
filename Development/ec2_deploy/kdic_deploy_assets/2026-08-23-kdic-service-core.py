@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 import copy
 import importlib
 import importlib.util
@@ -126,6 +127,27 @@ def _route_from_result(result: Mapping[str, Any]) -> str:
     return _clean_text(_common_from_result(result).get("route") or "RETRIEVE").upper()
 
 
+def _normalize_answer_text(value: Any) -> str:
+    """Return markdown text without leaking Python list representations."""
+
+    if isinstance(value, (list, tuple)):
+        sections = [str(item).strip() for item in value if isinstance(item, str) and item.strip()]
+        return "\n\n---\n\n".join(sections)
+    text = str(value or "").strip()
+    if len(text) >= 2 and text[0] in "[(" and text[-1] in "])":
+        try:
+            parsed = ast.literal_eval(text)
+        except (SyntaxError, ValueError, TypeError, MemoryError, RecursionError):
+            parsed = None
+        if isinstance(parsed, (list, tuple)) and all(
+            isinstance(item, str) for item in parsed
+        ):
+            sections = [item.strip() for item in parsed if item.strip()]
+            if sections:
+                return "\n\n---\n\n".join(sections)
+    return text
+
+
 def _answer_from_result(result: Mapping[str, Any]) -> str:
     payload = _mapping(result.get("payload"))
     common = _common_from_result(result)
@@ -138,7 +160,7 @@ def _answer_from_result(result: Mapping[str, Any]) -> str:
         common.get("route_message"),
     ]
     for candidate in candidates:
-        text = str(candidate or "").strip()
+        text = _normalize_answer_text(candidate)
         if text:
             return text
     return "답변을 준비하지 못했습니다. 잠시 후 다시 시도해 주세요."
@@ -1008,6 +1030,9 @@ class KDICJobService:
             if bundle is not None and bundle.question == clean_question:
                 try:
                     public = copy.deepcopy(bundle.public_result)
+                    public["answer"] = _normalize_answer_text(public.get("answer")) or (
+                        "답변을 준비하지 못했습니다. 잠시 후 다시 시도해 주세요."
+                    )
                     public["origin_latency_seconds"] = copy.deepcopy(
                         public.get("latency_seconds") or {}
                     )
@@ -1036,7 +1061,7 @@ class KDICJobService:
                     with session.lock:
                         self.runtime.record_cached_turn(
                             clean_question,
-                            str(public.get("answer") or ""),
+                            public["answer"],
                             session.state,
                         )
                         session.updated_at = time.time()

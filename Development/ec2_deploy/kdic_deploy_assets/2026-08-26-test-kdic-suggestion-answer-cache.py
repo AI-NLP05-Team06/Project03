@@ -124,6 +124,8 @@ def test_static_contracts() -> dict[str, str]:
     assert "catch(e){ openKey(); }" not in ui
     assert "function officialUrl(raw)" in ui
     assert "function answerWithoutUrls(text='')" in ui
+    assert "function sourceLinksHtml(sources,visible=3)" in ui
+    assert "function bindSourceToggles(root)" in ui
     assert "md(answerWithoutUrls(result.answer||'답변을 준비하지 못했습니다.'))" in ui
     assert "officialRows(result.sources)" in ui
     assert "officialRows(result.action_links,3)" in ui
@@ -139,10 +141,16 @@ def test_static_contracts() -> dict[str, str]:
     assert "if(cacheHit)await completeCachedProgress(row);else await completeProgress(row)" in ui
     assert "else if(preview==='cache-progress')" in ui
     assert "function basisHtml(d)" in ui
-    assert "이 답변을 이렇게 안내한 이유예요" in ui
+    assert "쉬운 요약 보기" in ui
+    assert "쉬운 요약 접기" in ui
+    assert "공식 정보를 쉽게 요약하고 있어요" in ui
+    assert "답변을 쉽게 이해하기" in ui
     assert "근거가 된 공식 정보" in ui
     assert "사용자에게 어떤 의미인가요?" in ui
-    assert "officialRows(d.sources,10)" in ui
+    assert "sourceLinksHtml(sources,3)" in ui
+    assert "scrollAnswerTop(row)" in ui
+    assert "input.focus({preventScroll:true})" in ui
+    assert "finally{state.busy=false;updateSendState();input.focus();scrollBottom()}" not in ui
     assert "class PostgresSuggestionAnswerCache" in postgres
     assert "CREATE TABLE IF NOT EXISTS suggestion_answer_cache" in migration
     assert "compatible_overlay_revisions" in prewarm
@@ -244,6 +252,25 @@ def test_user_basis_contract(core) -> dict[str, str]:
     }
 
 
+def test_answer_normalization(core) -> dict[str, str]:
+    first = "**예금자보호 대상 금융상품**\n\n1인당 보호 한도를 안내합니다."
+    second = "**고객 미수령금 신청 방법**\n\n신청 경로를 안내합니다."
+    expected = first + "\n\n---\n\n" + second
+    assert core._normalize_answer_text([first, second]) == expected
+    assert core._normalize_answer_text(repr([first, second])) == expected
+    assert core._answer_from_result({"answer": [first, second]}) == expected
+    ordinary = "## 공식 안내\n\n일반 Markdown 답변입니다."
+    assert core._normalize_answer_text(ordinary) == ordinary
+    unsafe = "[__import__('os').system('echo unsafe')]"
+    assert core._normalize_answer_text(unsafe) == unsafe
+    return {
+        "list_answer_joined": "passed",
+        "stringified_list_joined": "passed",
+        "ordinary_markdown_preserved": "passed",
+        "literal_eval_only": "passed",
+    }
+
+
 def test_memory_cache_flow(core) -> dict[str, str]:
     pipeline = FakePipeline()
     runtime = core.PipelineRuntime(pipeline)
@@ -278,6 +305,13 @@ def test_memory_cache_flow(core) -> dict[str, str]:
     assert live_job.result["action_links"][0]["label"] == "착오송금 반환지원 신청"
     assert live_job.result["action_links"][0]["requires_auth"] is True
 
+    cached_bundle = cache.peek(service._cache_key(first["suggestion_id"]))
+    assert cached_bundle is not None
+    cached_bundle.public_result["answer"] = repr(
+        ["**첫 번째 안내**\n\n첫 번째 내용", "**두 번째 안내**\n\n두 번째 내용"]
+    )
+    cache.put(cached_bundle)
+
     hit_id = service.submit("hit-session", first["query"], first["suggestion_id"])
     hit_job = jobs.get(hit_id)
     assert hit_job is not None and hit_job.status == "done"
@@ -285,7 +319,11 @@ def test_memory_cache_flow(core) -> dict[str, str]:
     assert pipeline.calls == 1
     assert hit_job.result["sources"] == live_job.result["sources"]
     assert hit_job.result["action_links"] == live_job.result["action_links"]
+    assert hit_job.result["answer"] == (
+        "**첫 번째 안내**\n\n첫 번째 내용\n\n---\n\n**두 번째 안내**\n\n두 번째 내용"
+    )
     assert pipeline.cached_turns[-1][0] == first["query"]
+    assert pipeline.cached_turns[-1][1] == hit_job.result["answer"]
     assert len(sessions.get("hit-session").state["turns"]) == 2
     assert service.basis(hit_id)["summary"] == "공식 근거 요약"
 
@@ -325,6 +363,7 @@ def test_memory_cache_flow(core) -> dict[str, str]:
         "cached_turn_context": "passed",
         "cached_basis": "passed",
         "cached_sources_and_action_links": "passed",
+        "cached_legacy_list_answer_normalized": "passed",
         "forged_id_query_pair": "live_fallback",
         "runtime_revision_invalidation": "passed",
         "prompt_revision_invalidation": "passed",
@@ -353,6 +392,7 @@ def main() -> None:
         "static": test_static_contracts(),
         "registry": test_registry(core),
         "basis": test_user_basis_contract(core),
+        "answer_normalization": test_answer_normalization(core),
         "cache_flow": test_memory_cache_flow(core),
         "adapter": test_adapter_cached_turn(),
     }

@@ -395,11 +395,17 @@ def test_chat_ui_numbering_contract() -> dict[str, Any]:
     assert "Math.max(previous" in ui
     assert "1/4단계" in ui
     assert "function basisHtml(d)" in ui
-    assert "이 답변을 이렇게 안내한 이유예요" in ui
+    assert "쉬운 요약 보기" in ui
+    assert "쉬운 요약 접기" in ui
+    assert "답변을 쉽게 이해하기" in ui
     assert "근거가 된 공식 정보" in ui
     assert "사용자에게 어떤 의미인가요?" in ui
     assert "추가로 확인해 주세요" in ui
-    assert "officialRows(d.sources,10)" in ui
+    assert "function sourceLinksHtml(sources,visible=3)" in ui
+    assert "function bindSourceToggles(root)" in ui
+    assert "sourceLinksHtml(sources,3)" in ui
+    assert "function scrollAnswerTop(node)" in ui
+    assert "input.focus({preventScroll:true})" in ui
     assert "window.__KDIC_PROGRESS_PREVIEW=completeProgress(previewRow)" in ui
     assert "else if(preview==='cache-progress')" in ui
     assert "else if(preview==='basis')" in ui
