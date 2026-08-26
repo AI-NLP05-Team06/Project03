@@ -98,7 +98,14 @@ def test_static_contracts() -> dict[str, str]:
     assert "suggestion_cache=SUGGESTION_ANSWER_CACHE" in api
     assert 'data-suggestion-id="${esc(x.suggestion_id||\'\')}"' in ui
     assert "suggestion_id:String(suggestionId||'')" in ui
-    assert "⚡ 저장된 빠른 답변" in ui
+    assert "⚡ 저장된 빠른 답변" not in ui
+    assert "0.01초 미만" not in ui
+    assert 'class="boot-screen" id="bootScreen"' in ui
+    assert 'class="modal-backdrop hidden" id="keyModal"' in ui
+    assert "async function bootstrapApp()" in ui
+    assert "catch(e){showBootError()}" in ui
+    assert "$('#bootRetry').onclick=bootstrapApp" in ui
+    assert "catch(e){ openKey(); }" not in ui
     assert "class PostgresSuggestionAnswerCache" in postgres
     assert "CREATE TABLE IF NOT EXISTS suggestion_answer_cache" in migration
     assert "compatible_overlay_revisions" in prewarm
