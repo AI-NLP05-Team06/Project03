@@ -21,6 +21,7 @@ from typing import Any, Mapping, Sequence
 
 BASE_DIR = Path(__file__).resolve().parent
 ENGINE_FILE = BASE_DIR / "kdic_pipeline_engine.py"
+ROUTER_FILE = BASE_DIR / "kdic_lightweight_router_v1.py"
 OVERLAY_FILE = BASE_DIR / "2026-08-25-kdic-production-overlay.py"
 ADAPTER_FILE = BASE_DIR / "2026-08-23-kdic-colab-runtime-adapter.py"
 FASTAPI_FILE = BASE_DIR / "2026-08-23-kdic-fastapi-service.py"
@@ -56,6 +57,7 @@ def _load_module(name: str, path: Path):
 
 def test_static_contracts() -> dict[str, Any]:
     engine = ENGINE_FILE.read_text(encoding="utf-8")
+    router = ROUTER_FILE.read_text(encoding="utf-8")
     overlay = OVERLAY_FILE.read_text(encoding="utf-8")
     adapter = ADAPTER_FILE.read_text(encoding="utf-8")
     api = FASTAPI_FILE.read_text(encoding="utf-8")
@@ -64,6 +66,7 @@ def test_static_contracts() -> dict[str, Any]:
     admin_extension = ADMIN_EXTENSION_FILE.read_text(encoding="utf-8")
     for path, source in (
         (ENGINE_FILE, engine),
+        (ROUTER_FILE, router),
         (OVERLAY_FILE, overlay),
         (ADAPTER_FILE, adapter),
         (FASTAPI_FILE, api),
@@ -75,7 +78,9 @@ def test_static_contracts() -> dict[str, Any]:
     assert "2026-08-25-kdic-production-overlay.py" in engine
     assert "execute_production_variant_v1" in overlay
     assert "C_DEFAULT_DC2_COMPARE_ONLY_V1" in overlay
-    assert "2026-08-26-declared-citation-canonicalization-v12" in overlay
+    assert "2026-08-26-v15-direct-presearch-guard-v13" in overlay
+    assert "classify_non_retrieval_utterance" in router
+    assert "_non_retrieval_search_guard_v1" in overlay
     assert "반드시 유효한 단일 JSON 객체 하나만 출력" in overlay
     assert "C_STRUCTURED_SYSTEM_PROMPT_V3\n    +" not in overlay
     assert "answer_b_core._call_structured(" in overlay
@@ -90,8 +95,11 @@ def test_static_contracts() -> dict[str, Any]:
     assert '"runtime_build": dict(RUNTIME_BUILD_INFO)' in api
     assert EXPECTED_SOURCE_SHA256 in overlay
     assert EXPECTED_SOURCE_SHA256 in adapter
-    assert "2026-08-26-declared-citation-canonicalization-v12" in adapter
+    assert "2026-08-26-v15-direct-presearch-guard-v13" in adapter
+    assert '"adapter_version": "2026-08-26-ec2-production-v14"' in adapter
     assert "cache_compatible_overlay_revisions" in adapter
+    assert "2026-08-26-explicit-allowed-citation-ids-v11" in adapter
+    assert "2026-08-26-declared-citation-canonicalization-v12" in adapter
     assert "for repair_index in range(3):" in answer_core
     assert "[검증 실패 이유]" in answer_core
     assert 'system_prompt=_managed_prompt("C_CROSS_DIRECT_SYSTEM_PROMPT_V1", C_CROSS_DIRECT_SYSTEM_PROMPT_V1)' in overlay
@@ -279,6 +287,7 @@ def test_overlay_exec_contract() -> dict[str, Any]:
         "order_businesses_by_question_p0_v1",
         "build_p0_cross_business_subqueries_v1",
         "_current_question_scoped_analysis_v1",
+        "_non_retrieval_search_guard_v1",
         "generate_user_basis_explanation_v1",
     )
     assert all(callable(namespace.get(name)) for name in required)
@@ -423,6 +432,7 @@ def test_chat_ui_numbering_contract() -> dict[str, Any]:
     assert "window.__KDIC_PROGRESS_PREVIEW=completeProgress(previewRow)" in ui
     assert "else if(preview==='cache-progress')" in ui
     assert "else if(preview==='summary'||preview==='basis')" in ui
+    assert "route==='DIRECT_RESPONSE'?'간단 안내'" in ui
     return {
         "ordered_list_start_preserved": "passed",
         "ordered_list_item_value_preserved": "passed",
@@ -625,6 +635,299 @@ def test_routing_and_cross_structure() -> dict[str, Any]:
     }
 
 
+def test_v15_direct_router_contract() -> dict[str, Any]:
+    router = _load_module("kdic_lightweight_router_v1_direct_test", ROUTER_FILE)
+    context = router.build_context()
+
+    direct_cases = {
+        "GREETING": ("안뇽", "방가방가", "하이하이", "ㅎㅇ", "hello"),
+        "THANKS": ("감사링", "감사용", "고마워용", "그거 감사해", "답변 정말 감사합니다", "ㄱㅅ", "thanks"),
+        "CANCEL": ("그만", "취소", "됐어", "괜찮아", "필요 없어"),
+        "ACKNOWLEDGEMENT": ("네네", "ㅇㅇ", "ㅇㅋ", "오키", "알겠어요"),
+        "CLOSING": ("수고했어", "안녕히 계세요", "ㅅㄱ", "bye"),
+        "REACTION": ("ㅋㅋㅋ", "ㅎㅎㅎ", "ㅠㅠ", "ㅋㅋㅠㅠ", "아하", "대박", "👍", "👋"),
+        "CAPABILITY": (
+            "무슨 질문을 할 수 있나요", "지원하는 업무를 알려주세요", "도움말",
+            "너는 누구야?", "너 이름이 뭐야?", "이 챗봇은 뭐야?",
+        ),
+    }
+    for expected_action, questions in direct_cases.items():
+        for question in questions:
+            route, reasons, missing, action = router.detect_route(question, context=context)
+            assert route == "DIRECT", (question, route, reasons)
+            assert action == expected_action, (question, action, expected_action)
+            assert missing == [], (question, missing)
+            assert router.direct_response_for_action(action), question
+
+    decorated = {
+        "감사링ㅎㅎ": "THANKS",
+        "하이~👋": "GREETING",
+    }
+    for question, expected_action in decorated.items():
+        assert router.detect_route(question, context=context)[3] == expected_action
+
+    for question in ("뭐", "어떻게", "알려줘", "...", "123", "test"):
+        route, reasons, missing, action = router.detect_route(question, context=context)
+        assert route == "CLARIFY", (question, route, reasons)
+        assert action == "LOW_INFORMATION", (question, action)
+        assert "question_topic" in missing, (question, missing)
+
+    expected_routes = {
+        "하이하이, 예금자보호 한도 얼마야?": "RETRIEVE",
+        "감사링. 착오송금 신청 자격도 알려줘": "RETRIEVE",
+        "감사보고서는 어디서 봐요?": "CLARIFY",
+        "하이브리드 금융상품도 보호되나요?": "RETRIEVE",
+        "오케이저축은행 예금도 보호되나요?": "RETRIEVE",
+        "보호한도?": "RETRIEVE",
+        "예금보험금?": "RETRIEVE",
+        "부보금융회사가 무엇인가요?": "RETRIEVE",
+        "압류": "RETRIEVE",
+        "상계": "RETRIEVE",
+        "IRP": "RETRIEVE",
+        "신청 방법": "CLARIFY",
+        "비트코인 가격 알려줘": "OUT_OF_SCOPE",
+        "점심 뭐 먹지?": "CLARIFY",
+        "오늘 뭐 하고 지냈어?": "CLARIFY",
+        "사랑이 뭐야?": "CLARIFY",
+        "인생의 의미는 뭐야?": "CLARIFY",
+        "로또 번호 알려줘": "CLARIFY",
+        "한국도로공사 위치 알려줘": "CLARIFY",
+        "신청": "CLARIFY",
+        "조회": "CLARIFY",
+        "문의": "CLARIFY",
+        "방법": "CLARIFY",
+        "기간": "CLARIFY",
+        "@@@": "CLARIFY",
+        "$%^&": "CLARIFY",
+        "😅": "CLARIFY",
+    }
+    for question, expected_route in expected_routes.items():
+        route = router.detect_route(question, context=context)[0]
+        assert route == expected_route, (question, route, expected_route)
+
+    direct_result = router.route_query("감사링")
+    low_info_result = router.route_query("뭐")
+    for result in (direct_result, low_info_result):
+        assert result["analysis"]["needs"] == [], result
+        assert result["query_plans"] == [], result
+        assert result["decomposition"]["subqueries"] == [], result
+        assert result["runtime"]["api_request_count"] == 0, result
+        assert result["runtime"]["total_tokens"] == 0, result
+    return {
+        "direct_variants": sum(len(values) for values in direct_cases.values()) + len(decorated),
+        "low_information": 6,
+        "protected_queries": len(expected_routes),
+        "router_api_calls": 0,
+    }
+
+
+def test_non_retrieve_skips_common_search() -> dict[str, Any]:
+    overlay = OVERLAY_FILE.read_text(encoding="utf-8")
+    engine = ENGINE_FILE.read_text(encoding="utf-8")
+    router = _load_module("kdic_lightweight_router_v1_search_gate_test", ROUTER_FILE)
+    calls = {"analyzer": 0, "fuse": 0}
+
+    def stale_retrieve_analyzer(question: str, state: dict[str, Any]) -> dict[str, Any]:
+        calls["analyzer"] += 1
+        return {
+            "route": "RETRIEVE",
+            "route_reasons": ["STALE_DEFAULT_RETRIEVE"],
+            "resolved_question": question,
+            "businesses": [],
+            "plans": [{"query": question, "weight": 1.0, "source": "ORIGINAL"}],
+            "query_plan_valid": True,
+        }
+
+    def forbidden_fuse(*args: Any, **kwargs: Any):
+        calls["fuse"] += 1
+        raise AssertionError("non-retrieve route called fuse_query_results")
+
+    namespace: dict[str, Any] = {
+        "Any": Any,
+        "Mapping": Mapping,
+        "time": time,
+        "light_router": router,
+        "ANALYZER_FUNCTIONS": {"v15": stale_retrieve_analyzer},
+        "fuse_query_results": forbidden_fuse,
+        "order_businesses_by_question_p0_v1": lambda question, values: list(values),
+        "NEED_BATCH_MAX_BUSINESSES_V5": 3,
+        "_LAST_RERANK_TRACE": {"stale": True},
+        "_LAST_PARENT_CHILD_TRACE": {"stale": True},
+    }
+    exec(_function_source(overlay, "_current_question_scoped_analysis_v1"), namespace)
+    exec(_function_source(overlay, "_non_retrieval_search_guard_v1"), namespace)
+    exec(_function_source(engine, "_route_message"), namespace)
+    exec(_function_source(overlay, "prepare_common_retrieval_v1"), namespace)
+    prepare = namespace["prepare_common_retrieval_v1"]
+
+    expected = {
+        "방가방가": ("DIRECT_RESPONSE", "GREETING"),
+        "뭐": ("CLARIFY", "LOW_INFORMATION"),
+        "너는 누구야?": ("DIRECT_RESPONSE", "CAPABILITY"),
+        "점심 뭐 먹지?": ("CLARIFY", "LOW_INFORMATION"),
+        "@@@": ("CLARIFY", "LOW_INFORMATION"),
+        "비트코인 가격 알려줘": ("OUT_OF_SCOPE", None),
+    }
+    for question, (expected_route, expected_action) in expected.items():
+        result = prepare(question, state={})
+        assert result["route"] == expected_route, result
+        assert result["analysis"]["direct_action"] == expected_action, result
+        assert result["analysis"]["pre_search_guard_applied"] is True, result
+        if expected_action:
+            assert result["route_message"] == router.direct_response_for_action(expected_action), result
+        else:
+            assert "예금보험공사" in result["route_message"], result
+        assert "search_results" not in result, result
+        assert "evidence_pack" not in result, result
+        assert "plans" not in result, result
+
+    normal = {"route": "RETRIEVE", "plans": [{"query": "예금자보호 한도", "weight": 1.0}]}
+    guarded = namespace["_non_retrieval_search_guard_v1"]("예금자보호 한도", normal)
+    assert guarded == normal, guarded
+    contextual = {
+        "route": "RETRIEVE",
+        "context_used": True,
+        "businesses": ["착오송금 반환 신청"],
+        "plans": [{"query": "착오송금 반환 신청 관련 왜?", "weight": 1.0}],
+    }
+    assert namespace["_non_retrieval_search_guard_v1"]("왜?", contextual) == contextual
+    assert namespace["_non_retrieval_search_guard_v1"]("1번", contextual) == contextual
+    assert calls == {"analyzer": len(expected), "fuse": 0}, calls
+    assert namespace["_LAST_RERANK_TRACE"] == {}
+    assert namespace["_LAST_PARENT_CHILD_TRACE"] == {}
+    return {
+        "direct_search_calls": 0,
+        "low_information_search_calls": 0,
+        "out_of_scope_search_calls": 0,
+        "normal_query_preserved": True,
+    }
+
+
+def test_v15_preflight_skips_context_classifier() -> dict[str, Any]:
+    engine = ENGINE_FILE.read_text(encoding="utf-8")
+    router = _load_module("kdic_lightweight_router_v1_preflight_test", ROUTER_FILE)
+    calls = {"context": 0, "core": 0}
+
+    def resolve_stub(question: str, *, state: dict[str, Any], llm_classifier=None) -> dict[str, Any]:
+        calls["context"] += 1
+        context_used = bool(state.get("active_businesses") or state.get("pending_clarification"))
+        active = list(state.get("active_businesses") or [])
+        if not active and state.get("pending_clarification"):
+            active = ["착오송금 반환지원"]
+        resolved = f"{active[0]} 관련 {question}" if context_used and active else question
+        return {
+            "route": "CONTINUE",
+            "resolved_question": resolved,
+            "context_used": context_used,
+            "reason": "TEST_CONTINUE",
+            "active_businesses": active,
+            "latency_ms": 0.0,
+        }
+
+    def core_stub(question: str, previous_turns=None) -> dict[str, Any]:
+        calls["core"] += 1
+        if "비트코인" in question:
+            return {
+                "route": "OUT_OF_SCOPE",
+                "businesses": [],
+                "complexity": "NONE",
+                "plans": [],
+                "route_response": "예금보험공사 안내 범위에서 질문해 주세요.",
+            }
+        return {
+            "route": "RETRIEVE",
+            "businesses": ["예금자보호제도"],
+            "complexity": "SINGLE",
+            "plans": [{"query": question, "weight": 1.0, "source": "ORIGINAL"}],
+            "route_response": "",
+        }
+
+    namespace: dict[str, Any] = {
+        "Any": Any,
+        "Mapping": Mapping,
+        "time": time,
+        "light_router": router,
+        "resolve_context_v2": resolve_stub,
+        "classify_ambiguous_context": lambda question, state: {},
+        "analyze_v15_chat_query": core_stub,
+        "_context_businesses": lambda values: list(values),
+        "_comparison_plans_valid": lambda route, plans: route != "RETRIEVE" or bool(plans),
+    }
+    exec(_function_source(engine, "_route_only_analysis"), namespace)
+    exec(_function_source(engine, "_v15_non_retrieval_resolution"), namespace)
+    exec(_function_source(engine, "analyze_v15_improved"), namespace)
+    analyze = namespace["analyze_v15_improved"]
+
+    state = {
+        "active_businesses": ["착오송금 반환지원"],
+        "excluded_businesses": [],
+        "pending_clarification": {"reason": "EXISTING_PENDING", "options": ["송금인", "수취인"]},
+    }
+    before = copy.deepcopy(state)
+    direct = analyze("감사링", state)
+    assert direct["route"] == "DIRECT_RESPONSE", direct
+    assert direct["direct_action"] == "THANKS", direct
+    assert direct["plans"] == [], direct
+    assert direct["context_resolution"]["active_businesses"] == ["착오송금 반환지원"], direct
+    assert state == before, (state, before)
+    assert calls == {"context": 0, "core": 0}, calls
+
+    cancel_state = copy.deepcopy(state)
+    cancelled = analyze("됐어", cancel_state)
+    assert cancelled["route"] == "DIRECT_RESPONSE", cancelled
+    assert cancelled["direct_action"] == "CANCEL", cancelled
+    assert cancel_state["pending_clarification"] is None, cancel_state
+    assert cancel_state["active_businesses"] == ["착오송금 반환지원"], cancel_state
+    assert calls == {"context": 0, "core": 0}, calls
+
+    low_state = {"active_businesses": [], "excluded_businesses": [], "pending_clarification": None}
+    low_info = analyze("뭐", low_state)
+    assert low_info["route"] == "CLARIFY", low_info
+    assert low_info["direct_action"] == "LOW_INFORMATION", low_info
+    assert low_info["plans"] == [], low_info
+    assert calls == {"context": 0, "core": 0}, calls
+
+    oos = analyze("비트코인 가격 알려줘", {"active_businesses": []})
+    assert oos["route"] == "OUT_OF_SCOPE", oos
+    assert oos["plans"] == [], oos
+    assert calls == {"context": 1, "core": 1}, calls
+
+    normal = analyze("예금자보호 한도는 얼마인가요?", {"active_businesses": []})
+    assert normal["route"] == "RETRIEVE", normal
+    assert normal["plans"], normal
+    assert calls == {"context": 2, "core": 2}, calls
+
+    active_followup = analyze(
+        "어떻게",
+        {"active_businesses": ["착오송금 반환지원"], "pending_clarification": None},
+    )
+    assert active_followup["route"] == "RETRIEVE", active_followup
+    assert active_followup["context_used"] is True, active_followup
+    assert "착오송금 반환지원" in active_followup["resolved_question"], active_followup
+    assert calls == {"context": 3, "core": 3}, calls
+
+    pending_selection = analyze(
+        "1번",
+        {
+            "active_businesses": [],
+            "pending_clarification": {"options": ["착오송금 반환지원", "채무조정"]},
+        },
+    )
+    assert pending_selection["route"] == "RETRIEVE", pending_selection
+    assert pending_selection["context_used"] is True, pending_selection
+    assert calls == {"context": 4, "core": 4}, calls
+    return {
+        "direct_context_classifier_calls": 0,
+        "low_information_context_classifier_calls": 0,
+        "explicit_oos_preserved": True,
+        "normal_context_calls": 1,
+        "active_followup_context_calls": 1,
+        "pending_selection_context_calls": 1,
+        "cancel_cleared_pending": True,
+        "active_context_preserved": True,
+    }
+
+
 def test_current_question_business_mapping() -> dict[str, Any]:
     overlay = OVERLAY_FILE.read_text(encoding="utf-8")
     router = _load_module("kdic_lightweight_router_v1", BASE_DIR / "kdic_lightweight_router_v1.py")
@@ -812,6 +1115,9 @@ def main() -> None:
         "c_direct_json": test_c_direct_json_validator(),
         "evidence": test_evidence_gate(),
         "routing": test_routing_and_cross_structure(),
+        "v15_direct_router": test_v15_direct_router_contract(),
+        "non_retrieve_search_gate": test_non_retrieve_skips_common_search(),
+        "v15_preflight": test_v15_preflight_skips_context_classifier(),
         "business_mapping": test_current_question_business_mapping(),
         "adapter": test_adapter(),
     }

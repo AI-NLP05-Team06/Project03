@@ -19,7 +19,7 @@ from dataclasses import dataclass
 from typing import Any, Iterable, Mapping, Sequence
 
 
-PIPELINE_VERSION = "KDIC_LIGHTWEIGHT_ROUTER_V1_2026_08_13"
+PIPELINE_VERSION = "KDIC_LIGHTWEIGHT_ROUTER_V1_2026_08_26_DIRECT_GUARD"
 
 BUSINESS_FUNCTIONS = (
     "예금자보호제도",
@@ -110,6 +110,181 @@ DIRECT_META_PATTERN = re.compile(
     r"질문을 잘못 입력했어요[.]? 다시 물어볼게요)[.!?]*$",
     re.I,
 )
+
+DIRECT_ACTION_RESPONSES: dict[str, str] = {
+    "GREETING": "안녕하세요! 예금보험공사 관련 제도나 신청 절차를 편하게 물어보세요.",
+    "THANKS": "도움이 되었다니 다행입니다. 다른 궁금한 내용도 편하게 물어보세요.",
+    "ACKNOWLEDGEMENT": "네, 알겠습니다. 이어서 궁금한 내용이 있으면 말씀해 주세요.",
+    "CLOSING": "이용해 주셔서 감사합니다. 필요할 때 다시 찾아주세요.",
+    "REACTION": "네! 예금자보호·예금보험금·미수령금·착오송금 반환지원 등 궁금한 내용을 물어보세요.",
+    "CAPABILITY": (
+        "예금자보호, 예금보험금, 고객 미수령금, 착오송금 반환지원, "
+        "채무조정, 은닉재산 신고 관련 내용을 질문할 수 있습니다."
+    ),
+    "CANCEL": "알겠습니다. 현재 요청을 중단했습니다.",
+    "META_OR_SOCIAL": "예금보험공사 관련 제도나 신청 절차를 편하게 물어보세요.",
+    "LOW_INFORMATION": (
+        "질문의 뜻을 정확히 파악하기 어렵습니다. "
+        "예금자보호, 예금보험금, 미수령금처럼 궁금한 주제를 조금 더 구체적으로 적어 주세요."
+    ),
+}
+
+# NFKC 정규화는 단독 호환 자모(예: ㅋ, ㅎ, ㅇ)를 초성 자모로 바꾼다.
+# 소셜 표현 비교 때만 다시 익숙한 호환 자모로 접어 두 형태를 동일하게 처리한다.
+_SOCIAL_JAMO_TRANSLATION = str.maketrans({
+    "ᄀ": "ㄱ", "ᄇ": "ㅂ", "ᄉ": "ㅅ", "ᄋ": "ㅇ", "ᄏ": "ㅋ", "ᄒ": "ㅎ",
+    "ᅮ": "ㅜ", "ᅲ": "ㅠ",
+})
+_SOCIAL_JAMO_PLACEHOLDERS = str.maketrans({
+    "ㄱ": "\ue000", "ㅂ": "\ue001", "ㅅ": "\ue002", "ㅇ": "\ue003",
+    "ㅋ": "\ue004", "ㅎ": "\ue005", "ㅠ": "\ue006", "ㅜ": "\ue007",
+})
+_SOCIAL_JAMO_RESTORE = str.maketrans({
+    "\ue000": "ㄱ", "\ue001": "ㅂ", "\ue002": "ㅅ", "\ue003": "ㅇ",
+    "\ue004": "ㅋ", "\ue005": "ㅎ", "\ue006": "ㅠ", "\ue007": "ㅜ",
+})
+
+
+def _nfkc_preserving_social_jamo(text: Any) -> str:
+    protected = str(text or "").translate(_SOCIAL_JAMO_PLACEHOLDERS)
+    return unicodedata.normalize("NFKC", protected).translate(_SOCIAL_JAMO_RESTORE)
+
+
+def _social_compact(text: str) -> str:
+    folded = _nfkc_preserving_social_jamo(text).lower().translate(_SOCIAL_JAMO_TRANSLATION)
+    return re.sub(r"[\W_]+", "", folded, flags=re.UNICODE)
+
+
+_SOCIAL_ACTION_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
+    ("CAPABILITY", re.compile(
+        r"(?:(?:너|넌|너는|이챗봇|챗봇|ai챗봇|봇)(?:은|는|이|가)?"
+        r"(?:누구(?:야|예요|인가요)?|뭐야|무엇(?:인가요)?|이름(?:이)?뭐야|"
+        r"뭐해|뭘할수있(?:어|어요|나요)|무슨질문(?:을)?할수있(?:어|어요|나요)))|"
+        r"(?:무슨|어떤)질문(?:을)?(?:할수있(?:어|어요|나요)|하면돼(?:요)?)|"
+        r"(?:지원|안내)(?:하|하는)(?:업무|내용)(?:를)?(?:알려(?:줘|주세요)|보여(?:줘|주세요))|"
+        r"(?:이)?챗봇(?:은)?(?:어떻게)?사용(?:하|하면)(?:면되나요|나요|돼요)?|"
+        r"사용방법|도움말|help"
+    )),
+    ("GREETING", re.compile(
+        r"(?:안녕(?:하세요|하세용|하세여|하세욤|하십니까)?|안뇽(?:하세요|하세용)?|"
+        r"방가(?:방가)*|반가워(?:요)?|반갑(?:습니다|네요)|하이(?:하이)*|헬로|"
+        r"ㅎㅇ|ㅂㄱ|hi+|hello+|hey+)"
+    )),
+    ("THANKS", re.compile(
+        r"(?:(?:(?:그거|이거|답변|안내|설명|도움)(?:은|는|이|가)?)?"
+        r"(?:정말|너무|진짜)?(?:감사(?:합니다|해요|해|용|링|드립니다|드려요)?|고마워(?:요|용)?|"
+        r"고맙(?:습니다|네요|다)?|땡큐|thank(?:s|you)|thx|ty|ㄱㅅ)|"
+        r"도움이됐(?:어|어요|습니다))"
+    )),
+    ("CANCEL", re.compile(
+        r"(?:그만(?:할게요)?|취소(?:할게요|해줘|해주세요)?|됐(?:어|어요|습니다)|"
+        r"괜찮(?:아|아요|습니다)|필요없(?:어|어요|습니다)|필요없음)"
+    )),
+    ("ACKNOWLEDGEMENT", re.compile(
+        r"(?:네+|넵|넹+|예+|응+|ㅇ+|오케이|오키(?:도키)?|okay|ok|ㅇㅋ|"
+        r"알겠(?:어|어요|습니다)|잘알겠(?:어|어요|습니다)|"
+        r"이해했(?:어|어요|습니다)|좋아(?:요)?|좋습니다|"
+        r"확인했(?:어|어요|습니다))"
+    )),
+    ("CLOSING", re.compile(
+        r"(?:안녕히(?:계세요|가세요)|잘가(?:요)?|다음에(?:봐|뵐게요?)?|"
+        r"수고(?:했어|했어요|하셨어요|하세요|해요)?|ㅅㄱ|bye|goodbye|"
+        r"끝|종료(?:할게요)?|이만)"
+    )),
+    ("REACTION", re.compile(
+        r"(?:[ㅋㅎㅠㅜ]+|아하+|오+|와+|우와+|오호+|굿|좋네(?:요)?|"
+        r"대박|그렇구나|그렇군요|멋져(?:요)?)"
+    )),
+)
+
+_SOCIAL_EMOJI_ONLY_PATTERN = re.compile(r"^[👍🙏👏👋🙂😊😁😄😃😂🤣🥹😭🙌👌❤♥♡✨🎉🏻🏼🏽🏾🏿]+$")
+_RETRIEVAL_PROTECT_PATTERN = re.compile(
+    r"(?:예금|적금|원금|이자|보험|보험금|보험사고|예금자|보호|한도|부보|"
+    r"금융|은행|저축은행|금융회사|금융상품|예금보험공사|예보|kdic|금융안심포털|파산|"
+    r"배당|가지급|개산지급|미수령|수령|지급|대행점|송금|반환|수취인|"
+    r"채무|부채|채권|재산|신고|포상금|계좌|상속|대리인|청구|압류|상계|"
+    r"회생|면책|소멸시효|퇴직연금|cma|isa|irp|dc형)",
+    re.I,
+)
+_INFORMATION_REQUEST_PATTERN = re.compile(
+    r"(?:뭐|무엇|어디|언제|왜|어떻게|얼마|얼마나|누구|알려|설명|뜻|의미|정의|"
+    r"차이|비교|방법|절차|신청|조회|확인|자격|대상|조건|한도|금액|기간|기한|"
+    r"서류|비용|수수료|가능|되나요|인가요|예요|인가|문의)",
+    re.I,
+)
+_LOW_INFORMATION_PATTERN = re.compile(
+    r"(?:뭐|뭔데|음+|어+|아+|저기+|글쎄|모르겠어|아무거나|질문|테스트|test|"
+    r"[0-9]+|[a-z]{1,12})",
+    re.I,
+)
+_NOISE_ONLY_PATTERN = re.compile(r"^[\s!?.,~…·'\"`^_*+\-=()\[\]{}<>:/\\|]+$")
+
+
+def direct_response_for_action(action: Any) -> str:
+    """DIRECT/저정보 action에 대응하는 외부 호출 없는 고정 안내를 반환한다."""
+    key = str(action or "META_OR_SOCIAL").strip().upper()
+    return DIRECT_ACTION_RESPONSES.get(key, DIRECT_ACTION_RESPONSES["META_OR_SOCIAL"])
+
+
+def classify_non_retrieval_utterance(query: str) -> dict[str, str] | None:
+    """검색 전에 처리할 소셜 발화와 저정보 입력을 문장 전체 형태로 판정한다.
+
+    업무·금융 용어 또는 실질적인 정보 요청이 섞인 문장은 이 함수가 가로채지
+    않는다. 따라서 ``하이하이, 예금자보호 한도 얼마야?`` 같은 혼합 질문은
+    기존 RETRIEVE 흐름을 그대로 탄다.
+    """
+    text = str(query or "").strip()
+    if not text:
+        return None
+    compact = _social_compact(text)
+
+    compact_candidates = [compact]
+    without_trailing_reaction = re.sub(r"[ㅋㅎㅠㅜ]+$", "", compact)
+    if without_trailing_reaction and without_trailing_reaction != compact:
+        compact_candidates.append(without_trailing_reaction)
+    for action, pattern in _SOCIAL_ACTION_PATTERNS:
+        if any(candidate and pattern.fullmatch(candidate) for candidate in compact_candidates):
+            return {
+                "route": "DIRECT",
+                "action": action,
+                "reason": f"SOCIAL_{action}",
+                "response": direct_response_for_action(action),
+            }
+
+    emoji_text = re.sub(r"[\s.!?~…\ufe0f]", "", text)
+    if emoji_text and _SOCIAL_EMOJI_ONLY_PATTERN.fullmatch(emoji_text):
+        return {
+            "route": "DIRECT",
+            "action": "REACTION",
+            "reason": "SOCIAL_REACTION_EMOJI",
+            "response": direct_response_for_action("REACTION"),
+        }
+
+    # 실제 KDIC 단문과 정보 요청은 짧아도 검색/기존 명확화 규칙에 맡긴다.
+    if find_businesses(text) or _RETRIEVAL_PROTECT_PATTERN.search(text):
+        return None
+    if _INFORMATION_REQUEST_PATTERN.search(text):
+        return {
+            "route": "CLARIFY",
+            "action": "LOW_INFORMATION",
+            "reason": "NON_KDIC_INFORMATION_REQUEST_NO_RETRIEVAL",
+            "response": direct_response_for_action("LOW_INFORMATION"),
+        }
+
+    low_information = bool(
+        _NOISE_ONLY_PATTERN.fullmatch(text)
+        or _LOW_INFORMATION_PATTERN.fullmatch(compact)
+        or not compact
+        or (compact and len(compact) <= 12)
+    )
+    if low_information:
+        return {
+            "route": "CLARIFY",
+            "action": "LOW_INFORMATION",
+            "reason": "LOW_INFORMATION_NO_RETRIEVAL",
+            "response": direct_response_for_action("LOW_INFORMATION"),
+        }
+    return None
 
 REFORMAT_PATTERN = re.compile(
     r"^(?:쉽게 설명해 주세요|핵심만 알려주세요|표로 정리해 주세요|더 자세히 설명해 주세요)[.!?]*$",
@@ -269,7 +444,7 @@ class RouterConfig:
 
 def normalize_query(text: Any) -> dict[str, Any]:
     original = str(text or "")
-    value = unicodedata.normalize("NFKC", original)
+    value = _nfkc_preserving_social_jamo(original)
     changes: list[str] = []
     cleaned = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", " ", value)
     if cleaned != value:
@@ -394,6 +569,15 @@ def detect_route(
     context_business = str((context.get("confirmed") or {}).get("business_function") or "")
     has_context = bool(context.get("used"))
 
+    non_retrieval = classify_non_retrieval_utterance(query)
+    if non_retrieval and non_retrieval["route"] == "DIRECT":
+        return (
+            "DIRECT",
+            [non_retrieval["reason"]],
+            [],
+            non_retrieval["action"],
+        )
+
     if DIRECT_META_PATTERN.fullmatch(query):
         return "DIRECT", ["EXPLICIT_META_OR_SOCIAL"], [], "META_OR_SOCIAL"
     if REFORMAT_PATTERN.fullmatch(query) and has_context:
@@ -403,6 +587,14 @@ def detect_route(
 
     if GENERIC_BUSINESS_CLARIFY_PATTERN.fullmatch(query) and not businesses and not context_business:
         return "CLARIFY", ["BUSINESS_NOT_SPECIFIED"], ["business_function"], None
+
+    if non_retrieval and non_retrieval["route"] == "CLARIFY":
+        return (
+            "CLARIFY",
+            [non_retrieval["reason"]],
+            ["question_topic"],
+            non_retrieval["action"],
+        )
 
     has_resolved_context = has_context or bool(context_business)
     if any(phrase in query for phrase in APPLICANT_REFERENCE_PHRASES) and not has_resolved_context:

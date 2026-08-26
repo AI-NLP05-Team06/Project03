@@ -10,7 +10,7 @@ import kdic_lightweight_router_v1 as light_router
 
 KDIC_PRODUCTION_OVERLAY_SOURCE_SHA256 = "F9A908D62A43EA3A3566A5D8DF0E982F214373FFF96470A749DC1EFE79E25083"
 KDIC_PRODUCTION_OVERLAY_POLICY = "C_DEFAULT_DC2_COMPARE_ONLY_V1"
-KDIC_PRODUCTION_OVERLAY_REVISION = "2026-08-26-declared-citation-canonicalization-v12"
+KDIC_PRODUCTION_OVERLAY_REVISION = "2026-08-26-v15-direct-presearch-guard-v13"
 
 
 # ==== overlay: how-word-classification ====
@@ -532,6 +532,60 @@ def _current_question_scoped_analysis_v1(
     return output
 
 
+def _non_retrieval_search_guard_v1(
+    question: str,
+    analysis: Mapping[str, Any],
+) -> dict[str, Any]:
+    """V1.5 분석 결과가 잘못 RETRIEVE여도 검색 호출 전에 한 번 더 차단한다."""
+    output = dict(analysis)
+    if str(output.get("route") or "").upper() != "RETRIEVE":
+        return output
+    decision = light_router.classify_non_retrieval_utterance(question)
+    if not decision:
+        return output
+    explicit_oos = bool(
+        light_router.OOS_PATTERN.search(str(question or ""))
+        and not light_router.find_businesses(str(question or ""))
+    )
+    if (
+        decision["route"] != "DIRECT"
+        and not explicit_oos
+        and bool(output.get("context_used"))
+    ):
+        # ``왜?``, ``어떻게?``, pending의 ``1번``처럼 문맥 정책이 이미
+        # 안전하게 해석한 후속질문은 원문만 보고 저정보로 되돌리지 않는다.
+        return output
+
+    route = (
+        "OUT_OF_SCOPE"
+        if explicit_oos
+        else "DIRECT_RESPONSE" if decision["route"] == "DIRECT" else "CLARIFY"
+    )
+    guard_reason = "EXPLICIT_NON_KDIC_TOPIC" if explicit_oos else decision["reason"]
+    output.update({
+        "route": route,
+        "route_reasons": list(dict.fromkeys(
+            list(output.get("route_reasons") or []) + [guard_reason]
+        )),
+        "direct_action": None if explicit_oos else decision["action"],
+        "route_response": "" if explicit_oos else decision["response"],
+        "resolved_question": "",
+        "question_businesses": [],
+        "query_type": "NO_RETRIEVAL",
+        "cross_business_candidate": False,
+        "p0_cross_preserved": False,
+        "decomposition_or_rewrite_called": False,
+        "decomposition_or_rewrite_accepted": False,
+        "decomposition_accepted": False,
+        "subqueries": [],
+        "plans": [],
+        "query_plan_valid": True,
+        "pre_search_guard_applied": True,
+        "pre_search_guard_reason": guard_reason,
+    })
+    return output
+
+
 def _cross_business_scope_count_v5(
     analysis: Mapping[str, Any],
     plans: Sequence[Mapping[str, Any]],
@@ -587,9 +641,12 @@ def prepare_common_retrieval_v1(
     _LAST_RERANK_TRACE = {}
     _LAST_PARENT_CHILD_TRACE = {}
 
-    analysis = _current_question_scoped_analysis_v1(
+    analysis = _non_retrieval_search_guard_v1(
         question,
-        ANALYZER_FUNCTIONS["v15"](question, state),
+        _current_question_scoped_analysis_v1(
+            question,
+            ANALYZER_FUNCTIONS["v15"](question, state),
+        ),
     )
     analysis_ms = (time.perf_counter() - total_started) * 1000
     if analysis["route"] != "RETRIEVE":

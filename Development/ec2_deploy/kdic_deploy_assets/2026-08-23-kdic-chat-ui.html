@@ -113,7 +113,7 @@ function stripDocumentFormattingArtifacts(text=''){return String(text||'').repla
 function answerWithoutUrls(text=''){let value=stripDocumentFormattingArtifacts(text),urlChars='[A-Za-z0-9\\-._~:/?#\\[\\]@!$&()*+,;=%]+';value=value.replace(new RegExp(`\\[([^\\]\\n]+)\\]\\(\\s*(?:https?:\\/\\/|www\\.)${urlChars}(?:\\s+"[^"]*")?\\s*\\)`,'gi'),'$1');value=value.replace(new RegExp(`\\(\\s*(?:https?:\\/\\/|www\\.)${urlChars}\\s*\\)`,'gi'),'');value=value.replace(new RegExp(`<(?:https?:\\/\\/|www\\.)${urlChars}>`,'gi'),'예금보험공사 홈페이지');value=value.replace(new RegExp(`(?:https?:\\/\\/|www\\.)${urlChars}`,'gi'),raw=>{const punctuation=raw.match(/[),.;!?]+$/),tail=punctuation?punctuation[0]:'',core=tail?raw.slice(0,-tail.length):raw,normalized=/^www\./i.test(core)?`https://${core}`:core;return `${officialUrl(normalized)?'예금보험공사 홈페이지':'관련 안내 페이지'}${tail}`});return value.replace(/\(\s*\)/g,'').replace(/[ \t]+([,.;!?])/g,'$1').replace(/[ \t]{2,}/g,' ')}
 function renderResult(row,result,jobId){
   const route=result.route||'';
-  let body=`<div class="answer-main"><span class="route-pill">${route==='CLARIFY'?'추가 확인':route==='OUT_OF_SCOPE'?'안내 범위 확인':'공식 안내'}</span><div class="answer-body">${md(answerWithoutUrls(result.answer||'답변을 준비하지 못했습니다.'))}</div></div>`;
+  let body=`<div class="answer-main"><span class="route-pill">${route==='DIRECT_RESPONSE'?'간단 안내':route==='CLARIFY'?'추가 확인':route==='OUT_OF_SCOPE'?'안내 범위 확인':'공식 안내'}</span><div class="answer-body">${md(answerWithoutUrls(result.answer||'답변을 준비하지 못했습니다.'))}</div></div>`;
   if(route==='RETRIEVE'){
     const actionLinks=officialRows(result.action_links,3);
     if(actionLinks.length){

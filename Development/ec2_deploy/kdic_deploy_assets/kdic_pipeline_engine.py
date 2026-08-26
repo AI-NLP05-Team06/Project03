@@ -1904,6 +1904,7 @@ from kdic_hcx007_resumable_decomposition_core import (
     _condition_record,
     _normalize_baseline_record,
 )
+import kdic_lightweight_router_v1 as light_router
 from kdic_lightweight_query_ablation_core import AblationConfig, analyze_common
 
 
@@ -1935,9 +1936,11 @@ V15_DECOMPOSER = ResumableBaselineDecomposer(
 
 def _route_response(route: str, common: dict[str, Any]) -> str:
     if route == "DIRECT_RESPONSE":
-        return "안녕하세요. 예금보험공사 관련 제도와 신청 절차에 관해 질문해 주세요."
+        return light_router.direct_response_for_action(common.get("direct_action"))
     if route == "OUT_OF_SCOPE":
         return "이 챗봇은 예금자보호, 예금보험금, 고객 미수령금, 착오송금 반환지원, 채무조정, 은닉재산 신고 관련 질문에 답변합니다."
+    if str(common.get("direct_action") or "").upper() == "LOW_INFORMATION":
+        return light_router.direct_response_for_action("LOW_INFORMATION")
     missing = common.get("missing_information") or []
     detail = " / ".join(str(value) for value in missing if str(value).strip())
     if detail:
@@ -1997,6 +2000,7 @@ def analyze_v15_chat_query(question: str, previous_turns: Any = None) -> dict[st
     return {
         "route": route,
         "route_reasons": common.get("route_reasons") or [],
+        "direct_action": common.get("direct_action"),
         "businesses": businesses,
         "complexity": (common.get("complexity") or {}).get("question_type", "NONE"),
         "cross_business_candidate": cross_candidate,
@@ -2234,6 +2238,7 @@ def _route_only_analysis(
         "context_resolution": dict(resolution),
         "context_used": bool(resolution.get("context_used")),
         "context_reason": resolution.get("reason"),
+        "direct_action": resolution.get("direct_action"),
         "route_response": resolution.get("clarification_message") or resolution.get("direct_response") or "추가 정보가 필요합니다.",
         "decomposition_or_rewrite_called": False,
         "decomposition_or_rewrite_accepted": False,
@@ -2248,8 +2253,59 @@ def _route_only_analysis(
     }
 
 
+def _v15_non_retrieval_resolution(
+    question: str,
+    state: Mapping[str, Any],
+    decision: Mapping[str, Any],
+) -> dict[str, Any]:
+    route = "DIRECT_RESPONSE" if decision.get("route") == "DIRECT" else "CLARIFY"
+    return {
+        "route": route,
+        "dialogue_act": decision.get("action"),
+        "original_question": question,
+        "resolved_question": "",
+        "current_question_complete": route == "DIRECT_RESPONSE",
+        "context_used": False,
+        "reason": decision.get("reason"),
+        "direct_action": decision.get("action"),
+        "direct_response": decision.get("response") if route == "DIRECT_RESPONSE" else "",
+        "clarification_message": decision.get("response") if route == "CLARIFY" else "",
+        "active_businesses": list(state.get("active_businesses") or []),
+        "excluded_businesses": list(state.get("excluded_businesses") or []),
+        "actor_role": state.get("actor_role"),
+        "missing_slots": [] if route == "DIRECT_RESPONSE" else ["question_topic"],
+        "pending_clarification": state.get("pending_clarification"),
+        "llm_judgment": {"called": False, "reason": "V15_PRE_SEARCH_RULE"},
+        "latency_ms": 0.0,
+    }
+
+
 def analyze_v15_improved(question: str, state: dict[str, Any]) -> dict[str, Any]:
     started = time.perf_counter()
+    preflight = light_router.classify_non_retrieval_utterance(question)
+    explicit_oos = bool(
+        light_router.OOS_PATTERN.search(str(question or ""))
+        and not light_router.find_businesses(str(question or ""))
+    )
+    if preflight and preflight.get("route") != "DIRECT" and explicit_oos:
+        # 기존 OOS 판정이 CLARIFY보다 구체적이므로 core 라우터에 맡긴다.
+        preflight = None
+    if preflight and preflight.get("action") == "CANCEL":
+        state["pending_clarification"] = None
+    if preflight and (
+        preflight.get("route") == "DIRECT"
+        or (
+            not state.get("pending_clarification")
+            and not state.get("active_businesses")
+        )
+    ):
+        return _route_only_analysis(
+            "V1.5_IMPROVED",
+            question,
+            _v15_non_retrieval_resolution(question, state, preflight),
+            started,
+        )
+
     resolution = resolve_context_v2(
         question,
         state=state,
@@ -2291,6 +2347,7 @@ def analyze_v15_improved(question: str, state: dict[str, Any]) -> dict[str, Any]
         "context_resolution": dict(resolution),
         "context_used": bool(resolution.get("context_used")),
         "context_reason": resolution.get("reason"),
+        "direct_action": base.get("direct_action"),
         "route_response": str(base.get("route_response") or ""),
         "decomposition_or_rewrite_called": bool(base.get("decomposition_called")),
         "decomposition_or_rewrite_accepted": bool(base.get("decomposition_accepted")),
