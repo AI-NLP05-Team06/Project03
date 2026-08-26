@@ -141,13 +141,29 @@ def test_static_contracts() -> dict[str, str]:
     assert "async function advanceProgress(row,p,stage" in ui
     assert "if(cacheHit)await completeCachedProgress(row);else await completeProgress(row)" in ui
     assert "else if(preview==='cache-progress')" in ui
-    assert "function basisHtml(d)" in ui
-    assert "쉬운 요약 보기" in ui
-    assert "쉬운 요약 접기" in ui
-    assert "공식 정보를 쉽게 요약하고 있어요" in ui
-    assert "답변을 쉽게 이해하기" in ui
-    assert "근거가 된 공식 정보" in ui
-    assert "사용자에게 어떤 의미인가요?" in ui
+    assert '@app.post("/api/summary")' in api
+    assert "return JOB_SERVICE.summary(payload.job_id)" in api
+    assert "function summaryHtml(d)" in ui
+    assert "async function loadSummary" in ui
+    assert "api('/api/summary'" in ui
+    assert "핵심 요약 보기" in ui
+    assert "핵심 요약 접기" in ui
+    assert "핵심 내용을 짧게 정리하고 있어요" in ui
+    assert "핵심만 정리했어요" in ui
+    assert "세부 조건과 공식 링크는 위 답변에서 확인해 주세요." in ui
+    assert 'class="action-btn summary-btn"' in ui
+    assert "const summary=row.querySelector('.summary-btn')" in ui
+    assert "if(summary)summary.onclick=()=>loadSummary(summary,row.querySelector('.summary-slot'),jobId)" in ui
+    assert ".filter(Boolean).slice(0,3)" in ui
+    assert "${esc(title)}" in ui
+    assert "${esc(point)}" in ui
+    assert "if(slot.dataset.loaded)" in ui
+    assert "요약할 핵심 내용을 찾지 못했어요" in ui
+    assert "핵심 요약 다시 보기" in ui
+    assert "function basisHtml(d)" not in ui
+    assert "api('/api/basis'" not in ui
+    assert "근거가 된 공식 정보" not in ui
+    assert "사용자에게 어떤 의미인가요?" not in ui
     assert "sourceLinksHtml(sources,3)" in ui
     assert "scrollAnswerTop(row)" in ui
     assert "input.focus({preventScroll:true})" in ui
@@ -285,6 +301,166 @@ def test_answer_normalization(core) -> dict[str, str]:
     }
 
 
+def test_answer_summary_contract(core) -> dict[str, str]:
+    question = "본인 명의 고객 미수령금 조회 방법을 알려주세요."
+    contaminated_result = {
+        "route": "RETRIEVE",
+        "answer": """
+**예금자보호 대상 금융상품**
+
+원금과 소정이자를 합하여 1인당 1억원까지 보호됩니다.
+
+보호대상 금융상품은 예·적금과 일부 보험계약 등을 포함합니다.
+
+**본인 명의 고객 미수령금 조회 방법**
+
+1. **금융안심포털 이용**
+
+[금융안심포털](https://fins.kdic.or.kr "공식 안내")에서 본인 인증 후 고객 미수령금을 조회할 수 있습니다. fins.kdic.or.kr [E1] [MT-005_chunk_001] Evidence Pack parent_id=P1
+
+2. **방문 확인**
+
+온라인 이용이 어렵다면 안내된 방문 신청 방법을 확인할 수 있습니다.
+
+3. **명의 변경**
+
+명의가 변경된 경우 신청 전에 고객센터에 확인해야 합니다.
+""",
+        "businesses": ["예금자보호제도", "고객 미수령금 신청"],
+    }
+    summary = core.answer_summary_from_result(contaminated_result, question=question)
+    points = summary["points"]
+    public_text = " ".join(points)
+
+    assert summary["schema_version"] == "kdic-answer-summary-v1"
+    assert summary["source"] == "VALIDATED_FINAL_ANSWER"
+    assert summary["extractive"] is True
+    assert summary["point_count"] == len(points)
+    assert 1 <= len(points) <= 3
+    assert all(0 < len(point) <= 160 for point in points)
+    assert "미수령금" in public_text or "금융안심포털" in public_text
+    assert "예금자보호" not in public_text
+    assert "1억원" not in public_text
+    assert "보호대상 금융상품" not in public_text
+    assert "http" not in public_text
+    assert "Evidence Pack" not in public_text
+    assert "chunk_" not in public_text
+    assert "parent_id" not in public_text
+    assert "fins.kdic.or.kr" not in public_text
+    assert "[E1]" not in public_text
+    assert summary == core.answer_summary_from_result(
+        contaminated_result,
+        question=question,
+    )
+    unrelated_only = core.answer_summary_from_result(
+        {
+            "route": "RETRIEVE",
+            "answer": "**예금자보호 대상 금융상품**\n\n원금과 소정이자를 합하여 1인당 1억원까지 보호됩니다.",
+        },
+        question=question,
+    )
+    assert unrelated_only["points"] == []
+    assert unrelated_only["point_count"] == 0
+    unlabeled_unrelated = core.answer_summary_from_result(
+        {
+            "route": "RETRIEVE",
+            "answer": "원금과 소정이자를 합하여 1인당 1억원까지 보호됩니다.",
+        },
+        question=question,
+    )
+    assert unlabeled_unrelated["points"] == []
+
+    intent_scoped = core.answer_summary_from_result(
+        {
+            "route": "RETRIEVE",
+            "answer": """
+**고객 미수령금 조회 방법**
+
+고객 미수령금은 부실화된 금융회사의 예금자 등이 찾아가지 않은 금액입니다.
+
+- 금융안심포털에서 본인 인증 후 미수령금을 조회할 수 있습니다.
+- 온라인 이용이 어렵다면 안내된 방문 신청 방법을 확인해 주세요.
+- 추가 확인이 필요하면 안내된 고객센터에 전화해 주세요.
+""",
+            "businesses": ["고객 미수령금 신청"],
+        },
+        question=question,
+    )
+    intent_text = " ".join(intent_scoped["points"])
+    assert len(intent_scoped["points"]) == 3
+    assert "미수령금은 부실화된" not in intent_text
+    assert "금융안심포털" in intent_text
+    assert "방문" in intent_text
+    assert "전화" in intent_text
+    assert len(
+        core.answer_summary_from_result(
+            {"answer": intent_scoped["points"]},
+            question=question,
+            business_scope=["고객 미수령금 신청"],
+            maximum_points=1,
+        )["points"]
+    ) == 1
+    assert len(
+        core.answer_summary_from_result(
+            {
+                "answer": """
+**고객 미수령금 조회 방법**
+- 금융안심포털에서 미수령금을 조회할 수 있습니다.
+- 안내된 방문 신청 방법을 확인할 수 있습니다.
+- 고객센터에 전화해 추가 조건을 확인할 수 있습니다.
+- 본인 인증 수단을 미리 준비해 주세요.
+""",
+            },
+            question=question,
+            business_scope=["고객 미수령금 신청"],
+            maximum_points=99,
+        )["points"]
+    ) == 3
+    assert core.answer_summary_from_result(
+        {"answer": "   "},
+        question=question,
+        business_scope=["고객 미수령금 신청"],
+    )["points"] == []
+
+    natural_language = core.answer_summary_from_result(
+        contaminated_result,
+        question="못 받은 돈은 어디에서 찾나요?",
+    )
+    natural_text = " ".join(natural_language["points"])
+    assert natural_language["points"]
+    assert "1억원" not in natural_text
+    assert "금융안심포털" in natural_text
+
+    mixed_heading = core.answer_summary_from_result(
+        {
+            "answer": """
+**예금자보호제도·고객 미수령금 신청 답변**
+원금과 소정이자를 합하여 1인당 1억원까지 보호됩니다.
+고객 미수령금 조회는 금융안심포털에서 할 수 있습니다.
+온라인 이용이 어렵다면 방문 신청 방법을 확인해 주세요.
+""",
+            "businesses": ["예금자보호제도", "고객 미수령금 신청"],
+        },
+        question=question,
+    )
+    mixed_text = " ".join(mixed_heading["points"])
+    assert "금융안심포털" in mixed_text
+    assert "방문" in mixed_text
+    assert "1억원" not in mixed_text
+    return {
+        "validated_answer_only": "passed",
+        "question_business_scoped": "passed",
+        "unrelated_only_answer_suppressed": "passed",
+        "unlabeled_contamination_suppressed": "passed",
+        "same_business_intent_scoped": "passed",
+        "natural_language_alias_scoped": "passed",
+        "mixed_heading_scope_recovered": "passed",
+        "public_artifacts_removed": "passed",
+        "bounded_extracts": "passed",
+        "deterministic": "passed",
+    }
+
+
 def test_memory_cache_flow(core) -> dict[str, str]:
     pipeline = FakePipeline()
     runtime = core.PipelineRuntime(pipeline)
@@ -323,7 +499,7 @@ def test_memory_cache_flow(core) -> dict[str, str]:
     assert cached_bundle is not None
     cached_bundle.public_result["answer"] = repr(
         [
-            "**첫 번째 안내**\n\n금융안심포털([]{.underline})에서 확인합니다.",
+            f"**{first['business']} 첫 번째 안내**\n\n착오송금 반환 신청 대상은 금융안심포털([]{{.underline}})에서 확인합니다.",
             "**두 번째 안내**\n\n두 번째 내용",
         ]
     )
@@ -337,7 +513,8 @@ def test_memory_cache_flow(core) -> dict[str, str]:
     assert hit_job.result["sources"] == live_job.result["sources"]
     assert hit_job.result["action_links"] == live_job.result["action_links"]
     assert hit_job.result["answer"] == (
-        "**첫 번째 안내**\n\n금융안심포털에서 확인합니다.\n\n"
+        f"**{first['business']} 첫 번째 안내**\n\n"
+        "착오송금 반환 신청 대상은 금융안심포털에서 확인합니다.\n\n"
         "**두 번째 안내**\n\n두 번째 내용"
     )
     assert ".underline" not in hit_job.result["answer"]
@@ -345,6 +522,28 @@ def test_memory_cache_flow(core) -> dict[str, str]:
     assert pipeline.cached_turns[-1][1] == hit_job.result["answer"]
     assert len(sessions.get("hit-session").state["turns"]) == 2
     assert service.basis(hit_id)["summary"] == "공식 근거 요약"
+    cached_summary = service.summary(hit_id)
+    assert cached_summary["schema_version"] == "kdic-answer-summary-v1"
+    assert 1 <= cached_summary["point_count"] <= 3
+    cached_summary_text = " ".join(cached_summary["points"])
+    assert "금융안심포털" in cached_summary_text
+    assert ".underline" not in cached_summary_text
+    assert "공식 근거 요약" not in cached_summary_text
+    assert pipeline.calls == 1
+
+    try:
+        service.summary("missing-job")
+    except KeyError:
+        pass
+    else:
+        raise AssertionError("unknown summary job must raise KeyError")
+    queued = jobs.create("queued-session", "대기 중 질문")
+    try:
+        service.summary(queued.job_id)
+    except RuntimeError:
+        pass
+    else:
+        raise AssertionError("unfinished summary job must raise RuntimeError")
 
     forged_job = _wait_job(
         service,
@@ -381,6 +580,8 @@ def test_memory_cache_flow(core) -> dict[str, str]:
         "next_click_hit_without_pipeline": "passed",
         "cached_turn_context": "passed",
         "cached_basis": "passed",
+        "cached_summary_without_pipeline": "passed",
+        "summary_job_state_guards": "passed",
         "cached_sources_and_action_links": "passed",
         "cached_legacy_list_answer_normalized": "passed",
         "forged_id_query_pair": "live_fallback",
@@ -412,6 +613,7 @@ def main() -> None:
         "registry": test_registry(core),
         "basis": test_user_basis_contract(core),
         "answer_normalization": test_answer_normalization(core),
+        "summary": test_answer_summary_contract(core),
         "cache_flow": test_memory_cache_flow(core),
         "adapter": test_adapter_cached_turn(),
     }

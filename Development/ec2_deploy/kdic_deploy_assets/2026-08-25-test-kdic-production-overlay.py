@@ -394,14 +394,27 @@ def test_chat_ui_numbering_contract() -> dict[str, Any]:
     assert "공식 근거와 조건을 검증하고 있어요" in ui
     assert "Math.max(previous" in ui
     assert "1/4단계" in ui
-    assert "function basisHtml(d)" in ui
+    assert "function summaryHtml(d)" in ui
+    assert "async function loadSummary" in ui
     assert "function stripDocumentFormattingArtifacts(text='')" in ui
-    assert "쉬운 요약 보기" in ui
-    assert "쉬운 요약 접기" in ui
-    assert "답변을 쉽게 이해하기" in ui
-    assert "근거가 된 공식 정보" in ui
-    assert "사용자에게 어떤 의미인가요?" in ui
-    assert "추가로 확인해 주세요" in ui
+    assert "핵심 요약 보기" in ui
+    assert "핵심 요약 접기" in ui
+    assert "핵심만 정리했어요" in ui
+    assert "summary-points" in ui
+    assert "api('/api/summary'" in ui
+    assert 'class="action-btn summary-btn"' in ui
+    assert "if(summary)summary.onclick=()=>loadSummary(summary,row.querySelector('.summary-slot'),jobId)" in ui
+    assert ".filter(Boolean).slice(0,3)" in ui
+    assert "${esc(title)}" in ui
+    assert "${esc(point)}" in ui
+    assert "if(slot.dataset.loaded)" in ui
+    assert "요약할 핵심 내용을 찾지 못했어요" in ui
+    assert "api('/api/basis'" not in ui
+    assert "function basisHtml(d)" not in ui
+    assert "답변을 쉽게 이해하기" not in ui
+    assert "근거가 된 공식 정보" not in ui
+    assert "사용자에게 어떤 의미인가요?" not in ui
+    assert "추가로 확인해 주세요" not in ui
     assert "function sourceLinksHtml(sources,visible=3)" in ui
     assert "function bindSourceToggles(root)" in ui
     assert "sourceLinksHtml(sources,3)" in ui
@@ -409,12 +422,12 @@ def test_chat_ui_numbering_contract() -> dict[str, Any]:
     assert "input.focus({preventScroll:true})" in ui
     assert "window.__KDIC_PROGRESS_PREVIEW=completeProgress(previewRow)" in ui
     assert "else if(preview==='cache-progress')" in ui
-    assert "else if(preview==='basis')" in ui
+    assert "else if(preview==='summary'||preview==='basis')" in ui
     return {
         "ordered_list_start_preserved": "passed",
         "ordered_list_item_value_preserved": "passed",
         "visible_four_stage_progress": "passed",
-        "user_basis_explanation": "passed",
+        "user_answer_summary": "passed",
     }
 
 

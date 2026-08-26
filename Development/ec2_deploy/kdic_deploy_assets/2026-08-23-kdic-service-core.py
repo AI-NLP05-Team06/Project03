@@ -255,6 +255,7 @@ FOLLOWUP_QUERY_OVERRIDES: dict[tuple[str, str], str] = {
 }
 SUGGESTION_CACHE_SCHEMA_VERSION = "kdic-suggestion-answer-bundle-v5.1"
 BASIS_EXPLANATION_SCHEMA_VERSION = "kdic-basis-explanation-v2"
+ANSWER_SUMMARY_SCHEMA_VERSION = "kdic-answer-summary-v1"
 _SUGGESTION_BY_ID: dict[str, dict[str, str]] = {}
 _SUGGESTIONS_BY_BUSINESS_KEY: dict[str, list[dict[str, str]]] = {}
 
@@ -563,6 +564,230 @@ def default_basis_from_result(result: Mapping[str, Any]) -> dict[str, Any]:
         "limitations": missing,
         "additional_information_needed": missing,
         "sources": _sources_from_result(result),
+    }
+
+
+_SUMMARY_BUSINESS_ALIASES: dict[str, tuple[str, ...]] = {
+    "예금자보호": (
+        "예금자보호",
+        "예금 보호",
+        "보호한도",
+        "보호대상 금융상품",
+        "원금과 소정이자",
+        "1인당 1억원",
+    ),
+    "예금보험금": ("예금보험금", "보험사고"),
+    "미수령금": (
+        "미수령금",
+        "못 받은 돈",
+        "찾아가지 않은 금액",
+        "찾지 않은 금액",
+        "안 찾아간 돈",
+    ),
+    "착오송금": ("착오송금", "반환지원", "잘못 보낸 돈", "잘못 송금"),
+    "채무조정": ("채무조정",),
+    "은닉재산": ("은닉재산", "신고포상금"),
+}
+
+_SUMMARY_INTENT_TERMS: tuple[tuple[tuple[str, ...], tuple[str, ...]], ...] = (
+    (("조회", "어디", "방법"), ("조회", "접속", "포털", "온라인", "방문", "메뉴", "전화")),
+    (("신청", "접수"), ("신청", "접수", "서류", "방문", "온라인", "본인인증", "본인 인증")),
+    (("금액", "한도", "얼마"), ("금액", "한도", "원", "비율", "%")),
+    (("기간", "언제", "시기"), ("기간", "이내", "영업일", "개월", "년", "시기")),
+    (("대상", "자격", "조건"), ("대상", "자격", "조건", "경우", "요건")),
+)
+
+
+def _summary_public_text(value: Any) -> str:
+    text = _strip_document_formatting_artifacts(value)
+    text = re.sub(
+        r"\[([^\]\n]+)\]\(\s*(?:https?://|www\.)[^\s)]+(?:\s+[\"'][^\"']*[\"'])?\s*\)",
+        r"\1",
+        text,
+        flags=re.IGNORECASE,
+    )
+    text = re.sub(r"(?:https?://|www\.)\S+", " ", text, flags=re.IGNORECASE)
+    text = re.sub(
+        r"(?<!@)\b(?:[A-Za-z0-9-]+\.)+(?:or\.kr|go\.kr|co\.kr|com|org|net)(?:/[^\s]*)?",
+        " ",
+        text,
+        flags=re.IGNORECASE,
+    )
+    text = re.sub(r"\[(?:E\d+|(?:[^\]\s]*_)?chunk_?\d+)\]", " ", text, flags=re.IGNORECASE)
+    text = re.sub(r"\b[A-Za-z0-9-]+_chunk_?\d+\b", " ", text, flags=re.IGNORECASE)
+    text = re.sub(
+        r"\b(?:evidence|chunk|parent|need)_?id\s*[:=]\s*[^\s,;]+",
+        " ",
+        text,
+        flags=re.IGNORECASE,
+    )
+    text = re.sub(r"(?<![A-Za-z0-9])E\d+(?![A-Za-z0-9])", " ", text)
+    text = re.sub(r"(?i)\b(?:Evidence Pack|Reranker)\b", " ", text)
+    text = re.sub(r"(?m)^\s*#{1,6}\s*", "", text)
+    text = re.sub(r"(?:\*\*|__|`)", "", text)
+    text = re.sub(r"^[\s\-•□ㅇ☞]+", "", text)
+    return _clean_text(text)
+
+
+def _summary_business_families(value: Any) -> set[str]:
+    text = _summary_public_text(value)
+    return {
+        family
+        for family, aliases in _SUMMARY_BUSINESS_ALIASES.items()
+        if any(alias in text for alias in aliases)
+    }
+
+
+def _answer_summary_candidates(answer: str) -> list[dict[str, Any]]:
+    candidates: list[dict[str, Any]] = []
+    current_heading = ""
+    current_scope_families: set[str] = set()
+    order = 0
+    for raw_line in str(answer or "").replace("\r\n", "\n").replace("\r", "\n").splitlines():
+        line = raw_line.strip()
+        if not line:
+            continue
+        heading_match = re.match(r"^#{1,6}\s+(.+)$", line)
+        if not heading_match:
+            heading_match = re.match(r"^(?:\d{1,2}[.)]\s*)?\*\*([^*]+)\*\*\s*$", line)
+        if heading_match:
+            current_heading = _summary_public_text(heading_match.group(1))[:70]
+            heading_families = _summary_business_families(current_heading)
+            if heading_families:
+                current_scope_families = heading_families
+            continue
+        line = re.sub(r"^(?:\d{1,2}[.)]|[-•□ㅇ☞])\s*", "", line)
+        plain_line = _summary_public_text(line)
+        if len(plain_line) < 12:
+            continue
+        sentences = re.split(r"(?<=[.!?])\s+", plain_line)
+        for sentence in sentences:
+            clean_sentence = _summary_public_text(sentence)
+            if len(clean_sentence) < 12:
+                continue
+            sentence_families = _summary_business_families(clean_sentence)
+            effective_families = sentence_families or current_scope_families
+            candidates.append(
+                {
+                    "order": order,
+                    "heading": current_heading,
+                    "text": clean_sentence,
+                    "score_text": f"{current_heading} {clean_sentence}",
+                    "families": sorted(effective_families),
+                }
+            )
+            if len(sentence_families) == 1 and sentence_families != current_scope_families:
+                current_scope_families = sentence_families
+            order += 1
+    return candidates
+
+
+def _clip_summary_point(value: Any, maximum: int = 160) -> str:
+    text = _summary_public_text(value)
+    if len(text) <= maximum:
+        return text
+    clipped = text[: maximum - 1].rstrip()
+    if " " in clipped:
+        clipped = clipped.rsplit(" ", 1)[0].rstrip(" ,;·")
+    return clipped + "…"
+
+
+def answer_summary_from_result(
+    result: Mapping[str, Any],
+    *,
+    question: str = "",
+    business_scope: Sequence[str] | None = None,
+    maximum_points: int = 3,
+) -> dict[str, Any]:
+    """Extract a short user summary only from the validated final answer."""
+
+    answer = _answer_from_result(result)
+    current_question = _clean_text(
+        question
+        or result.get("question")
+        or _common_from_result(result).get("resolved_question")
+        or _common_from_result(result).get("current_question")
+    )
+    businesses = _businesses_from_result(result)
+    scoped_businesses = [
+        _clean_text(value)
+        for value in (business_scope or ())
+        if _clean_text(value)
+    ]
+    allowed_families = _summary_business_families(" ".join(scoped_businesses))
+    if not allowed_families:
+        allowed_families = _summary_business_families(current_question)
+    unique_businesses = list(dict.fromkeys(_clean_text(value) for value in businesses if _clean_text(value)))
+    if not allowed_families and len(unique_businesses) == 1:
+        allowed_families = _summary_business_families(unique_businesses[0])
+    ambiguous_business_scope = not allowed_families and len(unique_businesses) > 1
+    target_terms = _basis_terms(current_question)
+    if not target_terms:
+        target_terms = _basis_terms(" ".join(businesses))
+    active_intent_terms: set[str] = set()
+    for question_terms, candidate_terms in _SUMMARY_INTENT_TERMS:
+        if any(term in current_question for term in question_terms):
+            active_intent_terms.update(candidate_terms)
+
+    candidates = _answer_summary_candidates(answer)
+    ranked: list[dict[str, Any]] = []
+    for candidate in candidates:
+        candidate_families = set(candidate.get("families") or ())
+        if ambiguous_business_scope:
+            continue
+        if allowed_families and (
+            not candidate_families
+            or not candidate_families.intersection(allowed_families)
+            or candidate_families - allowed_families
+        ):
+            continue
+        candidate_terms = _basis_terms(candidate["score_text"])
+        overlap = len(candidate_terms & target_terms)
+        intent_hits = sum(term in candidate["score_text"] for term in active_intent_terms)
+        if active_intent_terms and intent_hits == 0:
+            continue
+        if target_terms and overlap == 0 and not candidate_families.intersection(allowed_families):
+            continue
+        candidate["score"] = overlap * 10 + intent_hits * 4
+        if candidate_families & allowed_families:
+            candidate["score"] += 8
+        ranked.append(candidate)
+
+    ranked.sort(key=lambda row: (-int(row["score"]), int(row["order"])))
+    selected: list[dict[str, Any]] = []
+    selected_terms: list[set[str]] = []
+    point_limit = max(1, min(int(maximum_points), 3))
+    for candidate in ranked:
+        terms = _basis_terms(candidate["text"])
+        if any(
+            terms
+            and previous
+            and len(terms & previous) / max(1, len(terms | previous)) >= 0.72
+            for previous in selected_terms
+        ):
+            continue
+        selected.append(candidate)
+        selected_terms.append(terms)
+        if len(selected) >= point_limit:
+            break
+    selected.sort(key=lambda row: int(row["order"]))
+    emitted_headings: set[str] = set()
+    points: list[str] = []
+    for row in selected:
+        point = _clean_text(row["text"])
+        heading = _clean_text(row.get("heading"))
+        if heading and heading not in emitted_headings and heading not in point:
+            point = f"{heading}: {point}"
+            emitted_headings.add(heading)
+        points.append(_clip_summary_point(point))
+    points = [point for point in points if point]
+    return {
+        "schema_version": ANSWER_SUMMARY_SCHEMA_VERSION,
+        "title": "핵심만 정리했어요",
+        "points": points[:3],
+        "point_count": min(len(points), 3),
+        "source": "VALIDATED_FINAL_ANSWER",
+        "extractive": True,
     }
 
 
@@ -1219,6 +1444,20 @@ class KDICJobService:
             ):
                 return copy.deepcopy(bundle.basis_result)
         return self.runtime.basis(record.raw_result)
+
+    def summary(self, job_id: str) -> dict[str, Any]:
+        record = self.jobs.get(job_id)
+        if record is None:
+            raise KeyError(job_id)
+        if record.status != "done" or record.result is None:
+            raise RuntimeError("완료된 답변만 핵심 요약을 조회할 수 있습니다.")
+        suggestion = resolve_registered_suggestion(record.question, record.suggestion_id)
+        business_scope = [suggestion["business"]] if suggestion is not None else None
+        return answer_summary_from_result(
+            record.result,
+            question=record.question,
+            business_scope=business_scope,
+        )
 
     def shutdown(self) -> None:
         self.executor.shutdown(wait=False, cancel_futures=False)

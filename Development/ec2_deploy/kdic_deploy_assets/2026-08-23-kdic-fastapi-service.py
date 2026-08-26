@@ -447,6 +447,15 @@ def answer_basis(payload: BasisRequest) -> dict[str, Any]:
         raise HTTPException(status_code=409, detail=str(error)) from error
 
 
+@app.post("/api/summary")
+def answer_summary(payload: BasisRequest) -> dict[str, Any]:
+    _job_or_404(payload.job_id)
+    try:
+        return JOB_SERVICE.summary(payload.job_id)
+    except RuntimeError as error:
+        raise HTTPException(status_code=409, detail=str(error)) from error
+
+
 @app.post("/api/reset")
 @app.post("/api/v1/sessions/reset")
 def reset_session(payload: ResetRequest) -> dict[str, bool]:
