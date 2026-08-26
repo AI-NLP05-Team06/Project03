@@ -1323,7 +1323,18 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
     @app.get("/admin", include_in_schema=False)
     def admin_page(_: None = Depends(require_admin_session)):
         if not page.is_file(): raise HTTPException(status_code=503, detail="관리자 HTML 파일을 찾지 못했습니다.")
-        return FileResponse(page, media_type="text/html; charset=utf-8")
+        # 페이지에 inline JavaScript가 포함되어 있어 구버전 문서 캐시는 UI와
+        # API 응답의 스키마를 어긋나게 할 수 있습니다. 관리자 화면은 항상 최신
+        # 배포본을 받게 합니다.
+        return FileResponse(
+            page,
+            media_type="text/html; charset=utf-8",
+            headers={
+                "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+                "Pragma": "no-cache",
+                "Expires": "0",
+            },
+        )
 
     @app.post("/api/admin-ui/logout", include_in_schema=False)
     def logout(request: Request, _: None = Depends(require_admin_session)):

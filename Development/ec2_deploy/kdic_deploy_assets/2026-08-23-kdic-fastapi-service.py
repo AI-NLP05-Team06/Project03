@@ -346,7 +346,18 @@ def admin_ui():
             "<h1>KDIC Admin</h1><p>관리자 화면 파일을 찾지 못했습니다.</p>",
             status_code=503,
         )
-    return FileResponse(ADMIN_HTML_PATH, media_type="text/html; charset=utf-8")
+    # 관리자 화면은 단일 HTML 안에 UI 로직이 포함되어 있습니다. 이전 화면이
+    # 브라우저 캐시에 남으면 운영 수치·작업 이력 열이 서로 다른 버전으로 보일 수
+    # 있으므로, /admin 진입 때마다 최신 파일을 다시 받도록 합니다.
+    return FileResponse(
+        ADMIN_HTML_PATH,
+        media_type="text/html; charset=utf-8",
+        headers={
+            "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+            "Pragma": "no-cache",
+            "Expires": "0",
+        },
+    )
 
 
 @app.get("/api/health")
