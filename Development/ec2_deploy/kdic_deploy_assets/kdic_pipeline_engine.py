@@ -2206,6 +2206,15 @@ BUSINESS_TO_CONTEXT = {
     "은닉재산 신고": "은닉재산 신고",
 }
 
+CONTEXT_TO_ANALYSIS_BUSINESS = {
+    "예금자보호": "예금자보호제도",
+    "예금보험금": "예금보험금 안내",
+    "고객 미수령금": "고객 미수령금 신청",
+    "착오송금 반환지원": "착오송금 반환 신청",
+    "채무조정": "채무조정 안내",
+    "은닉재산 신고": "은닉재산 신고",
+}
+
 
 def _context_businesses(values: Sequence[Any]) -> list[str]:
     output = []
@@ -2214,6 +2223,87 @@ def _context_businesses(values: Sequence[Any]) -> list[str]:
         if mapped and mapped not in output:
             output.append(mapped)
     return output
+
+
+def _authoritative_v15_context_scope(
+    resolution: Mapping[str, Any],
+) -> tuple[list[str], list[str], bool]:
+    """Return the effective V1.5 scope when context resolution is authoritative.
+
+    A complete new question remains owned by the regular query analyzer.  A
+    context-backed follow-up, option selection, or explicit replacement after
+    an exclusion must instead keep the resolver's scope so raw keyword matches
+    cannot reintroduce a stale or explicitly excluded business.
+    """
+
+    reason = str(resolution.get("reason") or "")
+    authoritative = bool(
+        resolution.get("context_used")
+        or reason == "EXPLICIT_EXCLUSION_WITH_REPLACEMENT"
+    )
+    if not authoritative:
+        return [], [], False
+    # ``excluded_businesses`` is historical state.  An explicitly selected or
+    # newly reactivated business may therefore occur in both lists; the current
+    # resolver-owned active scope wins and only the remaining exclusions filter
+    # plans.
+    active = _context_businesses(resolution.get("active_businesses") or [])
+    active_set = set(active)
+    excluded = [
+        business
+        for business in _context_businesses(resolution.get("excluded_businesses") or [])
+        if business not in active_set
+    ]
+    return active, excluded, bool(active)
+
+
+def _analysis_businesses_from_context(values: Sequence[Any]) -> list[str]:
+    output: list[str] = []
+    for value in _context_businesses(values):
+        mapped = CONTEXT_TO_ANALYSIS_BUSINESS.get(value, value)
+        if mapped and mapped not in output:
+            output.append(mapped)
+    return output
+
+
+def _scope_v15_plans_to_context(
+    plans: Sequence[Mapping[str, Any]],
+    *,
+    resolved_question: str,
+    active_businesses: Sequence[str],
+    excluded_businesses: Sequence[str],
+) -> list[dict[str, Any]]:
+    """Drop plans that mention a business outside the resolved context scope."""
+
+    allowed = set(_context_businesses(active_businesses))
+    excluded = set(_context_businesses(excluded_businesses))
+    scoped: list[dict[str, Any]] = []
+    for raw_plan in plans:
+        plan = dict(raw_plan)
+        query = str(plan.get("query") or "").strip()
+        if not query:
+            continue
+        detected = set(_context_businesses(light_router.find_businesses(query)))
+        if detected & excluded or detected - allowed:
+            continue
+        scoped.append(plan)
+
+    if not scoped:
+        scoped = [{
+            "query": str(resolved_question or "").strip(),
+            "weight": 1.0,
+            "source": "CONTEXT_SCOPE_FALLBACK",
+            "business_filter": {"mode": "NONE"},
+        }]
+    total = sum(float(plan.get("weight") or 0.0) for plan in scoped)
+    if total <= 0:
+        equal_weight = 1.0 / len(scoped)
+        for plan in scoped:
+            plan["weight"] = equal_weight
+    else:
+        for plan in scoped:
+            plan["weight"] = float(plan.get("weight") or 0.0) / total
+    return scoped
 
 
 def new_analyzer_state() -> dict[str, Any]:
@@ -2319,7 +2409,15 @@ def analyze_v15_improved(question: str, state: dict[str, Any]) -> dict[str, Any]
     base = analyze_v15_chat_query(resolved, previous_turns=[])
     core_latency_ms = (time.perf_counter() - core_started) * 1000
     businesses = list(base.get("businesses") or [])
-    if base.get("cross_business_candidate"):
+    active_scope, excluded_scope, context_scope_authoritative = (
+        _authoritative_v15_context_scope(resolution)
+    )
+    if context_scope_authoritative:
+        businesses = _analysis_businesses_from_context(active_scope)
+    cross_business_candidate = bool(
+        base.get("cross_business_candidate") and len(businesses) >= 2
+    )
+    if cross_business_candidate:
         query_type = "CROSS_BUSINESS"
     elif str(base.get("complexity") or "") == "MULTI":
         query_type = "SAME_BUSINESS_MULTI"
@@ -2334,7 +2432,19 @@ def analyze_v15_improved(question: str, state: dict[str, Any]) -> dict[str, Any]
         }
         for plan in base.get("plans") or []
     ]
-    if base.get("route") == "RETRIEVE" and businesses:
+    if context_scope_authoritative and base.get("route") == "RETRIEVE":
+        plans = _scope_v15_plans_to_context(
+            plans,
+            resolved_question=resolved,
+            active_businesses=active_scope,
+            excluded_businesses=excluded_scope,
+        )
+        state["active_businesses"] = list(active_scope)
+        base = copy.deepcopy(base)
+        base["businesses"] = list(businesses)
+        base["cross_business_candidate"] = cross_business_candidate
+        base["plans"] = copy.deepcopy(plans)
+    elif base.get("route") == "RETRIEVE" and businesses:
         state["active_businesses"] = _context_businesses(businesses)
     return {
         "analyzer": "V1.5_IMPROVED",
@@ -2342,6 +2452,9 @@ def analyze_v15_improved(question: str, state: dict[str, Any]) -> dict[str, Any]
         "original_question": question,
         "resolved_question": resolved,
         "businesses": businesses,
+        "context_scope_authoritative": context_scope_authoritative,
+        "context_scope_businesses": list(active_scope),
+        "context_scope_excluded_businesses": list(excluded_scope),
         "query_type": query_type,
         "plans": plans,
         "context_resolution": dict(resolution),
@@ -2849,10 +2962,12 @@ from kdic_context_policy_v2 import (
 )
 
 FOLLOWUP_INTENT_RULES_V21: dict[str, tuple[str, ...]] = {
-    "APPLICATION": ("신청", "접수", "신청하려", "접수하려"),
+    "APPLICATION": ("신청", "접수", "신고", "제출", "신청하려", "접수하려", "신고하려"),
     "DOCUMENTS": ("서류", "필요서류", "필요 서류", "구비서류", "구비 서류", "준비물", "뭘 준비", "무엇을 준비"),
     "ELIGIBILITY": ("자격", "대상", "해당", "신청 가능", "가능한 사람"),
     "PROCEDURE": ("절차", "방법", "순서", "과정", "어떻게"),
+    "LOCATION": ("어디", "어디서", "어디에서", "온라인", "방문"),
+    "ANONYMITY": ("익명", "실명", "신원 공개", "신원공개"),
     "TIME": ("기간", "기한", "언제", "얼마나 걸", "며칠", "몇 일"),
     "COST": ("비용", "수수료", "돈이 드", "얼마가 드"),
     "LOOKUP": ("조회", "확인", "진행상태", "진행 상태"),

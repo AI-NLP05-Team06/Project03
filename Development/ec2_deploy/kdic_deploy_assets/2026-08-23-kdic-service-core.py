@@ -94,6 +94,9 @@ def _action_link_rows(raw: Any) -> list[dict[str, Any]]:
         output.append(
             {
                 "link_id": _clean_text(row.get("link_id")),
+                "business_function_code": _clean_text(
+                    row.get("business_function_code")
+                ),
                 "label": _clean_text(
                     row.get("label") or row.get("button_label") or "공식 서비스 열기"
                 ),
@@ -177,7 +180,7 @@ def _normalize_answer_text(value: Any) -> str:
     return _strip_document_formatting_artifacts(text)
 
 
-def _answer_from_result(result: Mapping[str, Any]) -> str:
+def _explicit_answer_from_result(result: Mapping[str, Any]) -> str:
     payload = _mapping(result.get("payload"))
     common = _common_from_result(result)
     candidates = [
@@ -192,7 +195,13 @@ def _answer_from_result(result: Mapping[str, Any]) -> str:
         text = _normalize_answer_text(candidate)
         if text:
             return text
-    return "답변을 준비하지 못했습니다. 잠시 후 다시 시도해 주세요."
+    return ""
+
+
+def _answer_from_result(result: Mapping[str, Any]) -> str:
+    return _explicit_answer_from_result(result) or (
+        "답변을 준비하지 못했습니다. 잠시 후 다시 시도해 주세요."
+    )
 
 
 def _businesses_from_result(result: Mapping[str, Any]) -> list[str]:
@@ -333,13 +342,358 @@ def _followup_keywords(businesses: Sequence[str]) -> list[dict[str, str]]:
     return output[:5]
 
 
+def _business_scope_key(value: Any) -> str:
+    """Return a stable structured business family without reading answer text."""
+
+    text = _clean_text(value)
+    compact = re.sub(r"\s+", "", text)
+    for key in FOLLOWUP_CANONICAL_BUSINESSES:
+        if re.sub(r"\s+", "", key) in compact:
+            return key
+    return text
+
+
+def _dedupe_business_scope(values: Sequence[Any]) -> list[str]:
+    output: list[str] = []
+    seen: set[str] = set()
+    for value in values:
+        text = _clean_text(value)
+        scope_key = _business_scope_key(text)
+        if not text or not scope_key or scope_key in seen:
+            continue
+        seen.add(scope_key)
+        output.append(text)
+    return output
+
+
+ACTION_LINK_BUSINESS_SCOPE_KEYS: dict[str, str] = {
+    "deposit_protection": "예금자보호",
+    "deposit_insurance_payout": "예금보험금",
+    "unclaimed_funds": "미수령금",
+    "mistaken_transfer": "착오송금",
+    "debt_adjustment": "채무조정",
+    "hidden_assets_report": "은닉재산",
+}
+ACTION_LINK_ID_SCOPE_KEYS: dict[str, str] = {
+    "DP-": "예금자보호",
+    "DI-": "예금보험금",
+    "UN-": "미수령금",
+    "MT-": "착오송금",
+    "DA-": "채무조정",
+    "HP-": "은닉재산",
+}
+CONTEXT_STATE_CANONICAL_BUSINESSES: dict[str, str] = {
+    "예금자보호": "예금자보호",
+    "예금보험금": "예금보험금",
+    "미수령금": "고객 미수령금",
+    "착오송금": "착오송금 반환지원",
+    "채무조정": "채무조정",
+    "은닉재산": "은닉재산 신고",
+}
+
+
+def _context_state_businesses(values: Sequence[Any]) -> list[str]:
+    return list(dict.fromkeys(
+        CONTEXT_STATE_CANONICAL_BUSINESSES.get(
+            _business_scope_key(value),
+            _clean_text(value),
+        )
+        for value in values
+        if _clean_text(value)
+    ))
+
+
+def _action_link_scope_key(row: Mapping[str, Any]) -> str:
+    code = _clean_text(row.get("business_function_code")).lower()
+    if code in ACTION_LINK_BUSINESS_SCOPE_KEYS:
+        return ACTION_LINK_BUSINESS_SCOPE_KEYS[code]
+    link_id = _clean_text(row.get("link_id")).upper()
+    for prefix, scope_key in ACTION_LINK_ID_SCOPE_KEYS.items():
+        if link_id.startswith(prefix):
+            return scope_key
+    inferred = _business_scope_key(
+        " ".join([
+            _clean_text(row.get("label")),
+            _clean_text(row.get("description")),
+        ])
+    )
+    return inferred if inferred in FOLLOWUP_CANONICAL_BUSINESSES else ""
+
+
+def _scoped_action_links(raw: Any, businesses: Sequence[str]) -> list[dict[str, Any]]:
+    allowed = {
+        _business_scope_key(value)
+        for value in businesses
+        if _business_scope_key(value)
+    }
+    if not allowed:
+        return []
+    return [
+        row
+        for row in _action_link_rows(raw)
+        if _action_link_scope_key(row) in allowed
+    ]
+
+
+def _effective_businesses_from_result(result: Mapping[str, Any]) -> list[str]:
+    """Apply explicit structured exclusions before exposing a public scope."""
+
+    businesses = _dedupe_business_scope(_businesses_from_result(result))
+    analysis = _analysis_from_result(result)
+    resolution = _mapping(analysis.get("context_resolution"))
+    excluded = _clean_list(
+        resolution.get("excluded_businesses")
+        or analysis.get("excluded_businesses")
+    )
+    if not excluded:
+        return businesses
+
+    excluded_keys = {_business_scope_key(value) for value in excluded}
+    active = _clean_list(resolution.get("active_businesses"))
+    active_keys = {
+        _business_scope_key(value)
+        for value in active
+        if _business_scope_key(value)
+    }
+    # A current explicit scope may intentionally reactivate a business that was
+    # excluded by an earlier turn. Current active state therefore wins over the
+    # historical exclusion list, matching the context-policy engine contract.
+    effective_excluded = excluded_keys - active_keys
+    filtered = [
+        value
+        for value in businesses
+        if _business_scope_key(value) not in effective_excluded
+    ]
+    if active_keys:
+        aligned = [
+            value
+            for value in filtered
+            if _business_scope_key(value) in active_keys
+        ]
+        if aligned:
+            return _dedupe_business_scope(aligned)
+        return _dedupe_business_scope([
+            FOLLOWUP_CANONICAL_BUSINESSES.get(_business_scope_key(value), value)
+            for value in active
+            if _business_scope_key(value) in active_keys
+        ])
+    return _dedupe_business_scope(filtered)
+
+
+def _public_business_matches_expected(
+    public_businesses: Any,
+    expected_business: str,
+) -> bool:
+    expected_key = _business_scope_key(expected_business)
+    actual = _clean_list(public_businesses)
+    actual_keys = {_business_scope_key(value) for value in actual}
+    return bool(expected_key and actual_keys == {expected_key})
+
+
+def _structured_source_business_scopes(
+    result: Mapping[str, Any],
+) -> dict[str, set[str]]:
+    """Map source URLs to business families declared by Evidence Pack metadata."""
+
+    common = _common_from_result(result)
+    pack = _mapping(common.get("evidence_pack") or result.get("evidence_pack"))
+    needs = [row for row in pack.get("needs") or [] if isinstance(row, Mapping)]
+    need_businesses = {
+        _clean_text(row.get("need_id")): _business_scope_key(
+            row.get("business_function")
+        )
+        for row in needs
+        if _clean_text(row.get("need_id"))
+        and _business_scope_key(row.get("business_function"))
+    }
+    evidence_scopes: dict[str, set[str]] = {}
+    url_scopes: dict[str, set[str]] = {}
+    for row in pack.get("evidence") or []:
+        if not isinstance(row, Mapping):
+            continue
+        declared = _clean_list(row.get("need_businesses"))
+        declared.extend(_clean_list(row.get("actual_businesses")))
+        declared.extend(
+            need_businesses[need_id]
+            for need_id in _clean_list(row.get("need_ids"))
+            if need_id in need_businesses
+        )
+        for key in ("business_function", "actual_business"):
+            if _clean_text(row.get(key)):
+                declared.append(_clean_text(row.get(key)))
+        scopes = {
+            _business_scope_key(value)
+            for value in declared
+            if _business_scope_key(value)
+        }
+        evidence_id = _clean_text(row.get("evidence_id"))
+        if evidence_id and scopes:
+            evidence_scopes[evidence_id] = scopes
+        source_url = _clean_text(row.get("source_url") or row.get("url"))
+        if source_url and scopes:
+            url_scopes.setdefault(source_url, set()).update(scopes)
+
+    for row in pack.get("sources") or []:
+        if not isinstance(row, Mapping):
+            continue
+        source_url = _clean_text(row.get("source_url") or row.get("url"))
+        if not source_url:
+            continue
+        scopes: set[str] = set()
+        for evidence_id in _clean_list(row.get("evidence_ids")):
+            scopes.update(evidence_scopes.get(evidence_id) or set())
+        if scopes:
+            url_scopes.setdefault(source_url, set()).update(scopes)
+
+    raw_fact_records = (
+        common.get("dc_matched_fact_records")
+        or result.get("matched_fact_records")
+        or common.get("matched_fact_records")
+        or []
+    )
+    for row in raw_fact_records:
+        if not isinstance(row, Mapping):
+            continue
+        scopes = {
+            _business_scope_key(value)
+            for value in _clean_list(
+                row.get("business_functions") or row.get("business_function")
+            )
+            if _business_scope_key(value)
+        }
+        if not scopes:
+            continue
+        for value in row.get("source_urls") or []:
+            source_url = _clean_text(value)
+            if source_url:
+                url_scopes.setdefault(source_url, set()).update(scopes)
+    return url_scopes
+
+
+def _reference_scoped_sources_from_result(
+    result: Mapping[str, Any],
+) -> tuple[bool, list[dict[str, str]]]:
+    """Prefer sources declared by validated Evidence/Fact references when present."""
+
+    payload = _mapping(result.get("payload"))
+    reference_audit = _mapping(
+        payload.get("reference_audit") or result.get("reference_audit")
+    )
+    evidence_keys = ("valid_evidence_ids", "used_evidence_ids")
+    fact_keys = ("valid_fact_claim_ids", "used_fact_claim_ids")
+    restrict_evidence = "used_evidence_ids" in payload or any(
+        key in reference_audit for key in evidence_keys
+    )
+    restrict_facts = "used_fact_claim_ids" in payload or any(
+        key in reference_audit for key in fact_keys
+    )
+    if not restrict_evidence and not restrict_facts:
+        return False, []
+
+    used_evidence_ids = set(_clean_list(
+        payload.get("used_evidence_ids")
+        if "used_evidence_ids" in payload
+        else reference_audit.get("valid_evidence_ids")
+        or reference_audit.get("used_evidence_ids")
+    ))
+    used_fact_claim_ids = set(_clean_list(
+        payload.get("used_fact_claim_ids")
+        if "used_fact_claim_ids" in payload
+        else reference_audit.get("valid_fact_claim_ids")
+        or reference_audit.get("used_fact_claim_ids")
+    ))
+    common = _common_from_result(result)
+    pack = _mapping(common.get("evidence_pack") or result.get("evidence_pack"))
+    output: list[dict[str, str]] = []
+    seen_urls: set[str] = set()
+
+    if restrict_evidence:
+        for row in pack.get("sources") or []:
+            if not isinstance(row, Mapping):
+                continue
+            if not (set(_clean_list(row.get("evidence_ids"))) & used_evidence_ids):
+                continue
+            url = _clean_text(row.get("source_url") or row.get("url"))
+            if not url or url in seen_urls:
+                continue
+            seen_urls.add(url)
+            output.append({
+                "title": _clean_text(
+                    row.get("title") or row.get("document_title") or "공식 안내"
+                ),
+                "url": url,
+            })
+
+    if restrict_facts:
+        raw_fact_records = (
+            common.get("dc_matched_fact_records")
+            or result.get("matched_fact_records")
+            or common.get("matched_fact_records")
+            or []
+        )
+        for row in raw_fact_records:
+            if not isinstance(row, Mapping):
+                continue
+            fact_index_id = _clean_text(row.get("fact_index_id"))
+            if not fact_index_id or not any(
+                value == fact_index_id or value.startswith(f"{fact_index_id}:")
+                for value in used_fact_claim_ids
+            ):
+                continue
+            title = _clean_text(
+                row.get("document_title") or fact_index_id or "Fact Index 공식 근거"
+            )
+            for value in row.get("source_urls") or []:
+                url = _clean_text(value)
+                if not url or url in seen_urls:
+                    continue
+                seen_urls.add(url)
+                output.append({"title": title, "url": url})
+    return True, output
+
+
 def _sources_from_result(result: Mapping[str, Any]) -> list[dict[str, str]]:
+    reference_scoped, referenced_sources = _reference_scoped_sources_from_result(
+        result
+    )
+    if reference_scoped:
+        return referenced_sources
     direct = _source_rows(result.get("official_sources") or result.get("sources"))
     if direct:
         return direct
     common = _common_from_result(result)
     pack = _mapping(common.get("evidence_pack") or result.get("evidence_pack"))
     return _source_rows(pack.get("sources"))
+
+
+def _scoped_sources_from_result(
+    result: Mapping[str, Any],
+    businesses: Sequence[str],
+) -> list[dict[str, str]]:
+    sources = _sources_from_result(result)
+    allowed_scopes = {
+        _business_scope_key(value)
+        for value in businesses
+        if _business_scope_key(value)
+    }
+    if not sources:
+        return sources
+    structured_scopes = _structured_source_business_scopes(result)
+    if not allowed_scopes:
+        return []
+    if not structured_scopes:
+        # Backward-compatible path for older pipelines with no structured
+        # Evidence/Fact scope metadata at all.
+        return sources
+    return [
+        row
+        for row in sources
+        if _clean_text(row.get("url")) in structured_scopes
+        if bool(
+            structured_scopes[_clean_text(row.get("url"))]
+            & allowed_scopes
+        )
+    ]
 
 
 def _latency_from_result(result: Mapping[str, Any]) -> dict[str, float]:
@@ -357,9 +711,10 @@ def normalize_public_result(result: Mapping[str, Any]) -> dict[str, Any]:
     """Normalize legacy B, C and D-C notebook results for the HTML client."""
 
     route = _route_from_result(result)
-    businesses = _businesses_from_result(result)
-    action_links = _action_link_rows(
-        result.get("action_links") or _common_from_result(result).get("action_links")
+    businesses = _effective_businesses_from_result(result)
+    action_links = _scoped_action_links(
+        result.get("action_links") or _common_from_result(result).get("action_links"),
+        businesses,
     )
     analysis = _analysis_from_result(result)
     payload = _mapping(result.get("payload"))
@@ -371,7 +726,9 @@ def normalize_public_result(result: Mapping[str, Any]) -> dict[str, Any]:
         "clarification_options": _clarification_options(result)
         if route == "CLARIFY"
         else [],
-        "sources": _sources_from_result(result),
+        "sources": _scoped_sources_from_result(result, businesses)
+        if route == "RETRIEVE"
+        else [],
         "action_links": action_links if route == "RETRIEVE" else [],
         "latency_seconds": {
             key: round(value / 1000.0, 3)
@@ -893,6 +1250,7 @@ class PipelineRuntime:
         question: str,
         answer: str,
         state: MutableMapping[str, Any],
+        business_scope: Sequence[str] | None = None,
     ) -> None:
         """Keep a cache-hit turn visible to the next context-dependent question."""
 
@@ -900,7 +1258,23 @@ class PipelineRuntime:
             pipeline = self._pipeline
         recorder = getattr(pipeline, "record_cached_turn", None) if pipeline else None
         if callable(recorder):
-            recorder(question, answer, state)
+            try:
+                parameters = inspect.signature(recorder).parameters
+            except (TypeError, ValueError):
+                parameters = {}
+            accepts_scope = "business_scope" in parameters or any(
+                parameter.kind == inspect.Parameter.VAR_KEYWORD
+                for parameter in parameters.values()
+            )
+            if business_scope is not None and accepts_scope:
+                recorder(
+                    question,
+                    answer,
+                    state,
+                    business_scope=list(business_scope),
+                )
+            else:
+                recorder(question, answer, state)
             return
         state.setdefault("turns", []).extend(
             [
@@ -908,6 +1282,12 @@ class PipelineRuntime:
                 {"role": "assistant", "content": str(answer or "").strip()},
             ]
         )
+        if business_scope is not None:
+            state["active_businesses"] = _context_state_businesses(business_scope)
+            state["excluded_businesses"] = []
+            state["actor_role"] = None
+            state["pending_clarification"] = None
+            state["last_resolved_question"] = _clean_text(question)
 
     def run(
         self,
@@ -1249,7 +1629,10 @@ class KDICJobService:
         )
 
     @staticmethod
-    def _cache_eligibility(public: Mapping[str, Any]) -> tuple[bool, str]:
+    def _cache_eligibility(
+        public: Mapping[str, Any],
+        expected_business: str = "",
+    ) -> tuple[bool, str]:
         if _clean_text(public.get("route")).upper() != "RETRIEVE":
             return False, "ROUTE_NOT_RETRIEVE"
         if not str(public.get("answer") or "").strip():
@@ -1265,6 +1648,10 @@ class KDICJobService:
             return False, "VALIDATION_FAILED"
         if not list(public.get("sources") or []):
             return False, "NO_OFFICIAL_SOURCES"
+        if expected_business and not _public_business_matches_expected(
+            public.get("businesses"), expected_business
+        ):
+            return False, "SUGGESTION_BUSINESS_MISMATCH"
         return True, "VALIDATED_STANDALONE_RETRIEVE"
 
     def submit(
@@ -1292,9 +1679,36 @@ class KDICJobService:
             lookup_started = time.perf_counter()
             bundle = self.suggestion_cache.get(cache_key)
             lookup_ms = (time.perf_counter() - lookup_started) * 1000.0
-            if bundle is not None and bundle.question == clean_question:
+            expected_business = _clean_text(suggestion.get("business"))
+            bundle_eligible = False
+            cached_public: dict[str, Any] = {}
+            if bundle is not None:
                 try:
-                    public = copy.deepcopy(bundle.public_result)
+                    raw_answer = _explicit_answer_from_result(bundle.raw_result)
+                    cached_public = (
+                        normalize_public_result(bundle.raw_result)
+                        if raw_answer
+                        else {}
+                    )
+                    if cached_public:
+                        cached_public["answer"] = raw_answer
+                except Exception:
+                    cached_public = {}
+                bundle_eligible, _ = self._cache_eligibility(
+                    cached_public,
+                    expected_business,
+                )
+            if (
+                bundle is not None
+                and bundle.question == clean_question
+                and _clean_text(bundle.suggestion_id).upper() == clean_suggestion_id
+                and _public_business_matches_expected(
+                    [bundle.business], expected_business
+                )
+                and bundle_eligible
+            ):
+                try:
+                    public = copy.deepcopy(cached_public)
                     public["answer"] = _normalize_answer_text(public.get("answer")) or (
                         "답변을 준비하지 못했습니다. 잠시 후 다시 시도해 주세요."
                     )
@@ -1328,6 +1742,7 @@ class KDICJobService:
                             clean_question,
                             public["answer"],
                             session.state,
+                            business_scope=[expected_business],
                         )
                         session.updated_at = time.time()
                         save = getattr(self.sessions, "save", None)
@@ -1382,10 +1797,13 @@ class KDICJobService:
                     save(session)
             public = normalize_public_result(raw)
             if record.cache_key and record.suggestion_id:
-                eligible, reason = self._cache_eligibility(public)
+                suggestion = _SUGGESTION_BY_ID[record.suggestion_id]
+                eligible, reason = self._cache_eligibility(
+                    public,
+                    suggestion["business"],
+                )
                 stored = False
                 if eligible:
-                    suggestion = _SUGGESTION_BY_ID[record.suggestion_id]
                     basis_result = self.runtime.basis(raw)
                     self.suggestion_cache.put(
                         CachedAnswerBundle(
@@ -1434,10 +1852,39 @@ class KDICJobService:
             raise KeyError(job_id)
         if record.status != "done" or record.raw_result is None:
             raise RuntimeError("완료된 답변만 근거를 조회할 수 있습니다.")
-        if record.cache_key:
+        cache_meta = _mapping(_mapping(record.result).get("suggestion_cache"))
+        if record.cache_key and cache_meta.get("hit") is True:
             bundle = self.suggestion_cache.peek(record.cache_key)
+            suggestion = resolve_registered_suggestion(
+                record.question,
+                record.suggestion_id,
+            )
+            expected_business = _clean_text(
+                suggestion.get("business") if suggestion else ""
+            )
+            try:
+                cached_public = normalize_public_result(bundle.raw_result) if bundle else {}
+                raw_answer = (
+                    _explicit_answer_from_result(bundle.raw_result) if bundle else ""
+                )
+                if cached_public and raw_answer:
+                    cached_public["answer"] = raw_answer
+                eligible, _ = self._cache_eligibility(
+                    cached_public,
+                    expected_business,
+                )
+            except Exception:
+                eligible = False
             if (
                 bundle is not None
+                and suggestion is not None
+                and bundle.question == record.question
+                and _clean_text(bundle.suggestion_id).upper()
+                == _clean_text(record.suggestion_id).upper()
+                and _public_business_matches_expected(
+                    [bundle.business], expected_business
+                )
+                and eligible
                 and bundle.basis_result
                 and _clean_text(bundle.basis_result.get("schema_version"))
                 == BASIS_EXPLANATION_SCHEMA_VERSION

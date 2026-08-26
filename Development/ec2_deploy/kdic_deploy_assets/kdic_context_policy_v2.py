@@ -74,15 +74,98 @@ def _selected_pending(question: str, pending: Mapping[str, Any]) -> str | None:
 def _excluded_explicit_businesses(question: str, businesses: Sequence[str]) -> list[str]:
     if not EXCLUSION_PATTERN.search(question):
         return []
+    # Bare ``제외`` and noun-modifying ``제외한 상품/대상`` are intentionally
+    # not unconditional removal connectives. They usually describe an FAQ
+    # inside the named business rather than asking to remove that business.
+    exclusion = r"(?:말고|제외(?:하고|해서|해)|빼고)"
+    particle = r"(?:은|는|이|가|을|를|도)?"
     output: list[str] = []
     for business in businesses:
-        positions = [question.find(term) for term in BUSINESS_PATTERNS[business] if term in question]
-        if not positions:
-            continue
-        start = min(positions)
-        if EXCLUSION_PATTERN.search(question[start:start + 40]):
+        terms = sorted(BUSINESS_PATTERNS[business], key=len, reverse=True)
+        hard_exclusion = any(
+            re.search(
+                rf"{re.escape(term)}\s*{particle}\s*{exclusion}(?=\s|[,.;!?]|$)",
+                question,
+            )
+            for term in terms
+        )
+        modifier_exclusion = False
+        if not hard_exclusion:
+            other_terms = [
+                term
+                for other_business in businesses
+                if other_business != business
+                for term in BUSINESS_PATTERNS[other_business]
+            ]
+            for term in terms:
+                match = re.search(
+                    rf"{re.escape(term)}\s*{particle}\s*제외한(?=\s|[,.;!?]|$)",
+                    question,
+                )
+                if not match:
+                    continue
+                tail = question[match.end():]
+                has_replacement = any(value in tail for value in other_terms)
+                has_remaining_scope = bool(
+                    re.match(r"\s*나머지(?:\s*(?:업무|제도|항목))?", tail)
+                )
+                if has_replacement or has_remaining_scope:
+                    modifier_exclusion = True
+                    break
+        if hard_exclusion or modifier_exclusion:
             output.append(business)
     return output
+
+
+def _replacement_only_question(
+    question: str,
+    *,
+    excluded_businesses: Sequence[str],
+    remaining_businesses: Sequence[str],
+) -> str:
+    """Remove an explicit exclusion clause before the query reaches retrieval.
+
+    ``detect_businesses`` intentionally uses simple keyword matching.  Keeping a
+    phrase such as ``착오송금 말고`` in the resolved query would therefore add the
+    excluded business back to the search plan.  This helper removes both the
+    excluded business expression and its exclusion connective while retaining
+    the replacement request.
+    """
+
+    resolved = _clean(question)
+    exclusion = r"(?:말고|제외(?:하고|한|해|해서)?|빼고)"
+    particle = r"(?:은|는|이|가|을|를|도)?"
+    for business in excluded_businesses:
+        terms = sorted(BUSINESS_PATTERNS.get(business, ()), key=len, reverse=True)
+        for term in terms:
+            escaped = re.escape(term)
+            resolved = re.sub(
+                rf"{escaped}\s*{particle}\s*{exclusion}\s*(?:,|그리고|대신)?\s*",
+                " ",
+                resolved,
+            )
+            resolved = re.sub(
+                rf"{exclusion}\s*{escaped}\s*{particle}\s*",
+                " ",
+                resolved,
+            )
+
+    # A supported but unusual word order may leave the excluded label behind.
+    # Removing that label is safer than allowing it to contaminate retrieval.
+    for business in excluded_businesses:
+        for term in sorted(BUSINESS_PATTERNS.get(business, ()), key=len, reverse=True):
+            resolved = re.sub(rf"{re.escape(term)}\s*{particle}", " ", resolved)
+    resolved = re.sub(r"^(?:그리고|또는|대신)\s+", "", resolved.strip())
+    resolved = re.sub(r"\s+([,.!?])", r"\1", resolved)
+    resolved = _clean(resolved.strip(" ,;:/"))
+
+    detected = detect_businesses(resolved)
+    missing = [business for business in remaining_businesses if business not in detected]
+    if missing:
+        subject = " 및 ".join(remaining_businesses)
+        detail = resolved or "관련 내용을 알려주세요."
+        resolved = f"{subject}에 관하여 {detail}"
+    return resolved
 
 
 def _clarify(
@@ -227,10 +310,15 @@ def resolve_context_v2(
                 missing_slots=["business_function"], started=started,
             )
         state["active_businesses"] = remaining
-        state["last_resolved_question"] = original
+        resolved = _replacement_only_question(
+            original,
+            excluded_businesses=excluded_now,
+            remaining_businesses=remaining,
+        )
+        state["last_resolved_question"] = resolved
         return {
             "route": "CONTINUE", "dialogue_act": "CORRECTION",
-            "original_question": original, "resolved_question": original,
+            "original_question": original, "resolved_question": resolved,
             "current_question_complete": True, "context_used": False,
             "reason": "EXPLICIT_EXCLUSION_WITH_REPLACEMENT", "clarification_message": "",
             "active_businesses": list(state["active_businesses"]),

@@ -10,7 +10,7 @@ import kdic_lightweight_router_v1 as light_router
 
 KDIC_PRODUCTION_OVERLAY_SOURCE_SHA256 = "F9A908D62A43EA3A3566A5D8DF0E982F214373FFF96470A749DC1EFE79E25083"
 KDIC_PRODUCTION_OVERLAY_POLICY = "C_DEFAULT_DC2_COMPARE_ONLY_V1"
-KDIC_PRODUCTION_OVERLAY_REVISION = "2026-08-26-v15-direct-presearch-guard-v13"
+KDIC_PRODUCTION_OVERLAY_REVISION = "2026-08-26-v15-multiturn-scope-coherence-v14"
 
 
 # ==== overlay: how-word-classification ====
@@ -483,6 +483,33 @@ def _current_question_scoped_analysis_v1(
     output = dict(analysis)
     if str(output.get("route") or "").upper() != "RETRIEVE":
         return output
+    resolution = dict(output.get("context_resolution") or {})
+    context_reason = str(
+        output.get("context_reason") or resolution.get("reason") or ""
+    ).upper()
+    active_context_businesses = list(dict.fromkeys(
+        _clean_text(value)
+        for value in resolution.get("active_businesses") or []
+        if _clean_text(value)
+    ))
+    excluded_context_businesses = set(
+        _clean_text(value)
+        for value in resolution.get("excluded_businesses") or []
+        if _clean_text(value)
+    )
+
+    def _context_name(value: Any) -> str:
+        mapped = list(_context_businesses([value]) or [])
+        return _clean_text(mapped[0] if mapped else value)
+
+    def _router_businesses_for_context(values: Sequence[str]) -> list[str]:
+        targets = {_context_name(value) for value in values if _context_name(value)}
+        output_businesses: list[str] = []
+        for business in getattr(light_router, "BUSINESS_KEYWORDS", {}):
+            if _context_name(business) in targets and business not in output_businesses:
+                output_businesses.append(str(business))
+        return output_businesses
+
     try:
         current_businesses = order_businesses_by_question_p0_v1(
             question,
@@ -490,19 +517,43 @@ def _current_question_scoped_analysis_v1(
         )
     except Exception:
         current_businesses = []
+
+    # ``말고/빼고/제외하고``는 문맥 정책이 이미 범위를 확정한 뒤에도
+    # 원문 키워드 재탐지에서 제외 업무가 살아날 수 있다. 이 경우에는
+    # context resolution의 replacement scope를 최종 권위값으로 사용한다.
+    if (
+        context_reason == "EXPLICIT_EXCLUSION_WITH_REPLACEMENT"
+        and active_context_businesses
+    ):
+        current_businesses = _router_businesses_for_context(
+            active_context_businesses
+        )
+    elif excluded_context_businesses:
+        current_businesses = [
+            business
+            for business in current_businesses
+            if _context_name(business) not in excluded_context_businesses
+        ]
     if not 1 <= len(current_businesses) <= NEED_BATCH_MAX_BUSINESSES_V5:
         return output
 
+    if context_reason == "EXPLICIT_EXCLUSION_WITH_REPLACEMENT":
+        scoped_question = _clean_text(output.get("resolved_question") or question)
+    else:
+        scoped_question = _clean_text(question)
+
     if len(current_businesses) == 1:
         subqueries: list[str] = []
-        plans = [{"query": question, "weight": 1.0, "source": "ORIGINAL"}]
+        plans = [{"query": scoped_question, "weight": 1.0, "source": "ORIGINAL"}]
     else:
-        subqueries = build_p0_cross_business_subqueries_v1(question, current_businesses)
+        subqueries = build_p0_cross_business_subqueries_v1(
+            scoped_question, current_businesses
+        )
         if len(subqueries) != len(current_businesses):
             return output
         sub_weight = V15_SUBQUERY_TOTAL_WEIGHT / len(subqueries)
         plans = [{
-            "query": question,
+            "query": scoped_question,
             "weight": V15_ORIGINAL_WEIGHT,
             "source": "ORIGINAL_ANCHOR",
         }]
@@ -513,8 +564,8 @@ def _current_question_scoped_analysis_v1(
         } for subquery in subqueries)
 
     output.update({
-        "resolved_question": question,
-        "normalized_question": question,
+        "resolved_question": scoped_question,
+        "normalized_question": scoped_question,
         "businesses": current_businesses,
         "question_businesses": current_businesses,
         "cross_business_candidate": len(current_businesses) >= 2,
@@ -526,8 +577,12 @@ def _current_question_scoped_analysis_v1(
         "subqueries": subqueries,
         "plans": plans,
         "query_plan_valid": True,
-        "context_used": False,
-        "context_override_reason": "EXPLICIT_CURRENT_BUSINESS_SCOPE",
+        "context_used": bool(output.get("context_used")),
+        "context_override_reason": (
+            "AUTHORITATIVE_EXCLUSION_REPLACEMENT_SCOPE"
+            if context_reason == "EXPLICIT_EXCLUSION_WITH_REPLACEMENT"
+            else "EXPLICIT_CURRENT_BUSINESS_SCOPE"
+        ),
     })
     return output
 
@@ -699,6 +754,28 @@ def prepare_common_retrieval_v1(
     search_results, per_query = fuse_query_results(plans)
     child_search_ms = (time.perf_counter() - search_started) * 1000
     reranker_trace = dict(_LAST_RERANK_TRACE)
+
+    if not search_results:
+        return {
+            "question": question,
+            "resolved_question": analysis.get("resolved_question") or question,
+            "route": "EVIDENCE_INSUFFICIENT",
+            "route_message": (
+                "질문의 업무와 일치하는 공식 근거를 확보하지 못했습니다. "
+                "업무명과 확인하려는 조건을 조금 더 구체적으로 적어 주세요."
+            ),
+            "analysis": analysis,
+            "plans": plans,
+            "search_results": [],
+            "per_query": per_query,
+            "reranker": reranker_trace,
+            "latency_ms": {
+                "문맥 처리": float(analysis.get("context_latency_ms") or 0),
+                "질의분석": analysis_ms,
+                "검색": child_search_ms,
+                "공통 준비 전체": (time.perf_counter() - total_started) * 1000,
+            },
+        }
 
     parent_started = time.perf_counter()
     search_results = expand_parent_context(search_results)
@@ -1042,12 +1119,48 @@ def fuse_query_results(
 
     decomposed_plans = [plan for plan in plans if _source_is_decomposed_v5(plan)]
     if len(decomposed_plans) < 2:
+        standard_results, per_query = _FUSE_QUERY_RESULTS_V4_1(
+            plans, top_k=top_k, rrf_k=rrf_k
+        )
+        standard_businesses: list[str] = []
+        for plan in plans:
+            try:
+                detected = list(
+                    light_router.find_businesses(str(plan.get("query") or "")) or []
+                )
+            except Exception:
+                detected = []
+            for business in detected:
+                clean_business = _clean_text(business)
+                if clean_business and clean_business not in standard_businesses:
+                    standard_businesses.append(clean_business)
+
+        before_scope_count = len(standard_results)
+        if len(standard_businesses) == 1:
+            expected_business = standard_businesses[0]
+            standard_results = [
+                row
+                for row in standard_results
+                if _clean_text((row.get("chunk") or {}).get("business_function"))
+                == expected_business
+            ]
         _LAST_NEED_BATCH_CONTEXT_V5 = {
             "strategy": "V4_1_STANDARD_RERANK",
             "needs": [],
             "max_evidence": int(top_k),
+            "business_scope": standard_businesses,
+            "before_business_scope_count": before_scope_count,
+            "after_business_scope_count": len(standard_results),
         }
-        return _FUSE_QUERY_RESULTS_V4_1(plans, top_k=top_k, rrf_k=rrf_k)
+        _LAST_RERANK_TRACE = {
+            **dict(_LAST_RERANK_TRACE or {}),
+            "strategy": "V4_1_STANDARD_RERANK",
+            "business_scope": standard_businesses,
+            "business_scope_filter_applied": len(standard_businesses) == 1,
+            "before_business_scope_count": before_scope_count,
+            "after_business_scope_count": len(standard_results),
+        }
+        return standard_results, per_query
 
     original_plan = next((plan for plan in plans if _source_is_original_v5(plan)), plans[0])
     original_question = _clean_text(original_plan.get("query"))
@@ -1371,6 +1484,7 @@ def build_compact_parent_evidence_pack_v1(
             "need_ids": [],
             "need_queries": [],
             "need_businesses": [],
+            "actual_businesses": [],
             "selection_types": [],
             "selection_reasons": [],
             "parent_fallback": parent_fallback,
@@ -1381,6 +1495,9 @@ def build_compact_parent_evidence_pack_v1(
         row["need_ids"].extend(str(value) for value in result.get("need_ids") or [])
         row["need_queries"].extend(str(value) for value in result.get("need_queries") or [])
         row["need_businesses"].extend(str(value) for value in result.get("need_businesses") or [])
+        actual_business = _clean_text(child.get("business_function"))
+        if actual_business:
+            row["actual_businesses"].append(actual_business)
         row["selection_types"].append(str(result.get("selection_type") or "STANDARD"))
         row["selection_reasons"].append(str(result.get("selection_reason") or "STANDARD"))
         if str(result.get("selection_type") or "") == "NEED_REQUIRED":
@@ -1423,6 +1540,7 @@ def build_compact_parent_evidence_pack_v1(
         if not content:
             continue
         evidence_id = f"E{len(evidence) + 1}"
+        actual_businesses = list(dict.fromkeys(row["actual_businesses"]))
         evidence.append({
             "evidence_id": evidence_id,
             "rank": int(row["rank"]),
@@ -1440,6 +1558,10 @@ def build_compact_parent_evidence_pack_v1(
             "need_ids": list(dict.fromkeys(row["need_ids"])),
             "need_queries": list(dict.fromkeys(row["need_queries"])),
             "need_businesses": list(dict.fromkeys(row["need_businesses"])),
+            "actual_business": (
+                actual_businesses[0] if len(actual_businesses) == 1 else ""
+            ),
+            "actual_businesses": actual_businesses,
             "selection_types": list(dict.fromkeys(row["selection_types"])),
             "selection_reasons": list(dict.fromkeys(row["selection_reasons"])),
             "parent_fallback": bool(row["parent_fallback"]),
@@ -2397,15 +2519,51 @@ def _dc_answer_cache_key_v1(
     })
 
 
-def _official_sources_dc_v1(common: Mapping[str, Any]) -> list[dict[str, str]]:
+def _official_sources_dc_v1(
+    common: Mapping[str, Any],
+    payload: Mapping[str, Any] | None = None,
+) -> list[dict[str, str]]:
+    answer_payload = dict(payload or {})
+    reference_audit = dict(answer_payload.get("reference_audit") or {})
+    used_evidence_ids = set(
+        answer_b_core._clean_list(
+            answer_payload.get("used_evidence_ids")
+            or reference_audit.get("valid_evidence_ids")
+            or reference_audit.get("used_evidence_ids")
+        )
+    )
+    used_fact_claim_ids = set(
+        answer_b_core._clean_list(
+            answer_payload.get("used_fact_claim_ids")
+            or reference_audit.get("valid_fact_claim_ids")
+            or reference_audit.get("used_fact_claim_ids")
+        )
+    )
+    restrict_evidence = payload is not None and (
+        "used_evidence_ids" in answer_payload or bool(reference_audit)
+    )
+    restrict_facts = payload is not None and (
+        "used_fact_claim_ids" in answer_payload or bool(reference_audit)
+    )
     sources = []
     seen = set()
     for row in (common.get("evidence_pack") or {}).get("sources") or []:
+        if restrict_evidence and not (
+            set(answer_b_core._clean_list(row.get("evidence_ids")))
+            & used_evidence_ids
+        ):
+            continue
         url = str(row.get("source_url") or "")
         if url and url not in seen:
             seen.add(url)
             sources.append({"title": str(row.get("title") or "공식 출처"), "url": url})
     for record in common.get("dc_matched_fact_records") or []:
+        fact_index_id = _clean_text(record.get("fact_index_id"))
+        if restrict_facts and not any(
+            value == fact_index_id or value.startswith(f"{fact_index_id}:")
+            for value in used_fact_claim_ids
+        ):
+            continue
         title = str(record.get("document_title") or record.get("fact_index_id") or "Fact Index 공식 근거")
         for url in record.get("source_urls") or []:
             url = str(url)
@@ -2489,7 +2647,7 @@ def execute_dc_variant_v1(
         "common_cache_hit": common_cache_hit,
         "answer_cache_hit": answer_cache_hit,
         "committed_variant": holder.get("committed_variant"),
-        "official_sources": _official_sources_dc_v1(common),
+        "official_sources": _official_sources_dc_v1(common, payload),
         "action_links": action_links_for_streamlit_v1(common.get("action_links") or []),
         "latency": {
             "stored_common_pipeline_ms": float((common.get("latency_ms") or {}).get("공통 준비 전체") or 0),
@@ -4059,7 +4217,7 @@ def _execute_c_threeway_v1(
         "common_cache_hit": common_cache_hit,
         "answer_cache_hit": answer_cache_hit,
         "committed_variant": holder.get("committed_variant"),
-        "official_sources": _official_sources_dc_v1(common),
+        "official_sources": _official_sources_dc_v1(common, payload),
         "action_links": action_links_for_streamlit_v1(common.get("action_links") or []),
         "cross_business_gate": cross_audit,
         "shared_augmented_pack_sha256": common.get("dc_augmented_pack_sha256"),

@@ -39,7 +39,7 @@ class FakePipeline:
         }
         self.calls = 0
         self.prompt_revision = prompt_revision
-        self.cached_turns: list[tuple[str, str]] = []
+        self.cached_turns: list[tuple[str, str, list[str]]] = []
 
     @property
     def answer_cache_revision(self) -> str:
@@ -80,14 +80,21 @@ class FakePipeline:
         question: str,
         answer: str,
         state: dict[str, Any],
+        business_scope: list[str] | None = None,
     ) -> None:
-        self.cached_turns.append((question, answer))
+        scope = list(business_scope or [])
+        self.cached_turns.append((question, answer, scope))
         state.setdefault("turns", []).extend(
             [
                 {"role": "user", "content": question},
                 {"role": "assistant", "content": answer},
             ]
         )
+        if business_scope is not None:
+            state["active_businesses"] = scope
+            state["excluded_businesses"] = []
+            state["pending_clarification"] = None
+            state["last_resolved_question"] = question
 
 
 def _wait_job(service, job_id: str, timeout: float = 3.0):
@@ -112,6 +119,7 @@ def test_static_contracts() -> dict[str, str]:
     assert "suggestion_cache=SUGGESTION_ANSWER_CACHE" in api
     assert '"suggestion_cache_runtime_namespace": PIPELINE_RUNTIME.cache_namespace' in api
     assert 'health.get("suggestion_cache_runtime_namespace")' in prewarm
+    assert 'suggestion["business"],' in prewarm
     assert 'data-suggestion-id="${esc(x.suggestion_id||\'\')}"' in ui
     assert "suggestion_id:String(suggestionId||'')" in ui
     assert "⚡ 저장된 빠른 답변" not in ui
@@ -171,6 +179,7 @@ def test_static_contracts() -> dict[str, str]:
     assert "class PostgresSuggestionAnswerCache" in postgres
     assert "CREATE TABLE IF NOT EXISTS suggestion_answer_cache" in migration
     assert "compatible_overlay_revisions" in prewarm
+    assert "normalized_public = core.normalize_public_result(raw)" in prewarm
     return {
         "python_syntax": "passed",
         "api_ui_wiring": "passed",
@@ -475,6 +484,11 @@ def test_memory_cache_flow(core) -> dict[str, str]:
         max_workers=1,
     )
     first, second = core.suggestion_catalog()[:2]
+    foreign = next(
+        row
+        for row in core.suggestion_catalog()
+        if row["business"] != first["business"]
+    )
 
     live_job = _wait_job(
         service,
@@ -497,14 +511,18 @@ def test_memory_cache_flow(core) -> dict[str, str]:
 
     cached_bundle = cache.peek(service._cache_key(first["suggestion_id"]))
     assert cached_bundle is not None
-    cached_bundle.public_result["answer"] = repr(
+    authoritative_cached_answer = repr(
         [
             f"**{first['business']} 첫 번째 안내**\n\n착오송금 반환 신청 대상은 금융안심포털([]{{.underline}})에서 확인합니다.",
             "**두 번째 안내**\n\n두 번째 내용",
         ]
     )
+    cached_bundle.raw_result["answer"] = authoritative_cached_answer
+    cached_bundle.public_result["answer"] = "채무조정에 관한 오염된 별도 저장 본문"
     cache.put(cached_bundle)
 
+    hit_session = sessions.get("hit-session")
+    hit_session.state["active_businesses"] = ["은닉재산 신고"]
     hit_id = service.submit("hit-session", first["query"], first["suggestion_id"])
     hit_job = jobs.get(hit_id)
     assert hit_job is not None and hit_job.status == "done"
@@ -520,7 +538,12 @@ def test_memory_cache_flow(core) -> dict[str, str]:
     assert ".underline" not in hit_job.result["answer"]
     assert pipeline.cached_turns[-1][0] == first["query"]
     assert pipeline.cached_turns[-1][1] == hit_job.result["answer"]
+    assert pipeline.cached_turns[-1][2] == [first["business"]]
     assert len(sessions.get("hit-session").state["turns"]) == 2
+    assert sessions.get("hit-session").state["active_businesses"] == [
+        first["business"]
+    ]
+    assert sessions.get("hit-session").state["excluded_businesses"] == []
     assert service.basis(hit_id)["summary"] == "공식 근거 요약"
     cached_summary = service.summary(hit_id)
     assert cached_summary["schema_version"] == "kdic-answer-summary-v1"
@@ -545,13 +568,48 @@ def test_memory_cache_flow(core) -> dict[str, str]:
     else:
         raise AssertionError("unfinished summary job must raise RuntimeError")
 
+    stale_foreign_bundle = cache.peek(service._cache_key(first["suggestion_id"]))
+    assert stale_foreign_bundle is not None
+    stale_foreign_bundle.cache_key = service._cache_key(foreign["suggestion_id"])
+    stale_foreign_bundle.suggestion_id = foreign["suggestion_id"]
+    stale_foreign_bundle.business = foreign["business"]
+    stale_foreign_bundle.keyword = foreign["label"]
+    stale_foreign_bundle.question = foreign["query"]
+    stale_foreign_bundle.basis_result = {
+        "schema_version": core.BASIS_EXPLANATION_SCHEMA_VERSION,
+        "summary": "거부되어야 하는 오래된 캐시 근거",
+    }
+    cache.put(stale_foreign_bundle)
+
+    mismatch_job = _wait_job(
+        service,
+        service.submit(
+            "mismatch-session",
+            foreign["query"],
+            foreign["suggestion_id"],
+        ),
+    )
+    assert mismatch_job.status == "done"
+    assert mismatch_job.result["suggestion_cache"] == {
+        "eligible": False,
+        "hit": False,
+        "stored": False,
+        "suggestion_id": foreign["suggestion_id"],
+        "source": "LIVE_PIPELINE",
+        "reason": "SUGGESTION_BUSINESS_MISMATCH",
+        "skipped_stages": [],
+    }
+    assert cache.peek(service._cache_key(foreign["suggestion_id"])) is not None
+    assert service.basis(mismatch_job.job_id)["summary"] == "공식 근거 요약"
+    assert pipeline.calls == 2
+
     forged_job = _wait_job(
         service,
         service.submit("forged-session", second["query"], first["suggestion_id"]),
     )
     assert forged_job.status == "done"
     assert "suggestion_cache" not in forged_job.result
-    assert pipeline.calls == 2
+    assert pipeline.calls == 3
 
     before_prompt_change = service._cache_key(first["suggestion_id"])
     pipeline.prompt_revision = "prompt-v2"
@@ -562,7 +620,7 @@ def test_memory_cache_flow(core) -> dict[str, str]:
     )
     assert prompt_changed_job.status == "done"
     assert prompt_changed_job.result["suggestion_cache"]["hit"] is False
-    assert pipeline.calls == 3
+    assert pipeline.calls == 4
 
     other_pipeline = FakePipeline(revision="revision-b")
     other_service = core.KDICJobService(
@@ -573,6 +631,15 @@ def test_memory_cache_flow(core) -> dict[str, str]:
     assert service._cache_key(first["suggestion_id"]) != other_service._cache_key(
         first["suggestion_id"]
     )
+    fallback_runtime = core.PipelineRuntime(lambda question, state: {})
+    fallback_state: dict[str, Any] = {}
+    fallback_runtime.record_cached_turn(
+        "채무조정에 필요한 서류를 알려주세요.",
+        "채무조정 공식 답변",
+        fallback_state,
+        business_scope=["채무조정 안내"],
+    )
+    assert fallback_state["active_businesses"] == ["채무조정"], fallback_state
     service.shutdown()
     other_service.shutdown()
     return {
@@ -584,9 +651,14 @@ def test_memory_cache_flow(core) -> dict[str, str]:
         "summary_job_state_guards": "passed",
         "cached_sources_and_action_links": "passed",
         "cached_legacy_list_answer_normalized": "passed",
+        "cached_raw_answer_authoritative": "passed",
+        "rejected_cache_basis_not_reused": "passed",
+        "cache_hit_business_scope": "canonical_business_applied",
+        "mismatched_business_bundle": "not_stored",
         "forged_id_query_pair": "live_fallback",
         "runtime_revision_invalidation": "passed",
         "prompt_revision_invalidation": "passed",
+        "fallback_cached_scope_canonicalization": "passed",
     }
 
 
@@ -596,14 +668,28 @@ def test_adapter_cached_turn() -> dict[str, str]:
         {"execute_production_variant_v1": lambda question, holder: {}}
     )
     state: dict[str, Any] = {}
-    adapter.record_cached_turn("질문", "답변", state)
+    adapter.record_cached_turn(
+        "채무조정 필요 서류를 알려주세요.",
+        "답변",
+        state,
+        business_scope=["채무조정 안내"],
+    )
     holder = state["_kdic_controller"]
     assert holder["conversation"]["turns"] == [
-        {"role": "user", "content": "질문"},
+        {"role": "user", "content": "채무조정 필요 서류를 알려주세요."},
         {"role": "assistant", "content": "답변"},
     ]
+    assert holder["conversation"]["active_businesses"] == ["채무조정"]
+    assert holder["conversation"]["excluded_businesses"] == []
+    assert holder["conversation"]["pending_clarification"] is None
+    assert holder["conversation"]["last_resolved_question"] == (
+        "채무조정 필요 서류를 알려주세요."
+    )
     assert holder["committed_variant"] == "SUGGESTION_ANSWER_CACHE"
-    return {"adapter_context_commit": "passed"}
+    return {
+        "adapter_context_commit": "passed",
+        "adapter_cached_business_scope": "채무조정",
+    }
 
 
 def main() -> None:

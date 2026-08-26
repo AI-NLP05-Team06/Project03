@@ -1,10 +1,30 @@
 from __future__ import annotations
 
-from typing import Any, Callable, Mapping, MutableMapping
+import copy
+
+from typing import Any, Callable, Mapping, MutableMapping, Sequence
 
 
 def _clean(value: Any) -> str:
     return " ".join(str(value or "").split()).strip()
+
+
+_CONTEXT_BUSINESS_NAMES = {
+    "예금자보호": "예금자보호",
+    "예금보험금": "예금보험금",
+    "미수령금": "고객 미수령금",
+    "착오송금": "착오송금 반환지원",
+    "채무조정": "채무조정",
+    "은닉재산": "은닉재산 신고",
+}
+
+
+def _context_business_name(value: Any) -> str:
+    text = _clean(value)
+    for key, canonical in _CONTEXT_BUSINESS_NAMES.items():
+        if key in text:
+            return canonical
+    return text
 
 
 class LatestKDICNotebookAdapter:
@@ -31,13 +51,11 @@ class LatestKDICNotebookAdapter:
         "dc1_enabled": False,
         "build_sha256": "F9A908D62A43EA3A3566A5D8DF0E982F214373FFF96470A749DC1EFE79E25083",
         "overlay_file": "2026-08-25-kdic-production-overlay.py",
-        "overlay_revision": "2026-08-26-v15-direct-presearch-guard-v13",
+        "overlay_revision": "2026-08-26-v15-multiturn-scope-coherence-v14",
         "cache_compatible_overlay_revisions": [
-            "2026-08-26-explicit-allowed-citation-ids-v11",
-            "2026-08-26-declared-citation-canonicalization-v12",
-            "2026-08-26-v15-direct-presearch-guard-v13",
+            "2026-08-26-v15-multiturn-scope-coherence-v14",
         ],
-        "adapter_version": "2026-08-26-ec2-production-v14",
+        "adapter_version": "2026-08-26-ec2-production-v15",
         "suggestion_cache_schema": "kdic-suggestion-answer-bundle-v5.1",
     }
 
@@ -103,16 +121,102 @@ class LatestKDICNotebookAdapter:
             "events": [],
         }
 
+    @staticmethod
+    def _safe_conversation_snapshot(holder: Mapping[str, Any]) -> dict[str, Any]:
+        """Copy only revision-independent dialogue state from an old holder."""
+
+        nested = holder.get("conversation")
+        conversation = nested if isinstance(nested, Mapping) else holder
+        snapshot: dict[str, Any] = {}
+
+        turns = conversation.get("turns")
+        if isinstance(turns, list):
+            snapshot["turns"] = copy.deepcopy(turns)
+
+        for key in ("active_businesses", "excluded_businesses"):
+            raw_values = conversation.get(key)
+            if isinstance(raw_values, str):
+                raw_values = [raw_values]
+            if isinstance(raw_values, Sequence):
+                values = list(dict.fromkeys(
+                    _context_business_name(value)
+                    for value in raw_values
+                    if _context_business_name(value)
+                ))
+                snapshot[key] = values
+
+        active = set(snapshot.get("active_businesses") or [])
+        if active and "excluded_businesses" in snapshot:
+            # The current explicit scope wins over historical exclusion state.
+            # Otherwise a user who deliberately reactivated a business would
+            # lose that scope on the next deployment revision.
+            snapshot["excluded_businesses"] = [
+                value
+                for value in snapshot["excluded_businesses"]
+                if value not in active
+            ]
+
+        if "last_resolved_question" in conversation:
+            snapshot["last_resolved_question"] = _clean(
+                conversation.get("last_resolved_question")
+            )
+        if "actor_role" in conversation:
+            snapshot["actor_role"] = _clean(conversation.get("actor_role")) or None
+        if "pending_clarification" in conversation:
+            pending = conversation.get("pending_clarification")
+            snapshot["pending_clarification"] = (
+                copy.deepcopy(dict(pending)) if isinstance(pending, Mapping) else None
+            )
+        return snapshot
+
+    @staticmethod
+    def _merge_conversation_snapshot(
+        holder: MutableMapping[str, Any],
+        snapshot: Mapping[str, Any],
+    ) -> None:
+        conversation = holder.get("conversation")
+        if not isinstance(conversation, dict):
+            conversation = {}
+            holder["conversation"] = conversation
+        for key, value in snapshot.items():
+            conversation[key] = copy.deepcopy(value)
+
     def _holder(self, state: MutableMapping[str, Any]) -> dict[str, Any]:
         holder = state.get("_kdic_controller")
         runtime_revision = str(self.build_info["overlay_revision"])
+        answer_cache_revision = self.answer_cache_revision
         if (
             not isinstance(holder, dict)
             or holder.get("_runtime_revision") != runtime_revision
         ):
-            holder = self._new_holder()
-            holder["_runtime_revision"] = runtime_revision
-            state["_kdic_controller"] = holder
+            snapshot = (
+                self._safe_conversation_snapshot(holder)
+                if isinstance(holder, Mapping)
+                else {}
+            )
+            refreshed = self._new_holder()
+            self._merge_conversation_snapshot(refreshed, snapshot)
+            # Search/answer artefacts are code-revision dependent. They must not
+            # survive a deployment even though the user's dialogue state does.
+            refreshed["current_question"] = ""
+            refreshed["common"] = None
+            refreshed["common_request_key"] = ""
+            refreshed["common_created_at"] = 0.0
+            refreshed["answer_cache"] = {}
+            refreshed["running"] = False
+            refreshed["committed"] = False
+            refreshed["committed_variant"] = None
+            refreshed["_runtime_revision"] = runtime_revision
+            refreshed["_answer_cache_revision"] = answer_cache_revision
+            state["_kdic_controller"] = refreshed
+            holder = refreshed
+        elif holder.get("_answer_cache_revision") != answer_cache_revision:
+            # Retrieval artefacts remain valid, but generated answers depend on
+            # the administrator-selected active prompt revision.
+            holder["answer_cache"] = {}
+            holder["committed"] = False
+            holder["committed_variant"] = None
+            holder["_answer_cache_revision"] = answer_cache_revision
         return holder
 
     def _apply_output_guardrails(self, result: Mapping[str, Any]) -> dict[str, Any]:
@@ -176,6 +280,7 @@ class LatestKDICNotebookAdapter:
         question: str,
         answer: str,
         state: MutableMapping[str, Any],
+        business_scope: Sequence[str] | None = None,
     ) -> None:
         """Commit a cached standalone answer to the notebook conversation state."""
 
@@ -194,6 +299,17 @@ class LatestKDICNotebookAdapter:
                 {"role": "assistant", "content": str(answer or "").strip()},
             ]
         )
+        if business_scope is not None:
+            canonical_scope = list(dict.fromkeys(
+                _context_business_name(value)
+                for value in business_scope
+                if _context_business_name(value)
+            ))
+            conversation["active_businesses"] = canonical_scope
+            conversation["excluded_businesses"] = []
+            conversation["actor_role"] = None
+            conversation["pending_clarification"] = None
+            conversation["last_resolved_question"] = _clean(question)
         holder["current_question"] = _clean(question)
         holder["common"] = None
         holder["answer_cache"] = {}

@@ -16,14 +16,16 @@ import tempfile
 import types
 from collections import OrderedDict, defaultdict
 from pathlib import Path
-from typing import Any, Mapping, Sequence
+from typing import Any, Callable, Mapping, Sequence
 
 
 BASE_DIR = Path(__file__).resolve().parent
 ENGINE_FILE = BASE_DIR / "kdic_pipeline_engine.py"
 ROUTER_FILE = BASE_DIR / "kdic_lightweight_router_v1.py"
+CONTEXT_POLICY_FILE = BASE_DIR / "kdic_context_policy_v2.py"
 OVERLAY_FILE = BASE_DIR / "2026-08-25-kdic-production-overlay.py"
 ADAPTER_FILE = BASE_DIR / "2026-08-23-kdic-colab-runtime-adapter.py"
+SERVICE_CORE_FILE = BASE_DIR / "2026-08-23-kdic-service-core.py"
 FASTAPI_FILE = BASE_DIR / "2026-08-23-kdic-fastapi-service.py"
 CHAT_UI_FILE = BASE_DIR / "2026-08-23-kdic-chat-ui.html"
 ANSWER_CORE_FILE = BASE_DIR / "kdic_v15_answer_b_core.py"
@@ -45,6 +47,28 @@ def _function_source(source: str, name: str) -> str:
     return value
 
 
+def _statement_source(source: str, name: str) -> str:
+    """Return the last module-level assignment for a production constant."""
+
+    tree = ast.parse(source)
+    matches: list[ast.stmt] = []
+    for node in tree.body:
+        if isinstance(node, ast.Assign):
+            targets = [target.id for target in node.targets if isinstance(target, ast.Name)]
+        elif isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
+            targets = [node.target.id]
+        else:
+            targets = []
+        if name in targets:
+            matches.append(node)
+    if not matches:
+        raise AssertionError(f"missing assignment: {name}")
+    value = ast.get_source_segment(source, matches[-1])
+    if not value:
+        raise AssertionError(f"cannot extract assignment: {name}")
+    return value
+
+
 def _load_module(name: str, path: Path):
     spec = importlib.util.spec_from_file_location(name, path)
     if spec is None or spec.loader is None:
@@ -53,6 +77,53 @@ def _load_module(name: str, path: Path):
     sys.modules[name] = module
     spec.loader.exec_module(module)
     return module
+
+
+def _production_context_resolver():
+    """Load the production V2 + V2.1 + V2.2 context chain without model imports."""
+
+    engine = ENGINE_FILE.read_text(encoding="utf-8")
+    base = _load_module("kdic_context_policy_scope_regression", CONTEXT_POLICY_FILE)
+    router = _load_module("kdic_context_router_scope_regression", ROUTER_FILE)
+    namespace: dict[str, Any] = {
+        "Any": Any,
+        "Callable": Callable,
+        "Mapping": Mapping,
+        "Sequence": Sequence,
+        "copy": copy,
+        "re": re,
+        "time": time,
+        "light_router": router,
+    }
+    for name in (
+        "AMBIGUOUS_REFERENCE_PATTERN",
+        "BUSINESS_PATTERNS",
+        "CANCEL_PATTERN",
+        "CORRECTION_PATTERN",
+        "EXCLUSION_PATTERN",
+        "_clean",
+        "_clarify",
+        "_selected_pending",
+        "detect_businesses",
+        "new_context_state",
+    ):
+        namespace[name] = getattr(base, name)
+    for name in ("FOLLOWUP_INTENT_RULES_V21", "EXPLICIT_OOS_CONTEXT_BLOCK_V21"):
+        exec(_statement_source(engine, name), namespace)
+    for name in (
+        "detect_followup_intents_v21",
+        "_explicit_oos_before_context_v21",
+        "_context_resolution_payload_v21",
+    ):
+        exec(_function_source(engine, name), namespace)
+    namespace["_ORIGINAL_RESOLVE_CONTEXT_V2"] = base.resolve_context_v2
+    exec(_function_source(engine, "resolve_context_v21"), namespace)
+
+    exec(_statement_source(engine, "RELATIONAL_CROSS_BUSINESS_PATTERN_V22"), namespace)
+    exec(_function_source(engine, "_is_relational_cross_business_followup_v22"), namespace)
+    namespace["_RESOLVE_CONTEXT_V21_BEFORE_RELATIONAL"] = namespace["resolve_context_v21"]
+    exec(_function_source(engine, "resolve_context_v22"), namespace)
+    return namespace["resolve_context_v22"], base, router
 
 
 def test_static_contracts() -> dict[str, Any]:
@@ -78,7 +149,7 @@ def test_static_contracts() -> dict[str, Any]:
     assert "2026-08-25-kdic-production-overlay.py" in engine
     assert "execute_production_variant_v1" in overlay
     assert "C_DEFAULT_DC2_COMPARE_ONLY_V1" in overlay
-    assert "2026-08-26-v15-direct-presearch-guard-v13" in overlay
+    assert "2026-08-26-v15-multiturn-scope-coherence-v14" in overlay
     assert "classify_non_retrieval_utterance" in router
     assert "_non_retrieval_search_guard_v1" in overlay
     assert "반드시 유효한 단일 JSON 객체 하나만 출력" in overlay
@@ -95,11 +166,11 @@ def test_static_contracts() -> dict[str, Any]:
     assert '"runtime_build": dict(RUNTIME_BUILD_INFO)' in api
     assert EXPECTED_SOURCE_SHA256 in overlay
     assert EXPECTED_SOURCE_SHA256 in adapter
-    assert "2026-08-26-v15-direct-presearch-guard-v13" in adapter
-    assert '"adapter_version": "2026-08-26-ec2-production-v14"' in adapter
+    assert "2026-08-26-v15-multiturn-scope-coherence-v14" in adapter
+    assert '"adapter_version": "2026-08-26-ec2-production-v15"' in adapter
     assert "cache_compatible_overlay_revisions" in adapter
-    assert "2026-08-26-explicit-allowed-citation-ids-v11" in adapter
-    assert "2026-08-26-declared-citation-canonicalization-v12" in adapter
+    assert "2026-08-26-explicit-allowed-citation-ids-v11" not in adapter
+    assert "2026-08-26-declared-citation-canonicalization-v12" not in adapter
     assert "for repair_index in range(3):" in answer_core
     assert "[검증 실패 이유]" in answer_core
     assert 'system_prompt=_managed_prompt("C_CROSS_DIRECT_SYSTEM_PROMPT_V1", C_CROSS_DIRECT_SYSTEM_PROMPT_V1)' in overlay
@@ -845,6 +916,7 @@ def test_v15_preflight_skips_context_classifier() -> dict[str, Any]:
     namespace: dict[str, Any] = {
         "Any": Any,
         "Mapping": Mapping,
+        "copy": copy,
         "time": time,
         "light_router": router,
         "resolve_context_v2": resolve_stub,
@@ -853,6 +925,15 @@ def test_v15_preflight_skips_context_classifier() -> dict[str, Any]:
         "_context_businesses": lambda values: list(values),
         "_comparison_plans_valid": lambda route, plans: route != "RETRIEVE" or bool(plans),
     }
+    for name in ("BUSINESS_TO_CONTEXT", "CONTEXT_TO_ANALYSIS_BUSINESS"):
+        exec(_statement_source(engine, name), namespace)
+    for name in (
+        "_context_businesses",
+        "_authoritative_v15_context_scope",
+        "_analysis_businesses_from_context",
+        "_scope_v15_plans_to_context",
+    ):
+        exec(_function_source(engine, name), namespace)
     exec(_function_source(engine, "_route_only_analysis"), namespace)
     exec(_function_source(engine, "_v15_non_retrieval_resolution"), namespace)
     exec(_function_source(engine, "analyze_v15_improved"), namespace)
@@ -943,6 +1024,9 @@ def test_current_question_business_mapping() -> dict[str, Any]:
         "V15_SUBQUERY_TOTAL_WEIGHT": 0.60,
         "HOW_COMPARE_PATTERN_V1": re.compile(r"어떻게\s*(?:다르|다른|달라|구분|비교)|어떤\s*차이", re.I),
     }
+    engine = ENGINE_FILE.read_text(encoding="utf-8")
+    exec(_statement_source(engine, "BUSINESS_TO_CONTEXT"), namespace)
+    exec(_function_source(engine, "_context_businesses"), namespace)
     exec(_function_source(overlay, "_need_business_v5"), namespace)
     exec(_function_source(overlay, "_cross_business_scope_count_v5"), namespace)
     exec(_function_source(overlay, "order_businesses_by_question_p0_v1"), namespace)
@@ -1045,6 +1129,399 @@ def test_current_question_business_mapping() -> dict[str, Any]:
     }
 
 
+def test_context_scope_and_source_regressions() -> dict[str, Any]:
+    """Keep multi-turn business scope authoritative through search and display."""
+
+    engine = ENGINE_FILE.read_text(encoding="utf-8")
+    overlay = OVERLAY_FILE.read_text(encoding="utf-8")
+    resolve_context, context_module, router = _production_context_resolver()
+
+    analysis_namespace: dict[str, Any] = {
+        "Any": Any,
+        "Mapping": Mapping,
+        "Sequence": Sequence,
+        "copy": copy,
+        "time": time,
+        "light_router": router,
+        "resolve_context_v2": resolve_context,
+        "classify_ambiguous_context": lambda question, state: {},
+        "_comparison_plans_valid": (
+            lambda route, plans: route != "RETRIEVE" or bool(plans)
+        ),
+    }
+    for name in ("BUSINESS_TO_CONTEXT", "CONTEXT_TO_ANALYSIS_BUSINESS"):
+        exec(_statement_source(engine, name), analysis_namespace)
+    for name in (
+        "_context_businesses",
+        "_authoritative_v15_context_scope",
+        "_analysis_businesses_from_context",
+        "_scope_v15_plans_to_context",
+    ):
+        exec(_function_source(engine, name), analysis_namespace)
+
+    def core_stub(question: str, previous_turns=None) -> dict[str, Any]:
+        businesses = list(router.find_businesses(question) or [])
+        return {
+            "route": "RETRIEVE",
+            "businesses": businesses,
+            "complexity": "SINGLE",
+            "cross_business_candidate": len(businesses) >= 2,
+            "plans": [
+                {"query": question, "weight": 1.0, "source": "ORIGINAL"}
+            ],
+            "route_response": "",
+        }
+
+    analysis_namespace["analyze_v15_chat_query"] = core_stub
+    exec(_function_source(engine, "analyze_v15_improved"), analysis_namespace)
+    analyze = analysis_namespace["analyze_v15_improved"]
+
+    hidden_state = context_module.new_context_state()
+    hidden_state["active_businesses"] = ["은닉재산 신고"]
+    hidden_followup = analyze(
+        "어디에서 신고할 수 있나요? 익명으로도 가능한가요?",
+        hidden_state,
+    )
+    assert hidden_followup["route"] == "RETRIEVE", hidden_followup
+    assert hidden_followup["context_used"] is True, hidden_followup
+    assert "은닉재산 신고" in hidden_followup["resolved_question"], hidden_followup
+    assert hidden_followup["businesses"] == ["은닉재산 신고"], hidden_followup
+
+    replacement_state = context_module.new_context_state()
+    replacement_state["active_businesses"] = ["착오송금 반환지원"]
+    replacement = analyze("착오송금 말고 채무조정", replacement_state)
+    assert replacement["route"] == "RETRIEVE", replacement
+    assert replacement["context_reason"] == "EXPLICIT_EXCLUSION_WITH_REPLACEMENT", replacement
+    assert replacement["businesses"] == ["채무조정 안내"], replacement
+    assert replacement["context_scope_businesses"] == ["채무조정"], replacement
+    assert replacement_state["active_businesses"] == ["채무조정"], replacement_state
+    assert "착오송금" not in replacement["resolved_question"], replacement
+    assert all(
+        "착오송금" not in str(plan.get("query") or "")
+        for plan in replacement["plans"]
+    ), replacement["plans"]
+
+    replacement_with_target_exclusion = analyze(
+        "착오송금 말고 채무조정에서 제외 대상과 필요 서류를 알려주세요.",
+        context_module.new_context_state(),
+    )
+    assert replacement_with_target_exclusion["route"] == "RETRIEVE", (
+        replacement_with_target_exclusion
+    )
+    assert replacement_with_target_exclusion["businesses"] == ["채무조정 안내"], (
+        replacement_with_target_exclusion
+    )
+    assert "착오송금" not in replacement_with_target_exclusion["resolved_question"], (
+        replacement_with_target_exclusion
+    )
+    assert "제외 대상" in replacement_with_target_exclusion["resolved_question"], (
+        replacement_with_target_exclusion
+    )
+
+    protected_product_exclusion = analyze(
+        "예금자보호 제외한 상품을 알려주세요.",
+        context_module.new_context_state(),
+    )
+    assert protected_product_exclusion["route"] == "RETRIEVE", (
+        protected_product_exclusion
+    )
+    assert protected_product_exclusion["businesses"] == ["예금자보호제도"], (
+        protected_product_exclusion
+    )
+    assert protected_product_exclusion["context_reason"] == "CURRENT_QUESTION_COMPLETE", (
+        protected_product_exclusion
+    )
+
+    modifier_replacement = analyze(
+        "착오송금을 제외한 채무조정에 대해 알려주세요.",
+        context_module.new_context_state(),
+    )
+    assert modifier_replacement["businesses"] == ["채무조정 안내"], (
+        modifier_replacement
+    )
+    assert "착오송금" not in modifier_replacement["resolved_question"], (
+        modifier_replacement
+    )
+
+    scope_namespace: dict[str, Any] = {
+        "Any": Any,
+        "Mapping": Mapping,
+        "Sequence": Sequence,
+        "light_router": router,
+        "re": re,
+        "_clean_text": lambda value: " ".join(str(value or "").split()).strip(),
+        "NEED_BATCH_MAX_BUSINESSES_V5": 3,
+        "V15_ORIGINAL_WEIGHT": 0.40,
+        "V15_SUBQUERY_TOTAL_WEIGHT": 0.60,
+        "HOW_COMPARE_PATTERN_V1": re.compile(
+            r"어떻게\s*(?:다르|다른|달라|구분|비교)|어떤\s*차이", re.I
+        ),
+    }
+    for name in ("BUSINESS_TO_CONTEXT",):
+        exec(_statement_source(engine, name), scope_namespace)
+    exec(_function_source(engine, "_context_businesses"), scope_namespace)
+    for name in (
+        "order_businesses_by_question_p0_v1",
+        "_business_local_segments_p0_v1",
+        "_business_need_topic_p0_v1",
+        "build_p0_cross_business_subqueries_v1",
+        "_current_question_scoped_analysis_v1",
+    ):
+        exec(_function_source(overlay, name), scope_namespace)
+    scoped_replacement = scope_namespace["_current_question_scoped_analysis_v1"](
+        "착오송금 말고 채무조정",
+        replacement,
+    )
+    assert scoped_replacement["businesses"] == ["채무조정 안내"], scoped_replacement
+    assert len(scoped_replacement["plans"]) == 1, scoped_replacement["plans"]
+    assert router.find_businesses(scoped_replacement["plans"][0]["query"]) == [
+        "채무조정 안내"
+    ], scoped_replacement["plans"]
+
+    followup = analyze("필요한 서류", replacement_state)
+    assert followup["route"] == "RETRIEVE", followup
+    assert followup["context_used"] is True, followup
+    assert followup["businesses"] == ["채무조정 안내"], followup
+    assert "채무조정" in followup["resolved_question"], followup
+    assert all(
+        router.find_businesses(str(plan.get("query") or "")) == ["채무조정 안내"]
+        for plan in followup["plans"]
+    ), followup["plans"]
+
+    evidence_namespace = _evidence_namespace(overlay)
+
+    def make_standard_pack(
+        query: str,
+        expected_business: str,
+        wrong_business: str,
+        suffix: str,
+    ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+        chunks = {
+            f"wrong-{suffix}": {
+                "chunk_id": f"wrong-{suffix}",
+                "parent_doc_id": f"parent-wrong-{suffix}",
+                "title": f"{wrong_business} 공식 안내",
+                "section_title": "관련 절차",
+                "content": f"{wrong_business}에 관한 고점수지만 범위 밖인 내용",
+                "source_url": f"https://www.kdic.or.kr/wrong-{suffix}",
+                "business_function": wrong_business,
+            },
+            f"right-{suffix}": {
+                "chunk_id": f"right-{suffix}",
+                "parent_doc_id": f"parent-right-{suffix}",
+                "title": f"{expected_business} 공식 안내",
+                "section_title": "신청 안내",
+                "content": f"{expected_business}에 관한 업무 일치 공식 내용",
+                "source_url": f"https://www.kdic.or.kr/right-{suffix}",
+                "business_function": expected_business,
+            },
+        }
+        candidates = [
+            {
+                "rank": index,
+                "chunk_id": chunk_id,
+                "parent_doc_id": chunk["parent_doc_id"],
+                "parent_context_chunk_ids": [chunk_id],
+                "chunk": copy.deepcopy(chunk),
+            }
+            for index, (chunk_id, chunk) in enumerate(chunks.items(), start=1)
+        ]
+        fuse_namespace: dict[str, Any] = {
+            "Any": Any,
+            "Mapping": Mapping,
+            "math": math,
+            "light_router": router,
+            "FINAL_TOP_K": 9,
+            "QUERY_FUSION_RRF_K": 60,
+            "_clean_text": lambda value: " ".join(str(value or "").split()).strip(),
+            "_FUSE_QUERY_RESULTS_V4_1": (
+                lambda plans, top_k, rrf_k: (copy.deepcopy(candidates), [])
+            ),
+            "_LAST_RERANK_TRACE": {},
+            "_LAST_NEED_BATCH_CONTEXT_V5": {},
+        }
+        exec(_function_source(overlay, "_source_is_decomposed_v5"), fuse_namespace)
+        exec(_function_source(overlay, "fuse_query_results"), fuse_namespace)
+        filtered, _ = fuse_namespace["fuse_query_results"]([
+            {"query": query, "weight": 1.0, "source": "ORIGINAL"}
+        ])
+        assert [row["chunk"]["business_function"] for row in filtered] == [
+            expected_business
+        ], filtered
+
+        pack_namespace: dict[str, Any] = {
+            "Any": Any,
+            "Mapping": Mapping,
+            "Sequence": Sequence,
+            "OrderedDict": OrderedDict,
+            "ANSWER_EVIDENCE_TOTAL_MAX_CHARS": 10_000,
+            "ANSWER_EVIDENCE_RANK_BUDGETS_V5": (4_000,) * 9,
+            "PARENT_CONTEXT_MAX_CHARS": 4_000,
+            "ANSWER_PROMPT_VERSION": "offline-regression",
+            "NEED_BATCH_REQUIRED_TOP_K_V5": 3,
+            "NEED_BATCH_MIN_DISTINCT_PARENTS_V5": 2,
+            "NEED_BATCH_MAX_EVIDENCE_PER_PARENT_V5": 2,
+            "NEED_BATCH_MAX_BUSINESSES_V5": 3,
+            "_LAST_NEED_BATCH_CONTEXT_V5": fuse_namespace[
+                "_LAST_NEED_BATCH_CONTEXT_V5"
+            ],
+            "CHUNKS_BY_ID": chunks,
+            "_clean_text": lambda value: " ".join(str(value or "").split()).strip(),
+            "_parent_id_for_chunk": (
+                lambda chunk: str(
+                    chunk.get("parent_doc_id") or chunk.get("chunk_id") or ""
+                )
+            ),
+            "need_score_gate_passed_v5": evidence_namespace[
+                "need_score_gate_passed_v5"
+            ],
+            "need_score_gate_metadata_v5": evidence_namespace[
+                "need_score_gate_metadata_v5"
+            ],
+        }
+        exec(_function_source(overlay, "_truncate_at_boundary_v1"), pack_namespace)
+        exec(_function_source(overlay, "_proximity_order_v1"), pack_namespace)
+        exec(
+            _function_source(overlay, "build_compact_parent_evidence_pack_v1"),
+            pack_namespace,
+        )
+        pack = pack_namespace["build_compact_parent_evidence_pack_v1"](
+            query,
+            filtered,
+        )
+        return pack, filtered
+
+    debt_pack, debt_rows = make_standard_pack(
+        scoped_replacement["plans"][0]["query"],
+        "채무조정 안내",
+        "착오송금 반환 신청",
+        "debt",
+    )
+    assert len(debt_rows) == 1 and len(debt_pack["evidence"]) == 1, debt_pack
+    assert all("wrong-debt" not in row["source_url"] for row in debt_pack["sources"])
+
+    hidden_pack, hidden_rows = make_standard_pack(
+        "은닉재산 신고는 어디에서 할 수 있고 익명으로도 가능한가요?",
+        "은닉재산 신고",
+        "상속인 금융거래조회",
+        "hidden",
+    )
+    assert len(hidden_rows) == 1 and len(hidden_pack["evidence"]) == 1, hidden_pack
+    assert all("wrong-hidden" not in row["source_url"] for row in hidden_pack["sources"])
+
+    hidden_pack["sources"].append({
+        "source_id": "S-STALE",
+        "title": "상속인 금융거래조회 공식 안내",
+        "source_url": "https://www.kdic.or.kr/wrong-hidden",
+        "evidence_ids": ["E-UNUSED"],
+    })
+    source_namespace: dict[str, Any] = {
+        "Any": Any,
+        "Mapping": Mapping,
+        "_clean_text": lambda value: " ".join(str(value or "").split()).strip(),
+        "answer_b_core": types.SimpleNamespace(
+            _clean_list=lambda value: [
+                str(item).strip()
+                for item in (
+                    value
+                    if isinstance(value, (list, tuple, set))
+                    else [value] if value else []
+                )
+                if str(item).strip()
+            ]
+        ),
+    }
+    exec(_function_source(overlay, "_official_sources_dc_v1"), source_namespace)
+    hidden_sources = source_namespace["_official_sources_dc_v1"](
+        {"evidence_pack": hidden_pack, "dc_matched_fact_records": []},
+        {
+            "used_evidence_ids": ["E1"],
+            "used_fact_claim_ids": [],
+            "reference_audit": {"valid_evidence_ids": ["E1"]},
+        },
+    )
+    assert [row["url"] for row in hidden_sources] == [
+        "https://www.kdic.or.kr/right-hidden"
+    ], hidden_sources
+
+    service_core = _load_module("kdic_scope_public_result_test", SERVICE_CORE_FILE)
+    debt_sources = [{
+        "title": row["title"],
+        "url": row["source_url"],
+    } for row in debt_pack["sources"]]
+    debt_fact_source = {
+        "title": "채무조정 Fact 공식 안내",
+        "url": "https://www.kdic.or.kr/debt-fact",
+    }
+    public = service_core.normalize_public_result({
+        "route": "RETRIEVE",
+        "payload": {"answer": "채무조정에 필요한 서류 안내"},
+        "common": {
+            "analysis": scoped_replacement,
+            "evidence_pack": debt_pack,
+            "dc_matched_fact_records": [
+                {
+                    "fact_index_id": "FI-DEBT",
+                    "business_function": "채무조정 안내",
+                    "source_urls": [debt_fact_source["url"]],
+                },
+                {
+                    "fact_index_id": "FI-MT",
+                    "business_function": "착오송금 반환 신청",
+                    "source_urls": ["https://www.kdic.or.kr/foreign-fact"],
+                },
+            ],
+        },
+        "official_sources": debt_sources + [
+            debt_fact_source,
+            {
+                "title": "착오송금 Fact 공식 안내",
+                "url": "https://www.kdic.or.kr/foreign-fact",
+            },
+            {
+                "title": "업무 메타데이터 없는 오래된 출처",
+                "url": "https://www.kdic.or.kr/unscoped-stale-source",
+            },
+        ],
+        "action_links": [
+            {
+                "link_id": "DA-ELIGIBILITY-DOCUMENTS-001",
+                "business_function_code": "debt_adjustment",
+                "label": "채무조정 자격·구비서류",
+                "url": "https://www.kdic.or.kr/debt-action",
+            },
+            {
+                "link_id": "MT-SENDER-APPLICATION-001",
+                "business_function_code": "mistaken_transfer",
+                "label": "착오송금 반환지원 신청",
+                "url": "https://fins.kdic.or.kr/foreign-action",
+            },
+        ],
+    })
+    assert public["businesses"] == ["채무조정 안내"], public
+    assert public["sources"] == debt_sources + [debt_fact_source], public
+    assert [row["link_id"] for row in public["action_links"]] == [
+        "DA-ELIGIBILITY-DOCUMENTS-001"
+    ], public
+    assert public["keywords"], public
+    assert all("착오송금" not in row["query"] for row in public["keywords"]), public
+
+    return {
+        "compound_hidden_property_followup": "passed",
+        "exclusion_replacement_analysis_scope": "debt_only",
+        "exclusion_replacement_plan_scope": "debt_only",
+        "replacement_target_exclusion_intent": "preserved",
+        "business_internal_exclusion_intent": "preserved",
+        "modifier_business_replacement": "debt_only",
+        "next_documents_followup": "retrieve_debt",
+        "single_business_pack_filter": "passed",
+        "used_source_filter": "passed",
+        "public_business_source_keyword_scope": "debt_only",
+        "public_action_link_scope": "debt_only",
+        "fact_and_unscoped_source_filter": "debt_only",
+    }
+
+
 def test_adapter() -> dict[str, Any]:
     module = _load_module("kdic_ec2_adapter_test", ADAPTER_FILE)
     calls: list[str] = []
@@ -1079,28 +1556,75 @@ def test_adapter() -> dict[str, Any]:
     })
     first = adapter("단일질의", {})
     second = adapter("업무 비교", {})
+    stale_conversation = {
+        "turns": [
+            {"role": "user", "content": "채무조정 안내"},
+            {"role": "assistant", "content": "채무조정 답변"},
+        ],
+        "active_businesses": ["채무조정"],
+        "excluded_businesses": ["착오송금 반환지원"],
+        "actor_role": "본인",
+        "pending_clarification": None,
+        "last_resolved_question": "채무조정 안내",
+    }
     stale_state = {
         "_kdic_controller": {
             "_runtime_revision": "stale-revision",
             "current_question": "단일질의",
             "common": {"route": "EVIDENCE_INSUFFICIENT"},
+            "answer_cache": {"stale": {"answer": "이전 캐시"}},
+            "conversation": copy.deepcopy(stale_conversation),
         }
     }
     adapter("단일질의", stale_state)
     assert calls == ["C_1CALL", "DC_2CALL", "C_1CALL"]
     assert first["runtime_build"]["dc1_enabled"] is False
+    assert adapter.build_info["cache_compatible_overlay_revisions"] == [
+        adapter.build_info["overlay_revision"]
+    ]
     assert second["routing_policy"] == "C_DEFAULT_DC2_COMPARE_ONLY_V1"
     refreshed = stale_state["_kdic_controller"]
     assert refreshed.get("_runtime_revision") == adapter.build_info["overlay_revision"]
     assert refreshed.get("common") != {"route": "EVIDENCE_INSUFFICIENT"}
+    assert refreshed.get("common") is None
+    assert refreshed.get("answer_cache") == {}
+    assert refreshed.get("conversation") == stale_conversation
     assert holders[-1] is refreshed
+
+    reactivated_state = {
+        "_kdic_controller": {
+            "_runtime_revision": "stale-revision",
+            "conversation": {
+                "turns": [],
+                "active_businesses": ["착오송금 반환 신청"],
+                "excluded_businesses": ["착오송금 반환지원"],
+                "last_resolved_question": "착오송금 반환 신청은 어떻게 하나요?",
+            },
+        }
+    }
+    reactivated_holder = adapter._holder(reactivated_state)
+    reactivated_conversation = reactivated_holder["conversation"]
+    assert reactivated_conversation["active_businesses"] == [
+        "착오송금 반환지원"
+    ], reactivated_conversation
+    assert reactivated_conversation["excluded_businesses"] == [], (
+        reactivated_conversation
+    )
     assert adapter.answer_cache_revision == "prompt-active-v1"
+    refreshed["answer_cache"] = {"stale": {"answer": "이전 프롬프트 답변"}}
+    refreshed["committed"] = True
     prompt_manager.version = "prompt-active-v2"
     assert adapter.answer_cache_revision == "prompt-active-v2"
+    prompt_refreshed = adapter._holder(stale_state)
+    assert prompt_refreshed is refreshed
+    assert prompt_refreshed["answer_cache"] == {}
+    assert prompt_refreshed["committed"] is False
+    assert prompt_refreshed["_answer_cache_revision"] == "prompt-active-v2"
     return {
         "c_default": "passed",
         "dc2_compare": "passed",
         "stale_controller_cache": "invalidated",
+        "overlay_revision_conversation_scope": "preserved",
         "build_info": "passed",
         "prompt_cache_revision": "passed",
     }
@@ -1119,6 +1643,7 @@ def main() -> None:
         "non_retrieve_search_gate": test_non_retrieve_skips_common_search(),
         "v15_preflight": test_v15_preflight_skips_context_classifier(),
         "business_mapping": test_current_question_business_mapping(),
+        "context_scope_sources": test_context_scope_and_source_regressions(),
         "adapter": test_adapter(),
     }
     print(json.dumps({"status": "passed", "result": result}, ensure_ascii=False, indent=2))

@@ -179,7 +179,15 @@ def main() -> None:
             for job_id, public, raw in _latest_reusable_job(
                 suggestion["query"], runtime_build, compatible_overlay_revisions
             ):
-                eligible, _ = core.KDICJobService._cache_eligibility(public)
+                normalized_public = core.normalize_public_result(raw)
+                raw_answer = core._explicit_answer_from_result(raw)
+                if not raw_answer:
+                    continue
+                normalized_public["answer"] = raw_answer
+                eligible, _ = core.KDICJobService._cache_eligibility(
+                    normalized_public,
+                    suggestion["business"],
+                )
                 if not eligible:
                     continue
                 cache.put(
@@ -189,7 +197,7 @@ def main() -> None:
                         business=suggestion["business"],
                         keyword=suggestion["label"],
                         question=suggestion["query"],
-                        public_result=public,
+                        public_result=normalized_public,
                         raw_result=raw,
                         basis_result=_basis_for_job(args.base_url, job_id),
                         pipeline_name=str(health.get("pipeline") or ""),
