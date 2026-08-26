@@ -52,6 +52,15 @@ class FakePipeline:
                     "url": "https://www.kdic.or.kr/example",
                 }
             ],
+            "action_links": [
+                {
+                    "link_id": "MT-TEST-001",
+                    "label": "착오송금 반환지원 신청",
+                    "url": "https://www.kdic.or.kr/example/apply",
+                    "description": "공식 신청 화면으로 이동합니다.",
+                    "requires_auth": True,
+                }
+            ],
             "payload": {
                 "coverage_status": "SUFFICIENT",
                 "validation_passed": True,
@@ -106,6 +115,13 @@ def test_static_contracts() -> dict[str, str]:
     assert "catch(e){showBootError()}" in ui
     assert "$('#bootRetry').onclick=bootstrapApp" in ui
     assert "catch(e){ openKey(); }" not in ui
+    assert "function officialUrl(raw)" in ui
+    assert "officialRows(result.sources)" in ui
+    assert "officialRows(result.action_links,3)" in ui
+    assert "관련 공식 서비스" in ui
+    assert "본인인증 필요" in ui
+    assert 'rel="noopener noreferrer"' in ui
+    assert "host==='kdic.or.kr'||host.endsWith('.kdic.or.kr')" in ui
     assert "class PostgresSuggestionAnswerCache" in postgres
     assert "CREATE TABLE IF NOT EXISTS suggestion_answer_cache" in migration
     assert "compatible_overlay_revisions" in prewarm
@@ -173,12 +189,17 @@ def test_memory_cache_flow(core) -> dict[str, str]:
         "skipped_stages": [],
     }
     assert pipeline.calls == 1
+    assert live_job.result["sources"][0]["url"].startswith("https://www.kdic.or.kr/")
+    assert live_job.result["action_links"][0]["label"] == "착오송금 반환지원 신청"
+    assert live_job.result["action_links"][0]["requires_auth"] is True
 
     hit_id = service.submit("hit-session", first["query"], first["suggestion_id"])
     hit_job = jobs.get(hit_id)
     assert hit_job is not None and hit_job.status == "done"
     assert hit_job.result["suggestion_cache"]["hit"] is True
     assert pipeline.calls == 1
+    assert hit_job.result["sources"] == live_job.result["sources"]
+    assert hit_job.result["action_links"] == live_job.result["action_links"]
     assert pipeline.cached_turns[-1][0] == first["query"]
     assert len(sessions.get("hit-session").state["turns"]) == 2
     assert service.basis(hit_id)["summary"] == "공식 근거 요약"
@@ -207,6 +228,7 @@ def test_memory_cache_flow(core) -> dict[str, str]:
         "next_click_hit_without_pipeline": "passed",
         "cached_turn_context": "passed",
         "cached_basis": "passed",
+        "cached_sources_and_action_links": "passed",
         "forged_id_query_pair": "live_fallback",
         "runtime_revision_invalidation": "passed",
     }
