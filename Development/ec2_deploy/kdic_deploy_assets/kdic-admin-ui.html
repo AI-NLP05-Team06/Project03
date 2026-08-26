@@ -397,7 +397,7 @@ function pipelineView(){const graph=state.pipelineGraph;if(!graph)return `${head
 root.addEventListener('click',e=>{const t=e.target.closest('button[data-action="toggle-quick-parameters"]');if(!t)return;e.stopImmediatePropagation();capturePipelineParameters();state.quickParameterPanelOpen=!state.quickParameterPanelOpen;render();},true);
 function workspaceShortcuts(current){const items=[['pipeline','파이프라인'],['runtime','파라미터 창고'],['evaluation','검색 비교 평가'],['chat','챗봇 테스트'],['apply','반영 센터']];return `<nav class="workspace-shortcuts" aria-label="검색 설정 작업 바로가기"><span>바로가기</span>${items.map(([view,label])=>`<button class="secondary-btn ${view===current?'active':''}" data-view="${view}" ${view===current?'disabled':''}>${label}</button>`).join('')}</nav>`;}
 const pipelineViewBeforeShortcutCleanup=pipelineView;
-pipelineView=function(){return pipelineViewBeforeShortcutCleanup().replace(/<section class="pipeline-flow-steps">[\s\S]*?<\/section>/,'');};
+pipelineView=function(){return pipelineViewBeforeShortcutCleanup().replace(/<section class="pipeline-flow-steps">[\s\S]*?<\/section>/,'').replace('<div class="pipeline-runtime-strip">',`${workspaceShortcuts('pipeline')}<div class="pipeline-runtime-strip">`);};
 const runtimeViewBeforeShortcuts=runtimeView;
 runtimeView=function(){return runtimeViewBeforeShortcuts().replace('</section><section class="preset-list">',`</section>${workspaceShortcuts('runtime')}<section class="preset-list">`);};
 const evaluationViewBeforeShortcuts=evaluationViewV2;
