@@ -132,7 +132,7 @@ def _normalize_answer_text(value: Any) -> str:
 
     if isinstance(value, (list, tuple)):
         sections = [str(item).strip() for item in value if isinstance(item, str) and item.strip()]
-        return "\n\n---\n\n".join(sections)
+        return "\n\n".join(sections)
     text = str(value or "").strip()
     if len(text) >= 2 and text[0] in "[(" and text[-1] in "])":
         try:
@@ -144,7 +144,7 @@ def _normalize_answer_text(value: Any) -> str:
         ):
             sections = [item.strip() for item in parsed if item.strip()]
             if sections:
-                return "\n\n---\n\n".join(sections)
+                return "\n\n".join(sections)
     return text
 
 

@@ -255,7 +255,7 @@ def test_user_basis_contract(core) -> dict[str, str]:
 def test_answer_normalization(core) -> dict[str, str]:
     first = "**예금자보호 대상 금융상품**\n\n1인당 보호 한도를 안내합니다."
     second = "**고객 미수령금 신청 방법**\n\n신청 경로를 안내합니다."
-    expected = first + "\n\n---\n\n" + second
+    expected = first + "\n\n" + second
     assert core._normalize_answer_text([first, second]) == expected
     assert core._normalize_answer_text(repr([first, second])) == expected
     assert core._answer_from_result({"answer": [first, second]}) == expected
@@ -320,7 +320,7 @@ def test_memory_cache_flow(core) -> dict[str, str]:
     assert hit_job.result["sources"] == live_job.result["sources"]
     assert hit_job.result["action_links"] == live_job.result["action_links"]
     assert hit_job.result["answer"] == (
-        "**첫 번째 안내**\n\n첫 번째 내용\n\n---\n\n**두 번째 안내**\n\n두 번째 내용"
+        "**첫 번째 안내**\n\n첫 번째 내용\n\n**두 번째 안내**\n\n두 번째 내용"
     )
     assert pipeline.cached_turns[-1][0] == first["query"]
     assert pipeline.cached_turns[-1][1] == hit_job.result["answer"]
