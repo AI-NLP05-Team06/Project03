@@ -12,11 +12,15 @@ from pathlib import Path
 from typing import Any, Mapping
 
 
+PROMPT_SCHEMA_VERSION = "c-cross-direct-dc-twocall-v1"
+LEGACY_C_PROMPT_SLOT = "C_STRUCTURED_SYSTEM_PROMPT_V3"
+
+
 PROMPT_SLOTS: dict[str, dict[str, str]] = {
-    "C_STRUCTURED_SYSTEM_PROMPT_V3": {
-        "label": "단일·동일업무 최종 답변",
-        "route": "C",
-        "description": "한 업무 안에서 검색된 Evidence Pack을 바탕으로 최종 답변을 생성합니다.",
+    "C_CROSS_DIRECT_SYSTEM_PROMPT_V1": {
+        "label": "C안 기본·직접 답변",
+        "route": "C 1Call",
+        "description": "최신 C안 Evidence Pack을 바탕으로 기본 답변과 비교용 직접 답변을 생성합니다.",
     },
     "DC_SKELETON_SYSTEM_PROMPT_V1": {
         "label": "교차업무 답변 골격",
@@ -50,6 +54,17 @@ def _validate_values(raw: Mapping[str, Any]) -> dict[str, str]:
     return values
 
 
+def _migrate_values(raw: Mapping[str, Any], defaults: Mapping[str, Any]) -> dict[str, Any]:
+    source = dict(raw or {})
+    unknown = set(source) - set(PROMPT_SLOTS) - {LEGACY_C_PROMPT_SLOT}
+    if unknown:
+        raise ValueError("관리 대상이 아닌 프롬프트가 포함되어 있습니다: " + ", ".join(sorted(unknown)))
+    return {
+        slot: source.get(slot) or defaults.get(slot)
+        for slot in PROMPT_SLOTS
+    }
+
+
 class PromptManager:
     def __init__(self, path: str | Path, defaults: Mapping[str, Any]):
         self.path = Path(path).resolve()
@@ -59,6 +74,7 @@ class PromptManager:
 
     def _default_payload(self) -> dict[str, Any]:
         return {
+            "schema_version": PROMPT_SCHEMA_VERSION,
             "active_version": "prompt-runtime-default-v1",
             "active_values": copy.deepcopy(self.defaults),
             "draft_values": copy.deepcopy(self.defaults),
@@ -73,9 +89,33 @@ class PromptManager:
             return payload
         try:
             payload = json.loads(self.path.read_text(encoding="utf-8"))
-            payload["active_values"] = _validate_values(payload.get("active_values") or self.defaults)
-            payload["draft_values"] = _validate_values(payload.get("draft_values") or payload["active_values"])
+            raw_active = dict(payload.get("active_values") or self.defaults)
+            raw_draft = dict(payload.get("draft_values") or raw_active)
+            active_values = _validate_values(_migrate_values(raw_active, self.defaults))
+            draft_values = _validate_values(_migrate_values(raw_draft, active_values))
+            migrated = (
+                payload.get("schema_version") != PROMPT_SCHEMA_VERSION
+                or raw_active != active_values
+                or raw_draft != draft_values
+            )
+            if migrated and (LEGACY_C_PROMPT_SLOT in raw_active or LEGACY_C_PROMPT_SLOT in raw_draft):
+                legacy_values = dict(payload.get("legacy_values") or {})
+                legacy_values.setdefault(
+                    LEGACY_C_PROMPT_SLOT,
+                    {
+                        "active": raw_active.get(LEGACY_C_PROMPT_SLOT),
+                        "draft": raw_draft.get(LEGACY_C_PROMPT_SLOT),
+                        "migrated_at": time.time(),
+                    },
+                )
+                payload["legacy_values"] = legacy_values
+            payload["schema_version"] = PROMPT_SCHEMA_VERSION
+            payload["active_values"] = active_values
+            payload["draft_values"] = draft_values
             payload["history"] = list(payload.get("history") or [])[-20:]
+            if migrated:
+                payload["schema_migrated_at"] = time.time()
+                self._write(payload)
             return payload
         except Exception:
             backup = self.path.with_suffix(self.path.suffix + f".invalid-{int(time.time())}")
@@ -103,6 +143,7 @@ class PromptManager:
             active = self.state["active_values"]
             draft = self.state["draft_values"]
             return {
+                "schema_version": self.state.get("schema_version", PROMPT_SCHEMA_VERSION),
                 "active_version": self.state["active_version"],
                 "updated_at": self.state["updated_at"],
                 "has_changes": active != draft,
@@ -156,7 +197,7 @@ class PromptManager:
         archive_current: bool = True,
     ) -> dict[str, Any]:
         """Activate validated values for a unified administrator release."""
-        validated = _validate_values(values)
+        validated = _validate_values(_migrate_values(values, self.defaults))
         with self.lock:
             if archive_current:
                 previous = {
@@ -177,7 +218,7 @@ class PromptManager:
             row = next((item for item in self.state.get("history") or [] if item.get("version") == version), None)
             if row is None:
                 raise KeyError(version)
-            restored = _validate_values(row.get("values") or {})
+            restored = _validate_values(_migrate_values(row.get("values") or {}, self.defaults))
             current = {
                 "version": self.state["active_version"],
                 "values": copy.deepcopy(self.state["active_values"]),

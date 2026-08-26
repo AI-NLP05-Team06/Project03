@@ -44,6 +44,14 @@ class LatestKDICNotebookAdapter:
         self.runtime = runtime_globals
         self._validate_runtime()
 
+    @property
+    def answer_cache_revision(self) -> str:
+        manager = self.runtime.get("KDIC_PROMPT_MANAGER")
+        if manager is None or not callable(getattr(manager, "public", None)):
+            return ""
+        state = manager.public()
+        return _clean(state.get("active_version")) if isinstance(state, Mapping) else ""
+
     def _required_callable(self, name: str) -> Callable[..., Any]:
         value = self.runtime.get(name)
         if not callable(value):

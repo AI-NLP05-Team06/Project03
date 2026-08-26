@@ -451,12 +451,16 @@ class PipelineRuntime:
             pipeline = self._pipeline
         build = getattr(pipeline, "build_info", None) if pipeline is not None else None
         build = dict(build) if isinstance(build, Mapping) else {}
+        answer_cache_revision = getattr(pipeline, "answer_cache_revision", "") if pipeline is not None else ""
+        if callable(answer_cache_revision):
+            answer_cache_revision = answer_cache_revision()
         return ":".join(
             value
             for value in (
                 self.name,
                 _clean_text(build.get("build_sha256")),
                 _clean_text(build.get("overlay_revision")),
+                _clean_text(answer_cache_revision),
             )
             if value
         )

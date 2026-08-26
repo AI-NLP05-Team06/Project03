@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import ast
 import builtins
+import contextvars
 import copy
 import dis
 import hashlib
@@ -11,6 +12,7 @@ import math
 import re
 import sys
 import time
+import tempfile
 import types
 from collections import OrderedDict, defaultdict
 from pathlib import Path
@@ -24,6 +26,8 @@ ADAPTER_FILE = BASE_DIR / "2026-08-23-kdic-colab-runtime-adapter.py"
 FASTAPI_FILE = BASE_DIR / "2026-08-23-kdic-fastapi-service.py"
 CHAT_UI_FILE = BASE_DIR / "2026-08-23-kdic-chat-ui.html"
 ANSWER_CORE_FILE = BASE_DIR / "kdic_v15_answer_b_core.py"
+PROMPT_MANAGER_FILE = BASE_DIR / "kdic_prompt_manager.py"
+ADMIN_EXTENSION_FILE = BASE_DIR / "kdic_admin_extension_aws.py"
 EXPECTED_SOURCE_SHA256 = (
     "F9A908D62A43EA3A3566A5D8DF0E982F214373FFF96470A749DC1EFE79E25083"
 )
@@ -56,12 +60,16 @@ def test_static_contracts() -> dict[str, Any]:
     adapter = ADAPTER_FILE.read_text(encoding="utf-8")
     api = FASTAPI_FILE.read_text(encoding="utf-8")
     answer_core = ANSWER_CORE_FILE.read_text(encoding="utf-8")
+    prompt_manager = PROMPT_MANAGER_FILE.read_text(encoding="utf-8")
+    admin_extension = ADMIN_EXTENSION_FILE.read_text(encoding="utf-8")
     for path, source in (
         (ENGINE_FILE, engine),
         (OVERLAY_FILE, overlay),
         (ADAPTER_FILE, adapter),
         (FASTAPI_FILE, api),
         (ANSWER_CORE_FILE, answer_core),
+        (PROMPT_MANAGER_FILE, prompt_manager),
+        (ADMIN_EXTENSION_FILE, admin_extension),
     ):
         ast.parse(source, filename=str(path))
     assert "2026-08-25-kdic-production-overlay.py" in engine
@@ -86,12 +94,97 @@ def test_static_contracts() -> dict[str, Any]:
     assert "cache_compatible_overlay_revisions" in adapter
     assert "for repair_index in range(3):" in answer_core
     assert "[검증 실패 이유]" in answer_core
+    assert 'system_prompt=_managed_prompt("C_CROSS_DIRECT_SYSTEM_PROMPT_V1", C_CROSS_DIRECT_SYSTEM_PROMPT_V1)' in overlay
+    assert 'system_prompt=_managed_prompt("DC_SKELETON_SYSTEM_PROMPT_V1", DC_SKELETON_SYSTEM_PROMPT_V1)' in overlay
+    assert 'system_prompt=_managed_prompt("DC_FINAL_SYSTEM_PROMPT_V1", DC_FINAL_SYSTEM_PROMPT_V1)' in overlay
+    assert '"settings": ["C_CROSS_DIRECT_SYSTEM_PROMPT_V1"]' in admin_extension
     return {
         "engine_overlay_loader": "passed",
         "overlay_syntax": "passed",
         "adapter_syntax": "passed",
         "fastapi_build_contract": "passed",
         "overlay_sha256": hashlib.sha256(OVERLAY_FILE.read_bytes()).hexdigest(),
+    }
+
+
+def test_managed_prompt_contract() -> dict[str, Any]:
+    prompt_module = _load_module("kdic_prompt_manager_contract", PROMPT_MANAGER_FILE)
+    expected_slots = (
+        "C_CROSS_DIRECT_SYSTEM_PROMPT_V1",
+        "DC_SKELETON_SYSTEM_PROMPT_V1",
+        "DC_FINAL_SYSTEM_PROMPT_V1",
+    )
+    assert tuple(prompt_module.PROMPT_SLOTS) == expected_slots
+
+    def long_prompt(label: str) -> str:
+        return ((label + " 운영 프롬프트 ") * 20).strip()
+
+    defaults = {slot: long_prompt("기본 " + slot) for slot in expected_slots}
+    legacy_c = long_prompt("기존 C")
+    active_skeleton = long_prompt("활성 D-C 골격")
+    active_final = long_prompt("활성 D-C 최종")
+    draft_skeleton = long_prompt("초안 D-C 골격")
+    draft_final = long_prompt("초안 D-C 최종")
+    legacy_values = {
+        "C_STRUCTURED_SYSTEM_PROMPT_V3": legacy_c,
+        "DC_SKELETON_SYSTEM_PROMPT_V1": active_skeleton,
+        "DC_FINAL_SYSTEM_PROMPT_V1": active_final,
+    }
+    with tempfile.TemporaryDirectory() as temp_dir:
+        state_path = Path(temp_dir) / "admin_prompts.json"
+        state_path.write_text(json.dumps({
+            "active_version": "legacy-active-v7",
+            "active_values": legacy_values,
+            "draft_values": {
+                **legacy_values,
+                "DC_SKELETON_SYSTEM_PROMPT_V1": draft_skeleton,
+                "DC_FINAL_SYSTEM_PROMPT_V1": draft_final,
+            },
+            "history": [{"version": "legacy-history-v6", "values": legacy_values}],
+            "updated_at": 1.0,
+        }, ensure_ascii=False), encoding="utf-8")
+        manager = prompt_module.PromptManager(state_path, defaults)
+        active = manager.active_values()
+        draft = manager.draft_values()
+        persisted = json.loads(state_path.read_text(encoding="utf-8"))
+        assert tuple(active) == expected_slots
+        assert active["C_CROSS_DIRECT_SYSTEM_PROMPT_V1"] == defaults["C_CROSS_DIRECT_SYSTEM_PROMPT_V1"]
+        assert active["DC_SKELETON_SYSTEM_PROMPT_V1"] == active_skeleton
+        assert active["DC_FINAL_SYSTEM_PROMPT_V1"] == active_final
+        assert draft["DC_SKELETON_SYSTEM_PROMPT_V1"] == draft_skeleton
+        assert draft["DC_FINAL_SYSTEM_PROMPT_V1"] == draft_final
+        assert persisted["schema_version"] == prompt_module.PROMPT_SCHEMA_VERSION
+        assert persisted["active_version"] == "legacy-active-v7"
+        assert persisted["history"][0]["version"] == "legacy-history-v6"
+        assert persisted["legacy_values"]["C_STRUCTURED_SYSTEM_PROMPT_V3"]["active"] == legacy_c
+        assert [row["slot"] for row in manager.public()["slots"]] == list(expected_slots)
+        restored = manager.activate(legacy_values, version="legacy-snapshot-restored", archive_current=False)
+        restored_values = manager.active_values()
+        assert restored["active_version"] == "legacy-snapshot-restored"
+        assert restored_values["C_CROSS_DIRECT_SYSTEM_PROMPT_V1"] == defaults["C_CROSS_DIRECT_SYSTEM_PROMPT_V1"]
+        assert restored_values["DC_SKELETON_SYSTEM_PROMPT_V1"] == active_skeleton
+        assert restored_values["DC_FINAL_SYSTEM_PROMPT_V1"] == active_final
+
+        engine = ENGINE_FILE.read_text(encoding="utf-8")
+        overrides = contextvars.ContextVar("prompt_test_overrides", default=None)
+        namespace = {"_KDIC_PROMPT_OVERRIDES": overrides, "KDIC_PROMPT_MANAGER": manager}
+        exec(_function_source(engine, "_managed_prompt"), namespace)
+        managed_prompt = namespace["_managed_prompt"]
+        assert managed_prompt("DC_SKELETON_SYSTEM_PROMPT_V1", "fallback") == active_skeleton
+        token = overrides.set({"DC_SKELETON_SYSTEM_PROMPT_V1": long_prompt("A/B override")})
+        try:
+            assert managed_prompt("DC_SKELETON_SYSTEM_PROMPT_V1", "fallback").startswith("A/B override")
+        finally:
+            overrides.reset(token)
+        assert managed_prompt("UNKNOWN_PROMPT", "fallback") == "fallback"
+
+    return {
+        "slots": list(expected_slots),
+        "legacy_state_migration": "passed",
+        "legacy_snapshot_restore": "passed",
+        "active_manager_lookup": "passed",
+        "context_override_precedence": "passed",
+        "default_fallback": "passed",
     }
 
 
@@ -541,6 +634,14 @@ def test_adapter() -> dict[str, Any]:
     calls: list[str] = []
     holders: list[dict[str, Any]] = []
 
+    class PromptVersionStub:
+        version = "prompt-active-v1"
+
+        def public(self) -> dict[str, str]:
+            return {"active_version": self.version}
+
+    prompt_manager = PromptVersionStub()
+
     def holder() -> dict[str, Any]:
         return {"conversation": {"turns": []}, "answer_cache": {}, "events": []}
 
@@ -558,6 +659,7 @@ def test_adapter() -> dict[str, Any]:
     adapter = module.build_latest_kdic_pipeline({
         "new_dc_controller_state_v1": holder,
         "execute_production_variant_v1": production,
+        "KDIC_PROMPT_MANAGER": prompt_manager,
     })
     first = adapter("단일질의", {})
     second = adapter("업무 비교", {})
@@ -576,11 +678,15 @@ def test_adapter() -> dict[str, Any]:
     assert refreshed.get("_runtime_revision") == adapter.build_info["overlay_revision"]
     assert refreshed.get("common") != {"route": "EVIDENCE_INSUFFICIENT"}
     assert holders[-1] is refreshed
+    assert adapter.answer_cache_revision == "prompt-active-v1"
+    prompt_manager.version = "prompt-active-v2"
+    assert adapter.answer_cache_revision == "prompt-active-v2"
     return {
         "c_default": "passed",
         "dc2_compare": "passed",
         "stale_controller_cache": "invalidated",
         "build_info": "passed",
+        "prompt_cache_revision": "passed",
     }
 
 
@@ -588,6 +694,7 @@ def main() -> None:
     result = {
         "static": test_static_contracts(),
         "overlay_exec": test_overlay_exec_contract(),
+        "managed_prompts": test_managed_prompt_contract(),
         "chat_ui": test_chat_ui_numbering_contract(),
         "c_direct_json": test_c_direct_json_validator(),
         "evidence": test_evidence_gate(),

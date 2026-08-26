@@ -227,12 +227,12 @@ DEFAULT_PIPELINE_GRAPH_SPEC: list[dict[str, Any]] = [
     },
     {
         "id": "answer_c",
-        "label": "단일·동일 업무 C안",
+        "label": "기본 답변 C 1Call",
         "stage": "ANSWER",
-        "description": "한 업무 안에서 근거 기반 기본 답변과 신청·처리 링크를 생성합니다.",
-        "symbols": ["execute_bcd_variant_v3", "generate_answer_c_v3", "generate_basic_answer_b_v2"],
+        "description": "최신 C안 Evidence Pack으로 기본 답변과 비교용 직접 답변을 생성합니다.",
+        "symbols": ["generate_c_direct_threeway_v1", "_execute_c_threeway_v1", "execute_production_variant_v1"],
         "setting_view": "prompts",
-        "settings": ["C_STRUCTURED_SYSTEM_PROMPT_V3"],
+        "settings": ["C_CROSS_DIRECT_SYSTEM_PROMPT_V1"],
     },
     {
         "id": "answer_dc",

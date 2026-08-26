@@ -32,13 +32,18 @@ def _load_module(name: str, path: Path):
 class FakePipeline:
     name = "V1.5_C_DEFAULT_DC2_COMPARE_ONLY"
 
-    def __init__(self, revision: str = "revision-a"):
+    def __init__(self, revision: str = "revision-a", prompt_revision: str = "prompt-v1"):
         self.build_info = {
             "build_sha256": "build-sha",
             "overlay_revision": revision,
         }
         self.calls = 0
+        self.prompt_revision = prompt_revision
         self.cached_turns: list[tuple[str, str]] = []
+
+    @property
+    def answer_cache_revision(self) -> str:
+        return self.prompt_revision
 
     def __call__(self, question: str, state: dict[str, Any], progress=None):
         self.calls += 1
@@ -215,6 +220,17 @@ def test_memory_cache_flow(core) -> dict[str, str]:
     assert "suggestion_cache" not in forged_job.result
     assert pipeline.calls == 2
 
+    before_prompt_change = service._cache_key(first["suggestion_id"])
+    pipeline.prompt_revision = "prompt-v2"
+    assert before_prompt_change != service._cache_key(first["suggestion_id"])
+    prompt_changed_job = _wait_job(
+        service,
+        service.submit("prompt-version-session", first["query"], first["suggestion_id"]),
+    )
+    assert prompt_changed_job.status == "done"
+    assert prompt_changed_job.result["suggestion_cache"]["hit"] is False
+    assert pipeline.calls == 3
+
     other_pipeline = FakePipeline(revision="revision-b")
     other_service = core.KDICJobService(
         runtime=core.PipelineRuntime(other_pipeline),
@@ -234,6 +250,7 @@ def test_memory_cache_flow(core) -> dict[str, str]:
         "cached_sources_and_action_links": "passed",
         "forged_id_query_pair": "live_fallback",
         "runtime_revision_invalidation": "passed",
+        "prompt_revision_invalidation": "passed",
     }
 
 

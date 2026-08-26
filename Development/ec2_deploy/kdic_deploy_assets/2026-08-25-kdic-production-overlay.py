@@ -2101,7 +2101,7 @@ def generate_dc_twocall_v1(
     skeleton_prompt = _dc_skeleton_prompt_v1(question, answer_needs, relation_constraint, augmented_pack)
     skeleton_prompt_ms = (time.perf_counter() - skeleton_prompt_started) * 1000
     raw_skeleton, usage1, skeleton_api_ms, trace1 = _call_answer_api_v1(
-        system_prompt=DC_SKELETON_SYSTEM_PROMPT_V1,
+        system_prompt=_managed_prompt("DC_SKELETON_SYSTEM_PROMPT_V1", DC_SKELETON_SYSTEM_PROMPT_V1),
         user_prompt=skeleton_prompt,
         max_tokens=DC_SKELETON_MAX_TOKENS_V1,
     )
@@ -2119,7 +2119,7 @@ def generate_dc_twocall_v1(
     final_prompt = f"""[사용자 질문]\n{_clean_text(question)}\n\n[Answer Needs]\n{_compact_json(answer_needs)}\n\n[관계 주장 안전조건]\n{_compact_json(relation_constraint)}\n\n[검증된 Answer Skeleton]\n{_compact_json(skeleton)}\n\n[Skeleton 선택 C안 Evidence Pack]\n{_compact_json(selected_pack)}\n\n모든 Answer Need를 반영한 최종 Markdown 답변만 작성하세요."""
     final_prompt_ms = (time.perf_counter() - final_prompt_started) * 1000
     raw_answer, usage2, final_api_ms, trace2 = _call_answer_api_v1(
-        system_prompt=DC_FINAL_SYSTEM_PROMPT_V1,
+        system_prompt=_managed_prompt("DC_FINAL_SYSTEM_PROMPT_V1", DC_FINAL_SYSTEM_PROMPT_V1),
         user_prompt=final_prompt,
         max_tokens=DC_FINAL_MAX_TOKENS_V1,
     )
@@ -3759,7 +3759,7 @@ def generate_c_direct_threeway_v1(question: str, augmented_pack: Mapping[str, An
         parsed, usage, api_ms, format_attempts = answer_b_core._call_structured(
             client=ANSWER_HCX_CLIENT,
             model=HCX_CHAT_MODEL,
-            system_prompt=C_CROSS_DIRECT_SYSTEM_PROMPT_V1,
+            system_prompt=_managed_prompt("C_CROSS_DIRECT_SYSTEM_PROMPT_V1", C_CROSS_DIRECT_SYSTEM_PROMPT_V1),
             user_prompt=prompt,
             schema_name="kdic_c_direct_answer_v2",
             schema=C_DIRECT_JSON_SCHEMA_V2,
