@@ -1926,7 +1926,7 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
         return {"reset": True, "graph": _build_pipeline_graph(runtime_globals, pipeline_labels)}
 
     @app.get("/api/admin-ui/monitoring")
-    def monitoring(hours: float = Query(default=24, ge=.25, le=720), limit: int = Query(default=30, ge=1, le=100),
+    def monitoring(hours: float = Query(default=24, ge=.25, le=720), limit: int = Query(default=30, ge=1, le=500),
                    offset: int = Query(default=0, ge=0),
                    _: None = Depends(require_admin_session)):
         return monitoring_snapshot(hours, limit, offset)
