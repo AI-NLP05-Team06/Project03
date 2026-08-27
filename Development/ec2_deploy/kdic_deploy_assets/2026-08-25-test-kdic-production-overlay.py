@@ -746,6 +746,12 @@ def test_v15_direct_router_contract() -> dict[str, Any]:
     expected_routes = {
         "하이하이, 예금자보호 한도 얼마야?": "RETRIEVE",
         "감사링. 착오송금 신청 자격도 알려줘": "RETRIEVE",
+        "내가 돈을 잘못보냈는데 어떻게 해": "RETRIEVE",
+        "돈을 잘못 보냈는데 어떻게 해야 하나요?": "RETRIEVE",
+        "송금을 실수했는데 돌려받을 수 있나요?": "RETRIEVE",
+        "계좌번호를 잘못 입력해서 돈을 보냈어요": "RETRIEVE",
+        "엉뚱한 계좌로 이체했는데 어떻게 하나요?": "RETRIEVE",
+        "모르는 돈이 입금됐는데 어떻게 해야 하나요?": "RETRIEVE",
         "감사보고서는 어디서 봐요?": "CLARIFY",
         "하이브리드 금융상품도 보호되나요?": "RETRIEVE",
         "오케이저축은행 예금도 보호되나요?": "RETRIEVE",
@@ -776,6 +782,30 @@ def test_v15_direct_router_contract() -> dict[str, Any]:
         route = router.detect_route(question, context=context)[0]
         assert route == expected_route, (question, route, expected_route)
 
+    natural_transfer_cases = (
+        "내가 돈을 잘못보냈는데 어떻게 해",
+        "돈을 잘못 보냈는데 어떻게 해야 하나요?",
+        "송금을 실수했는데 돌려받을 수 있나요?",
+        "계좌번호를 잘못 입력해서 돈을 보냈어요",
+        "엉뚱한 계좌로 이체했는데 어떻게 하나요?",
+        "모르는 돈이 입금됐는데 어떻게 해야 하나요?",
+    )
+    for question in natural_transfer_cases:
+        result = router.route_query(question)
+        assert result["analysis"]["business_functions"] == ["착오송금 반환 신청"], result
+        assert result["query_plans"], result
+        assert result["query_plans"][0]["business_filter"]["soft_hint"] == "착오송금 반환 신청", result
+
+    non_transfer_cases = {
+        "카드 결제를 잘못했는데 환불하고 싶어요": "OUT_OF_SCOPE",
+        "친구에게 현금을 잘못 건넸어요": "RETRIEVE",
+        "송금 수수료를 잘못 계산한 것 같아요": "RETRIEVE",
+    }
+    for question, expected_route in non_transfer_cases.items():
+        result = router.route_query(question)
+        assert result["analysis"]["route"] == expected_route, result
+        assert "착오송금 반환 신청" not in result["analysis"]["business_functions"], result
+
     direct_result = router.route_query("감사링")
     low_info_result = router.route_query("뭐")
     for result in (direct_result, low_info_result):
@@ -788,6 +818,8 @@ def test_v15_direct_router_contract() -> dict[str, Any]:
         "direct_variants": sum(len(values) for values in direct_cases.values()) + len(decorated),
         "low_information": 6,
         "protected_queries": len(expected_routes),
+        "natural_transfer_queries": len(natural_transfer_cases),
+        "natural_transfer_false_positives": len(non_transfer_cases),
         "router_api_calls": 0,
     }
 

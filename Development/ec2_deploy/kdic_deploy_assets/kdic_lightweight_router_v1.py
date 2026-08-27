@@ -19,7 +19,7 @@ from dataclasses import dataclass
 from typing import Any, Iterable, Mapping, Sequence
 
 
-PIPELINE_VERSION = "KDIC_LIGHTWEIGHT_ROUTER_V1_2026_08_26_DIRECT_GUARD"
+PIPELINE_VERSION = "KDIC_LIGHTWEIGHT_ROUTER_V1_2026_08_28_NATURAL_TRANSFER"
 
 BUSINESS_FUNCTIONS = (
     "예금자보호제도",
@@ -128,6 +128,71 @@ DIRECT_ACTION_RESPONSES: dict[str, str] = {
         "예금자보호, 예금보험금, 미수령금처럼 궁금한 주제를 조금 더 구체적으로 적어 주세요."
     ),
 }
+
+# 착오송금은 사용자가 제도명을 모른 채 일상어로 설명하는 경우가 많다.
+# 단순 부분 문자열 목록만으로는 ``잘못 보낸 돈``과 어순이 다른
+# ``돈을 잘못보냈다``를 놓치므로, 송금 행위와 실수 표현이 함께 있는
+# 문장 패턴을 별도의 강한 업무 근거로 사용한다.
+MISTAKEN_TRANSFER_NATURAL_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
+    (
+        "MISTAKEN_TRANSFER_SENDER_OBJECT_FIRST",
+        re.compile(
+            r"(?:돈|금액|송금|이체)(?:을|를)?\s*"
+            r"(?:잘못|실수(?:로)?|착각(?:해서|으로)?)\s*"
+            r"(?:보내|보냈|송금|이체)",
+            re.I,
+        ),
+    ),
+    (
+        "MISTAKEN_TRANSFER_SENDER_ERROR_FIRST",
+        re.compile(
+            r"(?:잘못|실수(?:로)?|착각(?:해서|으로)?).{0,10}"
+            r"(?:돈|금액)(?:을|를)?\s*(?:보내|보냈|송금|이체)",
+            re.I,
+        ),
+    ),
+    (
+        "MISTAKEN_TRANSFER_ACTION_ERROR",
+        re.compile(
+            r"(?:송금|이체)(?:을|를)?\s*"
+            r"(?:잘못(?:했|해서|한|했다)?|실수(?:했|해서|로)?|착각(?:했|해서|으로)?)",
+            re.I,
+        ),
+    ),
+    (
+        "MISTAKEN_TRANSFER_WRONG_DESTINATION",
+        re.compile(
+            r"(?:계좌(?:번호)?|받는\s*사람|수취인).{0,12}"
+            r"(?:잘못|틀리|실수).{0,12}(?:보내|보냈|송금|이체)",
+            re.I,
+        ),
+    ),
+    (
+        "MISTAKEN_TRANSFER_OTHER_DESTINATION",
+        re.compile(
+            r"(?:엉뚱한|다른|모르는)\s*(?:계좌|사람|수취인)"
+            r"(?:에게|으로|로)?.{0,12}(?:보내|보냈|송금|이체)",
+            re.I,
+        ),
+    ),
+    (
+        "MISTAKEN_TRANSFER_RECIPIENT",
+        re.compile(
+            r"(?:(?:모르는|잘못\s*온|뜻하지\s*않은)\s*(?:돈|금액|송금|입금)"
+            r"|(?:돈|금액|송금|입금)(?:이|을)?\s*(?:잘못|모르게))"
+            r".{0,10}(?:받|들어오|입금되|입금됐)",
+            re.I,
+        ),
+    ),
+)
+
+
+def _mistaken_transfer_natural_evidence(text: str) -> list[str]:
+    return [
+        rule_id
+        for rule_id, pattern in MISTAKEN_TRANSFER_NATURAL_PATTERNS
+        if pattern.search(str(text or ""))
+    ]
 
 # NFKC 정규화는 단독 호환 자모(예: ㅋ, ㅎ, ㅇ)를 초성 자모로 바꾼다.
 # 소셜 표현 비교 때만 다시 익숙한 호환 자모로 접어 두 형태를 동일하게 처리한다.
@@ -486,9 +551,16 @@ def find_business_matches(text: str) -> list[dict[str, Any]]:
     found: list[dict[str, Any]] = []
     for business, keywords in BUSINESS_KEYWORDS.items():
         evidence = [keyword for keyword in keywords if _compact(keyword) in compact]
+        natural_evidence = (
+            _mistaken_transfer_natural_evidence(text)
+            if business == "착오송금 반환 신청"
+            else []
+        )
+        evidence.extend(natural_evidence)
         if not evidence:
             continue
         strong = [term for term in STRONG_BUSINESS_KEYWORDS[business] if _compact(term) in compact]
+        strong.extend(natural_evidence)
         found.append({
             "business_function": business,
             "evidence": _ordered_unique(evidence),
@@ -515,6 +587,19 @@ def find_intent_matches(text: str) -> list[dict[str, Any]]:
                     "start": hit.start(),
                     "end": hit.end(),
                 })
+    natural_transfer = _mistaken_transfer_natural_evidence(text)
+    if (
+        natural_transfer
+        and "APPLICATION" not in {row["intent"] for row in matches}
+        and re.search(r"(?:어떻게|어쩌|해야\s*(?:해|돼|하)|돌려\s*받)", text, flags=re.I)
+    ):
+        matches.append({
+            "intent": "APPLICATION",
+            "source": "NATURAL_BUSINESS_PATTERN",
+            "evidence": natural_transfer[0],
+            "start": 0,
+            "end": len(text),
+        })
     return matches
 
 

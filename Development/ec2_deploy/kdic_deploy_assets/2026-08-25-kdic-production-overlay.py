@@ -3342,8 +3342,8 @@ def build_program_fallback_skeleton_dc_v2(
 DC_SCOPE_ROLE_PATTERNS_V2 = {
     "INHERITANCE": re.compile(r"상속|상속인|피상속인|사망|유족"),
     "PROXY": re.compile(r"대리인|위임|대리\s*신청"),
-    "SENDER": re.compile(r"송금인|착오송금인|돈을\s*보낸"),
-    "RECIPIENT": re.compile(r"수취인|돈을\s*받은|잘못\s*받"),
+    "SENDER": re.compile(r"송금인|착오송금인|잘못\s*보냈|돈을\s*(?:잘못\s*)?보낸"),
+    "RECIPIENT": re.compile(r"수취인|받은\s*사람|모르는\s*돈|돈을\s*받은|잘못\s*받"),
     "MINOR": re.compile(r"미성년자|친권자"),
     "CORPORATION": re.compile(r"법인|사업자|대표자"),
 }
