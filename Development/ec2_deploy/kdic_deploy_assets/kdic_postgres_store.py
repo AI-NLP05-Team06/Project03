@@ -413,25 +413,112 @@ def _row_to_cached_bundle(row: Mapping[str, Any]) -> CachedAnswerBundle:
 
 
 class PostgresSuggestionAnswerCache:
-    """Persistent cache for exact server-registered recommendation questions."""
+    """Persistent approved answers for the fixed recommendation catalog.
+
+    Runtime-specific rows remain as immutable generation history.  The catalog
+    points at one active row per suggestion, so a build or prompt deployment no
+    longer makes a previously approved answer disappear.
+    """
 
     _SELECT_COLUMNS = (
         "cache_key, suggestion_id, business, keyword, question, public_result, "
         "raw_result, basis_result, pipeline_name, runtime_revision, created_at, "
         "updated_at, hit_count"
     )
+    _QUALIFIED_SELECT_COLUMNS = ", ".join(
+        "answer." + column.strip() for column in _SELECT_COLUMNS.split(",")
+    )
 
     def __init__(self, ttl_seconds: int = 2_592_000, max_entries: int = 2_000):
+        # Kept in the signature for rollout compatibility.  Managed suggestion
+        # answers deliberately do not expire by time.
         self.ttl_seconds = max(60, int(ttl_seconds))
         self.max_entries = max(10, int(max_entries))
+
+    def sync_catalog(self, rows: Any) -> None:
+        records = [dict(row) for row in rows]
+        ids = [_clean_text(row.get("suggestion_id")).upper() for row in records]
+        if len(records) != 26 or len(set(ids)) != 26 or not all(ids):
+            raise ValueError("고정 추천 질의 카탈로그는 고유한 26개 항목이어야 합니다.")
+        with _cursor() as cur:
+            for display_order, row in enumerate(records, start=1):
+                suggestion_id = _clean_text(row.get("suggestion_id")).upper()
+                business = _clean_text(row.get("business"))
+                keyword = _clean_text(row.get("label"))
+                question = _clean_text(row.get("query"))
+                cur.execute(
+                    "INSERT INTO suggestion_catalog ("
+                    "suggestion_id, business, keyword, canonical_question, display_order) "
+                    "VALUES (%s, %s, %s, %s, %s) "
+                    "ON CONFLICT (suggestion_id) DO NOTHING",
+                    (suggestion_id, business, keyword, question, display_order),
+                )
+                # One-time migration path: if this catalog item does not yet
+                # have an active answer, adopt its newest validated exact-query
+                # bundle.  Existing administrator selections are never changed.
+                cur.execute(
+                    "UPDATE suggestion_catalog AS catalog SET active_cache_key = candidate.cache_key, "
+                    "updated_at = now(), row_version = row_version + 1 "
+                    "FROM (SELECT cache_key FROM suggestion_answer_cache "
+                    "WHERE suggestion_id = %s AND business = %s AND question = %s "
+                    "AND validation_status = 'VALIDATED' "
+                    "ORDER BY created_at DESC LIMIT 1) AS candidate "
+                    "WHERE catalog.suggestion_id = %s AND catalog.active_cache_key IS NULL",
+                    (suggestion_id, business, question, suggestion_id),
+                )
+
+    def get_active(self, suggestion_id: str) -> CachedAnswerBundle | None:
+        with _cursor() as cur:
+            cur.execute(
+                "UPDATE suggestion_answer_cache AS answer SET "
+                "hit_count = answer.hit_count + 1, last_hit_at = now() "
+                "FROM suggestion_catalog AS catalog "
+                "WHERE catalog.suggestion_id = %s AND catalog.is_enabled = true "
+                "AND catalog.active_cache_key = answer.cache_key "
+                "AND answer.validation_status = 'VALIDATED' "
+                "RETURNING " + self._QUALIFIED_SELECT_COLUMNS,
+                (_clean_text(suggestion_id).upper(),),
+            )
+            row = cur.fetchone()
+        return _row_to_cached_bundle(row) if row else None
+
+    def peek_active(self, suggestion_id: str) -> CachedAnswerBundle | None:
+        with _cursor() as cur:
+            cur.execute(
+                "SELECT " + self._QUALIFIED_SELECT_COLUMNS + " FROM suggestion_answer_cache AS answer "
+                "JOIN suggestion_catalog AS catalog ON catalog.active_cache_key = answer.cache_key "
+                "WHERE catalog.suggestion_id = %s AND catalog.is_enabled = true "
+                "AND answer.validation_status = 'VALIDATED'",
+                (_clean_text(suggestion_id).upper(),),
+            )
+            row = cur.fetchone()
+        return _row_to_cached_bundle(row) if row else None
+
+    def activate(self, suggestion_id: str, cache_key: str, actor: str = "SYSTEM") -> None:
+        clean_id = _clean_text(suggestion_id).upper()
+        clean_key = _clean_text(cache_key)
+        with _cursor() as cur:
+            cur.execute(
+                "UPDATE suggestion_catalog AS catalog SET active_cache_key = answer.cache_key, "
+                "updated_by = %s, updated_at = now(), row_version = row_version + 1 "
+                "FROM suggestion_answer_cache AS answer "
+                "WHERE catalog.suggestion_id = %s AND answer.cache_key = %s "
+                "AND answer.suggestion_id = catalog.suggestion_id "
+                "AND answer.question = catalog.canonical_question "
+                "AND answer.validation_status = 'VALIDATED' "
+                "RETURNING catalog.suggestion_id",
+                (_clean_text(actor) or "SYSTEM", clean_id, clean_key),
+            )
+            if cur.fetchone() is None:
+                raise ValueError("검증된 동일 질의 답변만 활성화할 수 있습니다.")
 
     def get(self, cache_key: str) -> CachedAnswerBundle | None:
         with _cursor() as cur:
             cur.execute(
                 "UPDATE suggestion_answer_cache SET hit_count = hit_count + 1, "
-                "last_hit_at = now(), updated_at = now() "
+                "last_hit_at = now() "
                 "WHERE cache_key = %s AND validation_status = 'VALIDATED' "
-                "AND expires_at > now() RETURNING " + self._SELECT_COLUMNS,
+                "RETURNING " + self._SELECT_COLUMNS,
                 (_clean_text(cache_key),),
             )
             row = cur.fetchone()
@@ -441,8 +528,7 @@ class PostgresSuggestionAnswerCache:
         with _cursor() as cur:
             cur.execute(
                 "SELECT " + self._SELECT_COLUMNS + " FROM suggestion_answer_cache "
-                "WHERE cache_key = %s AND validation_status = 'VALIDATED' "
-                "AND expires_at > now()",
+                "WHERE cache_key = %s AND validation_status = 'VALIDATED'",
                 (_clean_text(cache_key),),
             )
             row = cur.fetchone()
@@ -456,7 +542,7 @@ class PostgresSuggestionAnswerCache:
                 "raw_result, basis_result, pipeline_name, runtime_revision, "
                 "validation_status, expires_at) "
                 "VALUES (%s, %s, %s, %s, %s, %s::jsonb, %s::jsonb, %s::jsonb, "
-                "%s, %s, 'VALIDATED', now() + (%s * interval '1 second')) "
+                "%s, %s, 'VALIDATED', NULL) "
                 "ON CONFLICT (cache_key) DO UPDATE SET "
                 "suggestion_id = EXCLUDED.suggestion_id, business = EXCLUDED.business, "
                 "keyword = EXCLUDED.keyword, question = EXCLUDED.question, "
@@ -476,36 +562,56 @@ class PostgresSuggestionAnswerCache:
                     json.dumps(bundle.basis_result, ensure_ascii=False),
                     _clean_text(bundle.pipeline_name),
                     _clean_text(bundle.runtime_revision),
-                    self.ttl_seconds,
                 ),
             )
-            cur.execute("DELETE FROM suggestion_answer_cache WHERE expires_at <= now()")
-            cur.execute("SELECT count(*) AS n FROM suggestion_answer_cache")
-            overflow = max(0, int(cur.fetchone()["n"]) - self.max_entries)
-            if overflow:
-                cur.execute(
-                    "DELETE FROM suggestion_answer_cache WHERE cache_key IN ("
-                    "SELECT cache_key FROM suggestion_answer_cache "
-                    "ORDER BY updated_at ASC LIMIT %s)",
-                    (overflow,),
-                )
+            # The first validated answer becomes active.  Later generated
+            # versions remain history until an administrator explicitly calls
+            # activate(), so deployments cannot silently replace user content.
+            cur.execute(
+                "UPDATE suggestion_catalog SET active_cache_key = %s, updated_at = now(), "
+                "row_version = row_version + 1 WHERE suggestion_id = %s "
+                "AND canonical_question = %s AND active_cache_key IS NULL",
+                (
+                    _clean_text(bundle.cache_key),
+                    _clean_text(bundle.suggestion_id).upper(),
+                    _clean_text(bundle.question),
+                ),
+            )
 
     def stats(self) -> dict[str, Any]:
         with _cursor() as cur:
             cur.execute(
-                "SELECT count(*) FILTER (WHERE validation_status = 'VALIDATED' "
-                "AND expires_at > now()) AS active, "
-                "coalesce(sum(hit_count), 0) AS hits, "
-                "count(*) FILTER (WHERE expires_at <= now()) AS expired "
+                "SELECT count(*) FILTER (WHERE validation_status = 'VALIDATED') AS active, "
+                "coalesce(sum(hit_count), 0) AS hits "
                 "FROM suggestion_answer_cache"
             )
             row = cur.fetchone()
+            cur.execute(
+                "SELECT count(*) FILTER (WHERE is_enabled) AS catalog_count, "
+                "count(*) FILTER (WHERE catalog.is_enabled AND answer.cache_key IS NOT NULL "
+                "AND answer.validation_status = 'VALIDATED') AS active_count, "
+                "coalesce(array_agg(catalog.suggestion_id ORDER BY catalog.display_order) "
+                "FILTER (WHERE catalog.is_enabled AND (answer.cache_key IS NULL "
+                "OR answer.validation_status <> 'VALIDATED')), ARRAY[]::varchar[]) "
+                "AS missing_ids FROM suggestion_catalog AS catalog "
+                "LEFT JOIN suggestion_answer_cache AS answer "
+                "ON answer.cache_key = catalog.active_cache_key"
+            )
+            readiness = cur.fetchone()
+        catalog_count = int(readiness["catalog_count"] or 0)
+        active_count = int(readiness["active_count"] or 0)
         return {
             "backend": "postgres",
-            "schema_version": "kdic-suggestion-answer-bundle-v5.1",
+            "schema_version": "kdic-managed-suggestion-answer-v6",
             "entry_count": int(row["active"] or 0),
+            "catalog_count": catalog_count,
+            "active_count": active_count,
+            "missing_active_count": max(0, catalog_count - active_count),
+            "missing_suggestion_ids": list(readiness["missing_ids"] or []),
+            "ready": catalog_count == 26 and active_count == 26,
             "hits": int(row["hits"] or 0),
-            "expired": int(row["expired"] or 0),
-            "ttl_seconds": self.ttl_seconds,
+            "expired": 0,
+            "ttl_seconds": None,
+            "retention_policy": "MANUAL_REPLACEMENT_NO_TTL",
             "max_entries": self.max_entries,
         }

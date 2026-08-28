@@ -149,18 +149,20 @@ def main() -> None:
     }
     compatible_overlay_revisions.add(str(runtime_build.get("overlay_revision") or ""))
     cache = postgres.PostgresSuggestionAnswerCache(
-        ttl_seconds=int(os.getenv("KDIC_SUGGESTION_CACHE_TTL_SECONDS", "2592000")),
         max_entries=int(os.getenv("KDIC_SUGGESTION_CACHE_MAX_ENTRIES", "2000")),
     )
+    catalog = core.suggestion_catalog()
+    cache.sync_catalog(catalog)
 
     summary = {
         "catalog_rows": 0,
         "already_cached": 0,
+        "invalid_active": 0,
         "seeded_from_jobs": 0,
         "generated_live": 0,
         "failed": [],
     }
-    for index, suggestion in enumerate(core.suggestion_catalog(), start=1):
+    for index, suggestion in enumerate(catalog, start=1):
         summary["catalog_rows"] += 1
         cache_key = ":".join(
             [
@@ -169,10 +171,28 @@ def main() -> None:
                 suggestion["suggestion_id"],
             ]
         )
-        if cache.peek(cache_key) is not None:
-            summary["already_cached"] += 1
-            print(json.dumps({"index": index, "status": "already_cached"}))
-            continue
+        active = cache.peek_active(suggestion["suggestion_id"])
+        if active is not None:
+            try:
+                active_public = core.normalize_public_result(active.raw_result)
+                active_answer = core._explicit_answer_from_result(active.raw_result)
+                if active_answer:
+                    active_public["answer"] = active_answer
+                active_eligible, _ = core.KDICJobService._cache_eligibility(
+                    active_public,
+                    suggestion["business"],
+                )
+            except Exception:
+                active_eligible = False
+            if (
+                active_eligible
+                and active.question == suggestion["query"]
+                and active.suggestion_id == suggestion["suggestion_id"]
+            ):
+                summary["already_cached"] += 1
+                print(json.dumps({"index": index, "status": "already_cached"}))
+                continue
+            summary["invalid_active"] += 1
 
         seeded = False
         if not args.skip_existing_job_seed:
@@ -204,6 +224,9 @@ def main() -> None:
                         runtime_revision=runtime_namespace,
                     )
                 )
+                cache.activate(
+                    suggestion["suggestion_id"], cache_key, actor="PREWARM"
+                )
                 summary["seeded_from_jobs"] += 1
                 seeded = True
                 print(json.dumps({"index": index, "status": "seeded_from_job"}))
@@ -224,6 +247,7 @@ def main() -> None:
         result = dict(job.get("result") or {})
         cache_meta = dict(result.get("suggestion_cache") or {})
         if job.get("status") == "done" and cache_meta.get("stored"):
+            cache.activate(suggestion["suggestion_id"], cache_key, actor="PREWARM")
             summary["generated_live"] += 1
             print(json.dumps({"index": index, "status": "generated_live"}))
         else:
@@ -237,23 +261,36 @@ def main() -> None:
             summary["failed"].append(failure)
             print(json.dumps({"index": index, "status": "failed", "reason": failure["reason"]}))
 
-    catalog = core.suggestion_catalog()
-    current_ready = 0
+    persistent_ready = 0
     for suggestion in catalog:
-        current_key = ":".join(
-            [
-                core.SUGGESTION_CACHE_SCHEMA_VERSION,
-                runtime_namespace,
-                suggestion["suggestion_id"],
-            ]
-        )
-        if cache.peek(current_key) is not None:
-            current_ready += 1
+        active = cache.peek_active(suggestion["suggestion_id"])
+        if active is None:
+            continue
+        try:
+            active_public = core.normalize_public_result(active.raw_result)
+            active_answer = core._explicit_answer_from_result(active.raw_result)
+            if active_answer:
+                active_public["answer"] = active_answer
+            active_eligible, _ = core.KDICJobService._cache_eligibility(
+                active_public,
+                suggestion["business"],
+            )
+        except Exception:
+            active_eligible = False
+        if (
+            active_eligible
+            and active.question == suggestion["query"]
+            and active.suggestion_id == suggestion["suggestion_id"]
+        ):
+            persistent_ready += 1
 
-    summary["current_runtime_ready"] = current_ready
+    summary["persistent_catalog_ready"] = persistent_ready
+    # Backward-compatible field name for deployment scripts written before the
+    # catalog became runtime-independent.
+    summary["current_runtime_ready"] = persistent_ready
     summary["cache_stats"] = cache.stats()
     print(json.dumps({"summary": summary}, ensure_ascii=False, indent=2))
-    if summary["failed"] or current_ready != len(catalog):
+    if summary["failed"] or persistent_ready != len(catalog):
         raise SystemExit(1)
 
 

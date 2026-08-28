@@ -16,7 +16,7 @@ UI_FILE = BASE_DIR / "2026-08-23-kdic-chat-ui.html"
 ADAPTER_FILE = BASE_DIR / "2026-08-23-kdic-colab-runtime-adapter.py"
 POSTGRES_FILE = BASE_DIR / "kdic_postgres_store.py"
 PREWARM_FILE = BASE_DIR / "2026-08-26-prewarm-kdic-suggestion-answer-cache.py"
-MIGRATION_FILE = BASE_DIR.parent / "2026-08-26-kdic-suggestion-answer-cache-migration.sql"
+MIGRATION_FILE = BASE_DIR.parent / "2026-08-28-kdic-persistent-suggestion-catalog-migration.sql"
 
 
 def _load_module(name: str, path: Path):
@@ -177,7 +177,10 @@ def test_static_contracts() -> dict[str, str]:
     assert "input.focus({preventScroll:true})" in ui
     assert "finally{state.busy=false;updateSendState();input.focus();scrollBottom()}" not in ui
     assert "class PostgresSuggestionAnswerCache" in postgres
-    assert "CREATE TABLE IF NOT EXISTS suggestion_answer_cache" in migration
+    assert "CREATE TABLE IF NOT EXISTS suggestion_catalog" in migration
+    assert "ALTER COLUMN expires_at DROP NOT NULL" in migration
+    assert "SET expires_at = NULL" in migration
+    assert "cache.peek_active" in prewarm
     assert "compatible_overlay_revisions" in prewarm
     assert "normalized_public = core.normalize_public_result(raw)" in prewarm
     return {
@@ -242,7 +245,7 @@ def test_user_basis_contract(core) -> dict[str, str]:
         ],
     }
     fallback = core.default_basis_from_result(raw_result)
-    assert core.SUGGESTION_CACHE_SCHEMA_VERSION == "kdic-suggestion-answer-bundle-v5.1"
+    assert core.SUGGESTION_CACHE_SCHEMA_VERSION == "kdic-managed-suggestion-answer-v6"
     assert fallback["schema_version"] == "kdic-basis-explanation-v2"
     assert len(fallback["items"]) == 1
     assert fallback["items"][0]["evidence_ids"] == ["E1"]
@@ -619,8 +622,8 @@ def test_memory_cache_flow(core) -> dict[str, str]:
         service.submit("prompt-version-session", first["query"], first["suggestion_id"]),
     )
     assert prompt_changed_job.status == "done"
-    assert prompt_changed_job.result["suggestion_cache"]["hit"] is False
-    assert pipeline.calls == 4
+    assert prompt_changed_job.result["suggestion_cache"]["hit"] is True
+    assert pipeline.calls == 3
 
     other_pipeline = FakePipeline(revision="revision-b")
     other_service = core.KDICJobService(
@@ -631,6 +634,15 @@ def test_memory_cache_flow(core) -> dict[str, str]:
     assert service._cache_key(first["suggestion_id"]) != other_service._cache_key(
         first["suggestion_id"]
     )
+    other_hit_job = _wait_job(
+        other_service,
+        other_service.submit(
+            "other-runtime-session", first["query"], first["suggestion_id"]
+        ),
+    )
+    assert other_hit_job.status == "done"
+    assert other_hit_job.result["suggestion_cache"]["hit"] is True
+    assert other_pipeline.calls == 0
     fallback_runtime = core.PipelineRuntime(lambda question, state: {})
     fallback_state: dict[str, Any] = {}
     fallback_runtime.record_cached_turn(
@@ -656,8 +668,8 @@ def test_memory_cache_flow(core) -> dict[str, str]:
         "cache_hit_business_scope": "canonical_business_applied",
         "mismatched_business_bundle": "not_stored",
         "forged_id_query_pair": "live_fallback",
-        "runtime_revision_invalidation": "passed",
-        "prompt_revision_invalidation": "passed",
+        "runtime_revision_persistence": "passed",
+        "prompt_revision_persistence": "passed",
         "fallback_cached_scope_canonicalization": "passed",
     }
 

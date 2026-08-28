@@ -56,7 +56,7 @@ class LatestKDICNotebookAdapter:
             "2026-08-26-v15-multiturn-scope-coherence-v14",
         ],
         "adapter_version": "2026-08-26-ec2-production-v15",
-        "suggestion_cache_schema": "kdic-suggestion-answer-bundle-v5.1",
+        "suggestion_cache_schema": "kdic-managed-suggestion-answer-v6",
     }
 
     def __init__(self, runtime_globals: Mapping[str, Any]):

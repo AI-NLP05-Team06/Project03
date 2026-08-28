@@ -262,7 +262,7 @@ FOLLOWUP_QUERY_OVERRIDES: dict[tuple[str, str], str] = {
         "예금보험금으로 지급되는 1인당 최대 금액을 알려주세요."
     ),
 }
-SUGGESTION_CACHE_SCHEMA_VERSION = "kdic-suggestion-answer-bundle-v5.1"
+SUGGESTION_CACHE_SCHEMA_VERSION = "kdic-managed-suggestion-answer-v6"
 BASIS_EXPLANATION_SCHEMA_VERSION = "kdic-basis-explanation-v2"
 ANSWER_SUMMARY_SCHEMA_VERSION = "kdic-answer-summary-v1"
 _SUGGESTION_BY_ID: dict[str, dict[str, str]] = {}
@@ -1404,27 +1404,88 @@ class CachedAnswerBundle:
 
 
 class InMemorySuggestionAnswerCache:
-    """Validated recommendation answer bundles for local development and Colab."""
+    """Durable-by-policy recommendation bundles for local development and Colab.
+
+    The production implementation persists the same contract in PostgreSQL.  A
+    registered suggestion keeps one explicitly active answer across runtime,
+    prompt, and build revisions until a replacement is activated.
+    """
 
     def __init__(self, ttl_seconds: int = 2_592_000, max_entries: int = 200):
         self.ttl_seconds = max(60, int(ttl_seconds))
         self.max_entries = max(10, int(max_entries))
         self._lock = threading.RLock()
         self._records: dict[str, CachedAnswerBundle] = {}
+        self._catalog: dict[str, dict[str, Any]] = {}
+        self._active_keys: dict[str, str] = {}
         self._hits = 0
         self._misses = 0
         self._stores = 0
 
     def _cleanup_locked(self) -> None:
-        cutoff = time.time() - self.ttl_seconds
-        for key in [
-            key for key, row in self._records.items() if row.updated_at < cutoff
-        ]:
-            self._records.pop(key, None)
+        # Registered answers have no time-based expiry.  If a local developer
+        # creates many historical revisions, only non-active revisions may be
+        # evicted to respect the memory cap.
         if len(self._records) > self.max_entries:
+            active_keys = set(self._active_keys.values())
             ordered = sorted(self._records.values(), key=lambda row: row.updated_at)
-            for row in ordered[: len(self._records) - self.max_entries]:
+            removable = [row for row in ordered if row.cache_key not in active_keys]
+            for row in removable[: len(self._records) - self.max_entries]:
                 self._records.pop(row.cache_key, None)
+
+    def sync_catalog(self, rows: Sequence[Mapping[str, Any]]) -> None:
+        records = [dict(row) for row in rows]
+        ids = [_clean_text(row.get("suggestion_id")).upper() for row in records]
+        if len(records) != 26 or len(set(ids)) != 26 or not all(ids):
+            raise ValueError("고정 추천 질의 카탈로그는 고유한 26개 항목이어야 합니다.")
+        with self._lock:
+            for display_order, row in enumerate(records, start=1):
+                suggestion_id = _clean_text(row.get("suggestion_id")).upper()
+                self._catalog.setdefault(
+                    suggestion_id,
+                    {
+                        "suggestion_id": suggestion_id,
+                        "business": _clean_text(row.get("business")),
+                        "keyword": _clean_text(row.get("label")),
+                        "canonical_question": _clean_text(row.get("query")),
+                        "display_order": display_order,
+                        "is_enabled": True,
+                    },
+                )
+
+    def get_active(self, suggestion_id: str) -> CachedAnswerBundle | None:
+        clean_id = _clean_text(suggestion_id).upper()
+        with self._lock:
+            self._cleanup_locked()
+            key = self._active_keys.get(clean_id, "")
+            row = self._records.get(key)
+            if row is None:
+                self._misses += 1
+                return None
+            row.hit_count += 1
+            self._hits += 1
+            return copy.deepcopy(row)
+
+    def peek_active(self, suggestion_id: str) -> CachedAnswerBundle | None:
+        clean_id = _clean_text(suggestion_id).upper()
+        with self._lock:
+            self._cleanup_locked()
+            row = self._records.get(self._active_keys.get(clean_id, ""))
+            return copy.deepcopy(row) if row is not None else None
+
+    def activate(self, suggestion_id: str, cache_key: str) -> None:
+        clean_id = _clean_text(suggestion_id).upper()
+        clean_key = _clean_text(cache_key)
+        with self._lock:
+            row = self._records.get(clean_key)
+            catalog = self._catalog.get(clean_id)
+            if row is None or catalog is None:
+                raise KeyError(clean_id or clean_key)
+            if _clean_text(row.suggestion_id).upper() != clean_id:
+                raise ValueError("다른 추천 질의의 답변은 활성화할 수 없습니다.")
+            if row.question != catalog["canonical_question"]:
+                raise ValueError("표준 질의와 일치하는 답변만 활성화할 수 있습니다.")
+            self._active_keys[clean_id] = clean_key
 
     def get(self, cache_key: str) -> CachedAnswerBundle | None:
         clean_key = _clean_text(cache_key)
@@ -1434,7 +1495,6 @@ class InMemorySuggestionAnswerCache:
             if row is None:
                 self._misses += 1
                 return None
-            row.updated_at = time.time()
             row.hit_count += 1
             self._hits += 1
             return copy.deepcopy(row)
@@ -1449,6 +1509,14 @@ class InMemorySuggestionAnswerCache:
         with self._lock:
             self._cleanup_locked()
             self._records[bundle.cache_key] = copy.deepcopy(bundle)
+            clean_id = _clean_text(bundle.suggestion_id).upper()
+            catalog = self._catalog.get(clean_id)
+            if (
+                catalog is not None
+                and bundle.question == catalog["canonical_question"]
+                and clean_id not in self._active_keys
+            ):
+                self._active_keys[clean_id] = bundle.cache_key
             self._stores += 1
             self._cleanup_locked()
 
@@ -1460,11 +1528,19 @@ class InMemorySuggestionAnswerCache:
                 "backend": "memory",
                 "schema_version": SUGGESTION_CACHE_SCHEMA_VERSION,
                 "entry_count": len(self._records),
+                "catalog_count": len(self._catalog),
+                "active_count": len(self._active_keys),
+                "missing_active_count": max(
+                    0, len(self._catalog) - len(self._active_keys)
+                ),
+                "ready": bool(self._catalog)
+                and len(self._active_keys) == len(self._catalog),
                 "hits": self._hits,
                 "misses": self._misses,
                 "stores": self._stores,
                 "hit_rate": round(self._hits / total, 4) if total else 0.0,
-                "ttl_seconds": self.ttl_seconds,
+                "ttl_seconds": None,
+                "retention_policy": "MANUAL_REPLACEMENT_NO_TTL",
                 "max_entries": self.max_entries,
             }
 
@@ -1615,6 +1691,9 @@ class KDICJobService:
         self.sessions = sessions or InMemorySessionStore()
         self.jobs = jobs or InMemoryJobStore()
         self.suggestion_cache = suggestion_cache or InMemorySuggestionAnswerCache()
+        sync_catalog = getattr(self.suggestion_cache, "sync_catalog", None)
+        if callable(sync_catalog):
+            sync_catalog(suggestion_catalog())
         self.executor = ThreadPoolExecutor(
             max_workers=max(1, int(max_workers)), thread_name_prefix="kdic-pipeline"
         )
@@ -1677,7 +1756,12 @@ class KDICJobService:
         )
         if cache_key:
             lookup_started = time.perf_counter()
-            bundle = self.suggestion_cache.get(cache_key)
+            get_active = getattr(self.suggestion_cache, "get_active", None)
+            bundle = (
+                get_active(clean_suggestion_id)
+                if callable(get_active)
+                else self.suggestion_cache.get(cache_key)
+            )
             lookup_ms = (time.perf_counter() - lookup_started) * 1000.0
             expected_business = _clean_text(suggestion.get("business"))
             bundle_eligible = False
@@ -1854,7 +1938,12 @@ class KDICJobService:
             raise RuntimeError("완료된 답변만 근거를 조회할 수 있습니다.")
         cache_meta = _mapping(_mapping(record.result).get("suggestion_cache"))
         if record.cache_key and cache_meta.get("hit") is True:
-            bundle = self.suggestion_cache.peek(record.cache_key)
+            peek_active = getattr(self.suggestion_cache, "peek_active", None)
+            bundle = (
+                peek_active(record.suggestion_id)
+                if callable(peek_active)
+                else self.suggestion_cache.peek(record.cache_key)
+            )
             suggestion = resolve_registered_suggestion(
                 record.question,
                 record.suggestion_id,

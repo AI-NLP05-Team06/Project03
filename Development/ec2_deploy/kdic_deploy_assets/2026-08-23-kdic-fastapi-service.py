@@ -118,9 +118,6 @@ if os.getenv("KDIC_DATABASE_URL", "").strip():
         max_jobs=_env_int("KDIC_MAX_JOBS", 5_000, 50, 500_000),
     )
     SUGGESTION_ANSWER_CACHE = pg_store.PostgresSuggestionAnswerCache(
-        ttl_seconds=_env_int(
-            "KDIC_SUGGESTION_CACHE_TTL_SECONDS", 2_592_000, 60, 31_536_000
-        ),
         max_entries=_env_int(
             "KDIC_SUGGESTION_CACHE_MAX_ENTRIES", 2_000, 10, 100_000
         ),
@@ -135,9 +132,6 @@ else:
         max_jobs=_env_int("KDIC_MAX_JOBS", 5_000, 50, 500_000),
     )
     SUGGESTION_ANSWER_CACHE = core.InMemorySuggestionAnswerCache(
-        ttl_seconds=_env_int(
-            "KDIC_SUGGESTION_CACHE_TTL_SECONDS", 2_592_000, 60, 31_536_000
-        ),
         max_entries=_env_int(
             "KDIC_SUGGESTION_CACHE_MAX_ENTRIES", 200, 10, 10_000
         ),
