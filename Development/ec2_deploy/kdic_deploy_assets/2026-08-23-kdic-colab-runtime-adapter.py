@@ -51,11 +51,11 @@ class LatestKDICNotebookAdapter:
         "dc1_enabled": False,
         "build_sha256": "F9A908D62A43EA3A3566A5D8DF0E982F214373FFF96470A749DC1EFE79E25083",
         "overlay_file": "2026-08-25-kdic-production-overlay.py",
-        "overlay_revision": "2026-08-26-v15-multiturn-scope-coherence-v14",
+        "overlay_revision": "2026-08-28-v15-lightweight-route-repair-v15",
         "cache_compatible_overlay_revisions": [
-            "2026-08-26-v15-multiturn-scope-coherence-v14",
+            "2026-08-28-v15-lightweight-route-repair-v15",
         ],
-        "adapter_version": "2026-08-26-ec2-production-v15",
+        "adapter_version": "2026-08-28-ec2-production-v16",
         "suggestion_cache_schema": "kdic-managed-suggestion-answer-v6",
     }
 

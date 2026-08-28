@@ -149,7 +149,7 @@ def test_static_contracts() -> dict[str, Any]:
     assert "2026-08-25-kdic-production-overlay.py" in engine
     assert "execute_production_variant_v1" in overlay
     assert "C_DEFAULT_DC2_COMPARE_ONLY_V1" in overlay
-    assert "2026-08-26-v15-multiturn-scope-coherence-v14" in overlay
+    assert "2026-08-28-v15-lightweight-route-repair-v15" in overlay
     assert "classify_non_retrieval_utterance" in router
     assert "_non_retrieval_search_guard_v1" in overlay
     assert "반드시 유효한 단일 JSON 객체 하나만 출력" in overlay
@@ -166,8 +166,8 @@ def test_static_contracts() -> dict[str, Any]:
     assert '"runtime_build": dict(RUNTIME_BUILD_INFO)' in api
     assert EXPECTED_SOURCE_SHA256 in overlay
     assert EXPECTED_SOURCE_SHA256 in adapter
-    assert "2026-08-26-v15-multiturn-scope-coherence-v14" in adapter
-    assert '"adapter_version": "2026-08-26-ec2-production-v15"' in adapter
+    assert "2026-08-28-v15-lightweight-route-repair-v15" in adapter
+    assert '"adapter_version": "2026-08-28-ec2-production-v16"' in adapter
     assert "cache_compatible_overlay_revisions" in adapter
     assert "2026-08-26-explicit-allowed-citation-ids-v11" not in adapter
     assert "2026-08-26-declared-citation-canonicalization-v12" not in adapter
@@ -357,6 +357,7 @@ def test_overlay_exec_contract() -> dict[str, Any]:
         "generate_c_direct_threeway_v1",
         "order_businesses_by_question_p0_v1",
         "build_p0_cross_business_subqueries_v1",
+        "_lightweight_retrieval_repair_v1",
         "_current_question_scoped_analysis_v1",
         "_non_retrieval_search_guard_v1",
         "generate_user_basis_explanation_v1",
@@ -824,6 +825,43 @@ def test_v15_direct_router_contract() -> dict[str, Any]:
     }
 
 
+def test_lightweight_retrieval_repair() -> dict[str, Any]:
+    overlay = OVERLAY_FILE.read_text(encoding="utf-8")
+    router = _load_module("kdic_lightweight_route_repair_test", ROUTER_FILE)
+    namespace: dict[str, Any] = {
+        "Any": Any,
+        "Mapping": Mapping,
+        "light_router": router,
+    }
+    exec(_function_source(overlay, "_lightweight_retrieval_repair_v1"), namespace)
+    repair = namespace["_lightweight_retrieval_repair_v1"]
+    stale = {
+        "route": "CLARIFY",
+        "route_reasons": ["STALE_ANALYZER_CLARIFY"],
+        "businesses": [],
+        "plans": [],
+    }
+    natural_cases = (
+        "나 돈을 잘못보냈는데 어떻게 해?",
+        "돈을 잘못 보냈는데 어떻게 해야 하나요?",
+        "송금을 실수했는데 돌려받을 수 있나요?",
+        "계좌번호를 잘못 입력해서 돈을 보냈어요",
+    )
+    for question in natural_cases:
+        repaired = repair(question, stale)
+        assert repaired["route"] == "RETRIEVE", repaired
+        assert repaired["businesses"] == ["착오송금 반환 신청"], repaired
+        assert repaired["lightweight_route_repair_applied"] is True, repaired
+        assert repaired["plans"], repaired
+
+    for question in ("뭐", "방가방가", "비트코인 가격 알려줘"):
+        assert repair(question, stale) == stale, question
+    return {
+        "repaired_natural_transfer_queries": len(natural_cases),
+        "non_retrieval_routes_preserved": 3,
+    }
+
+
 def test_non_retrieve_skips_common_search() -> dict[str, Any]:
     overlay = OVERLAY_FILE.read_text(encoding="utf-8")
     engine = ENGINE_FILE.read_text(encoding="utf-8")
@@ -857,6 +895,7 @@ def test_non_retrieve_skips_common_search() -> dict[str, Any]:
         "_LAST_RERANK_TRACE": {"stale": True},
         "_LAST_PARENT_CHILD_TRACE": {"stale": True},
     }
+    exec(_function_source(overlay, "_lightweight_retrieval_repair_v1"), namespace)
     exec(_function_source(overlay, "_current_question_scoped_analysis_v1"), namespace)
     exec(_function_source(overlay, "_non_retrieval_search_guard_v1"), namespace)
     exec(_function_source(engine, "_route_message"), namespace)
@@ -1672,6 +1711,7 @@ def main() -> None:
         "evidence": test_evidence_gate(),
         "routing": test_routing_and_cross_structure(),
         "v15_direct_router": test_v15_direct_router_contract(),
+        "lightweight_retrieval_repair": test_lightweight_retrieval_repair(),
         "non_retrieve_search_gate": test_non_retrieve_skips_common_search(),
         "v15_preflight": test_v15_preflight_skips_context_classifier(),
         "business_mapping": test_current_question_business_mapping(),

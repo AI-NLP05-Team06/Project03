@@ -10,7 +10,7 @@ import kdic_lightweight_router_v1 as light_router
 
 KDIC_PRODUCTION_OVERLAY_SOURCE_SHA256 = "F9A908D62A43EA3A3566A5D8DF0E982F214373FFF96470A749DC1EFE79E25083"
 KDIC_PRODUCTION_OVERLAY_POLICY = "C_DEFAULT_DC2_COMPARE_ONLY_V1"
-KDIC_PRODUCTION_OVERLAY_REVISION = "2026-08-26-v15-multiturn-scope-coherence-v14"
+KDIC_PRODUCTION_OVERLAY_REVISION = "2026-08-28-v15-lightweight-route-repair-v15"
 
 
 # ==== overlay: how-word-classification ====
@@ -474,6 +474,60 @@ def new_bd_comparison_state() -> dict[str, Any]:
     return new_context_state()
 
 
+def _lightweight_retrieval_repair_v1(
+    question: str,
+    analysis: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Promote a high-confidence business route missed by the V1.5 analyzer."""
+
+    output = dict(analysis)
+    if str(output.get("route") or "").upper() == "RETRIEVE":
+        return output
+    try:
+        routed = dict(light_router.route_query(str(question or "")) or {})
+        lightweight = dict(routed.get("analysis") or {})
+        businesses = list(dict.fromkeys(
+            str(value).strip()
+            for value in lightweight.get("business_functions") or []
+            if str(value).strip()
+        ))
+        query_plans = list(routed.get("query_plans") or [])
+    except Exception:
+        return output
+    if (
+        str(lightweight.get("route") or "").upper() != "RETRIEVE"
+        or len(businesses) != 1
+        or not query_plans
+    ):
+        return output
+
+    clean_question = str(question or "").strip()
+    output.update({
+        "route": "RETRIEVE",
+        "route_reasons": list(dict.fromkeys(
+            list(output.get("route_reasons") or [])
+            + ["LIGHTWEIGHT_HIGH_CONFIDENCE_BUSINESS_REPAIR"]
+        )),
+        "route_response": "",
+        "resolved_question": clean_question,
+        "normalized_question": clean_question,
+        "businesses": businesses,
+        "question_businesses": businesses,
+        "missing_information": [],
+        "query_type": "SINGLE",
+        "cross_business_candidate": False,
+        "p0_cross_preserved": False,
+        "plans": [{
+            "query": clean_question,
+            "weight": 1.0,
+            "source": "LIGHTWEIGHT_ROUTE_REPAIR",
+        }],
+        "query_plan_valid": True,
+        "lightweight_route_repair_applied": True,
+    })
+    return output
+
+
 def _current_question_scoped_analysis_v1(
     question: str,
     analysis: Mapping[str, Any],
@@ -700,7 +754,10 @@ def prepare_common_retrieval_v1(
         question,
         _current_question_scoped_analysis_v1(
             question,
-            ANALYZER_FUNCTIONS["v15"](question, state),
+            _lightweight_retrieval_repair_v1(
+                question,
+                ANALYZER_FUNCTIONS["v15"](question, state),
+            ),
         ),
     )
     analysis_ms = (time.perf_counter() - total_started) * 1000
