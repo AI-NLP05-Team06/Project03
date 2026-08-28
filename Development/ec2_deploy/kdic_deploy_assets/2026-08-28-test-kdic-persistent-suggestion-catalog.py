@@ -72,6 +72,14 @@ def test_fixed_catalog(core) -> dict[str, object]:
     catalog = core.suggestion_catalog()
     assert len(catalog) == 26
     assert len({row["suggestion_id"] for row in catalog}) == 26
+    assert {row["suggestion_id"] for row in catalog} == set(
+        core.FOLLOWUP_SUGGESTION_IDS.values()
+    )
+    assert not any(
+        bad in row["query"]
+        for row in catalog
+        for bad in ("서류을", "절차을", "시기을", "한도을", "자료을")
+    )
 
     cache = core.InMemorySuggestionAnswerCache(ttl_seconds=60, max_entries=100)
     cache.sync_catalog(catalog)

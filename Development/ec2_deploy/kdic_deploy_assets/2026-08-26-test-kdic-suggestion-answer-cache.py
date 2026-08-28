@@ -196,6 +196,14 @@ def test_registry(core) -> dict[str, Any]:
     assert len({row["suggestion_id"] for row in catalog}) == 26
     assert len({row["query"] for row in catalog}) == 26
     assert len({row["business_key"] for row in catalog}) == 6
+    assert {row["suggestion_id"] for row in catalog} == set(
+        core.FOLLOWUP_SUGGESTION_IDS.values()
+    )
+    assert not any(
+        bad in row["query"]
+        for row in catalog
+        for bad in ("서류을", "절차을", "시기을", "한도을", "자료을")
+    )
     by_key = {(row["business_key"], row["label"]): row for row in catalog}
     assert by_key[("예금자보호", "제외 상품")]["query"].startswith("예금자보호제도에서")
     assert "본인 명의" in by_key[("미수령금", "조회 방법")]["query"]

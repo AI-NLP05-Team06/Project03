@@ -262,6 +262,34 @@ FOLLOWUP_QUERY_OVERRIDES: dict[tuple[str, str], str] = {
         "예금보험금으로 지급되는 1인당 최대 금액을 알려주세요."
     ),
 }
+FOLLOWUP_SUGGESTION_IDS: dict[tuple[str, str], str] = {
+    ("착오송금", "신청 대상"): "SQ-79CEF3DA87345ECD",
+    ("착오송금", "신청 기한"): "SQ-C1F0B95324F15224",
+    ("착오송금", "필요 서류"): "SQ-2060AAB635105137",
+    ("착오송금", "처리 절차"): "SQ-B791CB88BFC45CF3",
+    ("착오송금", "회수 비용"): "SQ-431A2942D4D15E21",
+    ("예금보험금", "신청 방법"): "SQ-DA5D9990C81158B4",
+    ("예금보험금", "필요 서류"): "SQ-459DECFF580A5384",
+    ("예금보험금", "지급 절차"): "SQ-320F0AB620FF5A12",
+    ("예금보험금", "지급 시기"): "SQ-FF6F9636C6005A67",
+    ("예금보험금", "보호 한도"): "SQ-AFF74BB75B4E5263",
+    ("예금자보호", "보호 대상"): "SQ-E858B33F1F8859EA",
+    ("예금자보호", "보호 한도"): "SQ-AC6E709EA06D5BD8",
+    ("예금자보호", "제외 상품"): "SQ-34337A1A56DA5E56",
+    ("예금자보호", "금융회사별 계산"): "SQ-B9B93FD5312A5723",
+    ("미수령금", "조회 방법"): "SQ-06038E408FDB51CE",
+    ("미수령금", "신청 방법"): "SQ-2E6A736F6DF152CA",
+    ("미수령금", "필요 서류"): "SQ-BFF8C8C20FF95C88",
+    ("미수령금", "지급 절차"): "SQ-A8BD396C8E29557D",
+    ("채무조정", "신청 대상"): "SQ-DC1C2DF71A0B5C34",
+    ("채무조정", "신청 방법"): "SQ-0094EEF3AE065B6A",
+    ("채무조정", "필요 서류"): "SQ-BC43EF4C7E93539C",
+    ("채무조정", "조정 절차"): "SQ-66BFA311A16459DB",
+    ("은닉재산", "신고 방법"): "SQ-297AE983F3965793",
+    ("은닉재산", "포상금 기준"): "SQ-3DB57AA2713E54A0",
+    ("은닉재산", "필요 자료"): "SQ-2052C10901E15DEF",
+    ("은닉재산", "처리 절차"): "SQ-A049AF6FABE55BA4",
+}
 SUGGESTION_CACHE_SCHEMA_VERSION = "kdic-managed-suggestion-answer-v6"
 BASIS_EXPLANATION_SCHEMA_VERSION = "kdic-basis-explanation-v2"
 ANSWER_SUMMARY_SCHEMA_VERSION = "kdic-answer-summary-v1"
@@ -269,11 +297,14 @@ _SUGGESTION_BY_ID: dict[str, dict[str, str]] = {}
 _SUGGESTIONS_BY_BUSINESS_KEY: dict[str, list[dict[str, str]]] = {}
 
 
-def _suggestion_id(business: str, label: str, query: str) -> str:
-    return "SQ-" + uuid.uuid5(
-        uuid.NAMESPACE_URL,
-        f"kdic://suggestion/{business}/{label}/{query}",
-    ).hex[:16].upper()
+def _korean_object_marker(value: str) -> str:
+    clean = _clean_text(value)
+    if not clean:
+        return "을"
+    codepoint = ord(clean[-1])
+    if 0xAC00 <= codepoint <= 0xD7A3:
+        return "을" if (codepoint - 0xAC00) % 28 else "를"
+    return "을"
 
 
 def _build_suggestion_registry() -> None:
@@ -282,10 +313,11 @@ def _build_suggestion_registry() -> None:
         rows: list[dict[str, str]] = []
         for label in labels:
             query = FOLLOWUP_QUERY_OVERRIDES.get(
-                (business_key, label), f"{business}의 {label}을 알려주세요."
+                (business_key, label),
+                f"{business}의 {label}{_korean_object_marker(label)} 알려주세요.",
             )
             record = {
-                "suggestion_id": _suggestion_id(business, label, query),
+                "suggestion_id": FOLLOWUP_SUGGESTION_IDS[(business_key, label)],
                 "business_key": business_key,
                 "business": business,
                 "label": label,
