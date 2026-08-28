@@ -15,6 +15,10 @@ PREWARM_FILE = BASE_DIR / "2026-08-26-prewarm-kdic-suggestion-answer-cache.py"
 MIGRATION_FILE = (
     BASE_DIR.parent / "2026-08-28-kdic-persistent-suggestion-catalog-migration.sql"
 )
+GRAMMAR_MIGRATION_FILE = (
+    BASE_DIR.parent
+    / "2026-08-28-kdic-fixed-suggestion-query-grammar-migration.sql"
+)
 
 
 def _load_core():
@@ -50,9 +54,17 @@ def test_static_contracts() -> dict[str, str]:
     postgres = POSTGRES_FILE.read_text(encoding="utf-8")
     prewarm = PREWARM_FILE.read_text(encoding="utf-8")
     migration = MIGRATION_FILE.read_text(encoding="utf-8")
+    grammar_migration = GRAMMAR_MIGRATION_FILE.read_text(encoding="utf-8")
     assert "CREATE TABLE IF NOT EXISTS suggestion_catalog" in migration
     assert "ALTER COLUMN expires_at DROP NOT NULL" in migration
     assert "SET expires_at = NULL" in migration
+    assert "UPDATE suggestion_catalog AS catalog" in grammar_migration
+    assert "UPDATE suggestion_answer_cache AS answer" in grammar_migration
+    assert grammar_migration.count("SQ-") == 22
+    assert not any(
+        bad in grammar_migration
+        for bad in ("서류을", "절차을", "시기을", "한도을", "자료을")
+    )
     assert "DELETE FROM suggestion_answer_cache" not in postgres
     assert "'VALIDATED', NULL" in postgres
     assert "def get_active(" in postgres
@@ -62,6 +74,7 @@ def test_static_contracts() -> dict[str, str]:
     assert "cache.peek_active" in prewarm
     return {
         "migration": "passed",
+        "fixed_query_grammar_migration": "passed",
         "no_ttl_delete": "passed",
         "postgres_active_pointer": "passed",
         "prewarm_uses_persistent_catalog": "passed",
