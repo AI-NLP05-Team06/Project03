@@ -225,6 +225,35 @@ def test_registry(core) -> dict[str, Any]:
     }
 
 
+def test_followup_keyword_policy(core) -> dict[str, Any]:
+    business_key = "착오송금"
+    original_rows = list(core._SUGGESTIONS_BY_BUSINESS_KEY[business_key])
+    extra_row = {
+        "suggestion_id": "SQ-TEST-UNLIMITED-0001",
+        "business_key": business_key,
+        "business": "착오송금 반환 신청",
+        "label": "신청 자격",
+        "query": "착오송금 반환 신청의 신청 자격을 알려주세요.",
+    }
+    core._SUGGESTIONS_BY_BUSINESS_KEY[business_key] = [*original_rows, extra_row]
+    try:
+        rows = core._followup_keywords(
+            ["착오송금 반환 신청", "예금보험금 안내"]
+        )
+    finally:
+        core._SUGGESTIONS_BY_BUSINESS_KEY[business_key] = original_rows
+
+    assert len(rows) == 6
+    assert rows[-1] == extra_row
+    assert {row["business_key"] for row in rows} == {business_key}
+    assert core._followup_keywords([]) == []
+    return {
+        "primary_business_only": "passed",
+        "unlimited_keyword_count": len(rows),
+        "empty_businesses": "passed",
+    }
+
+
 def test_user_basis_contract(core) -> dict[str, str]:
     raw_result = {
         "answer": "착오송금 반환지원은 자진반환 및 지급명령으로 회수되면 신청 접수일로부터 2개월 내외가 예상됩니다.",
@@ -717,6 +746,7 @@ def main() -> None:
     result = {
         "static": test_static_contracts(),
         "registry": test_registry(core),
+        "followup_keywords": test_followup_keyword_policy(core),
         "basis": test_user_basis_contract(core),
         "answer_normalization": test_answer_normalization(core),
         "summary": test_answer_summary_contract(core),

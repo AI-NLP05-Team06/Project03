@@ -362,16 +362,22 @@ def suggestion_registry_stats() -> dict[str, Any]:
 
 
 def _followup_keywords(businesses: Sequence[str]) -> list[dict[str, str]]:
+    if not businesses:
+        return []
+
+    primary_business = _clean_text(businesses[0])
+    if not primary_business:
+        return []
+
     output: list[dict[str, str]] = []
-    for business in businesses:
-        for key, rows in _SUGGESTIONS_BY_BUSINESS_KEY.items():
-            if key not in business:
-                continue
-            for record in rows:
-                item = copy.deepcopy(record)
-                if item not in output:
-                    output.append(item)
-    return output[:5]
+    for key, rows in _SUGGESTIONS_BY_BUSINESS_KEY.items():
+        if key not in primary_business:
+            continue
+        for record in rows:
+            item = copy.deepcopy(record)
+            if item not in output:
+                output.append(item)
+    return output
 
 
 def _business_scope_key(value: Any) -> str:
