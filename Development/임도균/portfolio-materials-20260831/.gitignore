@@ -1,0 +1,34 @@
+# Runtime secrets and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+credentials*.json
+secrets*.json
+secrets.toml
+# Local/runtime-only artifacts
+node_modules/
+.venv/
+venv/
+__pycache__/
+*.pyc
+.next/
+.wrangler/
+.openai/
+*.log
+*.sqlite*
+*.db
+.DS_Store
+Thumbs.db
+runtime/
+local-data/
+private-results/
+kdic_data.zip
+KDIC_output.zip
+*embeddings*.jsonl
+*embeddings*.npy
+*embeddings*.npz
+*.inspect.ndjson

@@ -1,0 +1,3733 @@
+{
+  "schema_version": "kdic-fact-index-c-v3-reviewable",
+  "status": "REVIEW_REQUIRED",
+  "prototype_use_allowed": true,
+  "production_requires_approved_review_sheet": true,
+  "matching_policy": "TOP5_CANDIDATE_CHUNK_ID_AND_BUSINESS_AND_ACTIVATION_KEYWORD",
+  "review_dimensions": [
+    "confusion_type",
+    "exact_subject_scope",
+    "similar_scheme_distinctions",
+    "amount_period_conditions",
+    "exceptions_exclusions",
+    "common_misinterpretations",
+    "answer_must_not_assert",
+    "related_chunk_ids",
+    "official_evidence"
+  ],
+  "records": [
+    {
+      "fact_index_id": "FI-CAND-001",
+      "status": "REVIEWED_FOR_PROTOTYPE",
+      "review_status": "HUMAN_APPROVED_EVAL",
+      "trigger_chunk_ids": [
+        "DP-001_chunk_000"
+      ],
+      "business_function": "예금자보호제도",
+      "business_function_code": "deposit_protection",
+      "document_title": "보호한도",
+      "section_title": "",
+      "priority": "HIGH",
+      "recommended_processing": "재청킹 후 Fact Sheet",
+      "confusion_type": "수치 경계·합산·상계·예외",
+      "confusion_point": "1억원 한도, 별도 보호 상품, 동일 금융회사 합산, 대출 상계, 소정이자 정의가 한 청크에 섞여 있어 질문 조건을 잘못 연결하기 쉽다.",
+      "required_review_points": "보호한도 단위, 별도 보호 대상, 상계 순서, 소정이자 계산 기준",
+      "verified_claims": [
+        {
+          "claim_id": "F1",
+          "statement": "보호대상 예금은 원금과 소정이자를 합하여 동일한 금융회사별 예금자 1인당 1억원까지 보호된다.",
+          "source_chunk_ids": [
+            "DP-001_chunk_000"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F2",
+          "statement": "1억원을 초과하는 금액은 예금보험금으로 보호되지 않는다.",
+          "source_chunk_ids": [
+            "DP-001_chunk_000"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F3",
+          "statement": "원금과 소정이자를 합한 금액 중 1억원을 초과하는 부분은 예금보험금으로 보호되지 않는다.",
+          "source_chunk_ids": [
+            "DP-001_chunk_000"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F4",
+          "statement": "보호받지 못한 나머지 채권은 파산 금융회사의 잔여재산이 있으면 다른 채권자들과 채권액 비율에 따라 전부 또는 일부를 배당받을 수 있다.",
+          "source_chunk_ids": [
+            "DP-001_chunk_000"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F5",
+          "statement": "예금보호 한도는 원금과 소정이자를 합산하여 계산한다.",
+          "source_chunk_ids": [
+            "DP-001_chunk_000"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F6",
+          "statement": "소정이자는 약정이자와 예금보험공사가 정한 이자 중 적은 금액이다.",
+          "source_chunk_ids": [
+            "DP-001_chunk_000"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        }
+      ],
+      "forbidden_claims": [
+        "예금의 전액이 한도 없이 보호된다.",
+        "보호한도는 모든 금융회사의 예금을 합산하여 1억원이다.",
+        "보호한도 초과액도 예금보험공사가 전액 지급한다.",
+        "보호한도 초과액은 어떤 경우에도 돌려받을 수 없다.",
+        "보호한도 계산에는 원금만 포함된다.",
+        "약정이자는 금리 수준과 관계없이 항상 전액 보호된다."
+      ],
+      "related_chunk_ids": [],
+      "source_chunk_ids": [
+        "DP-001_chunk_000"
+      ],
+      "source_urls": [
+        "https://www.kdic.or.kr/sp/dpstrprot/ProtSystProtLmts/selectScrn.do"
+      ],
+      "source_evaluation_ids": [
+        "EVAL001",
+        "EVAL002",
+        "EVAL003",
+        "EVAL020"
+      ],
+      "source_questions": [
+        "예금자 1인당 보호받을 수 있는 한도는 얼마인가요?",
+        "예금보호 한도를 초과한 금액은 어떻게 되나요?",
+        "예금자보호 한도를 계산할 때 원금과 이자를 합산하나요?",
+        "오늘 너무 힘든데 예금 얼마까지 보호되나요?"
+      ],
+      "candidate_evidence_summary": "예금자보호제도는 다수의 소액예금자를 우선 보호하고 부실 금융회사를 선택한 예금자도 일정부분 책임을 분담한다는 차원에서 예금의 전액을 보호하지 않고 일정액만을 보호하고 있습니다. 원금과 소정이자를 합하여 1인당 1억원까지만 보호되며 초과금액은 보호되지 않습니다. 예금보험에 가입한 금융회사에 예금등 채권의 지급정지 등 예금자보호법상 보험사고 1 가 발생한 시점에 해당 금융회사에 예금 등 보호대상 금융상품을 보유하고 있다면 원금과 소정의 이자 2 를 합쳐 금융회사별로…",
+      "provenance": {
+        "candidate_file": "FACT_SHEET_적용_후보_청크 (1).xlsx",
+        "candidate_sheet": "Fact Sheet 후보",
+        "evaluation_file": "Evaluation_DataSet_v3_AnswerEval_MinColumns (1).xlsx",
+        "evaluation_sheet": "평가데이터셋 V4_1"
+      },
+      "schema_record_version": "c-ver3",
+      "activation_policy": "TRIGGER_CHUNK_AND_BUSINESS_AND_KEYWORD",
+      "activation_keywords": [
+        "예금자보호",
+        "예금보호",
+        "보호한도",
+        "보호받",
+        "보호대상",
+        "수치",
+        "경계",
+        "합산",
+        "상계",
+        "예외",
+        "단위",
+        "별도",
+        "보호",
+        "대상"
+      ],
+      "applies_when": "Top-5에 DP-001_chunk_000가 있고 질문이 예금자보호, 예금보호, 보호한도, 보호받, 보호대상, 수치, 경계, 합산 중 하나 이상과 직접 관련될 때",
+      "do_not_apply_when": "Trigger 청크가 검색됐더라도 질문이 이 Fact Index의 적용 키워드·대상·조건과 무관하거나 다른 업무를 묻는 경우",
+      "review_dimensions": {
+        "confusion_type": "수치 경계·합산·상계·예외",
+        "exact_subject_scope": [
+          "보호대상 예금은 원금과 소정이자를 합하여 동일한 금융회사별 예금자 1인당 1억원까지 보호된다."
+        ],
+        "similar_scheme_distinctions": [
+          "보호대상 예금은 원금과 소정이자를 합하여 동일한 금융회사별 예금자 1인당 1억원까지 보호된다.",
+          "1억원을 초과하는 금액은 예금보험금으로 보호되지 않는다.",
+          "원금과 소정이자를 합한 금액 중 1억원을 초과하는 부분은 예금보험금으로 보호되지 않는다.",
+          "보호받지 못한 나머지 채권은 파산 금융회사의 잔여재산이 있으면 다른 채권자들과 채권액 비율에 따라 전부 또는 일부를 배당받을 수 있다.",
+          "예금보호 한도는 원금과 소정이자를 합산하여 계산한다.",
+          "소정이자는 약정이자와 예금보험공사가 정한 이자 중 적은 금액이다."
+        ],
+        "amount_period_conditions": [
+          "보호대상 예금은 원금과 소정이자를 합하여 동일한 금융회사별 예금자 1인당 1억원까지 보호된다.",
+          "1억원을 초과하는 금액은 예금보험금으로 보호되지 않는다.",
+          "원금과 소정이자를 합한 금액 중 1억원을 초과하는 부분은 예금보험금으로 보호되지 않는다.",
+          "보호받지 못한 나머지 채권은 파산 금융회사의 잔여재산이 있으면 다른 채권자들과 채권액 비율에 따라 전부 또는 일부를 배당받을 수 있다.",
+          "예금보호 한도는 원금과 소정이자를 합산하여 계산한다.",
+          "소정이자는 약정이자와 예금보험공사가 정한 이자 중 적은 금액이다."
+        ],
+        "exceptions_exclusions": [
+          "1억원을 초과하는 금액은 예금보험금으로 보호되지 않는다.",
+          "원금과 소정이자를 합한 금액 중 1억원을 초과하는 부분은 예금보험금으로 보호되지 않는다."
+        ],
+        "common_misinterpretations": [
+          "예금의 전액이 한도 없이 보호된다.",
+          "보호한도는 모든 금융회사의 예금을 합산하여 1억원이다.",
+          "보호한도 초과액도 예금보험공사가 전액 지급한다.",
+          "보호한도 초과액은 어떤 경우에도 돌려받을 수 없다.",
+          "보호한도 계산에는 원금만 포함된다.",
+          "약정이자는 금리 수준과 관계없이 항상 전액 보호된다."
+        ],
+        "answer_must_not_assert": [
+          "예금의 전액이 한도 없이 보호된다.",
+          "보호한도는 모든 금융회사의 예금을 합산하여 1억원이다.",
+          "보호한도 초과액도 예금보험공사가 전액 지급한다.",
+          "보호한도 초과액은 어떤 경우에도 돌려받을 수 없다.",
+          "보호한도 계산에는 원금만 포함된다.",
+          "약정이자는 금리 수준과 관계없이 항상 전액 보호된다."
+        ],
+        "related_chunk_ids": [],
+        "official_evidence": {
+          "chunk_ids": [
+            "DP-001_chunk_000"
+          ],
+          "urls": [
+            "https://www.kdic.or.kr/sp/dpstrprot/ProtSystProtLmts/selectScrn.do"
+          ]
+        }
+      },
+      "review_workflow": {
+        "current_status": "검수필요",
+        "reviewer": "",
+        "review_date": "",
+        "review_notes": "",
+        "production_enabled": false
+      }
+    },
+    {
+      "fact_index_id": "FI-CAND-002",
+      "status": "REVIEWED_FOR_PROTOTYPE",
+      "review_status": "CANDIDATE_EVIDENCE_REVIEWED",
+      "trigger_chunk_ids": [
+        "DP-004_chunk_001"
+      ],
+      "business_function": "예금자보호제도",
+      "business_function_code": "deposit_protection",
+      "document_title": "보호대상 금융상품 개요",
+      "section_title": "보호대상 금융상품",
+      "priority": "HIGH",
+      "recommended_processing": "Fact Sheet",
+      "confusion_type": "제외·별도 보호·합산",
+      "confusion_point": "보호 제외 기관과 퇴직연금·연금저축·사고보험금의 별도 보호 규칙을 서로 혼동할 수 있다.",
+      "required_review_points": "보호 제외 대상, 합산되는 상품군, 각각 별도 보호되는 상품군",
+      "verified_claims": [
+        {
+          "claim_id": "F1",
+          "statement": "정부·지방자치단체(국·공립학교 포함), 한국은행, 금융감독원, 예금보험공사 및 부보금융회사의 예금 등은 보호대상에서 제외된다.",
+          "source_chunk_ids": [
+            "DP-004_chunk_001"
+          ],
+          "origin": "CANDIDATE_EVIDENCE_REVIEWED"
+        },
+        {
+          "claim_id": "F2",
+          "statement": "확정기여형·개인형 퇴직연금제도 및 중소기업퇴직연금기금에 편입된 예금보호대상 금융상품은 합산하여 1억원까지 별도로 보호된다.",
+          "source_chunk_ids": [
+            "DP-004_chunk_001"
+          ],
+          "origin": "CANDIDATE_EVIDENCE_REVIEWED"
+        }
+      ],
+      "forbidden_claims": [
+        "정부·지방자치단체와 부보금융회사의 예금도 일반 예금자와 동일하게 보호된다.",
+        "별도 보호되는 퇴직연금 관련 상품을 일반 예금과 합산하여 하나의 보호한도만 적용한다."
+      ],
+      "related_chunk_ids": [],
+      "source_chunk_ids": [
+        "DP-004_chunk_001"
+      ],
+      "source_urls": [
+        "https://www.kdic.or.kr/sp/dpstrprot/selectProtSystProtTrgtPrdctSumr.do"
+      ],
+      "source_evaluation_ids": [],
+      "source_questions": [],
+      "candidate_evidence_summary": "### 보호대상 금융상품 도움말(각주설명) 1. 주택도시기금에 의해 정부가 별도로 관리(주택도시기금법 제14조 제2항) 2. 부보금융회사가 조달하여 저축은행의 예금보호대상 금융상품으로 운용되는 경우 * 정부·지방자치단체(국·공립학교 포함), 한국은행, 금융감독원, 예금보험공사, 부보금융회사의 예금 등은 보호대상에서 제외 * 확정기여형, 개인형 퇴직연금제도 및 중소기업퇴직연금기금 편입 금융상품 중 예금보호대상으로 운용되는 금융상품은 합산하여 1억원까지 별도 보호하…",
+      "provenance": {
+        "candidate_file": "FACT_SHEET_적용_후보_청크 (1).xlsx",
+        "candidate_sheet": "Fact Sheet 후보",
+        "evaluation_file": "Evaluation_DataSet_v3_AnswerEval_MinColumns (1).xlsx",
+        "evaluation_sheet": "평가데이터셋 V4_1"
+      },
+      "schema_record_version": "c-ver3",
+      "activation_policy": "TRIGGER_CHUNK_AND_BUSINESS_AND_KEYWORD",
+      "activation_keywords": [
+        "예금자보호",
+        "예금보호",
+        "보호한도",
+        "보호받",
+        "보호대상",
+        "금융상품",
+        "제외",
+        "별도",
+        "보호",
+        "합산",
+        "대상",
+        "합산되는",
+        "상품군",
+        "각각"
+      ],
+      "applies_when": "Top-5에 DP-004_chunk_001가 있고 질문이 예금자보호, 예금보호, 보호한도, 보호받, 보호대상, 금융상품, 제외, 별도 중 하나 이상과 직접 관련될 때",
+      "do_not_apply_when": "Trigger 청크가 검색됐더라도 질문이 이 Fact Index의 적용 키워드·대상·조건과 무관하거나 다른 업무를 묻는 경우",
+      "review_dimensions": {
+        "confusion_type": "제외·별도 보호·합산",
+        "exact_subject_scope": [
+          "정부·지방자치단체(국·공립학교 포함), 한국은행, 금융감독원, 예금보험공사 및 부보금융회사의 예금 등은 보호대상에서 제외된다.",
+          "확정기여형·개인형 퇴직연금제도 및 중소기업퇴직연금기금에 편입된 예금보호대상 금융상품은 합산하여 1억원까지 별도로 보호된다."
+        ],
+        "similar_scheme_distinctions": [
+          "정부·지방자치단체(국·공립학교 포함), 한국은행, 금융감독원, 예금보험공사 및 부보금융회사의 예금 등은 보호대상에서 제외된다.",
+          "확정기여형·개인형 퇴직연금제도 및 중소기업퇴직연금기금에 편입된 예금보호대상 금융상품은 합산하여 1억원까지 별도로 보호된다."
+        ],
+        "amount_period_conditions": [
+          "확정기여형·개인형 퇴직연금제도 및 중소기업퇴직연금기금에 편입된 예금보호대상 금융상품은 합산하여 1억원까지 별도로 보호된다."
+        ],
+        "exceptions_exclusions": [
+          "정부·지방자치단체(국·공립학교 포함), 한국은행, 금융감독원, 예금보험공사 및 부보금융회사의 예금 등은 보호대상에서 제외된다."
+        ],
+        "common_misinterpretations": [
+          "정부·지방자치단체와 부보금융회사의 예금도 일반 예금자와 동일하게 보호된다.",
+          "별도 보호되는 퇴직연금 관련 상품을 일반 예금과 합산하여 하나의 보호한도만 적용한다."
+        ],
+        "answer_must_not_assert": [
+          "정부·지방자치단체와 부보금융회사의 예금도 일반 예금자와 동일하게 보호된다.",
+          "별도 보호되는 퇴직연금 관련 상품을 일반 예금과 합산하여 하나의 보호한도만 적용한다."
+        ],
+        "related_chunk_ids": [],
+        "official_evidence": {
+          "chunk_ids": [
+            "DP-004_chunk_001"
+          ],
+          "urls": [
+            "https://www.kdic.or.kr/sp/dpstrprot/selectProtSystProtTrgtPrdctSumr.do"
+          ]
+        }
+      },
+      "review_workflow": {
+        "current_status": "검수필요",
+        "reviewer": "",
+        "review_date": "",
+        "review_notes": "",
+        "production_enabled": false
+      }
+    },
+    {
+      "fact_index_id": "FI-CAND-003",
+      "status": "REVIEWED_FOR_PROTOTYPE",
+      "review_status": "HUMAN_APPROVED_EVAL",
+      "trigger_chunk_ids": [
+        "DP-005_chunk_004"
+      ],
+      "business_function": "예금자보호제도",
+      "business_function_code": "deposit_protection",
+      "document_title": "예금자보호제도 FAQ",
+      "section_title": "계열 저축은행에 분산하여 예금을 하였는데 각각 1억원까지 예금 보호가 되나요?",
+      "priority": "HIGH",
+      "recommended_processing": "Fact Sheet",
+      "confusion_type": "공제·세금·법인 구분",
+      "confusion_point": "제세금 차감 전 금액과 채무 공제 후 금액이라는 서로 다른 계산 기준을 하나로 오해하기 쉽다.",
+      "required_review_points": "법인이 다를 때 각각 보호, 제세금 차감 전 기준, 채무 공제 후 보호대상 금액",
+      "verified_claims": [
+        {
+          "claim_id": "F1",
+          "statement": "법인이 다른 계열 저축은행에 분산된 예금은 금융회사별로 원금과 소정이자를 합해 1인당 1억원 한도에서 각각 보호된다.",
+          "source_chunk_ids": [
+            "DP-005_chunk_004"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F2",
+          "statement": "예금자가 해당 저축은행에 채무가 있으면 예금채권 합계에서 채무를 공제한 금액을 기준으로 보호한다.",
+          "source_chunk_ids": [
+            "DP-005_chunk_004"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        }
+      ],
+      "forbidden_claims": [
+        "영업정지만 발생하면 예금이 즉시 전액 인출된다.",
+        "계열 저축은행의 예금은 모두 하나의 금융회사로 합산된다."
+      ],
+      "related_chunk_ids": [],
+      "source_chunk_ids": [
+        "DP-005_chunk_004"
+      ],
+      "source_urls": [
+        "https://fins.kdic.or.kr/cm/bbs/selectFaqNramtAply.do"
+      ],
+      "source_evaluation_ids": [
+        "EVAL013"
+      ],
+      "source_questions": [
+        "은행이 영업정지되면 제 예금은 예금자보호제도에 따라 어떻게 보호되나요?"
+      ],
+      "candidate_evidence_summary": "### Q. 계열 저축은행에 분산하여 예금을 하였는데 각각 1억원까지 예금 보호가 되나요? □ 계열사라 하여도 법인이 다를 경우 계열 저축은행의 예금은 각각 예금자보호법에 따라 예금자 명의별로(1인당) 원금과 소정의 이자를 합하여 1억원* 한도 내에서 보호됩니다. * 원리금은 이자에 대한 제세금이 차감되기전 금액 ㅇ 다만, 예금자가 해당 저축은행에 채무를 부담하고 있는 경우 예금등 채권의 합계액에서 그 채무를 공제한 금액을 대상으로 합니다.",
+      "provenance": {
+        "candidate_file": "FACT_SHEET_적용_후보_청크 (1).xlsx",
+        "candidate_sheet": "Fact Sheet 후보",
+        "evaluation_file": "Evaluation_DataSet_v3_AnswerEval_MinColumns (1).xlsx",
+        "evaluation_sheet": "평가데이터셋 V4_1"
+      },
+      "schema_record_version": "c-ver3",
+      "activation_policy": "TRIGGER_CHUNK_AND_BUSINESS_AND_KEYWORD",
+      "activation_keywords": [
+        "예금자보호",
+        "예금보호",
+        "보호한도",
+        "보호받",
+        "보호대상",
+        "계열",
+        "저축은행",
+        "분산하여",
+        "예금을",
+        "하였는데",
+        "각각",
+        "1억원",
+        "예금",
+        "보호가"
+      ],
+      "applies_when": "Top-5에 DP-005_chunk_004가 있고 질문이 예금자보호, 예금보호, 보호한도, 보호받, 보호대상, 계열, 저축은행, 분산하여 중 하나 이상과 직접 관련될 때",
+      "do_not_apply_when": "Trigger 청크가 검색됐더라도 질문이 이 Fact Index의 적용 키워드·대상·조건과 무관하거나 다른 업무를 묻는 경우",
+      "review_dimensions": {
+        "confusion_type": "공제·세금·법인 구분",
+        "exact_subject_scope": [
+          "예금자가 해당 저축은행에 채무가 있으면 예금채권 합계에서 채무를 공제한 금액을 기준으로 보호한다."
+        ],
+        "similar_scheme_distinctions": [
+          "법인이 다른 계열 저축은행에 분산된 예금은 금융회사별로 원금과 소정이자를 합해 1인당 1억원 한도에서 각각 보호된다."
+        ],
+        "amount_period_conditions": [
+          "법인이 다른 계열 저축은행에 분산된 예금은 금융회사별로 원금과 소정이자를 합해 1인당 1억원 한도에서 각각 보호된다.",
+          "예금자가 해당 저축은행에 채무가 있으면 예금채권 합계에서 채무를 공제한 금액을 기준으로 보호한다."
+        ],
+        "exceptions_exclusions": [],
+        "common_misinterpretations": [
+          "영업정지만 발생하면 예금이 즉시 전액 인출된다.",
+          "계열 저축은행의 예금은 모두 하나의 금융회사로 합산된다."
+        ],
+        "answer_must_not_assert": [
+          "영업정지만 발생하면 예금이 즉시 전액 인출된다.",
+          "계열 저축은행의 예금은 모두 하나의 금융회사로 합산된다."
+        ],
+        "related_chunk_ids": [],
+        "official_evidence": {
+          "chunk_ids": [
+            "DP-005_chunk_004"
+          ],
+          "urls": [
+            "https://fins.kdic.or.kr/cm/bbs/selectFaqNramtAply.do"
+          ]
+        }
+      },
+      "review_workflow": {
+        "current_status": "검수필요",
+        "reviewer": "",
+        "review_date": "",
+        "review_notes": "",
+        "production_enabled": false
+      }
+    },
+    {
+      "fact_index_id": "FI-CAND-004",
+      "status": "REVIEWED_FOR_PROTOTYPE",
+      "review_status": "CANDIDATE_EVIDENCE_REVIEWED",
+      "trigger_chunk_ids": [
+        "DP-005_chunk_016"
+      ],
+      "business_function": "예금자보호제도",
+      "business_function_code": "deposit_protection",
+      "document_title": "예금자보호제도 FAQ",
+      "section_title": "예금담보대출은 얼마나 가능하며 어떻게 신청하나요?",
+      "priority": "HIGH",
+      "recommended_processing": "Fact Sheet",
+      "confusion_type": "복합 계산식·변동 가능성",
+      "confusion_point": "두 기준 중 작은 금액을 고른 뒤 여러 금액을 차감해야 하며, 실제 방안이 달라질 수 있다는 제한까지 있다.",
+      "required_review_points": "min(예금액 95%, 보호한도 90%) 계산, 차감 항목, 실제 지급방안 변동 가능성",
+      "verified_claims": [
+        {
+          "claim_id": "F1",
+          "statement": "예금담보대출의 통상 한도는 부실저축은행 예금액의 95%와 보호한도의 90% 중 작은 금액을 기준으로 한다.",
+          "source_chunk_ids": [
+            "DP-005_chunk_016"
+          ],
+          "origin": "CANDIDATE_EVIDENCE_REVIEWED"
+        },
+        {
+          "claim_id": "F2",
+          "statement": "통상 대출한도에서는 가지급금 수령액, 대출 및 보증채무, 기타 지급제한금액을 차감한다.",
+          "source_chunk_ids": [
+            "DP-005_chunk_016"
+          ],
+          "origin": "CANDIDATE_EVIDENCE_REVIEWED"
+        },
+        {
+          "claim_id": "F3",
+          "statement": "예금담보대출의 실제 지급방안은 달라질 수 있으므로 통상 한도를 확정금액으로 단정해서는 안 된다.",
+          "source_chunk_ids": [
+            "DP-005_chunk_016"
+          ],
+          "origin": "CANDIDATE_EVIDENCE_REVIEWED"
+        }
+      ],
+      "forbidden_claims": [
+        "예금액의 95%와 보호한도의 90% 중 큰 금액이 대출한도다.",
+        "가지급금이나 채무가 있어도 예금담보대출 한도에서 차감되지 않는다."
+      ],
+      "related_chunk_ids": [],
+      "source_chunk_ids": [
+        "DP-005_chunk_016"
+      ],
+      "source_urls": [
+        "https://fins.kdic.or.kr/cm/bbs/selectFaqNramtAply.do"
+      ],
+      "source_evaluation_ids": [],
+      "source_questions": [],
+      "candidate_evidence_summary": "### Q. 예금담보대출은 얼마나 가능하며 어떻게 신청하나요? □ 부실저축은행의 예금자는 예금담보대출 취급 기관으로 지정된 농협·우리·국민·기업·신한·하나은행의 영업점에서 대출을 받으실 수 있습니다. ㅇ 통상 대출한도는 부실저축은행 예금액의 95%와 보호한도의 90% 중 작은 금액에서 가지급금 수령액, 대출 및 보증채무, 기타 지급제한금액을 차감하여 설정됩니다. ㅇ 가지급금 수령 후에도 추가로 자금이 필요하신 예금자는 영업정지 저축은행에서 예금 잔액증명서를 발급…",
+      "provenance": {
+        "candidate_file": "FACT_SHEET_적용_후보_청크 (1).xlsx",
+        "candidate_sheet": "Fact Sheet 후보",
+        "evaluation_file": "Evaluation_DataSet_v3_AnswerEval_MinColumns (1).xlsx",
+        "evaluation_sheet": "평가데이터셋 V4_1"
+      },
+      "schema_record_version": "c-ver3",
+      "activation_policy": "TRIGGER_CHUNK_AND_BUSINESS_AND_KEYWORD",
+      "activation_keywords": [
+        "예금자보호",
+        "예금보호",
+        "보호한도",
+        "보호받",
+        "보호대상",
+        "예금담보대출",
+        "얼마나",
+        "가능하며",
+        "신청하나요",
+        "복합",
+        "계산식",
+        "변동",
+        "가능성",
+        "min"
+      ],
+      "applies_when": "Top-5에 DP-005_chunk_016가 있고 질문이 예금자보호, 예금보호, 보호한도, 보호받, 보호대상, 예금담보대출, 얼마나, 가능하며 중 하나 이상과 직접 관련될 때",
+      "do_not_apply_when": "Trigger 청크가 검색됐더라도 질문이 이 Fact Index의 적용 키워드·대상·조건과 무관하거나 다른 업무를 묻는 경우",
+      "review_dimensions": {
+        "confusion_type": "복합 계산식·변동 가능성",
+        "exact_subject_scope": [],
+        "similar_scheme_distinctions": [],
+        "amount_period_conditions": [
+          "예금담보대출의 통상 한도는 부실저축은행 예금액의 95%와 보호한도의 90% 중 작은 금액을 기준으로 한다.",
+          "통상 대출한도에서는 가지급금 수령액, 대출 및 보증채무, 기타 지급제한금액을 차감한다.",
+          "예금담보대출의 실제 지급방안은 달라질 수 있으므로 통상 한도를 확정금액으로 단정해서는 안 된다."
+        ],
+        "exceptions_exclusions": [],
+        "common_misinterpretations": [
+          "예금액의 95%와 보호한도의 90% 중 큰 금액이 대출한도다.",
+          "가지급금이나 채무가 있어도 예금담보대출 한도에서 차감되지 않는다."
+        ],
+        "answer_must_not_assert": [
+          "예금액의 95%와 보호한도의 90% 중 큰 금액이 대출한도다.",
+          "가지급금이나 채무가 있어도 예금담보대출 한도에서 차감되지 않는다."
+        ],
+        "related_chunk_ids": [],
+        "official_evidence": {
+          "chunk_ids": [
+            "DP-005_chunk_016"
+          ],
+          "urls": [
+            "https://fins.kdic.or.kr/cm/bbs/selectFaqNramtAply.do"
+          ]
+        }
+      },
+      "review_workflow": {
+        "current_status": "검수필요",
+        "reviewer": "",
+        "review_date": "",
+        "review_notes": "",
+        "production_enabled": false
+      }
+    },
+    {
+      "fact_index_id": "FI-CAND-005",
+      "status": "REVIEWED_FOR_PROTOTYPE",
+      "review_status": "CANDIDATE_EVIDENCE_REVIEWED",
+      "trigger_chunk_ids": [
+        "DP-005_chunk_021"
+      ],
+      "business_function": "예금자보호제도",
+      "business_function_code": "deposit_protection",
+      "document_title": "예금자보호제도 FAQ",
+      "section_title": "예금자가 사망하였을 경우 가지급금(또는 예금보험금)은 어떻게 청구하면 되나요?",
+      "priority": "HIGH",
+      "recommended_processing": "Fact Sheet",
+      "confusion_type": "상속 서류·소액 예외",
+      "confusion_point": "일반 상속 신청과 300만원 이하 간편 지급의 서류가 다르고, 분쟁 시 간편 지급이 거절될 수 있다.",
+      "required_review_points": "일반 상속 서류, 간편 지급 기준, 대체 서류, 분쟁 시 예외",
+      "verified_claims": [
+        {
+          "claim_id": "F1",
+          "statement": "예금자가 사망한 경우 상속인은 본인확인 서류와 상속인임을 확인할 수 있는 가족관계증명서 또는 필요한 경우 제적등본 등을 갖추어 청구한다.",
+          "source_chunk_ids": [
+            "DP-005_chunk_021"
+          ],
+          "origin": "CANDIDATE_EVIDENCE_REVIEWED"
+        },
+        {
+          "claim_id": "F2",
+          "statement": "일반 상속 청구에는 상속인 전원이 작성한 지분신고·수령권한 관련 서류와 상속인별 인감증명서 등이 요구될 수 있다.",
+          "source_chunk_ids": [
+            "DP-005_chunk_021"
+          ],
+          "origin": "CANDIDATE_EVIDENCE_REVIEWED"
+        },
+        {
+          "claim_id": "F3",
+          "statement": "300만원 이하 소액 상속의 간편 지급은 일반 상속 청구와 구비서류가 다르며 분쟁이 있으면 간편 지급이 제한될 수 있다.",
+          "source_chunk_ids": [
+            "DP-005_chunk_021"
+          ],
+          "origin": "CANDIDATE_EVIDENCE_REVIEWED"
+        }
+      ],
+      "forbidden_claims": [
+        "상속인 한 명이 다른 상속인의 동의나 관련 서류 없이 언제나 전액을 청구할 수 있다.",
+        "300만원 이하이면 상속 분쟁 여부와 관계없이 무조건 간편 지급된다."
+      ],
+      "related_chunk_ids": [],
+      "source_chunk_ids": [
+        "DP-005_chunk_021"
+      ],
+      "source_urls": [
+        "https://fins.kdic.or.kr/cm/bbs/selectFaqNramtAply.do"
+      ],
+      "source_evaluation_ids": [],
+      "source_questions": [],
+      "candidate_evidence_summary": "### Q. 예금자가 사망하였을 경우 가지급금(또는 예금보험금)은 어떻게 청구하면 되나요? □ 예금자가 사망하였을 경우에는 다음의 서류를 구비하시어 영업정지된 해당 저축은행을 방문하시면 됩니다. ㅇ 상속인의 주민등록증 등 본인증명 서류 ㅇ 상속인임을 확인할 수 있는 피상속인의 가족관계증명서(상세) 또는 피상속인의 제적등본(필요시) ㅇ 상속인 전원이 연서한 “(공동·상속)예금등 지분신고서 및 수령권한 위임동의서”, “상속포기각서”와 상속인 각자의 인감증명서(동의서…",
+      "provenance": {
+        "candidate_file": "FACT_SHEET_적용_후보_청크 (1).xlsx",
+        "candidate_sheet": "Fact Sheet 후보",
+        "evaluation_file": "Evaluation_DataSet_v3_AnswerEval_MinColumns (1).xlsx",
+        "evaluation_sheet": "평가데이터셋 V4_1"
+      },
+      "schema_record_version": "c-ver3",
+      "activation_policy": "TRIGGER_CHUNK_AND_BUSINESS_AND_KEYWORD",
+      "activation_keywords": [
+        "예금자보호",
+        "예금보호",
+        "보호한도",
+        "보호받",
+        "보호대상",
+        "예금자가",
+        "사망하였",
+        "가지급금",
+        "예금보험금",
+        "청구하면",
+        "되나요",
+        "상속",
+        "서류",
+        "소액"
+      ],
+      "applies_when": "Top-5에 DP-005_chunk_021가 있고 질문이 예금자보호, 예금보호, 보호한도, 보호받, 보호대상, 예금자가, 사망하였, 가지급금 중 하나 이상과 직접 관련될 때",
+      "do_not_apply_when": "Trigger 청크가 검색됐더라도 질문이 이 Fact Index의 적용 키워드·대상·조건과 무관하거나 다른 업무를 묻는 경우",
+      "review_dimensions": {
+        "confusion_type": "상속 서류·소액 예외",
+        "exact_subject_scope": [
+          "예금자가 사망한 경우 상속인은 본인확인 서류와 상속인임을 확인할 수 있는 가족관계증명서 또는 필요한 경우 제적등본 등을 갖추어 청구한다.",
+          "일반 상속 청구에는 상속인 전원이 작성한 지분신고·수령권한 관련 서류와 상속인별 인감증명서 등이 요구될 수 있다."
+        ],
+        "similar_scheme_distinctions": [
+          "예금자가 사망한 경우 상속인은 본인확인 서류와 상속인임을 확인할 수 있는 가족관계증명서 또는 필요한 경우 제적등본 등을 갖추어 청구한다.",
+          "일반 상속 청구에는 상속인 전원이 작성한 지분신고·수령권한 관련 서류와 상속인별 인감증명서 등이 요구될 수 있다.",
+          "300만원 이하 소액 상속의 간편 지급은 일반 상속 청구와 구비서류가 다르며 분쟁이 있으면 간편 지급이 제한될 수 있다."
+        ],
+        "amount_period_conditions": [
+          "300만원 이하 소액 상속의 간편 지급은 일반 상속 청구와 구비서류가 다르며 분쟁이 있으면 간편 지급이 제한될 수 있다."
+        ],
+        "exceptions_exclusions": [],
+        "common_misinterpretations": [
+          "상속인 한 명이 다른 상속인의 동의나 관련 서류 없이 언제나 전액을 청구할 수 있다.",
+          "300만원 이하이면 상속 분쟁 여부와 관계없이 무조건 간편 지급된다."
+        ],
+        "answer_must_not_assert": [
+          "상속인 한 명이 다른 상속인의 동의나 관련 서류 없이 언제나 전액을 청구할 수 있다.",
+          "300만원 이하이면 상속 분쟁 여부와 관계없이 무조건 간편 지급된다."
+        ],
+        "related_chunk_ids": [],
+        "official_evidence": {
+          "chunk_ids": [
+            "DP-005_chunk_021"
+          ],
+          "urls": [
+            "https://fins.kdic.or.kr/cm/bbs/selectFaqNramtAply.do"
+          ]
+        }
+      },
+      "review_workflow": {
+        "current_status": "검수필요",
+        "reviewer": "",
+        "review_date": "",
+        "review_notes": "",
+        "production_enabled": false
+      }
+    },
+    {
+      "fact_index_id": "FI-CAND-006",
+      "status": "REVIEWED_FOR_PROTOTYPE",
+      "review_status": "HUMAN_APPROVED_EVAL",
+      "trigger_chunk_ids": [
+        "BI-001_chunk_003"
+      ],
+      "business_function": "예금보험금 안내",
+      "business_function_code": "deposit_insurance_payout",
+      "document_title": "신청시 구비서류",
+      "section_title": "예금자가 미성년자인 경우 : 본인이 아닌 친권자 혹은 후견인이 예금보험금 수령",
+      "priority": "HIGH",
+      "recommended_processing": "Fact Sheet",
+      "confusion_type": "역할별 서류·공동 친권",
+      "confusion_point": "미성년자 본인·친권자·후견인에 따라 서류가 다르며 부모 공동 친권과 불참 친권자 조건이 있다.",
+      "required_review_points": "신청자 역할별 서류, 공동 친권 조건, 불참 친권자의 인감증명 필요",
+      "verified_claims": [
+        {
+          "claim_id": "F1",
+          "statement": "미성년자 명의 예금보험금은 친권자 또는 후견인이 수령할 수 있다.",
+          "source_chunk_ids": [
+            "BI-001_chunk_003"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F2",
+          "statement": "친권자 본인확인 증명, 친권자임을 확인하는 가족관계증명서와 미성년자 기준 기본증명서, 친권자 도장, 친권자합의서 등이 필요하다.",
+          "source_chunk_ids": [
+            "BI-001_chunk_003"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F3",
+          "statement": "부모가 혼인 중이면 친권을 공동 행사하며, 동행하지 못한 친권자의 인감증명서가 필요하다.",
+          "source_chunk_ids": [
+            "BI-001_chunk_003"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        }
+      ],
+      "forbidden_claims": [
+        "부모 중 한 명이 아무 증빙 없이 단독으로 수령할 수 있다.",
+        "미성년자 본인 신청에는 친권자 동의가 필요하지 않다."
+      ],
+      "related_chunk_ids": [],
+      "source_chunk_ids": [
+        "BI-001_chunk_003"
+      ],
+      "source_urls": [
+        "https://www.kdic.or.kr/sp/dpstrprot/DpsmIbamtAplyPossDcmnt/selectScrn.do"
+      ],
+      "source_evaluation_ids": [
+        "EVAL022",
+        "EVAL034"
+      ],
+      "source_questions": [
+        "미성년자 명의의 예금보험금을 신청할 때 어떤 서류가 필요한가요?",
+        "아이 통장에 있는 돈은 부모가 대신 보험금 신청할 수 있나요?"
+      ],
+      "candidate_evidence_summary": "### 예금자가 미성년자인 경우 : 본인이 아닌 친권자 혹은 후견인이 예금보험금 수령 - 친권자 본인의 확인 증명 - 친권자 여부를 확인할 수 있는 증명 - 친권자의 도장 - 친권자 합의서 - 주민등록증, 경로우대증, 운전면허증, 여권 등 공공기관에서 발행한 사진이 들어간 본인임을 확인할 수 있는 증명 - 미성년자 본인이 찾아올 경우 친권자의 동의서 필요 (인감증명 및 인감도장 날인) - 친권자를 확인할 수 있는 증명서(가족관계증명서 및 미성년자 기준의 기본증명…",
+      "provenance": {
+        "candidate_file": "FACT_SHEET_적용_후보_청크 (1).xlsx",
+        "candidate_sheet": "Fact Sheet 후보",
+        "evaluation_file": "Evaluation_DataSet_v3_AnswerEval_MinColumns (1).xlsx",
+        "evaluation_sheet": "평가데이터셋 V4_1"
+      },
+      "schema_record_version": "c-ver3",
+      "activation_policy": "TRIGGER_CHUNK_AND_BUSINESS_AND_KEYWORD",
+      "activation_keywords": [
+        "예금보험금",
+        "가지급금",
+        "개산지급금",
+        "지급보류",
+        "예금자가",
+        "미성년자인",
+        "본인이",
+        "아닌",
+        "친권자",
+        "혹은",
+        "후견인이",
+        "수령",
+        "역할별",
+        "서류"
+      ],
+      "applies_when": "Top-5에 BI-001_chunk_003가 있고 질문이 예금보험금, 가지급금, 개산지급금, 지급보류, 예금자가, 미성년자인, 본인이, 아닌 중 하나 이상과 직접 관련될 때",
+      "do_not_apply_when": "Trigger 청크가 검색됐더라도 질문이 이 Fact Index의 적용 키워드·대상·조건과 무관하거나 다른 업무를 묻는 경우",
+      "review_dimensions": {
+        "confusion_type": "역할별 서류·공동 친권",
+        "exact_subject_scope": [
+          "친권자 본인확인 증명, 친권자임을 확인하는 가족관계증명서와 미성년자 기준 기본증명서, 친권자 도장, 친권자합의서 등이 필요하다."
+        ],
+        "similar_scheme_distinctions": [
+          "미성년자 명의 예금보험금은 친권자 또는 후견인이 수령할 수 있다."
+        ],
+        "amount_period_conditions": [
+          "미성년자 명의 예금보험금은 친권자 또는 후견인이 수령할 수 있다.",
+          "친권자 본인확인 증명, 친권자임을 확인하는 가족관계증명서와 미성년자 기준 기본증명서, 친권자 도장, 친권자합의서 등이 필요하다."
+        ],
+        "exceptions_exclusions": [],
+        "common_misinterpretations": [
+          "부모 중 한 명이 아무 증빙 없이 단독으로 수령할 수 있다.",
+          "미성년자 본인 신청에는 친권자 동의가 필요하지 않다."
+        ],
+        "answer_must_not_assert": [
+          "부모 중 한 명이 아무 증빙 없이 단독으로 수령할 수 있다.",
+          "미성년자 본인 신청에는 친권자 동의가 필요하지 않다."
+        ],
+        "related_chunk_ids": [],
+        "official_evidence": {
+          "chunk_ids": [
+            "BI-001_chunk_003"
+          ],
+          "urls": [
+            "https://www.kdic.or.kr/sp/dpstrprot/DpsmIbamtAplyPossDcmnt/selectScrn.do"
+          ]
+        }
+      },
+      "review_workflow": {
+        "current_status": "검수필요",
+        "reviewer": "",
+        "review_date": "",
+        "review_notes": "",
+        "production_enabled": false
+      }
+    },
+    {
+      "fact_index_id": "FI-CAND-007",
+      "status": "REVIEWED_FOR_PROTOTYPE",
+      "review_status": "HUMAN_APPROVED_EVAL",
+      "trigger_chunk_ids": [
+        "BI-001_chunk_004"
+      ],
+      "business_function": "예금보험금 안내",
+      "business_function_code": "deposit_insurance_payout",
+      "document_title": "신청시 구비서류",
+      "section_title": "예금자가 사망한 경우",
+      "priority": "HIGH",
+      "recommended_processing": "재청킹 후 Fact Sheet",
+      "confusion_type": "상속 서류·다중 예외",
+      "confusion_point": "상속인 전원 방문, 동의서, 해외거주·군복무 대체서류, 소액 간편 지급이 한 청크에 혼합돼 있다.",
+      "required_review_points": "일반 상속 절차, 예외별 대체서류, 300만원 이하 간편 지급, 거절 조건",
+      "verified_claims": [
+        {
+          "claim_id": "F1",
+          "statement": "사망한 예금자의 예금보험금은 상속인이 신청하며 제적등본 또는 가족관계증명서, 상속인 본인확인 증명, 지분신고서와 상속인 도장 등이 필요하다.",
+          "source_chunk_ids": [
+            "BI-001_chunk_004"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F2",
+          "statement": "원칙적으로 모든 1순위 상속권자의 이름과 지분을 포함하고 해당 상속인이 방문해야 하며, 적법한 동의서와 인감증명서를 갖추면 예외적으로 방문하지 않을 수 있다.",
+          "source_chunk_ids": [
+            "BI-001_chunk_004"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F3",
+          "statement": "상속 예금 등이 300만원 이하이면 상속인 1인이 손해담보약정서를 제출해 간편 지급을 신청할 수 있으나 분쟁 가능성 등에 따라 거절될 수 있다.",
+          "source_chunk_ids": [
+            "BI-001_chunk_004"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        }
+      ],
+      "forbidden_claims": [
+        "가족 중 아무나 단독으로 제한 없이 전액을 신청할 수 있다.",
+        "상속인 간 합의나 지분 확인은 필요하지 않다."
+      ],
+      "related_chunk_ids": [],
+      "source_chunk_ids": [
+        "BI-001_chunk_004"
+      ],
+      "source_urls": [
+        "https://www.kdic.or.kr/sp/dpstrprot/DpsmIbamtAplyPossDcmnt/selectScrn.do"
+      ],
+      "source_evaluation_ids": [
+        "EVAL035"
+      ],
+      "source_questions": [
+        "돌아가신 가족의 예금보험금은 누가 신청해야 하나요?"
+      ],
+      "candidate_evidence_summary": "### 예금자가 사망한 경우 - 제적등본 또는 가족관계증명서 - 상속인 본인의 확인증명 - (공동·상속)미수령금 지분신고서 - 상속인의 도장 - 소액 상속 간편 지급 안내 - 제적정리가 안된 경우 예금자 본인이 사망하였다는 증명 (사망진단서, 사망확인서또는 주민등록등본상에 사망사실이 기재되면 됨) 및 예금자 본인의 가족관계증명서 - 주민등록증, 경로우대증, 운전면허증, 여권 등 공공기관에서 발행한 사진이 들어간 본인임을 확인할 수 있는 증명서 - 학생인 경우 학…",
+      "provenance": {
+        "candidate_file": "FACT_SHEET_적용_후보_청크 (1).xlsx",
+        "candidate_sheet": "Fact Sheet 후보",
+        "evaluation_file": "Evaluation_DataSet_v3_AnswerEval_MinColumns (1).xlsx",
+        "evaluation_sheet": "평가데이터셋 V4_1"
+      },
+      "schema_record_version": "c-ver3",
+      "activation_policy": "TRIGGER_CHUNK_AND_BUSINESS_AND_KEYWORD",
+      "activation_keywords": [
+        "예금보험금",
+        "가지급금",
+        "개산지급금",
+        "지급보류",
+        "예금자가",
+        "사망한",
+        "상속",
+        "서류",
+        "다중",
+        "예외",
+        "일반",
+        "절차",
+        "예외별",
+        "대체서류"
+      ],
+      "applies_when": "Top-5에 BI-001_chunk_004가 있고 질문이 예금보험금, 가지급금, 개산지급금, 지급보류, 예금자가, 사망한, 상속, 서류 중 하나 이상과 직접 관련될 때",
+      "do_not_apply_when": "Trigger 청크가 검색됐더라도 질문이 이 Fact Index의 적용 키워드·대상·조건과 무관하거나 다른 업무를 묻는 경우",
+      "review_dimensions": {
+        "confusion_type": "상속 서류·다중 예외",
+        "exact_subject_scope": [
+          "사망한 예금자의 예금보험금은 상속인이 신청하며 제적등본 또는 가족관계증명서, 상속인 본인확인 증명, 지분신고서와 상속인 도장 등이 필요하다.",
+          "원칙적으로 모든 1순위 상속권자의 이름과 지분을 포함하고 해당 상속인이 방문해야 하며, 적법한 동의서와 인감증명서를 갖추면 예외적으로 방문하지 않을 수 있다.",
+          "상속 예금 등이 300만원 이하이면 상속인 1인이 손해담보약정서를 제출해 간편 지급을 신청할 수 있으나 분쟁 가능성 등에 따라 거절될 수 있다."
+        ],
+        "similar_scheme_distinctions": [
+          "사망한 예금자의 예금보험금은 상속인이 신청하며 제적등본 또는 가족관계증명서, 상속인 본인확인 증명, 지분신고서와 상속인 도장 등이 필요하다.",
+          "원칙적으로 모든 1순위 상속권자의 이름과 지분을 포함하고 해당 상속인이 방문해야 하며, 적법한 동의서와 인감증명서를 갖추면 예외적으로 방문하지 않을 수 있다.",
+          "상속 예금 등이 300만원 이하이면 상속인 1인이 손해담보약정서를 제출해 간편 지급을 신청할 수 있으나 분쟁 가능성 등에 따라 거절될 수 있다."
+        ],
+        "amount_period_conditions": [
+          "원칙적으로 모든 1순위 상속권자의 이름과 지분을 포함하고 해당 상속인이 방문해야 하며, 적법한 동의서와 인감증명서를 갖추면 예외적으로 방문하지 않을 수 있다.",
+          "상속 예금 등이 300만원 이하이면 상속인 1인이 손해담보약정서를 제출해 간편 지급을 신청할 수 있으나 분쟁 가능성 등에 따라 거절될 수 있다."
+        ],
+        "exceptions_exclusions": [
+          "원칙적으로 모든 1순위 상속권자의 이름과 지분을 포함하고 해당 상속인이 방문해야 하며, 적법한 동의서와 인감증명서를 갖추면 예외적으로 방문하지 않을 수 있다."
+        ],
+        "common_misinterpretations": [
+          "가족 중 아무나 단독으로 제한 없이 전액을 신청할 수 있다.",
+          "상속인 간 합의나 지분 확인은 필요하지 않다."
+        ],
+        "answer_must_not_assert": [
+          "가족 중 아무나 단독으로 제한 없이 전액을 신청할 수 있다.",
+          "상속인 간 합의나 지분 확인은 필요하지 않다."
+        ],
+        "related_chunk_ids": [],
+        "official_evidence": {
+          "chunk_ids": [
+            "BI-001_chunk_004"
+          ],
+          "urls": [
+            "https://www.kdic.or.kr/sp/dpstrprot/DpsmIbamtAplyPossDcmnt/selectScrn.do"
+          ]
+        }
+      },
+      "review_workflow": {
+        "current_status": "검수필요",
+        "reviewer": "",
+        "review_date": "",
+        "review_notes": "",
+        "production_enabled": false
+      }
+    },
+    {
+      "fact_index_id": "FI-CAND-008",
+      "status": "REVIEWED_FOR_PROTOTYPE",
+      "review_status": "CANDIDATE_EVIDENCE_REVIEWED",
+      "trigger_chunk_ids": [
+        "BI-002_chunk_003"
+      ],
+      "business_function": "예금보험금 안내",
+      "business_function_code": "deposit_insurance_payout",
+      "document_title": "예금보험금 신청절차",
+      "section_title": "예금보험금 지급보류 및 지급보류의 해제 경우",
+      "priority": "HIGH",
+      "recommended_processing": "Fact Sheet",
+      "confusion_type": "지급보류·조건부 해제",
+      "confusion_point": "6개월 후 자동 지급으로 오해하기 쉽다. 귀책사유가 없을 때만 지급 가능하고 추가 보전조치로 보류가 지속될 수 있다.",
+      "required_review_points": "보류 대상, 6개월의 의미, 해제 조건, 보류 지속 가능 조건",
+      "verified_claims": [
+        {
+          "claim_id": "F1",
+          "statement": "지급이 보류된 예금보험금은 지급보류 사유가 해소된 이후 지급할 수 있다.",
+          "source_chunk_ids": [
+            "BI-002_chunk_003"
+          ],
+          "origin": "CANDIDATE_EVIDENCE_REVIEWED"
+        },
+        {
+          "claim_id": "F2",
+          "statement": "부실금융회사의 부실관련자와 특수관계인의 예금은 6개월 지급보류 후에도 귀책사유가 없다고 판단되는 경우에만 지급할 수 있다.",
+          "source_chunk_ids": [
+            "BI-002_chunk_003"
+          ],
+          "origin": "CANDIDATE_EVIDENCE_REVIEWED"
+        },
+        {
+          "claim_id": "F3",
+          "statement": "6개월이 지났다는 이유만으로 지급보류 예금보험금이 자동 지급되는 것은 아니다.",
+          "source_chunk_ids": [
+            "BI-002_chunk_003"
+          ],
+          "origin": "CANDIDATE_EVIDENCE_REVIEWED"
+        }
+      ],
+      "forbidden_claims": [
+        "지급보류된 예금보험금은 6개월이 지나면 조건 없이 자동 지급된다.",
+        "지급보류 사유가 해소되지 않아도 기간만 지나면 지급해야 한다."
+      ],
+      "related_chunk_ids": [],
+      "source_chunk_ids": [
+        "BI-002_chunk_003"
+      ],
+      "source_urls": [
+        "https://www.kdic.or.kr/sp/dpstrprot/DpsmIbamtAplyProc/selectScrn.do"
+      ],
+      "source_evaluation_ids": [],
+      "source_questions": [],
+      "candidate_evidence_summary": "### 예금보험금 지급보류 및 지급보류의 해제 경우 * 아래의 사유로 지급이 보류된 예금보험금은 사유가 해소된 이후 지급이 가능하며, 아래의 사유 중 부실금융 회사의 부실관련자 및 그 특수관계인에 대한 예금은 예금자보호법에 따라 6개월 지급보류 후 귀책사유가 없다고 판단될 경우에만 지급이 가능합니다. - 예금보험금 지급보류 대상 - 예금보험금 지급보류의 해제 - 부실관련자(상호저축은행법상 예금 연대책임자 및 재정보증인 포함) 및 특수관계인, 계열회사 및 그 임원…",
+      "provenance": {
+        "candidate_file": "FACT_SHEET_적용_후보_청크 (1).xlsx",
+        "candidate_sheet": "Fact Sheet 후보",
+        "evaluation_file": "Evaluation_DataSet_v3_AnswerEval_MinColumns (1).xlsx",
+        "evaluation_sheet": "평가데이터셋 V4_1"
+      },
+      "schema_record_version": "c-ver3",
+      "activation_policy": "TRIGGER_CHUNK_AND_BUSINESS_AND_KEYWORD",
+      "activation_keywords": [
+        "예금보험금",
+        "가지급금",
+        "개산지급금",
+        "지급보류",
+        "해제",
+        "조건부",
+        "보류",
+        "대상",
+        "6개월의",
+        "의미",
+        "조건",
+        "지속"
+      ],
+      "applies_when": "Top-5에 BI-002_chunk_003가 있고 질문이 예금보험금, 가지급금, 개산지급금, 지급보류, 해제, 조건부, 보류, 대상 중 하나 이상과 직접 관련될 때",
+      "do_not_apply_when": "Trigger 청크가 검색됐더라도 질문이 이 Fact Index의 적용 키워드·대상·조건과 무관하거나 다른 업무를 묻는 경우",
+      "review_dimensions": {
+        "confusion_type": "지급보류·조건부 해제",
+        "exact_subject_scope": [
+          "부실금융회사의 부실관련자와 특수관계인의 예금은 6개월 지급보류 후에도 귀책사유가 없다고 판단되는 경우에만 지급할 수 있다."
+        ],
+        "similar_scheme_distinctions": [
+          "지급이 보류된 예금보험금은 지급보류 사유가 해소된 이후 지급할 수 있다.",
+          "부실금융회사의 부실관련자와 특수관계인의 예금은 6개월 지급보류 후에도 귀책사유가 없다고 판단되는 경우에만 지급할 수 있다.",
+          "6개월이 지났다는 이유만으로 지급보류 예금보험금이 자동 지급되는 것은 아니다."
+        ],
+        "amount_period_conditions": [
+          "부실금융회사의 부실관련자와 특수관계인의 예금은 6개월 지급보류 후에도 귀책사유가 없다고 판단되는 경우에만 지급할 수 있다.",
+          "6개월이 지났다는 이유만으로 지급보류 예금보험금이 자동 지급되는 것은 아니다."
+        ],
+        "exceptions_exclusions": [
+          "지급이 보류된 예금보험금은 지급보류 사유가 해소된 이후 지급할 수 있다.",
+          "부실금융회사의 부실관련자와 특수관계인의 예금은 6개월 지급보류 후에도 귀책사유가 없다고 판단되는 경우에만 지급할 수 있다.",
+          "6개월이 지났다는 이유만으로 지급보류 예금보험금이 자동 지급되는 것은 아니다."
+        ],
+        "common_misinterpretations": [
+          "지급보류된 예금보험금은 6개월이 지나면 조건 없이 자동 지급된다.",
+          "지급보류 사유가 해소되지 않아도 기간만 지나면 지급해야 한다."
+        ],
+        "answer_must_not_assert": [
+          "지급보류된 예금보험금은 6개월이 지나면 조건 없이 자동 지급된다.",
+          "지급보류 사유가 해소되지 않아도 기간만 지나면 지급해야 한다."
+        ],
+        "related_chunk_ids": [],
+        "official_evidence": {
+          "chunk_ids": [
+            "BI-002_chunk_003"
+          ],
+          "urls": [
+            "https://www.kdic.or.kr/sp/dpstrprot/DpsmIbamtAplyProc/selectScrn.do"
+          ]
+        }
+      },
+      "review_workflow": {
+        "current_status": "검수필요",
+        "reviewer": "",
+        "review_date": "",
+        "review_notes": "",
+        "production_enabled": false
+      }
+    },
+    {
+      "fact_index_id": "FI-CAND-009",
+      "status": "REVIEWED_FOR_PROTOTYPE",
+      "review_status": "HUMAN_APPROVED_EVAL",
+      "trigger_chunk_ids": [
+        "BI-003_chunk_008"
+      ],
+      "business_function": "예금보험금 안내",
+      "business_function_code": "deposit_insurance_payout",
+      "document_title": "예금보험금이란?",
+      "section_title": "신청안내",
+      "priority": "HIGH",
+      "recommended_processing": "재청킹 후 Fact Sheet",
+      "confusion_type": "신청 경로·시효·제한 혼합",
+      "confusion_point": "온라인·방문·대리 신청, 5년 소멸시효, 미성년자·법인 온라인 불가, 소정이자가 한 청크에 섞여 있다.",
+      "required_review_points": "신청 경로별 요건, 대리인 서류, 5년 시효, 온라인 제한 대상, 소정이자 기준",
+      "verified_claims": [
+        {
+          "claim_id": "F1",
+          "statement": "방문 신청은 본인 신분증과 도장 또는 서명이 필요하다.",
+          "source_chunk_ids": [
+            "BI-003_chunk_008"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F2",
+          "statement": "신청 시 예금등 채권양도증서 등 소정의 서류를 추가로 제출할 수 있으므로 신분증만으로 충분하다고 볼 수 없다.",
+          "source_chunk_ids": [
+            "BI-003_chunk_008"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F3",
+          "statement": "인터넷 신청은 본인 명의 인증수단으로 가능하지만 미성년자와 법인은 공사 홈페이지 인터넷 신청을 할 수 없다.",
+          "source_chunk_ids": [
+            "BI-003_chunk_008"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F4",
+          "statement": "예금보험금은 금융안심포털에서 본인인증 후 인터넷으로 신청하거나 지급대행지점을 방문해 신청할 수 있다.",
+          "source_chunk_ids": [
+            "BI-002_chunk_002",
+            "BI-003_chunk_008"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F5",
+          "statement": "공사 홈페이지를 통한 인터넷 신청은 미성년자와 법인은 불가능하다.",
+          "source_chunk_ids": [
+            "BI-003_chunk_008"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        }
+      ],
+      "forbidden_claims": [
+        "방문 신청은 신분증 하나만 있으면 항상 완료된다.",
+        "미성년자와 법인도 동일하게 인터넷 신청할 수 있다.",
+        "예금보험금은 반드시 방문으로만 신청할 수 있다.",
+        "미성년자와 법인도 개인과 같은 방식으로 인터넷 신청할 수 있다."
+      ],
+      "related_chunk_ids": [],
+      "source_chunk_ids": [
+        "BI-003_chunk_008"
+      ],
+      "source_urls": [
+        "https://www.kdic.or.kr/sp/dpstrprot/DpsmIbamtExpln/selectScrn.do"
+      ],
+      "source_evaluation_ids": [
+        "EVAL032",
+        "EVAL037"
+      ],
+      "source_questions": [
+        "예금 보험금 신청하려는데 신분증만 가져가면 되나요?",
+        "예금보험금은 인터넷으로 신청할 수 있나요, 직접 방문해야 하나요?"
+      ],
+      "candidate_evidence_summary": "### 신청안내 - 보험금/개산지급금/가지급금 신청은 본인명의 공인인증서, 금융인증서나 간편인증 등을 통해 하단의 「예금보험금/개산지급금/가지급금 신청 바로가기」에 접속하여 신청하시거나, 예금자 본인의 신분증, 도장(서명가능)을 지참하여 지급대행지점을 방문하여 신청하시면 됩니다. 다만, 대리인으로 하여금 예금보험금/개산지급금/가지급금을 수령하게 할 경우에는 위임장, 위임자의 인감증명서, 대리인의 실명증표 등을 추가로 구비하여야 합니다. - 예금보험금/개산지급금/…",
+      "provenance": {
+        "candidate_file": "FACT_SHEET_적용_후보_청크 (1).xlsx",
+        "candidate_sheet": "Fact Sheet 후보",
+        "evaluation_file": "Evaluation_DataSet_v3_AnswerEval_MinColumns (1).xlsx",
+        "evaluation_sheet": "평가데이터셋 V4_1"
+      },
+      "schema_record_version": "c-ver3",
+      "activation_policy": "TRIGGER_CHUNK_AND_BUSINESS_AND_KEYWORD",
+      "activation_keywords": [
+        "예금보험금",
+        "가지급금",
+        "개산지급금",
+        "지급보류",
+        "신청안내",
+        "신청",
+        "경로",
+        "시효",
+        "제한",
+        "혼합",
+        "경로별",
+        "요건",
+        "대리인",
+        "서류"
+      ],
+      "applies_when": "Top-5에 BI-003_chunk_008가 있고 질문이 예금보험금, 가지급금, 개산지급금, 지급보류, 신청안내, 신청, 경로, 시효 중 하나 이상과 직접 관련될 때",
+      "do_not_apply_when": "Trigger 청크가 검색됐더라도 질문이 이 Fact Index의 적용 키워드·대상·조건과 무관하거나 다른 업무를 묻는 경우",
+      "review_dimensions": {
+        "confusion_type": "신청 경로·시효·제한 혼합",
+        "exact_subject_scope": [
+          "방문 신청은 본인 신분증과 도장 또는 서명이 필요하다.",
+          "인터넷 신청은 본인 명의 인증수단으로 가능하지만 미성년자와 법인은 공사 홈페이지 인터넷 신청을 할 수 없다.",
+          "예금보험금은 금융안심포털에서 본인인증 후 인터넷으로 신청하거나 지급대행지점을 방문해 신청할 수 있다."
+        ],
+        "similar_scheme_distinctions": [
+          "예금보험금은 금융안심포털에서 본인인증 후 인터넷으로 신청하거나 지급대행지점을 방문해 신청할 수 있다."
+        ],
+        "amount_period_conditions": [
+          "인터넷 신청은 본인 명의 인증수단으로 가능하지만 미성년자와 법인은 공사 홈페이지 인터넷 신청을 할 수 없다.",
+          "공사 홈페이지를 통한 인터넷 신청은 미성년자와 법인은 불가능하다."
+        ],
+        "exceptions_exclusions": [
+          "공사 홈페이지를 통한 인터넷 신청은 미성년자와 법인은 불가능하다."
+        ],
+        "common_misinterpretations": [
+          "방문 신청은 신분증 하나만 있으면 항상 완료된다.",
+          "미성년자와 법인도 동일하게 인터넷 신청할 수 있다.",
+          "예금보험금은 반드시 방문으로만 신청할 수 있다.",
+          "미성년자와 법인도 개인과 같은 방식으로 인터넷 신청할 수 있다."
+        ],
+        "answer_must_not_assert": [
+          "방문 신청은 신분증 하나만 있으면 항상 완료된다.",
+          "미성년자와 법인도 동일하게 인터넷 신청할 수 있다.",
+          "예금보험금은 반드시 방문으로만 신청할 수 있다.",
+          "미성년자와 법인도 개인과 같은 방식으로 인터넷 신청할 수 있다."
+        ],
+        "related_chunk_ids": [
+          "BI-002_chunk_002"
+        ],
+        "official_evidence": {
+          "chunk_ids": [
+            "BI-003_chunk_008"
+          ],
+          "urls": [
+            "https://www.kdic.or.kr/sp/dpstrprot/DpsmIbamtExpln/selectScrn.do"
+          ]
+        }
+      },
+      "review_workflow": {
+        "current_status": "검수필요",
+        "reviewer": "",
+        "review_date": "",
+        "review_notes": "",
+        "production_enabled": false
+      }
+    },
+    {
+      "fact_index_id": "FI-CAND-010",
+      "status": "REVIEWED_FOR_PROTOTYPE",
+      "review_status": "CANDIDATE_EVIDENCE_REVIEWED",
+      "trigger_chunk_ids": [
+        "UN-001_chunk_002"
+      ],
+      "business_function": "고객 미수령금 신청",
+      "business_function_code": "unclaimed_funds",
+      "document_title": "고객미수령금",
+      "section_title": "고객 미수령금의 종류",
+      "priority": "HIGH",
+      "recommended_processing": "Fact Sheet",
+      "confusion_type": "정산금 계산·정의 혼동",
+      "confusion_point": "회수액 전체가 아니라 소요비용 공제 후 금액이 기존 개산지급금을 초과할 때 그 초과분만 추가 지급한다.",
+      "required_review_points": "정산금 계산 순서, 초과분만 지급, 예금보험금·파산배당금과의 개념 구분",
+      "verified_claims": [
+        {
+          "claim_id": "F1",
+          "statement": "예금보험금은 보험사고로 금융회사가 예금을 지급하지 못할 때 예금보험공사가 해당 금융회사를 대신하여 지급하는 보험금이다.",
+          "source_chunk_ids": [
+            "UN-001_chunk_002"
+          ],
+          "origin": "CANDIDATE_EVIDENCE_REVIEWED"
+        },
+        {
+          "claim_id": "F2",
+          "statement": "파산배당금은 파산 금융회사의 남은 자산을 현금화하여 채권자에게 채권액 비율대로 배당하는 금액이다.",
+          "source_chunk_ids": [
+            "UN-001_chunk_002"
+          ],
+          "origin": "CANDIDATE_EVIDENCE_REVIEWED"
+        },
+        {
+          "claim_id": "F3",
+          "statement": "개산지급금 정산금은 회수금액에서 소요비용을 공제한 금액이 이미 받은 개산지급금을 초과할 때 그 초과분을 추가 지급하는 금액이다.",
+          "source_chunk_ids": [
+            "UN-001_chunk_002"
+          ],
+          "origin": "CANDIDATE_EVIDENCE_REVIEWED"
+        }
+      ],
+      "forbidden_claims": [
+        "파산배당금 등으로 회수한 금액 전부가 개산지급금 정산금으로 지급된다.",
+        "개산지급금 정산금 계산에서는 회수에 소요된 비용을 공제하지 않는다.",
+        "예금보험금, 파산배당금과 개산지급금 정산금은 같은 종류의 금액이다."
+      ],
+      "related_chunk_ids": [],
+      "source_chunk_ids": [
+        "UN-001_chunk_002"
+      ],
+      "source_urls": [
+        "https://www.kdic.or.kr/sp/dpstrprot/ProtSystNramtInqAplyNramtGudn/selectScrn.do"
+      ],
+      "source_evaluation_ids": [],
+      "source_questions": [],
+      "candidate_evidence_summary": "### 고객 미수령금의 종류 - 예금보험금 - 파산배당금 - 개산지급금 정산금 - 예금보험에 가입한 금융회사가 예금의 지급정지, 영업 인·허가의 취소 등 보험사고로 인하여 고객의 예금을 지급할 수 없을 때 공사가 해당 금융회사를 대신하여 지급하는 보험금을 말합니다. - 금융회사가 파산하는 경우 남은 자산을 현금화하여 채권자들에게 그 채권액 비율대로 배당하는 금액을 말합니다. - 파산배당금 등으로 회수한 금액에서 소요비용을 공제한 금액이 수령한 개산지급금을 초과하…",
+      "provenance": {
+        "candidate_file": "FACT_SHEET_적용_후보_청크 (1).xlsx",
+        "candidate_sheet": "Fact Sheet 후보",
+        "evaluation_file": "Evaluation_DataSet_v3_AnswerEval_MinColumns (1).xlsx",
+        "evaluation_sheet": "평가데이터셋 V4_1"
+      },
+      "schema_record_version": "c-ver3",
+      "activation_policy": "TRIGGER_CHUNK_AND_BUSINESS_AND_KEYWORD",
+      "activation_keywords": [
+        "미수령금",
+        "파산배당금",
+        "정산금",
+        "상속인",
+        "고객",
+        "종류",
+        "계산",
+        "정의",
+        "혼동",
+        "순서",
+        "초과분만",
+        "지급",
+        "예금보험금",
+        "파산배당금과"
+      ],
+      "applies_when": "Top-5에 UN-001_chunk_002가 있고 질문이 미수령금, 파산배당금, 정산금, 상속인, 고객, 종류, 계산, 정의 중 하나 이상과 직접 관련될 때",
+      "do_not_apply_when": "Trigger 청크가 검색됐더라도 질문이 이 Fact Index의 적용 키워드·대상·조건과 무관하거나 다른 업무를 묻는 경우",
+      "review_dimensions": {
+        "confusion_type": "정산금 계산·정의 혼동",
+        "exact_subject_scope": [],
+        "similar_scheme_distinctions": [
+          "예금보험금은 보험사고로 금융회사가 예금을 지급하지 못할 때 예금보험공사가 해당 금융회사를 대신하여 지급하는 보험금이다.",
+          "파산배당금은 파산 금융회사의 남은 자산을 현금화하여 채권자에게 채권액 비율대로 배당하는 금액이다.",
+          "개산지급금 정산금은 회수금액에서 소요비용을 공제한 금액이 이미 받은 개산지급금을 초과할 때 그 초과분을 추가 지급하는 금액이다."
+        ],
+        "amount_period_conditions": [
+          "파산배당금은 파산 금융회사의 남은 자산을 현금화하여 채권자에게 채권액 비율대로 배당하는 금액이다.",
+          "개산지급금 정산금은 회수금액에서 소요비용을 공제한 금액이 이미 받은 개산지급금을 초과할 때 그 초과분을 추가 지급하는 금액이다."
+        ],
+        "exceptions_exclusions": [],
+        "common_misinterpretations": [
+          "파산배당금 등으로 회수한 금액 전부가 개산지급금 정산금으로 지급된다.",
+          "개산지급금 정산금 계산에서는 회수에 소요된 비용을 공제하지 않는다.",
+          "예금보험금, 파산배당금과 개산지급금 정산금은 같은 종류의 금액이다."
+        ],
+        "answer_must_not_assert": [
+          "파산배당금 등으로 회수한 금액 전부가 개산지급금 정산금으로 지급된다.",
+          "개산지급금 정산금 계산에서는 회수에 소요된 비용을 공제하지 않는다.",
+          "예금보험금, 파산배당금과 개산지급금 정산금은 같은 종류의 금액이다."
+        ],
+        "related_chunk_ids": [],
+        "official_evidence": {
+          "chunk_ids": [
+            "UN-001_chunk_002"
+          ],
+          "urls": [
+            "https://www.kdic.or.kr/sp/dpstrprot/ProtSystNramtInqAplyNramtGudn/selectScrn.do"
+          ]
+        }
+      },
+      "review_workflow": {
+        "current_status": "검수필요",
+        "reviewer": "",
+        "review_date": "",
+        "review_notes": "",
+        "production_enabled": false
+      }
+    },
+    {
+      "fact_index_id": "FI-CAND-011",
+      "status": "REVIEWED_FOR_PROTOTYPE",
+      "review_status": "HUMAN_APPROVED_EVAL",
+      "trigger_chunk_ids": [
+        "UN-004_chunk_002"
+      ],
+      "business_function": "고객 미수령금 신청",
+      "business_function_code": "unclaimed_funds",
+      "document_title": "상속인 금융거래조회",
+      "section_title": "상속인 미수령금 조회결과 안내",
+      "priority": "HIGH",
+      "recommended_processing": "Fact Sheet",
+      "confusion_type": "기준일 선후·합산 한도",
+      "confusion_point": "사망일과 지급결정일의 선후에 따라 예금상속과 보험금상속이 갈리고, 예금상속이면 상속인 예금과 합산한다.",
+      "required_review_points": "기준일 선후 조건, 상속 유형, 합산 적용 조건, 접수처 구분",
+      "verified_claims": [
+        {
+          "claim_id": "F1",
+          "statement": "조회 결과에는 거래 금융회사명, 미수령금 잔액 구간, 파산재단 연락처가 제공된다.",
+          "source_chunk_ids": [
+            "UN-004_chunk_002"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F2",
+          "statement": "수령하려면 상속인 전원의 합의를 거쳐 관련 서류를 갖추고 해당 파산재단 또는 지급대행점에 상속 명의변경을 신청해야 한다.",
+          "source_chunk_ids": [
+            "UN-004_chunk_002"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        }
+      ],
+      "forbidden_claims": [
+        "자녀 한 명이 다른 상속인의 합의 없이 조회된 미수령금 전액을 바로 수령할 수 있다."
+      ],
+      "related_chunk_ids": [],
+      "source_chunk_ids": [
+        "UN-004_chunk_002"
+      ],
+      "source_urls": [
+        "https://www.kdic.or.kr/sp/dpstrprot/ProtSystHrpeHistInq/selectScrn.do"
+      ],
+      "source_evaluation_ids": [
+        "EVAL057"
+      ],
+      "source_questions": [
+        "돌아가신 부모님 명의의 미수령금을 자녀가 조회할 수 있나요?"
+      ],
+      "candidate_evidence_summary": "### 상속인 미수령금 조회결과 안내 본 조회 서비스에서는 사망예금자(피상속인)의 거래 금융회사명, 미수령금 잔액(구간별), 해당 파산재단 연락처 정보를 제공하고 있습니다. 예금보험금은 예금자의 사망일자가 보험금 지급결정일 전인 경우 예금상속, 후인 경우 보험금 상속으로 구분되고, 예금 상속인 경우 상속인의 예금과 합산하여 5천만원 한도 여부를 판단합니다. 또한 조회된 미수령금은 상속인 전원의 합의를 거쳐 관련 서류(“고객 미수령금 통합조회/신청” 화면 참고)를…",
+      "provenance": {
+        "candidate_file": "FACT_SHEET_적용_후보_청크 (1).xlsx",
+        "candidate_sheet": "Fact Sheet 후보",
+        "evaluation_file": "Evaluation_DataSet_v3_AnswerEval_MinColumns (1).xlsx",
+        "evaluation_sheet": "평가데이터셋 V4_1"
+      },
+      "schema_record_version": "c-ver3",
+      "activation_policy": "TRIGGER_CHUNK_AND_BUSINESS_AND_KEYWORD",
+      "activation_keywords": [
+        "미수령금",
+        "파산배당금",
+        "정산금",
+        "상속인",
+        "조회결과",
+        "안내",
+        "기준일",
+        "선후",
+        "합산",
+        "한도",
+        "조건",
+        "상속",
+        "유형",
+        "접수처"
+      ],
+      "applies_when": "Top-5에 UN-004_chunk_002가 있고 질문이 미수령금, 파산배당금, 정산금, 상속인, 조회결과, 안내, 기준일, 선후 중 하나 이상과 직접 관련될 때",
+      "do_not_apply_when": "Trigger 청크가 검색됐더라도 질문이 이 Fact Index의 적용 키워드·대상·조건과 무관하거나 다른 업무를 묻는 경우",
+      "review_dimensions": {
+        "confusion_type": "기준일 선후·합산 한도",
+        "exact_subject_scope": [
+          "수령하려면 상속인 전원의 합의를 거쳐 관련 서류를 갖추고 해당 파산재단 또는 지급대행점에 상속 명의변경을 신청해야 한다."
+        ],
+        "similar_scheme_distinctions": [
+          "조회 결과에는 거래 금융회사명, 미수령금 잔액 구간, 파산재단 연락처가 제공된다.",
+          "수령하려면 상속인 전원의 합의를 거쳐 관련 서류를 갖추고 해당 파산재단 또는 지급대행점에 상속 명의변경을 신청해야 한다."
+        ],
+        "amount_period_conditions": [],
+        "exceptions_exclusions": [],
+        "common_misinterpretations": [
+          "자녀 한 명이 다른 상속인의 합의 없이 조회된 미수령금 전액을 바로 수령할 수 있다."
+        ],
+        "answer_must_not_assert": [
+          "자녀 한 명이 다른 상속인의 합의 없이 조회된 미수령금 전액을 바로 수령할 수 있다."
+        ],
+        "related_chunk_ids": [],
+        "official_evidence": {
+          "chunk_ids": [
+            "UN-004_chunk_002"
+          ],
+          "urls": [
+            "https://www.kdic.or.kr/sp/dpstrprot/ProtSystHrpeHistInq/selectScrn.do"
+          ]
+        }
+      },
+      "review_workflow": {
+        "current_status": "검수필요",
+        "reviewer": "",
+        "review_date": "",
+        "review_notes": "",
+        "production_enabled": false
+      }
+    },
+    {
+      "fact_index_id": "FI-CAND-012",
+      "status": "REVIEWED_FOR_PROTOTYPE",
+      "review_status": "HUMAN_APPROVED_EVAL",
+      "trigger_chunk_ids": [
+        "MT-002_chunk_000"
+      ],
+      "business_function": "착오송금 반환 신청",
+      "business_function_code": "mistaken_transfer",
+      "document_title": "착오송금 반환지원 절차",
+      "section_title": "착오송금반환지원 절차",
+      "priority": "HIGH",
+      "recommended_processing": "중복 제거 후 Fact Sheet",
+      "confusion_type": "절차·비용 차감",
+      "confusion_point": "반환지원 절차와 비용 차감 규칙이 함께 있으며 유사 청크와 중복돼 같은 사실을 여러 근거처럼 취급할 수 있다.",
+      "required_review_points": "사전 반환부터 법원 절차까지 순서, 회수액에서 실제 비용 차감 후 잔액 반환",
+      "verified_claims": [
+        {
+          "claim_id": "F1",
+          "statement": "착오송금인은 먼저 금융회사를 통한 사전 반환을 시도하고 반환되지 않으면 예금보험공사에 반환지원을 신청한다.",
+          "source_chunk_ids": [
+            "MT-002_chunk_000"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F2",
+          "statement": "지원대상이면 예금보험공사가 부당이득반환채권을 매입하고 수취인 정보를 확인해 자진반환을 권유한다.",
+          "source_chunk_ids": [
+            "MT-002_chunk_000"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F3",
+          "statement": "수취인이 자진반환하지 않으면 법원의 지급명령을 통해 회수를 진행한다.",
+          "source_chunk_ids": [
+            "MT-002_chunk_000"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F4",
+          "statement": "회수되면 회수액에서 회수 비용을 차감한 잔액을 착오송금인에게 지급한다.",
+          "source_chunk_ids": [
+            "MT-002_chunk_000"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        }
+      ],
+      "forbidden_claims": [
+        "신청 즉시 예금보험공사가 착오송금액 전액을 선지급한다.",
+        "수취인에게 자진반환을 권유하지 않고 바로 강제집행한다."
+      ],
+      "related_chunk_ids": [],
+      "source_chunk_ids": [
+        "MT-002_chunk_000"
+      ],
+      "source_urls": [
+        "https://www.kdic.or.kr/sp/kmrs/kmrsItrdProc/selectScrn.do"
+      ],
+      "source_evaluation_ids": [
+        "EVAL061"
+      ],
+      "source_questions": [
+        "착오송금 반환지원은 어떤 절차로 진행되나요?"
+      ],
+      "candidate_evidence_summary": "### 착오송금반환지원 절차 ( 착오송금인-예금보험공사-착오송금 수취인, 중앙행정기관 금융회사등 - 예금보험공사 - 법원 ) 1. 착오송금인은 예금보험공사에게 반환지원신청(채권매입) 2. 예금보험공사는 중앙행정기관/금융회사 등에 착오송금 수취인 정보 확인 3. 예금보험공사는 착오송금 수취인에게 자진반환 권유 4. 예금보험공사는 법원에게 착오송금 수취인이 미반환시 지급명령 진행 5. 예금보험공사는 착오송금 수취인에게서 회수 시 회수액에서 비용 차감 후 착오송금인에…",
+      "provenance": {
+        "candidate_file": "FACT_SHEET_적용_후보_청크 (1).xlsx",
+        "candidate_sheet": "Fact Sheet 후보",
+        "evaluation_file": "Evaluation_DataSet_v3_AnswerEval_MinColumns (1).xlsx",
+        "evaluation_sheet": "평가데이터셋 V4_1"
+      },
+      "schema_record_version": "c-ver3",
+      "activation_policy": "TRIGGER_CHUNK_AND_BUSINESS_AND_KEYWORD",
+      "activation_keywords": [
+        "착오송금",
+        "반환지원",
+        "송금인",
+        "수취인",
+        "회수비용",
+        "착오송금반환지원",
+        "절차",
+        "비용",
+        "차감",
+        "사전",
+        "반환부터",
+        "법원",
+        "절차까지",
+        "순서"
+      ],
+      "applies_when": "Top-5에 MT-002_chunk_000가 있고 질문이 착오송금, 반환지원, 송금인, 수취인, 회수비용, 착오송금반환지원, 절차, 비용 중 하나 이상과 직접 관련될 때",
+      "do_not_apply_when": "Trigger 청크가 검색됐더라도 질문이 이 Fact Index의 적용 키워드·대상·조건과 무관하거나 다른 업무를 묻는 경우",
+      "review_dimensions": {
+        "confusion_type": "절차·비용 차감",
+        "exact_subject_scope": [
+          "착오송금인은 먼저 금융회사를 통한 사전 반환을 시도하고 반환되지 않으면 예금보험공사에 반환지원을 신청한다.",
+          "지원대상이면 예금보험공사가 부당이득반환채권을 매입하고 수취인 정보를 확인해 자진반환을 권유한다.",
+          "수취인이 자진반환하지 않으면 법원의 지급명령을 통해 회수를 진행한다.",
+          "회수되면 회수액에서 회수 비용을 차감한 잔액을 착오송금인에게 지급한다."
+        ],
+        "similar_scheme_distinctions": [
+          "착오송금인은 먼저 금융회사를 통한 사전 반환을 시도하고 반환되지 않으면 예금보험공사에 반환지원을 신청한다.",
+          "지원대상이면 예금보험공사가 부당이득반환채권을 매입하고 수취인 정보를 확인해 자진반환을 권유한다."
+        ],
+        "amount_period_conditions": [
+          "회수되면 회수액에서 회수 비용을 차감한 잔액을 착오송금인에게 지급한다."
+        ],
+        "exceptions_exclusions": [
+          "착오송금인은 먼저 금융회사를 통한 사전 반환을 시도하고 반환되지 않으면 예금보험공사에 반환지원을 신청한다.",
+          "수취인이 자진반환하지 않으면 법원의 지급명령을 통해 회수를 진행한다."
+        ],
+        "common_misinterpretations": [
+          "신청 즉시 예금보험공사가 착오송금액 전액을 선지급한다.",
+          "수취인에게 자진반환을 권유하지 않고 바로 강제집행한다."
+        ],
+        "answer_must_not_assert": [
+          "신청 즉시 예금보험공사가 착오송금액 전액을 선지급한다.",
+          "수취인에게 자진반환을 권유하지 않고 바로 강제집행한다."
+        ],
+        "related_chunk_ids": [],
+        "official_evidence": {
+          "chunk_ids": [
+            "MT-002_chunk_000"
+          ],
+          "urls": [
+            "https://www.kdic.or.kr/sp/kmrs/kmrsItrdProc/selectScrn.do"
+          ]
+        }
+      },
+      "review_workflow": {
+        "current_status": "검수필요",
+        "reviewer": "",
+        "review_date": "",
+        "review_notes": "",
+        "production_enabled": false
+      }
+    },
+    {
+      "fact_index_id": "FI-CAND-013",
+      "status": "REVIEWED_FOR_PROTOTYPE",
+      "review_status": "CANDIDATE_EVIDENCE_REVIEWED",
+      "trigger_chunk_ids": [
+        "MT-004_chunk_010"
+      ],
+      "business_function": "착오송금 반환 신청",
+      "business_function_code": "mistaken_transfer",
+      "document_title": "착오송금 반환지원 FAQ",
+      "section_title": "금융회사를 통한 반환절차를 거치지 않고 착오송금 즉시 예보에 반환지원 신청이 가능한가요?",
+      "priority": "HIGH",
+      "recommended_processing": "Fact Sheet",
+      "confusion_type": "경로별 비용 차이",
+      "confusion_point": "예보 반환지원은 비용이 차감되지만 금융회사 단계에서 직접 반환되면 별도 회수비용 차감이 없다는 경로 차이를 놓치기 쉽다.",
+      "required_review_points": "사전 반환절차 의무, 예보 즉시 신청 불가, 직접 반환 시 비용 미차감 조건",
+      "verified_claims": [
+        {
+          "claim_id": "F1",
+          "statement": "착오송금 반환지원은 먼저 금융회사를 통한 반환절차를 거친 뒤 반환되지 않은 경우에 신청할 수 있다.",
+          "source_chunk_ids": [
+            "MT-004_chunk_010"
+          ],
+          "origin": "CANDIDATE_EVIDENCE_REVIEWED"
+        },
+        {
+          "claim_id": "F2",
+          "statement": "금융회사를 통한 사전 반환절차 없이 착오송금 즉시 예금보험공사에 반환지원을 신청할 수 없다.",
+          "source_chunk_ids": [
+            "MT-004_chunk_010"
+          ],
+          "origin": "CANDIDATE_EVIDENCE_REVIEWED"
+        },
+        {
+          "claim_id": "F3",
+          "statement": "금융회사 단계에서 수취인과 연락되어 직접 반환되면 별도의 회수 관련 비용 차감 없이 착오송금액을 반환받을 수 있다.",
+          "source_chunk_ids": [
+            "MT-004_chunk_010"
+          ],
+          "origin": "CANDIDATE_EVIDENCE_REVIEWED"
+        }
+      ],
+      "forbidden_claims": [
+        "금융회사에 반환을 요청하지 않고 즉시 예금보험공사에 반환지원을 신청할 수 있다.",
+        "금융회사 단계에서 직접 반환되어도 반드시 회수 관련 비용을 차감한다."
+      ],
+      "related_chunk_ids": [],
+      "source_chunk_ids": [
+        "MT-004_chunk_010"
+      ],
+      "source_urls": [
+        "https://fins.kdic.or.kr/cm/bbs/selectFaqMsdrGvbkAply.do"
+      ],
+      "source_evaluation_ids": [],
+      "source_questions": [],
+      "candidate_evidence_summary": "### Q. 금융회사를 통한 반환절차를 거치지 않고 착오송금 즉시 예보에 반환지원 신청이 가능한가요? 금융회사를 통한 사전 반환절차를 거치지 않은 경우 공사의 착오송금 반환지원 신청이 불가능합니다. ㅇ 송금인은 착오송금 발생시 우선적으로 송금금융회사를 통해 반환청구를 요청할 수 있으며, 이 때 수취인과 연락이 된다면 별도의 회수관련 비용 차감 없이 착오송금액을 반환받으실 수 있습니다.",
+      "provenance": {
+        "candidate_file": "FACT_SHEET_적용_후보_청크 (1).xlsx",
+        "candidate_sheet": "Fact Sheet 후보",
+        "evaluation_file": "Evaluation_DataSet_v3_AnswerEval_MinColumns (1).xlsx",
+        "evaluation_sheet": "평가데이터셋 V4_1"
+      },
+      "schema_record_version": "c-ver3",
+      "activation_policy": "TRIGGER_CHUNK_AND_BUSINESS_AND_KEYWORD",
+      "activation_keywords": [
+        "착오송금",
+        "반환지원",
+        "송금인",
+        "수취인",
+        "회수비용",
+        "금융회사",
+        "통한",
+        "반환절차",
+        "거치지",
+        "않고",
+        "즉시",
+        "예보에",
+        "신청이",
+        "가능한가요"
+      ],
+      "applies_when": "Top-5에 MT-004_chunk_010가 있고 질문이 착오송금, 반환지원, 송금인, 수취인, 회수비용, 금융회사, 통한, 반환절차 중 하나 이상과 직접 관련될 때",
+      "do_not_apply_when": "Trigger 청크가 검색됐더라도 질문이 이 Fact Index의 적용 키워드·대상·조건과 무관하거나 다른 업무를 묻는 경우",
+      "review_dimensions": {
+        "confusion_type": "경로별 비용 차이",
+        "exact_subject_scope": [
+          "금융회사 단계에서 수취인과 연락되어 직접 반환되면 별도의 회수 관련 비용 차감 없이 착오송금액을 반환받을 수 있다."
+        ],
+        "similar_scheme_distinctions": [
+          "착오송금 반환지원은 먼저 금융회사를 통한 반환절차를 거친 뒤 반환되지 않은 경우에 신청할 수 있다.",
+          "금융회사를 통한 사전 반환절차 없이 착오송금 즉시 예금보험공사에 반환지원을 신청할 수 없다.",
+          "금융회사 단계에서 수취인과 연락되어 직접 반환되면 별도의 회수 관련 비용 차감 없이 착오송금액을 반환받을 수 있다."
+        ],
+        "amount_period_conditions": [
+          "금융회사 단계에서 수취인과 연락되어 직접 반환되면 별도의 회수 관련 비용 차감 없이 착오송금액을 반환받을 수 있다."
+        ],
+        "exceptions_exclusions": [
+          "착오송금 반환지원은 먼저 금융회사를 통한 반환절차를 거친 뒤 반환되지 않은 경우에 신청할 수 있다."
+        ],
+        "common_misinterpretations": [
+          "금융회사에 반환을 요청하지 않고 즉시 예금보험공사에 반환지원을 신청할 수 있다.",
+          "금융회사 단계에서 직접 반환되어도 반드시 회수 관련 비용을 차감한다."
+        ],
+        "answer_must_not_assert": [
+          "금융회사에 반환을 요청하지 않고 즉시 예금보험공사에 반환지원을 신청할 수 있다.",
+          "금융회사 단계에서 직접 반환되어도 반드시 회수 관련 비용을 차감한다."
+        ],
+        "related_chunk_ids": [],
+        "official_evidence": {
+          "chunk_ids": [
+            "MT-004_chunk_010"
+          ],
+          "urls": [
+            "https://fins.kdic.or.kr/cm/bbs/selectFaqMsdrGvbkAply.do"
+          ]
+        }
+      },
+      "review_workflow": {
+        "current_status": "검수필요",
+        "reviewer": "",
+        "review_date": "",
+        "review_notes": "",
+        "production_enabled": false
+      }
+    },
+    {
+      "fact_index_id": "FI-CAND-014",
+      "status": "REVIEWED_FOR_PROTOTYPE",
+      "review_status": "HUMAN_APPROVED_EVAL",
+      "trigger_chunk_ids": [
+        "MT-006_chunk_000"
+      ],
+      "business_function": "착오송금 반환 신청",
+      "business_function_code": "mistaken_transfer",
+      "document_title": "착오송금 수취인 유의사항",
+      "section_title": "착오송금 수취인 유의사항",
+      "priority": "HIGH",
+      "recommended_processing": "Fact Sheet",
+      "confusion_type": "2주 기한·부분반환·추가비용",
+      "confusion_point": "자진반환, 이의제기, 수수료 환급, 지급명령, 강제집행의 조건과 기한이 연속적으로 연결돼 있다.",
+      "required_review_points": "2주 기한, 일부 반환의 효과, 환급 증빙, 강제집행 비용·지연이자 발생 조건",
+      "verified_claims": [
+        {
+          "claim_id": "F1",
+          "statement": "착오송금 수취인의 자진반환 기한은 양도통지문 송달일부터 2주다.",
+          "source_chunk_ids": [
+            "MT-006_chunk_000",
+            "MT-007_chunk_000"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F2",
+          "statement": "2주 안에 이의제기 없이 반환하지 않거나 일부만 반환하면 법원의 지급명령 절차가 진행될 수 있다.",
+          "source_chunk_ids": [
+            "MT-006_chunk_000"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F3",
+          "statement": "수취인은 양도통지문 송달일부터 2주 안에 온라인 또는 방문으로 이의를 제기할 수 있다.",
+          "source_chunk_ids": [
+            "MT-006_chunk_000"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F4",
+          "statement": "이의제기 없이 반환하지 않거나 일부만 반환하면 법원의 지급명령이 진행될 수 있다.",
+          "source_chunk_ids": [
+            "MT-006_chunk_000"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F5",
+          "statement": "확정된 지급명령 뒤에도 반환하지 않으면 강제집행 등 회수 조치와 추가 비용·지연이자가 발생할 수 있다.",
+          "source_chunk_ids": [
+            "MT-006_chunk_000"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F6",
+          "statement": "수취인이 자진반환 기한 안에 돈을 반환하면서 이체수수료가 발생한 경우 수수료 환급을 신청할 수 있다.",
+          "source_chunk_ids": [
+            "MT-006_chunk_000",
+            "MT-007_chunk_000"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F7",
+          "statement": "반환 당일 이체확인증 등 증빙을 갖춰 온라인·방문·이메일·팩스 중 하나로 신청해야 한다.",
+          "source_chunk_ids": [
+            "MT-006_chunk_000",
+            "MT-007_chunk_000"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        }
+      ],
+      "forbidden_claims": [
+        "착오송금 발생일로부터 2주가 수취인의 자진반환 기한이다.",
+        "기한이 지나도 아무 법적 절차가 진행되지 않는다.",
+        "반환에 동의하지 않으면 착오송금액을 보유해도 아무 절차가 진행되지 않는다.",
+        "이의제기를 하면 반환 의무가 자동으로 소멸한다.",
+        "착오송금인에게 발생한 송금수수료를 모두 자동 환급한다.",
+        "자진반환 기한이 지난 뒤에도 증빙 없이 수수료를 환급받을 수 있다."
+      ],
+      "related_chunk_ids": [],
+      "source_chunk_ids": [
+        "MT-006_chunk_000"
+      ],
+      "source_urls": [
+        "https://fins.kdic.or.kr/ir/addrse/AddrseAttnMttr/selectScrn.do"
+      ],
+      "source_evaluation_ids": [
+        "EVAL067",
+        "EVAL068",
+        "EVAL069"
+      ],
+      "source_questions": [
+        "착오송금을 잘못 받은 사람인데, 자진반환 기한이 있나요?",
+        "착오송금 반환에 동의하지 않으면 어떻게 되나요?",
+        "착오송금 이체수수료는 돌려받을 수 있나요?"
+      ],
+      "candidate_evidence_summary": "### 착오송금 수취인 유의사항 - 착오송금 자진반환의 경우, 송달받으신 양도통지문에 기재된 반환금액과 반환계좌를 확인하여 자진반환 기한(양도통지문 송달일로부터 2주) 내에 반환해주시기 바랍니다. - 부당이득반환채원 양도사실을 통지받은 날(양도통지서 송달시점)로부터 2주 내에 이의제기 없이 착오송금을 반환하지 않거나 일부만 반환하는 경우 법원을 통한 지급명령 절차가 진행될 수 있습니다. - 이의제기는 온라인 [착오송금 수취인 - 이의제기] 메뉴 또한 직접 방문하…",
+      "provenance": {
+        "candidate_file": "FACT_SHEET_적용_후보_청크 (1).xlsx",
+        "candidate_sheet": "Fact Sheet 후보",
+        "evaluation_file": "Evaluation_DataSet_v3_AnswerEval_MinColumns (1).xlsx",
+        "evaluation_sheet": "평가데이터셋 V4_1"
+      },
+      "schema_record_version": "c-ver3",
+      "activation_policy": "TRIGGER_CHUNK_AND_BUSINESS_AND_KEYWORD",
+      "activation_keywords": [
+        "착오송금",
+        "반환지원",
+        "송금인",
+        "수취인",
+        "회수비용",
+        "유의사항",
+        "2주",
+        "기한",
+        "부분반환",
+        "추가비용",
+        "일부",
+        "반환의",
+        "효과",
+        "환급"
+      ],
+      "applies_when": "Top-5에 MT-006_chunk_000가 있고 질문이 착오송금, 반환지원, 송금인, 수취인, 회수비용, 유의사항, 2주, 기한 중 하나 이상과 직접 관련될 때",
+      "do_not_apply_when": "Trigger 청크가 검색됐더라도 질문이 이 Fact Index의 적용 키워드·대상·조건과 무관하거나 다른 업무를 묻는 경우",
+      "review_dimensions": {
+        "confusion_type": "2주 기한·부분반환·추가비용",
+        "exact_subject_scope": [
+          "착오송금 수취인의 자진반환 기한은 양도통지문 송달일부터 2주다.",
+          "수취인은 양도통지문 송달일부터 2주 안에 온라인 또는 방문으로 이의를 제기할 수 있다.",
+          "수취인이 자진반환 기한 안에 돈을 반환하면서 이체수수료가 발생한 경우 수수료 환급을 신청할 수 있다."
+        ],
+        "similar_scheme_distinctions": [],
+        "amount_period_conditions": [
+          "착오송금 수취인의 자진반환 기한은 양도통지문 송달일부터 2주다.",
+          "2주 안에 이의제기 없이 반환하지 않거나 일부만 반환하면 법원의 지급명령 절차가 진행될 수 있다.",
+          "수취인은 양도통지문 송달일부터 2주 안에 온라인 또는 방문으로 이의를 제기할 수 있다.",
+          "수취인이 자진반환 기한 안에 돈을 반환하면서 이체수수료가 발생한 경우 수수료 환급을 신청할 수 있다."
+        ],
+        "exceptions_exclusions": [
+          "2주 안에 이의제기 없이 반환하지 않거나 일부만 반환하면 법원의 지급명령 절차가 진행될 수 있다.",
+          "이의제기 없이 반환하지 않거나 일부만 반환하면 법원의 지급명령이 진행될 수 있다.",
+          "확정된 지급명령 뒤에도 반환하지 않으면 강제집행 등 회수 조치와 추가 비용·지연이자가 발생할 수 있다."
+        ],
+        "common_misinterpretations": [
+          "착오송금 발생일로부터 2주가 수취인의 자진반환 기한이다.",
+          "기한이 지나도 아무 법적 절차가 진행되지 않는다.",
+          "반환에 동의하지 않으면 착오송금액을 보유해도 아무 절차가 진행되지 않는다.",
+          "이의제기를 하면 반환 의무가 자동으로 소멸한다.",
+          "착오송금인에게 발생한 송금수수료를 모두 자동 환급한다.",
+          "자진반환 기한이 지난 뒤에도 증빙 없이 수수료를 환급받을 수 있다."
+        ],
+        "answer_must_not_assert": [
+          "착오송금 발생일로부터 2주가 수취인의 자진반환 기한이다.",
+          "기한이 지나도 아무 법적 절차가 진행되지 않는다.",
+          "반환에 동의하지 않으면 착오송금액을 보유해도 아무 절차가 진행되지 않는다.",
+          "이의제기를 하면 반환 의무가 자동으로 소멸한다.",
+          "착오송금인에게 발생한 송금수수료를 모두 자동 환급한다.",
+          "자진반환 기한이 지난 뒤에도 증빙 없이 수수료를 환급받을 수 있다."
+        ],
+        "related_chunk_ids": [
+          "MT-007_chunk_000"
+        ],
+        "official_evidence": {
+          "chunk_ids": [
+            "MT-006_chunk_000"
+          ],
+          "urls": [
+            "https://fins.kdic.or.kr/ir/addrse/AddrseAttnMttr/selectScrn.do"
+          ]
+        }
+      },
+      "review_workflow": {
+        "current_status": "검수필요",
+        "reviewer": "",
+        "review_date": "",
+        "review_notes": "",
+        "production_enabled": false
+      }
+    },
+    {
+      "fact_index_id": "FI-CAND-015",
+      "status": "REVIEWED_FOR_PROTOTYPE",
+      "review_status": "CANDIDATE_EVIDENCE_REVIEWED",
+      "trigger_chunk_ids": [
+        "MT-010_rule_layer01_chunk_012"
+      ],
+      "business_function": "착오송금 반환 신청",
+      "business_function_code": "mistaken_transfer",
+      "document_title": "착오송금 반환지원 등에 관한 규정",
+      "section_title": "제10조(반환지원대상)",
+      "priority": "HIGH",
+      "recommended_processing": "Fact Sheet",
+      "confusion_type": "제외 대상·예외의 예외",
+      "confusion_point": "사전 반환 미신청, 비용 미납, 과거 계약 해제 등 제외 조건마다 다시 예외가 붙어 있어 의미 반전 위험이 크다.",
+      "required_review_points": "제외 사유별 주체, 영업정지 예외, 비용 납부·손해배상 시 예외",
+      "verified_claims": [
+        {
+          "claim_id": "F1",
+          "statement": "정부·지방자치단체, 한국은행, 금융감독원, 예금보험공사 및 자금이체 금융회사 등은 반환지원대상에서 제외된다.",
+          "source_chunk_ids": [
+            "MT-010_rule_layer01_chunk_012"
+          ],
+          "origin": "CANDIDATE_EVIDENCE_REVIEWED"
+        },
+        {
+          "claim_id": "F2",
+          "statement": "착오송금 계좌가 개설된 자금이체 금융회사 등에 사전 반환신청을 하지 않은 사람은 원칙적으로 반환지원대상에서 제외된다.",
+          "source_chunk_ids": [
+            "MT-010_rule_layer01_chunk_012"
+          ],
+          "origin": "CANDIDATE_EVIDENCE_REVIEWED"
+        },
+        {
+          "claim_id": "F3",
+          "statement": "착오송금 계좌 또는 수취 계좌가 개설된 자금이체 금융회사가 영업정지된 경우에는 사전 반환신청 미실시 제외 규칙의 예외가 적용된다.",
+          "source_chunk_ids": [
+            "MT-010_rule_layer01_chunk_012"
+          ],
+          "origin": "CANDIDATE_EVIDENCE_REVIEWED"
+        }
+      ],
+      "forbidden_claims": [
+        "금융회사를 통한 사전 반환신청을 하지 않아도 항상 반환지원대상이 된다.",
+        "관련 금융회사가 영업정지된 경우에도 사전 반환신청 미실시를 이유로 예외 없이 제외한다."
+      ],
+      "related_chunk_ids": [],
+      "source_chunk_ids": [
+        "MT-010_rule_layer01_chunk_012"
+      ],
+      "source_urls": [
+        "https://fins.kdic.or.kr/ir/aplygudn/MtrsRelLawoRgul/selectScrn.do"
+      ],
+      "source_evaluation_ids": [],
+      "source_questions": [],
+      "candidate_evidence_summary": "### 제3장 반환지원대상 및 매입금액 #### 제10조(반환지원대상) 1. 가. 정부 또는 지방자치단체 2. 나. 「한국은행법」에 따라 설립된 한국은행, 「금융위원회 설치 등에 관한 법률」에 따라 설립된 금융감독원 또는 공사 3. 다. 자금이체 금융회사등 4. 라. 착오송금한 계좌가 개설된 자금이체 금융회사등에 대해 착오송금 반환신청을 하지 않은 자. 다만 착오송금 계좌 또는 착오송금 수취 계좌가 개설된 자금이체 금융회사가 영업정지된 경우는 그러하지 아니하다.…",
+      "provenance": {
+        "candidate_file": "FACT_SHEET_적용_후보_청크 (1).xlsx",
+        "candidate_sheet": "Fact Sheet 후보",
+        "evaluation_file": "Evaluation_DataSet_v3_AnswerEval_MinColumns (1).xlsx",
+        "evaluation_sheet": "평가데이터셋 V4_1"
+      },
+      "schema_record_version": "c-ver3",
+      "activation_policy": "TRIGGER_CHUNK_AND_BUSINESS_AND_KEYWORD",
+      "activation_keywords": [
+        "착오송금",
+        "반환지원",
+        "송금인",
+        "수취인",
+        "회수비용",
+        "제10조",
+        "반환지원대상",
+        "제외",
+        "대상",
+        "예외의",
+        "예외",
+        "사유별",
+        "주체",
+        "영업정지"
+      ],
+      "applies_when": "Top-5에 MT-010_rule_layer01_chunk_012가 있고 질문이 착오송금, 반환지원, 송금인, 수취인, 회수비용, 제10조, 반환지원대상, 제외 중 하나 이상과 직접 관련될 때",
+      "do_not_apply_when": "Trigger 청크가 검색됐더라도 질문이 이 Fact Index의 적용 키워드·대상·조건과 무관하거나 다른 업무를 묻는 경우",
+      "review_dimensions": {
+        "confusion_type": "제외 대상·예외의 예외",
+        "exact_subject_scope": [
+          "정부·지방자치단체, 한국은행, 금융감독원, 예금보험공사 및 자금이체 금융회사 등은 반환지원대상에서 제외된다.",
+          "착오송금 계좌가 개설된 자금이체 금융회사 등에 사전 반환신청을 하지 않은 사람은 원칙적으로 반환지원대상에서 제외된다."
+        ],
+        "similar_scheme_distinctions": [
+          "정부·지방자치단체, 한국은행, 금융감독원, 예금보험공사 및 자금이체 금융회사 등은 반환지원대상에서 제외된다.",
+          "착오송금 계좌가 개설된 자금이체 금융회사 등에 사전 반환신청을 하지 않은 사람은 원칙적으로 반환지원대상에서 제외된다.",
+          "착오송금 계좌 또는 수취 계좌가 개설된 자금이체 금융회사가 영업정지된 경우에는 사전 반환신청 미실시 제외 규칙의 예외가 적용된다."
+        ],
+        "amount_period_conditions": [],
+        "exceptions_exclusions": [
+          "정부·지방자치단체, 한국은행, 금융감독원, 예금보험공사 및 자금이체 금융회사 등은 반환지원대상에서 제외된다.",
+          "착오송금 계좌가 개설된 자금이체 금융회사 등에 사전 반환신청을 하지 않은 사람은 원칙적으로 반환지원대상에서 제외된다.",
+          "착오송금 계좌 또는 수취 계좌가 개설된 자금이체 금융회사가 영업정지된 경우에는 사전 반환신청 미실시 제외 규칙의 예외가 적용된다."
+        ],
+        "common_misinterpretations": [
+          "금융회사를 통한 사전 반환신청을 하지 않아도 항상 반환지원대상이 된다.",
+          "관련 금융회사가 영업정지된 경우에도 사전 반환신청 미실시를 이유로 예외 없이 제외한다."
+        ],
+        "answer_must_not_assert": [
+          "금융회사를 통한 사전 반환신청을 하지 않아도 항상 반환지원대상이 된다.",
+          "관련 금융회사가 영업정지된 경우에도 사전 반환신청 미실시를 이유로 예외 없이 제외한다."
+        ],
+        "related_chunk_ids": [],
+        "official_evidence": {
+          "chunk_ids": [
+            "MT-010_rule_layer01_chunk_012"
+          ],
+          "urls": [
+            "https://fins.kdic.or.kr/ir/aplygudn/MtrsRelLawoRgul/selectScrn.do"
+          ]
+        }
+      },
+      "review_workflow": {
+        "current_status": "검수필요",
+        "reviewer": "",
+        "review_date": "",
+        "review_notes": "",
+        "production_enabled": false
+      }
+    },
+    {
+      "fact_index_id": "FI-CAND-016",
+      "status": "REVIEWED_FOR_PROTOTYPE",
+      "review_status": "CANDIDATE_EVIDENCE_REVIEWED",
+      "trigger_chunk_ids": [
+        "MT-010_rule_layer01_chunk_015"
+      ],
+      "business_function": "착오송금 반환 신청",
+      "business_function_code": "mistaken_transfer",
+      "document_title": "착오송금 반환지원 등에 관한 규정",
+      "section_title": "제11조(매입금액)",
+      "priority": "HIGH",
+      "recommended_processing": "Fact Sheet",
+      "confusion_type": "법적 계산 정의",
+      "confusion_point": "매입금액이 회수금액 전체라고 답하기 쉽지만 실제로는 회수 관련 비용 등을 차감한 금액이다.",
+      "required_review_points": "매입금액 공식, 회수 관련 비용의 범위, 의무적 차감",
+      "verified_claims": [
+        {
+          "claim_id": "F1",
+          "statement": "착오송금인에게 지급하는 매입금액은 수취인에게서 회수한 금액에서 부당이득반환채권 회수 관련 비용 등을 차감한 금액이다.",
+          "source_chunk_ids": [
+            "MT-010_rule_layer01_chunk_015"
+          ],
+          "origin": "CANDIDATE_EVIDENCE_REVIEWED"
+        },
+        {
+          "claim_id": "F2",
+          "statement": "회수 관련 비용은 착오송금인의 부당이득반환채권 회수에 소요된 비용 등의 합계액이다.",
+          "source_chunk_ids": [
+            "MT-010_rule_layer01_chunk_015"
+          ],
+          "origin": "CANDIDATE_EVIDENCE_REVIEWED"
+        }
+      ],
+      "forbidden_claims": [
+        "수취인에게서 회수한 금액 전부를 비용 차감 없이 착오송금인에게 지급한다.",
+        "회수 관련 비용의 차감 여부는 착오송금인이 임의로 선택할 수 있다."
+      ],
+      "related_chunk_ids": [],
+      "source_chunk_ids": [
+        "MT-010_rule_layer01_chunk_015"
+      ],
+      "source_urls": [
+        "https://fins.kdic.or.kr/ir/aplygudn/MtrsRelLawoRgul/selectScrn.do"
+      ],
+      "source_evaluation_ids": [],
+      "source_questions": [],
+      "candidate_evidence_summary": "### 제3장 반환지원대상 및 매입금액 #### 제11조(매입금액) 1. 법 제39조의2에 따라 착오송금인에게 지급하는 금액(이하 “매입금액”이라 한다)은 매입 후 부당이득반환채권과 관련하여 착오송금 수취인으로부터 회수한 금액에서 부당이득반환채권 회수관련 비용(이하 “회수관련 비용”이라 한다) 등을 차감한 금액으로 한다. 2. 제1항에 따른 회수관련 비용은 제7조제1항의 각 호 중 착오송금인의 부당이득반환채권 회수에 소요된 비용 등의 합계액을 말한다.",
+      "provenance": {
+        "candidate_file": "FACT_SHEET_적용_후보_청크 (1).xlsx",
+        "candidate_sheet": "Fact Sheet 후보",
+        "evaluation_file": "Evaluation_DataSet_v3_AnswerEval_MinColumns (1).xlsx",
+        "evaluation_sheet": "평가데이터셋 V4_1"
+      },
+      "schema_record_version": "c-ver3",
+      "activation_policy": "TRIGGER_CHUNK_AND_BUSINESS_AND_KEYWORD",
+      "activation_keywords": [
+        "착오송금",
+        "반환지원",
+        "송금인",
+        "수취인",
+        "회수비용",
+        "제11조",
+        "매입금액",
+        "법적",
+        "계산",
+        "정의",
+        "공식",
+        "회수",
+        "비용의",
+        "범위"
+      ],
+      "applies_when": "Top-5에 MT-010_rule_layer01_chunk_015가 있고 질문이 착오송금, 반환지원, 송금인, 수취인, 회수비용, 제11조, 매입금액, 법적 중 하나 이상과 직접 관련될 때",
+      "do_not_apply_when": "Trigger 청크가 검색됐더라도 질문이 이 Fact Index의 적용 키워드·대상·조건과 무관하거나 다른 업무를 묻는 경우",
+      "review_dimensions": {
+        "confusion_type": "법적 계산 정의",
+        "exact_subject_scope": [
+          "착오송금인에게 지급하는 매입금액은 수취인에게서 회수한 금액에서 부당이득반환채권 회수 관련 비용 등을 차감한 금액이다.",
+          "회수 관련 비용은 착오송금인의 부당이득반환채권 회수에 소요된 비용 등의 합계액이다."
+        ],
+        "similar_scheme_distinctions": [],
+        "amount_period_conditions": [
+          "착오송금인에게 지급하는 매입금액은 수취인에게서 회수한 금액에서 부당이득반환채권 회수 관련 비용 등을 차감한 금액이다."
+        ],
+        "exceptions_exclusions": [],
+        "common_misinterpretations": [
+          "수취인에게서 회수한 금액 전부를 비용 차감 없이 착오송금인에게 지급한다.",
+          "회수 관련 비용의 차감 여부는 착오송금인이 임의로 선택할 수 있다."
+        ],
+        "answer_must_not_assert": [
+          "수취인에게서 회수한 금액 전부를 비용 차감 없이 착오송금인에게 지급한다.",
+          "회수 관련 비용의 차감 여부는 착오송금인이 임의로 선택할 수 있다."
+        ],
+        "related_chunk_ids": [],
+        "official_evidence": {
+          "chunk_ids": [
+            "MT-010_rule_layer01_chunk_015"
+          ],
+          "urls": [
+            "https://fins.kdic.or.kr/ir/aplygudn/MtrsRelLawoRgul/selectScrn.do"
+          ]
+        }
+      },
+      "review_workflow": {
+        "current_status": "검수필요",
+        "reviewer": "",
+        "review_date": "",
+        "review_notes": "",
+        "production_enabled": false
+      }
+    },
+    {
+      "fact_index_id": "FI-CAND-017",
+      "status": "REVIEWED_FOR_PROTOTYPE",
+      "review_status": "CANDIDATE_EVIDENCE_REVIEWED",
+      "trigger_chunk_ids": [
+        "MT-010_rule_layer01_chunk_019"
+      ],
+      "business_function": "착오송금 반환 신청",
+      "business_function_code": "mistaken_transfer",
+      "document_title": "착오송금 반환지원 등에 관한 규정",
+      "section_title": "제15조(반환지원심사)",
+      "priority": "HIGH",
+      "recommended_processing": "Fact Sheet",
+      "confusion_type": "가능·반려 재량",
+      "confusion_point": "추가자료 요구와 신청 반려가 자동·의무인지 재량인지 혼동하기 쉽다.",
+      "required_review_points": "추가자료 요구 가능, 미제출 또는 대상 아님일 때 반려 가능",
+      "verified_claims": [
+        {
+          "claim_id": "F1",
+          "statement": "예금보험공사는 반환지원심사에 필요한 추가자료를 착오송금인 등에게 요구할 수 있다.",
+          "source_chunk_ids": [
+            "MT-010_rule_layer01_chunk_019"
+          ],
+          "origin": "CANDIDATE_EVIDENCE_REVIEWED"
+        },
+        {
+          "claim_id": "F2",
+          "statement": "착오송금인 등이 요구받은 추가자료를 제출하지 않거나 심사 결과 반환지원대상이 아니면 신청을 반려할 수 있다.",
+          "source_chunk_ids": [
+            "MT-010_rule_layer01_chunk_019"
+          ],
+          "origin": "CANDIDATE_EVIDENCE_REVIEWED"
+        },
+        {
+          "claim_id": "F3",
+          "statement": "추가자료 요구와 신청 반려는 규정상 가능 조치이며 모든 경우에 자동으로 이루어지는 의무 조치로 단정할 수 없다.",
+          "source_chunk_ids": [
+            "MT-010_rule_layer01_chunk_019"
+          ],
+          "origin": "CANDIDATE_EVIDENCE_REVIEWED"
+        }
+      ],
+      "forbidden_claims": [
+        "예금보험공사는 모든 반환지원 신청에서 반드시 추가자료를 요구해야 한다.",
+        "추가자료를 제출하지 않아도 반환지원 신청을 반려할 수 없다."
+      ],
+      "related_chunk_ids": [],
+      "source_chunk_ids": [
+        "MT-010_rule_layer01_chunk_019"
+      ],
+      "source_urls": [
+        "https://fins.kdic.or.kr/ir/aplygudn/MtrsRelLawoRgul/selectScrn.do"
+      ],
+      "source_evaluation_ids": [],
+      "source_questions": [],
+      "candidate_evidence_summary": "### 제1절 반환지원신청 및 반환지원심사 #### 제15조(반환지원심사) 1. 공사는 제12조에 따른 반환지원신청에 필요한 서류, 제14조에 따라 제출받은 자료 등을 통해 착오송금인등의 반환지원신청이 반환지원대상에 해당하는지 여부를 심사(이하 “반환지원심사”라 한다)한다. 이 경우 공사는 착오송금인등에게 반환지원심사에 필요한 추가자료를 요구할 수 있다. 2. 공사는 착오송금인등이 제1항 후문에 따른 추가자료를 제출하지 않거나, 반환지원심사 결과 착오송금인등이 …",
+      "provenance": {
+        "candidate_file": "FACT_SHEET_적용_후보_청크 (1).xlsx",
+        "candidate_sheet": "Fact Sheet 후보",
+        "evaluation_file": "Evaluation_DataSet_v3_AnswerEval_MinColumns (1).xlsx",
+        "evaluation_sheet": "평가데이터셋 V4_1"
+      },
+      "schema_record_version": "c-ver3",
+      "activation_policy": "TRIGGER_CHUNK_AND_BUSINESS_AND_KEYWORD",
+      "activation_keywords": [
+        "착오송금",
+        "반환지원",
+        "송금인",
+        "수취인",
+        "회수비용",
+        "제15조",
+        "반환지원심사",
+        "반려",
+        "재량",
+        "추가자료",
+        "요구",
+        "미제출",
+        "대상",
+        "아님일"
+      ],
+      "applies_when": "Top-5에 MT-010_rule_layer01_chunk_019가 있고 질문이 착오송금, 반환지원, 송금인, 수취인, 회수비용, 제15조, 반환지원심사, 반려 중 하나 이상과 직접 관련될 때",
+      "do_not_apply_when": "Trigger 청크가 검색됐더라도 질문이 이 Fact Index의 적용 키워드·대상·조건과 무관하거나 다른 업무를 묻는 경우",
+      "review_dimensions": {
+        "confusion_type": "가능·반려 재량",
+        "exact_subject_scope": [
+          "예금보험공사는 반환지원심사에 필요한 추가자료를 착오송금인 등에게 요구할 수 있다.",
+          "착오송금인 등이 요구받은 추가자료를 제출하지 않거나 심사 결과 반환지원대상이 아니면 신청을 반려할 수 있다."
+        ],
+        "similar_scheme_distinctions": [
+          "예금보험공사는 반환지원심사에 필요한 추가자료를 착오송금인 등에게 요구할 수 있다.",
+          "착오송금인 등이 요구받은 추가자료를 제출하지 않거나 심사 결과 반환지원대상이 아니면 신청을 반려할 수 있다."
+        ],
+        "amount_period_conditions": [],
+        "exceptions_exclusions": [
+          "착오송금인 등이 요구받은 추가자료를 제출하지 않거나 심사 결과 반환지원대상이 아니면 신청을 반려할 수 있다.",
+          "추가자료 요구와 신청 반려는 규정상 가능 조치이며 모든 경우에 자동으로 이루어지는 의무 조치로 단정할 수 없다."
+        ],
+        "common_misinterpretations": [
+          "예금보험공사는 모든 반환지원 신청에서 반드시 추가자료를 요구해야 한다.",
+          "추가자료를 제출하지 않아도 반환지원 신청을 반려할 수 없다."
+        ],
+        "answer_must_not_assert": [
+          "예금보험공사는 모든 반환지원 신청에서 반드시 추가자료를 요구해야 한다.",
+          "추가자료를 제출하지 않아도 반환지원 신청을 반려할 수 없다."
+        ],
+        "related_chunk_ids": [],
+        "official_evidence": {
+          "chunk_ids": [
+            "MT-010_rule_layer01_chunk_019"
+          ],
+          "urls": [
+            "https://fins.kdic.or.kr/ir/aplygudn/MtrsRelLawoRgul/selectScrn.do"
+          ]
+        }
+      },
+      "review_workflow": {
+        "current_status": "검수필요",
+        "reviewer": "",
+        "review_date": "",
+        "review_notes": "",
+        "production_enabled": false
+      }
+    },
+    {
+      "fact_index_id": "FI-CAND-018",
+      "status": "REVIEWED_FOR_PROTOTYPE",
+      "review_status": "CANDIDATE_EVIDENCE_REVIEWED",
+      "trigger_chunk_ids": [
+        "MT-010_rule_layer01_chunk_024"
+      ],
+      "business_function": "착오송금 반환 신청",
+      "business_function_code": "mistaken_transfer",
+      "document_title": "착오송금 반환지원 등에 관한 규정",
+      "section_title": "제20조(매입계약 해제 절차)",
+      "priority": "HIGH",
+      "recommended_processing": "Fact Sheet",
+      "confusion_type": "해제·비용·소송 재량",
+      "confusion_point": "해제 시 비용 납부, 미상환 시 손해배상 가능, 소송 실익이 없으면 제기하지 않을 수 있다는 단계별 재량이 있다.",
+      "required_review_points": "해제 통지, 비용 선납 조건, 손해배상 가능, 소송 미제기 예외, 10년 보존",
+      "verified_claims": [
+        {
+          "claim_id": "F1",
+          "statement": "예금보험공사가 매입계약을 해제하면 착오송금인 등에게 해제 사실과 사유를 통지한다.",
+          "source_chunk_ids": [
+            "MT-010_rule_layer01_chunk_024"
+          ],
+          "origin": "CANDIDATE_EVIDENCE_REVIEWED"
+        },
+        {
+          "claim_id": "F2",
+          "statement": "규정에서 정한 경우에는 착오송금인 등으로부터 회수 관련 비용을 납부받은 후 매입계약 해제 절차를 진행한다.",
+          "source_chunk_ids": [
+            "MT-010_rule_layer01_chunk_024"
+          ],
+          "origin": "CANDIDATE_EVIDENCE_REVIEWED"
+        },
+        {
+          "claim_id": "F3",
+          "statement": "매입계약이 해제되면 예금보험공사는 수취인에게 착오송금인에 대한 부당이득반환채권 양도 사실을 통지한다.",
+          "source_chunk_ids": [
+            "MT-010_rule_layer01_chunk_024"
+          ],
+          "origin": "CANDIDATE_EVIDENCE_REVIEWED"
+        }
+      ],
+      "forbidden_claims": [
+        "매입계약 해제는 사유 통지 없이 처리할 수 있다.",
+        "매입계약 해제 시 회수 관련 비용은 어떤 경우에도 납부할 필요가 없다."
+      ],
+      "related_chunk_ids": [],
+      "source_chunk_ids": [
+        "MT-010_rule_layer01_chunk_024"
+      ],
+      "source_urls": [
+        "https://fins.kdic.or.kr/ir/aplygudn/MtrsRelLawoRgul/selectScrn.do"
+      ],
+      "source_evaluation_ids": [],
+      "source_questions": [],
+      "candidate_evidence_summary": "### 제5장 매입계약의 해제 #### 제20조(매입계약 해제 절차) 1. 공사는 착오송금인등의 반환지원신청이 매입계약 해제 요건에 해당되어 해제하는 경우 착오송금인등에게 매입계약 해제 사실 및 그 사유를 통지한다. 다만, 공사는 다음 각 호의 어느 하나에 해당하는 경우 착오송금인등으로부터 회수관련 비용을 납부받은 후 매입계약 해제 절차를 진행한다. 2. 공사는 매입계약이 해제된 경우 착오송금 수취인에게 착오송금인에 대한 부당이득반환채권 양도 사실을 통지한다. …",
+      "provenance": {
+        "candidate_file": "FACT_SHEET_적용_후보_청크 (1).xlsx",
+        "candidate_sheet": "Fact Sheet 후보",
+        "evaluation_file": "Evaluation_DataSet_v3_AnswerEval_MinColumns (1).xlsx",
+        "evaluation_sheet": "평가데이터셋 V4_1"
+      },
+      "schema_record_version": "c-ver3",
+      "activation_policy": "TRIGGER_CHUNK_AND_BUSINESS_AND_KEYWORD",
+      "activation_keywords": [
+        "착오송금",
+        "반환지원",
+        "송금인",
+        "수취인",
+        "회수비용",
+        "제20조",
+        "매입계약",
+        "해제",
+        "절차",
+        "비용",
+        "소송",
+        "재량",
+        "통지",
+        "선납"
+      ],
+      "applies_when": "Top-5에 MT-010_rule_layer01_chunk_024가 있고 질문이 착오송금, 반환지원, 송금인, 수취인, 회수비용, 제20조, 매입계약, 해제 중 하나 이상과 직접 관련될 때",
+      "do_not_apply_when": "Trigger 청크가 검색됐더라도 질문이 이 Fact Index의 적용 키워드·대상·조건과 무관하거나 다른 업무를 묻는 경우",
+      "review_dimensions": {
+        "confusion_type": "해제·비용·소송 재량",
+        "exact_subject_scope": [
+          "예금보험공사가 매입계약을 해제하면 착오송금인 등에게 해제 사실과 사유를 통지한다.",
+          "규정에서 정한 경우에는 착오송금인 등으로부터 회수 관련 비용을 납부받은 후 매입계약 해제 절차를 진행한다.",
+          "매입계약이 해제되면 예금보험공사는 수취인에게 착오송금인에 대한 부당이득반환채권 양도 사실을 통지한다."
+        ],
+        "similar_scheme_distinctions": [
+          "예금보험공사가 매입계약을 해제하면 착오송금인 등에게 해제 사실과 사유를 통지한다.",
+          "매입계약이 해제되면 예금보험공사는 수취인에게 착오송금인에 대한 부당이득반환채권 양도 사실을 통지한다."
+        ],
+        "amount_period_conditions": [],
+        "exceptions_exclusions": [
+          "예금보험공사가 매입계약을 해제하면 착오송금인 등에게 해제 사실과 사유를 통지한다.",
+          "규정에서 정한 경우에는 착오송금인 등으로부터 회수 관련 비용을 납부받은 후 매입계약 해제 절차를 진행한다.",
+          "매입계약이 해제되면 예금보험공사는 수취인에게 착오송금인에 대한 부당이득반환채권 양도 사실을 통지한다."
+        ],
+        "common_misinterpretations": [
+          "매입계약 해제는 사유 통지 없이 처리할 수 있다.",
+          "매입계약 해제 시 회수 관련 비용은 어떤 경우에도 납부할 필요가 없다."
+        ],
+        "answer_must_not_assert": [
+          "매입계약 해제는 사유 통지 없이 처리할 수 있다.",
+          "매입계약 해제 시 회수 관련 비용은 어떤 경우에도 납부할 필요가 없다."
+        ],
+        "related_chunk_ids": [],
+        "official_evidence": {
+          "chunk_ids": [
+            "MT-010_rule_layer01_chunk_024"
+          ],
+          "urls": [
+            "https://fins.kdic.or.kr/ir/aplygudn/MtrsRelLawoRgul/selectScrn.do"
+          ]
+        }
+      },
+      "review_workflow": {
+        "current_status": "검수필요",
+        "reviewer": "",
+        "review_date": "",
+        "review_notes": "",
+        "production_enabled": false
+      }
+    },
+    {
+      "fact_index_id": "FI-CAND-019",
+      "status": "REVIEWED_FOR_PROTOTYPE",
+      "review_status": "CANDIDATE_EVIDENCE_REVIEWED",
+      "trigger_chunk_ids": [
+        "MT-010_rule_layer01_chunk_031"
+      ],
+      "business_function": "착오송금 반환 신청",
+      "business_function_code": "mistaken_transfer",
+      "document_title": "착오송금 반환지원 등에 관한 규정",
+      "section_title": "제25조(강제집행 등)",
+      "priority": "HIGH",
+      "recommended_processing": "Fact Sheet",
+      "confusion_type": "강제집행 재량·예외",
+      "confusion_point": "강제집행을 반드시 한다고 단정하기 쉽지만 변제능력·기간·비용상 실익이 없으면 하지 않을 수 있다.",
+      "required_review_points": "채권회수 조치 가능, 실익 판단 요소, 조치하지 않을 수 있는 조건",
+      "verified_claims": [
+        {
+          "claim_id": "F1",
+          "statement": "예금보험공사는 채무를 이행하지 않는 착오송금 수취인에 대해 채권보전절차와 강제집행 등 필요한 채권회수 조치를 할 수 있다.",
+          "source_chunk_ids": [
+            "MT-010_rule_layer01_chunk_031"
+          ],
+          "origin": "CANDIDATE_EVIDENCE_REVIEWED"
+        },
+        {
+          "claim_id": "F2",
+          "statement": "수취인의 변제능력·변제의사와 회수에 필요한 기간·비용을 고려해 실익이 없다고 판단되면 채권회수 조치를 하지 않을 수 있다.",
+          "source_chunk_ids": [
+            "MT-010_rule_layer01_chunk_031"
+          ],
+          "origin": "CANDIDATE_EVIDENCE_REVIEWED"
+        }
+      ],
+      "forbidden_claims": [
+        "착오송금 수취인이 반환하지 않으면 예금보험공사는 모든 경우에 반드시 강제집행해야 한다.",
+        "회수 실익을 판단할 때 수취인의 변제능력이나 회수 비용은 고려하지 않는다."
+      ],
+      "related_chunk_ids": [],
+      "source_chunk_ids": [
+        "MT-010_rule_layer01_chunk_031"
+      ],
+      "source_urls": [
+        "https://fins.kdic.or.kr/ir/aplygudn/MtrsRelLawoRgul/selectScrn.do"
+      ],
+      "source_evaluation_ids": [],
+      "source_questions": [],
+      "candidate_evidence_summary": "### 제2절 지급명령 및 채권회수 #### 제25조(강제집행 등) 1. 공사는 채무를 이행하지 아니하는 착오송금 수취인에 대하여 채권보전절차, 강제집행 등 채권 회수를 위하여 필요한 조치를 취할 수 있다. 2. 제1항에 따른 채권회수를 위한 조치는 착오송금 수취인의 변제능력, 변제의사, 회수에 소요되는 기간과 비용 등을 고려하여 실익이 없다고 판단되는 경우에는 하지 않을 수 있다.",
+      "provenance": {
+        "candidate_file": "FACT_SHEET_적용_후보_청크 (1).xlsx",
+        "candidate_sheet": "Fact Sheet 후보",
+        "evaluation_file": "Evaluation_DataSet_v3_AnswerEval_MinColumns (1).xlsx",
+        "evaluation_sheet": "평가데이터셋 V4_1"
+      },
+      "schema_record_version": "c-ver3",
+      "activation_policy": "TRIGGER_CHUNK_AND_BUSINESS_AND_KEYWORD",
+      "activation_keywords": [
+        "착오송금",
+        "반환지원",
+        "송금인",
+        "수취인",
+        "회수비용",
+        "제25조",
+        "강제집행",
+        "재량",
+        "예외",
+        "채권회수",
+        "조치",
+        "실익",
+        "판단",
+        "요소"
+      ],
+      "applies_when": "Top-5에 MT-010_rule_layer01_chunk_031가 있고 질문이 착오송금, 반환지원, 송금인, 수취인, 회수비용, 제25조, 강제집행, 재량 중 하나 이상과 직접 관련될 때",
+      "do_not_apply_when": "Trigger 청크가 검색됐더라도 질문이 이 Fact Index의 적용 키워드·대상·조건과 무관하거나 다른 업무를 묻는 경우",
+      "review_dimensions": {
+        "confusion_type": "강제집행 재량·예외",
+        "exact_subject_scope": [
+          "예금보험공사는 채무를 이행하지 않는 착오송금 수취인에 대해 채권보전절차와 강제집행 등 필요한 채권회수 조치를 할 수 있다.",
+          "수취인의 변제능력·변제의사와 회수에 필요한 기간·비용을 고려해 실익이 없다고 판단되면 채권회수 조치를 하지 않을 수 있다."
+        ],
+        "similar_scheme_distinctions": [
+          "예금보험공사는 채무를 이행하지 않는 착오송금 수취인에 대해 채권보전절차와 강제집행 등 필요한 채권회수 조치를 할 수 있다."
+        ],
+        "amount_period_conditions": [
+          "수취인의 변제능력·변제의사와 회수에 필요한 기간·비용을 고려해 실익이 없다고 판단되면 채권회수 조치를 하지 않을 수 있다."
+        ],
+        "exceptions_exclusions": [
+          "예금보험공사는 채무를 이행하지 않는 착오송금 수취인에 대해 채권보전절차와 강제집행 등 필요한 채권회수 조치를 할 수 있다.",
+          "수취인의 변제능력·변제의사와 회수에 필요한 기간·비용을 고려해 실익이 없다고 판단되면 채권회수 조치를 하지 않을 수 있다."
+        ],
+        "common_misinterpretations": [
+          "착오송금 수취인이 반환하지 않으면 예금보험공사는 모든 경우에 반드시 강제집행해야 한다.",
+          "회수 실익을 판단할 때 수취인의 변제능력이나 회수 비용은 고려하지 않는다."
+        ],
+        "answer_must_not_assert": [
+          "착오송금 수취인이 반환하지 않으면 예금보험공사는 모든 경우에 반드시 강제집행해야 한다.",
+          "회수 실익을 판단할 때 수취인의 변제능력이나 회수 비용은 고려하지 않는다."
+        ],
+        "related_chunk_ids": [],
+        "official_evidence": {
+          "chunk_ids": [
+            "MT-010_rule_layer01_chunk_031"
+          ],
+          "urls": [
+            "https://fins.kdic.or.kr/ir/aplygudn/MtrsRelLawoRgul/selectScrn.do"
+          ]
+        }
+      },
+      "review_workflow": {
+        "current_status": "검수필요",
+        "reviewer": "",
+        "review_date": "",
+        "review_notes": "",
+        "production_enabled": false
+      }
+    },
+    {
+      "fact_index_id": "FI-CAND-020",
+      "status": "REVIEWED_FOR_PROTOTYPE",
+      "review_status": "HUMAN_APPROVED_EVAL",
+      "trigger_chunk_ids": [
+        "MT-013_chunk_000"
+      ],
+      "business_function": "착오송금 반환 신청",
+      "business_function_code": "mistaken_transfer",
+      "document_title": "착오송금인 유의사항",
+      "section_title": "착오송금반환지원 신청 대상",
+      "priority": "HIGH",
+      "recommended_processing": "Fact Sheet",
+      "confusion_type": "금액·기한·비용률 예시",
+      "confusion_point": "5만원~1억원, 1년 이내, 사전 반환절차, 비용 차감이 결합돼 있고 비용률은 확정값이 아닌 예시다.",
+      "required_review_points": "지원 금액 범위, 신청기한, 선행 절차, 비용률은 예시이며 개인별 상이",
+      "verified_claims": [
+        {
+          "claim_id": "F1",
+          "statement": "반환지원 대상 금액은 건당 5만원 이상 1억원 이하다.",
+          "source_chunk_ids": [
+            "MT-013_chunk_000"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F2",
+          "statement": "착오송금일로부터 1년 이내이고, 먼저 자금이체 금융회사 등을 통해 반환을 요청했지만 반환되지 않은 경우에 제도를 이용할 수 있다.",
+          "source_chunk_ids": [
+            "MT-013_chunk_000"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F3",
+          "statement": "회수된 금액에서는 회수 관련 비용을 차감하고 잔액을 지급하며 비용률은 금액·회수단계 등에 따라 개인별로 달라진다.",
+          "source_chunk_ids": [
+            "MT-013_chunk_000"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F4",
+          "statement": "기본 신청요건은 건당 5만원 이상 1억원 이하, 착오송금일로부터 1년 이내, 금융회사 등을 통한 사전 반환 요청 실패다.",
+          "source_chunk_ids": [
+            "MT-013_chunk_000"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        }
+      ],
+      "forbidden_claims": [
+        "1억원을 초과한 착오송금도 동일하게 반환지원 대상이다.",
+        "회수된 착오송금액은 비용 공제 없이 전액 지급된다.",
+        "금액과 기간 요건만 맞으면 다른 제외사유와 관계없이 반드시 지원된다."
+      ],
+      "related_chunk_ids": [],
+      "source_chunk_ids": [
+        "MT-013_chunk_000"
+      ],
+      "source_urls": [
+        "https://fins.kdic.or.kr/ir/msdrpr/MsdrprAttnMttr/selectScrn.do"
+      ],
+      "source_evaluation_ids": [
+        "EVAL081",
+        "EVAL082"
+      ],
+      "source_questions": [
+        "얼마까지 착오송금 반환지원을 신청할 수 있나요?",
+        "제가 반환지원 신청대상인지 어떻게 확인하나요?"
+      ],
+      "candidate_evidence_summary": "### 착오송금반환지원 신청 대상 - 건당 5만원 이상 1억원 이하 착오송금이 지원대상. - 착오송금일로부터 1년 이내에 착오송금반환지원 신청 가능 - 자금이체 금융회사등* 을 통해 반환신청을 하였으나 반환이 안된 경우 제도 이용 가능 *은행(외은지점, 농협은행, 수협은행, 산업은행, 중소기업은행 포함), 투자매매·중개업자, 저축은행, 신협, 새마을금고, 농협·수협·산림조합, 우체국, 간편송금업자 등 ※ 착오송금 수취인이 공사에 반환한 착오송금액에서 회수 관련 …",
+      "provenance": {
+        "candidate_file": "FACT_SHEET_적용_후보_청크 (1).xlsx",
+        "candidate_sheet": "Fact Sheet 후보",
+        "evaluation_file": "Evaluation_DataSet_v3_AnswerEval_MinColumns (1).xlsx",
+        "evaluation_sheet": "평가데이터셋 V4_1"
+      },
+      "schema_record_version": "c-ver3",
+      "activation_policy": "TRIGGER_CHUNK_AND_BUSINESS_AND_KEYWORD",
+      "activation_keywords": [
+        "착오송금",
+        "반환지원",
+        "송금인",
+        "수취인",
+        "회수비용",
+        "착오송금반환지원",
+        "신청",
+        "대상",
+        "금액",
+        "기한",
+        "비용률",
+        "예시",
+        "지원",
+        "범위"
+      ],
+      "applies_when": "Top-5에 MT-013_chunk_000가 있고 질문이 착오송금, 반환지원, 송금인, 수취인, 회수비용, 착오송금반환지원, 신청, 대상 중 하나 이상과 직접 관련될 때",
+      "do_not_apply_when": "Trigger 청크가 검색됐더라도 질문이 이 Fact Index의 적용 키워드·대상·조건과 무관하거나 다른 업무를 묻는 경우",
+      "review_dimensions": {
+        "confusion_type": "금액·기한·비용률 예시",
+        "exact_subject_scope": [
+          "반환지원 대상 금액은 건당 5만원 이상 1억원 이하다."
+        ],
+        "similar_scheme_distinctions": [
+          "반환지원 대상 금액은 건당 5만원 이상 1억원 이하다.",
+          "착오송금일로부터 1년 이내이고, 먼저 자금이체 금융회사 등을 통해 반환을 요청했지만 반환되지 않은 경우에 제도를 이용할 수 있다.",
+          "기본 신청요건은 건당 5만원 이상 1억원 이하, 착오송금일로부터 1년 이내, 금융회사 등을 통한 사전 반환 요청 실패다."
+        ],
+        "amount_period_conditions": [
+          "반환지원 대상 금액은 건당 5만원 이상 1억원 이하다.",
+          "착오송금일로부터 1년 이내이고, 먼저 자금이체 금융회사 등을 통해 반환을 요청했지만 반환되지 않은 경우에 제도를 이용할 수 있다.",
+          "회수된 금액에서는 회수 관련 비용을 차감하고 잔액을 지급하며 비용률은 금액·회수단계 등에 따라 개인별로 달라진다.",
+          "기본 신청요건은 건당 5만원 이상 1억원 이하, 착오송금일로부터 1년 이내, 금융회사 등을 통한 사전 반환 요청 실패다."
+        ],
+        "exceptions_exclusions": [
+          "착오송금일로부터 1년 이내이고, 먼저 자금이체 금융회사 등을 통해 반환을 요청했지만 반환되지 않은 경우에 제도를 이용할 수 있다."
+        ],
+        "common_misinterpretations": [
+          "1억원을 초과한 착오송금도 동일하게 반환지원 대상이다.",
+          "회수된 착오송금액은 비용 공제 없이 전액 지급된다.",
+          "금액과 기간 요건만 맞으면 다른 제외사유와 관계없이 반드시 지원된다."
+        ],
+        "answer_must_not_assert": [
+          "1억원을 초과한 착오송금도 동일하게 반환지원 대상이다.",
+          "회수된 착오송금액은 비용 공제 없이 전액 지급된다.",
+          "금액과 기간 요건만 맞으면 다른 제외사유와 관계없이 반드시 지원된다."
+        ],
+        "related_chunk_ids": [],
+        "official_evidence": {
+          "chunk_ids": [
+            "MT-013_chunk_000"
+          ],
+          "urls": [
+            "https://fins.kdic.or.kr/ir/msdrpr/MsdrprAttnMttr/selectScrn.do"
+          ]
+        }
+      },
+      "review_workflow": {
+        "current_status": "검수필요",
+        "reviewer": "",
+        "review_date": "",
+        "review_notes": "",
+        "production_enabled": false
+      }
+    },
+    {
+      "fact_index_id": "FI-CAND-021",
+      "status": "REVIEWED_FOR_PROTOTYPE",
+      "review_status": "HUMAN_APPROVED_EVAL",
+      "trigger_chunk_ids": [
+        "MT-013_chunk_002"
+      ],
+      "business_function": "착오송금 반환 신청",
+      "business_function_code": "mistaken_transfer",
+      "document_title": "착오송금인 유의사항",
+      "section_title": "반환지원 제외 대상",
+      "priority": "HIGH",
+      "recommended_processing": "표 구조 복원 후 Fact Sheet",
+      "confusion_type": "표 구조 손실·주체 혼동",
+      "confusion_point": "착오송금인·수취인·수취계좌별 제외 조건이 평문으로 펼쳐져 어느 조건이 누구에게 적용되는지 틀리기 쉽다.",
+      "required_review_points": "주체별 제외 조건, 비용 납부·손해배상 예외, 계좌 상태별 제외",
+      "verified_claims": [
+        {
+          "claim_id": "F1",
+          "statement": "착오송금인·수취인·수취계좌의 법적 상태와 과거 신청 이력 등에 따라 반환지원 제외 대상이 될 수 있다.",
+          "source_chunk_ids": [
+            "MT-013_chunk_002"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        }
+      ],
+      "forbidden_claims": [
+        "금액과 기간 요건만 맞으면 다른 제외사유와 관계없이 반드시 지원된다."
+      ],
+      "related_chunk_ids": [],
+      "source_chunk_ids": [
+        "MT-013_chunk_002"
+      ],
+      "source_urls": [
+        "https://fins.kdic.or.kr/ir/msdrpr/MsdrprAttnMttr/selectScrn.do"
+      ],
+      "source_evaluation_ids": [
+        "EVAL082"
+      ],
+      "source_questions": [
+        "제가 반환지원 신청대상인지 어떻게 확인하나요?"
+      ],
+      "candidate_evidence_summary": "### 반환지원 제외 대상 | 구분 | 내용 | | --- | --- | | 착오송금인 | 정부 또는 지방자치 단체 한국은행, 금융감독원, 예금보험공사 자금이체 금융회사등* (주석3) 자금이체 금융회사등* (주석3) 에 착오송금 반환신청을 하지 않은 자 착오송금 이후 사망한 자 부당이득반환채권과 관련된 소송 또는 채권보전을 위한 절차 등을 진행 중이거나 완료한 자 등 법적절차 진행중이거나 완료한 자 공사가 과거 부당이득반환채권 회수관련 비용의 청구를 하였음에도 …",
+      "provenance": {
+        "candidate_file": "FACT_SHEET_적용_후보_청크 (1).xlsx",
+        "candidate_sheet": "Fact Sheet 후보",
+        "evaluation_file": "Evaluation_DataSet_v3_AnswerEval_MinColumns (1).xlsx",
+        "evaluation_sheet": "평가데이터셋 V4_1"
+      },
+      "schema_record_version": "c-ver3",
+      "activation_policy": "TRIGGER_CHUNK_AND_BUSINESS_AND_KEYWORD",
+      "activation_keywords": [
+        "착오송금",
+        "반환지원",
+        "송금인",
+        "수취인",
+        "회수비용",
+        "제외",
+        "대상",
+        "구조",
+        "손실",
+        "주체",
+        "혼동",
+        "주체별",
+        "조건",
+        "비용"
+      ],
+      "applies_when": "Top-5에 MT-013_chunk_002가 있고 질문이 착오송금, 반환지원, 송금인, 수취인, 회수비용, 제외, 대상, 구조 중 하나 이상과 직접 관련될 때",
+      "do_not_apply_when": "Trigger 청크가 검색됐더라도 질문이 이 Fact Index의 적용 키워드·대상·조건과 무관하거나 다른 업무를 묻는 경우",
+      "review_dimensions": {
+        "confusion_type": "표 구조 손실·주체 혼동",
+        "exact_subject_scope": [
+          "착오송금인·수취인·수취계좌의 법적 상태와 과거 신청 이력 등에 따라 반환지원 제외 대상이 될 수 있다."
+        ],
+        "similar_scheme_distinctions": [
+          "착오송금인·수취인·수취계좌의 법적 상태와 과거 신청 이력 등에 따라 반환지원 제외 대상이 될 수 있다."
+        ],
+        "amount_period_conditions": [],
+        "exceptions_exclusions": [
+          "착오송금인·수취인·수취계좌의 법적 상태와 과거 신청 이력 등에 따라 반환지원 제외 대상이 될 수 있다."
+        ],
+        "common_misinterpretations": [
+          "금액과 기간 요건만 맞으면 다른 제외사유와 관계없이 반드시 지원된다."
+        ],
+        "answer_must_not_assert": [
+          "금액과 기간 요건만 맞으면 다른 제외사유와 관계없이 반드시 지원된다."
+        ],
+        "related_chunk_ids": [],
+        "official_evidence": {
+          "chunk_ids": [
+            "MT-013_chunk_002"
+          ],
+          "urls": [
+            "https://fins.kdic.or.kr/ir/msdrpr/MsdrprAttnMttr/selectScrn.do"
+          ]
+        }
+      },
+      "review_workflow": {
+        "current_status": "검수필요",
+        "reviewer": "",
+        "review_date": "",
+        "review_notes": "",
+        "production_enabled": false
+      }
+    },
+    {
+      "fact_index_id": "FI-CAND-022",
+      "status": "REVIEWED_FOR_PROTOTYPE",
+      "review_status": "CANDIDATE_EVIDENCE_REVIEWED",
+      "trigger_chunk_ids": [
+        "DA-003_chunk_002"
+      ],
+      "business_function": "채무조정 안내",
+      "business_function_code": "debt_adjustment",
+      "document_title": "채무조정",
+      "section_title": "신청할 수 없는 경우",
+      "priority": "HIGH",
+      "recommended_processing": "Fact Sheet",
+      "confusion_type": "신청 불가 조건",
+      "confusion_point": "여러 신청 불가 사유 중 하나라도 해당하면 불가인데, 일부만 예시로 답하거나 반대로 자격으로 해석할 수 있다.",
+      "required_review_points": "각 신청 불가 사유, 하나라도 해당할 때의 결과",
+      "verified_claims": [
+        {
+          "claim_id": "F1",
+          "statement": "총 회수가능액이 총 채무액 이상이면 채무조정을 신청할 수 없다.",
+          "source_chunk_ids": [
+            "DA-003_chunk_002"
+          ],
+          "origin": "CANDIDATE_EVIDENCE_REVIEWED"
+        },
+        {
+          "claim_id": "F2",
+          "statement": "재산 도피·은닉이나 책임재산 감소행위로 발생한 손실액이 상환되지 않은 경우 채무조정을 신청할 수 없다.",
+          "source_chunk_ids": [
+            "DA-003_chunk_002"
+          ],
+          "origin": "CANDIDATE_EVIDENCE_REVIEWED"
+        },
+        {
+          "claim_id": "F3",
+          "statement": "부실책임조사 결과 부실책임자로서 손해배상채무가 소멸하지 않은 경우 채무조정을 신청할 수 없다.",
+          "source_chunk_ids": [
+            "DA-003_chunk_002"
+          ],
+          "origin": "CANDIDATE_EVIDENCE_REVIEWED"
+        },
+        {
+          "claim_id": "F4",
+          "statement": "채무에 관해 이해관계자 사이에 분쟁이 있는 경우 채무조정을 신청할 수 없다.",
+          "source_chunk_ids": [
+            "DA-003_chunk_002"
+          ],
+          "origin": "CANDIDATE_EVIDENCE_REVIEWED"
+        }
+      ],
+      "forbidden_claims": [
+        "신청 불가 사유 중 하나에 해당해도 다른 조건이 좋으면 채무조정을 신청할 수 있다.",
+        "재산 은닉은 채무조정 신청 가능 여부와 관계가 없다."
+      ],
+      "related_chunk_ids": [],
+      "source_chunk_ids": [
+        "DA-003_chunk_002"
+      ],
+      "source_urls": [
+        "https://www.kdic.or.kr/di/relsite/PbcrKrncLblarb/selectScrn.do"
+      ],
+      "source_evaluation_ids": [],
+      "source_questions": [],
+      "candidate_evidence_summary": "### 신청할 수 없는 경우 - 총 회수가능액이 총 채무액 이상인 경우 - 재산을 도피 또는 은닉하거나 기타 책임재산의 감소행위를 초래하여 그 손실액이 상환되지 아니한 경우 - 부실책임조사결과 부실책임자로서 손해배상채무가 소멸하지 않는 경우 - 채무에 대하여 이해관계자간에 분쟁이 있는 경우",
+      "provenance": {
+        "candidate_file": "FACT_SHEET_적용_후보_청크 (1).xlsx",
+        "candidate_sheet": "Fact Sheet 후보",
+        "evaluation_file": "Evaluation_DataSet_v3_AnswerEval_MinColumns (1).xlsx",
+        "evaluation_sheet": "평가데이터셋 V4_1"
+      },
+      "schema_record_version": "c-ver3",
+      "activation_policy": "TRIGGER_CHUNK_AND_BUSINESS_AND_KEYWORD",
+      "activation_keywords": [
+        "채무조정",
+        "신용회복",
+        "파산면책",
+        "신청할",
+        "신청",
+        "불가",
+        "조건",
+        "사유",
+        "하나라도",
+        "해당할",
+        "때의",
+        "결과"
+      ],
+      "applies_when": "Top-5에 DA-003_chunk_002가 있고 질문이 채무조정, 신용회복, 파산면책, 신청할, 신청, 불가, 조건, 사유 중 하나 이상과 직접 관련될 때",
+      "do_not_apply_when": "Trigger 청크가 검색됐더라도 질문이 이 Fact Index의 적용 키워드·대상·조건과 무관하거나 다른 업무를 묻는 경우",
+      "review_dimensions": {
+        "confusion_type": "신청 불가 조건",
+        "exact_subject_scope": [],
+        "similar_scheme_distinctions": [],
+        "amount_period_conditions": [
+          "총 회수가능액이 총 채무액 이상이면 채무조정을 신청할 수 없다."
+        ],
+        "exceptions_exclusions": [
+          "재산 도피·은닉이나 책임재산 감소행위로 발생한 손실액이 상환되지 않은 경우 채무조정을 신청할 수 없다.",
+          "부실책임조사 결과 부실책임자로서 손해배상채무가 소멸하지 않은 경우 채무조정을 신청할 수 없다."
+        ],
+        "common_misinterpretations": [
+          "신청 불가 사유 중 하나에 해당해도 다른 조건이 좋으면 채무조정을 신청할 수 있다.",
+          "재산 은닉은 채무조정 신청 가능 여부와 관계가 없다."
+        ],
+        "answer_must_not_assert": [
+          "신청 불가 사유 중 하나에 해당해도 다른 조건이 좋으면 채무조정을 신청할 수 있다.",
+          "재산 은닉은 채무조정 신청 가능 여부와 관계가 없다."
+        ],
+        "related_chunk_ids": [],
+        "official_evidence": {
+          "chunk_ids": [
+            "DA-003_chunk_002"
+          ],
+          "urls": [
+            "https://www.kdic.or.kr/di/relsite/PbcrKrncLblarb/selectScrn.do"
+          ]
+        }
+      },
+      "review_workflow": {
+        "current_status": "검수필요",
+        "reviewer": "",
+        "review_date": "",
+        "review_notes": "",
+        "production_enabled": false
+      }
+    },
+    {
+      "fact_index_id": "FI-CAND-023",
+      "status": "REVIEWED_FOR_PROTOTYPE",
+      "review_status": "CANDIDATE_EVIDENCE_REVIEWED",
+      "trigger_chunk_ids": [
+        "DA-004_chunk_007"
+      ],
+      "business_function": "채무조정 안내",
+      "business_function_code": "debt_adjustment",
+      "document_title": "신용회복 지원",
+      "section_title": "신용회복지원을 신청하기 위해서는 다음의 세가지 요건을 모두 갖추어야 합니다.",
+      "priority": "HIGH",
+      "recommended_processing": "Fact Sheet",
+      "confusion_type": "모두 충족·중첩 한도",
+      "confusion_point": "세 가지 요건을 모두 충족해야 하며 총채무·무담보·담보부 한도가 중첩돼 있다.",
+      "required_review_points": "ALL 조건, 총채무 15억원 이하, 무담보 5억원·담보부 10억원 이하",
+      "verified_claims": [
+        {
+          "claim_id": "F1",
+          "statement": "신용회복지원을 신청하려면 제시된 세 가지 신청자격을 모두 충족해야 한다.",
+          "source_chunk_ids": [
+            "DA-004_chunk_007"
+          ],
+          "origin": "CANDIDATE_EVIDENCE_REVIEWED"
+        },
+        {
+          "claim_id": "F2",
+          "statement": "약정 기일 내 채무를 변제하지 못하고 신용정보집중기관에 연체 등의 신용거래정보가 등록되어 있어야 한다.",
+          "source_chunk_ids": [
+            "DA-004_chunk_007"
+          ],
+          "origin": "CANDIDATE_EVIDENCE_REVIEWED"
+        },
+        {
+          "claim_id": "F3",
+          "statement": "최저생계비 이상의 수입이 있거나 심의위원회가 채무상환이 가능하다고 인정해야 한다.",
+          "source_chunk_ids": [
+            "DA-004_chunk_007"
+          ],
+          "origin": "CANDIDATE_EVIDENCE_REVIEWED"
+        },
+        {
+          "claim_id": "F4",
+          "statement": "협약가입 금융회사에 채무가 있고 총채무액이 15억원 이하이면서 무담보채무는 5억원 이하, 담보부채무는 10억원 이하여야 한다.",
+          "source_chunk_ids": [
+            "DA-004_chunk_007"
+          ],
+          "origin": "CANDIDATE_EVIDENCE_REVIEWED"
+        }
+      ],
+      "forbidden_claims": [
+        "신용회복지원의 세 가지 신청자격 중 하나만 충족하면 신청할 수 있다.",
+        "무담보 5억원과 담보부 10억원 한도만 맞으면 총채무액 15억원 한도는 적용되지 않는다."
+      ],
+      "related_chunk_ids": [],
+      "source_chunk_ids": [
+        "DA-004_chunk_007"
+      ],
+      "source_urls": [
+        "https://www.kdic.or.kr/rb/lbltajmt/LbltAjmtSprtCredRcvrySprt/selectScrn.do"
+      ],
+      "source_evaluation_ids": [],
+      "source_questions": [],
+      "candidate_evidence_summary": "### 신청자격 #### 신용회복지원을 신청하기 위해서는 다음의 세가지 요건을 모두 갖추어야 합니다. 1. 약정한 기일 내에 채무를 변제하지 아니한 자로서 신용정보집중기관(전국은행연합회)에 연체 등의 신용거래정보가 등록된 자 2. 최저생계비 이상의 수입이 있는 자 또는 채무상환이 가능하다고 심의위원회가 인정하는 자 3. 협약가입 금융회사에 채무가 있고 총채무액이 15억원 이하(무담보채무의 경우 5억원, 담보부채무의 경우 10억원 이하)인 자",
+      "provenance": {
+        "candidate_file": "FACT_SHEET_적용_후보_청크 (1).xlsx",
+        "candidate_sheet": "Fact Sheet 후보",
+        "evaluation_file": "Evaluation_DataSet_v3_AnswerEval_MinColumns (1).xlsx",
+        "evaluation_sheet": "평가데이터셋 V4_1"
+      },
+      "schema_record_version": "c-ver3",
+      "activation_policy": "TRIGGER_CHUNK_AND_BUSINESS_AND_KEYWORD",
+      "activation_keywords": [
+        "채무조정",
+        "신용회복",
+        "파산면책",
+        "신용회복지원",
+        "신청하기",
+        "위해서는",
+        "다음의",
+        "세가지",
+        "요건을",
+        "모두",
+        "갖추어야",
+        "합니다",
+        "충족",
+        "중첩"
+      ],
+      "applies_when": "Top-5에 DA-004_chunk_007가 있고 질문이 채무조정, 신용회복, 파산면책, 신용회복지원, 신청하기, 위해서는, 다음의, 세가지 중 하나 이상과 직접 관련될 때",
+      "do_not_apply_when": "Trigger 청크가 검색됐더라도 질문이 이 Fact Index의 적용 키워드·대상·조건과 무관하거나 다른 업무를 묻는 경우",
+      "review_dimensions": {
+        "confusion_type": "모두 충족·중첩 한도",
+        "exact_subject_scope": [],
+        "similar_scheme_distinctions": [
+          "협약가입 금융회사에 채무가 있고 총채무액이 15억원 이하이면서 무담보채무는 5억원 이하, 담보부채무는 10억원 이하여야 한다."
+        ],
+        "amount_period_conditions": [
+          "최저생계비 이상의 수입이 있거나 심의위원회가 채무상환이 가능하다고 인정해야 한다.",
+          "협약가입 금융회사에 채무가 있고 총채무액이 15억원 이하이면서 무담보채무는 5억원 이하, 담보부채무는 10억원 이하여야 한다."
+        ],
+        "exceptions_exclusions": [],
+        "common_misinterpretations": [
+          "신용회복지원의 세 가지 신청자격 중 하나만 충족하면 신청할 수 있다.",
+          "무담보 5억원과 담보부 10억원 한도만 맞으면 총채무액 15억원 한도는 적용되지 않는다."
+        ],
+        "answer_must_not_assert": [
+          "신용회복지원의 세 가지 신청자격 중 하나만 충족하면 신청할 수 있다.",
+          "무담보 5억원과 담보부 10억원 한도만 맞으면 총채무액 15억원 한도는 적용되지 않는다."
+        ],
+        "related_chunk_ids": [],
+        "official_evidence": {
+          "chunk_ids": [
+            "DA-004_chunk_007"
+          ],
+          "urls": [
+            "https://www.kdic.or.kr/rb/lbltajmt/LbltAjmtSprtCredRcvrySprt/selectScrn.do"
+          ]
+        }
+      },
+      "review_workflow": {
+        "current_status": "검수필요",
+        "reviewer": "",
+        "review_date": "",
+        "review_notes": "",
+        "production_enabled": false
+      }
+    },
+    {
+      "fact_index_id": "FI-CAND-024",
+      "status": "REVIEWED_FOR_PROTOTYPE",
+      "review_status": "CANDIDATE_EVIDENCE_REVIEWED",
+      "trigger_chunk_ids": [
+        "DA-005_chunk_001"
+      ],
+      "business_function": "채무조정 안내",
+      "business_function_code": "debt_adjustment",
+      "document_title": "파산면책",
+      "section_title": "파산선고의 불이익과 소멸",
+      "priority": "HIGH",
+      "recommended_processing": "Fact Sheet",
+      "confusion_type": "조건에 따른 법적 효과 반전",
+      "confusion_point": "면책 확정 시 불이익이 소멸하지만 면책 실패·취하 시 복권 없이는 소멸하지 않는다.",
+      "required_review_points": "면책 확정의 효과, 실패·취하의 효과, 별도 복권 필요 조건",
+      "verified_claims": [
+        {
+          "claim_id": "F1",
+          "statement": "파산선고를 받으면 공무원·부동산중개업자·사립학교 교원 자격 등 법률상 제약이 발생할 수 있다.",
+          "source_chunk_ids": [
+            "DA-005_chunk_001"
+          ],
+          "origin": "CANDIDATE_EVIDENCE_REVIEWED"
+        },
+        {
+          "claim_id": "F2",
+          "statement": "파산선고에 따른 불이익은 면책결정이 확정되면 소멸한다.",
+          "source_chunk_ids": [
+            "DA-005_chunk_001"
+          ],
+          "origin": "CANDIDATE_EVIDENCE_REVIEWED"
+        },
+        {
+          "claim_id": "F3",
+          "statement": "면책결정을 받지 못하거나 면책신청을 취하하면 별도의 복권 절차를 거치지 않는 한 불이익이 소멸하지 않는다.",
+          "source_chunk_ids": [
+            "DA-005_chunk_001"
+          ],
+          "origin": "CANDIDATE_EVIDENCE_REVIEWED"
+        }
+      ],
+      "forbidden_claims": [
+        "파산선고에 따른 불이익은 면책 여부와 관계없이 자동으로 소멸한다.",
+        "면책신청을 취하해도 별도 복권 없이 파산선고의 불이익이 소멸한다."
+      ],
+      "related_chunk_ids": [],
+      "source_chunk_ids": [
+        "DA-005_chunk_001"
+      ],
+      "source_urls": [
+        "https://www.kdic.or.kr/rb/lbltajmt/LbltAjmtSprtPsnBr/selectScrn.do"
+      ],
+      "source_evaluation_ids": [],
+      "source_questions": [],
+      "candidate_evidence_summary": "### 파산선고의 불이익과 소멸 채무자에게 파산이 선고되면, 공무원, 부동산중개업자, 사립학교 교원 등이 될 수 없는 등 법률상 여러 제약이 있고, 회사에 근무하는 경우 회사의 사규나 취업규칙에 의해 당연퇴직이 되는 경우도 있으므로 확인이 필요합니다. 이러한 불이익은 면책결정이 확정되면 소멸하지만, 면책결정을 받지 못하는 경우 또는 스스로 면책신청을 취하하는 경우 별도의 복권 절차를 거치지 않는 이상 소멸되지 않습니다.",
+      "provenance": {
+        "candidate_file": "FACT_SHEET_적용_후보_청크 (1).xlsx",
+        "candidate_sheet": "Fact Sheet 후보",
+        "evaluation_file": "Evaluation_DataSet_v3_AnswerEval_MinColumns (1).xlsx",
+        "evaluation_sheet": "평가데이터셋 V4_1"
+      },
+      "schema_record_version": "c-ver3",
+      "activation_policy": "TRIGGER_CHUNK_AND_BUSINESS_AND_KEYWORD",
+      "activation_keywords": [
+        "채무조정",
+        "신용회복",
+        "파산면책",
+        "파산선고",
+        "불이익과",
+        "소멸",
+        "조건에",
+        "따른",
+        "법적",
+        "효과",
+        "반전",
+        "면책",
+        "확정의",
+        "실패"
+      ],
+      "applies_when": "Top-5에 DA-005_chunk_001가 있고 질문이 채무조정, 신용회복, 파산면책, 파산선고, 불이익과, 소멸, 조건에, 따른 중 하나 이상과 직접 관련될 때",
+      "do_not_apply_when": "Trigger 청크가 검색됐더라도 질문이 이 Fact Index의 적용 키워드·대상·조건과 무관하거나 다른 업무를 묻는 경우",
+      "review_dimensions": {
+        "confusion_type": "조건에 따른 법적 효과 반전",
+        "exact_subject_scope": [],
+        "similar_scheme_distinctions": [],
+        "amount_period_conditions": [],
+        "exceptions_exclusions": [
+          "파산선고에 따른 불이익은 면책결정이 확정되면 소멸한다.",
+          "면책결정을 받지 못하거나 면책신청을 취하하면 별도의 복권 절차를 거치지 않는 한 불이익이 소멸하지 않는다."
+        ],
+        "common_misinterpretations": [
+          "파산선고에 따른 불이익은 면책 여부와 관계없이 자동으로 소멸한다.",
+          "면책신청을 취하해도 별도 복권 없이 파산선고의 불이익이 소멸한다."
+        ],
+        "answer_must_not_assert": [
+          "파산선고에 따른 불이익은 면책 여부와 관계없이 자동으로 소멸한다.",
+          "면책신청을 취하해도 별도 복권 없이 파산선고의 불이익이 소멸한다."
+        ],
+        "related_chunk_ids": [],
+        "official_evidence": {
+          "chunk_ids": [
+            "DA-005_chunk_001"
+          ],
+          "urls": [
+            "https://www.kdic.or.kr/rb/lbltajmt/LbltAjmtSprtPsnBr/selectScrn.do"
+          ]
+        }
+      },
+      "review_workflow": {
+        "current_status": "검수필요",
+        "reviewer": "",
+        "review_date": "",
+        "review_notes": "",
+        "production_enabled": false
+      }
+    },
+    {
+      "fact_index_id": "FI-CAND-025",
+      "status": "REVIEWED_FOR_PROTOTYPE",
+      "review_status": "HUMAN_APPROVED_EVAL",
+      "trigger_chunk_ids": [
+        "HP-002_chunk_001"
+      ],
+      "business_function": "은닉재산 신고",
+      "business_function_code": "hidden_assets_report",
+      "document_title": "은닉재산 신고 FAQ",
+      "section_title": "은닉재산신고 포상제도는 어떻게 되나요?",
+      "priority": "HIGH",
+      "recommended_processing": "표 구조 복원 후 Fact Sheet",
+      "confusion_type": "구간 계산·공제·포상 제외",
+      "confusion_point": "포상금 구간별 누진 계산, 회수비용 공제, 기여도·법원 결정, 포상 제외와 예외가 한 청크에 있다.",
+      "required_review_points": "금액 구간별 계산식, 회수비용 공제, 최고한도, 포상 제외·예외",
+      "verified_claims": [
+        {
+          "claim_id": "F1",
+          "statement": "포상금은 회수기여금액 구간별 비율과 신고자의 회수기여도에 따라 산정되며 최고 30억원이다.",
+          "source_chunk_ids": [
+            "HP-002_chunk_001",
+            "HP-001_chunk_004"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F2",
+          "statement": "회수기여금액은 단순 신고재산 금액이 아니라 회수금액에서 비용을 공제하고 회수기여도를 반영한 기준이다.",
+          "source_chunk_ids": [
+            "HP-002_chunk_001",
+            "HP-001_chunk_004"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F3",
+          "statement": "이미 인지한 재산, 본인 명의 국내 부동산, 직무 관련 임직원 신고, 익명 신고 등은 원칙적으로 포상에서 제외될 수 있다.",
+          "source_chunk_ids": [
+            "HP-002_chunk_001"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F4",
+          "statement": "포상금은 신고 접수 직후가 아니라 신고재산 조사와 회수절차가 완료된 뒤 지급대상과 회수기여도를 평가하고 법원 결정 등을 거쳐 지급한다.",
+          "source_chunk_ids": [
+            "HP-002_chunk_001",
+            "HP-002_chunk_009"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F5",
+          "statement": "근거에는 고정된 지급 소요일이 제시되어 있지 않다.",
+          "source_chunk_ids": [
+            "HP-002_chunk_001",
+            "HP-002_chunk_009"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F6",
+          "statement": "회수기여금액이 정확히 10억원이라면 구간식은 1억원에 5억원 초과분 5억원의 15%를 더해 1억7,500만원이다.",
+          "source_chunk_ids": [
+            "HP-002_chunk_001",
+            "HP-001_chunk_003"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F7",
+          "statement": "실제 기준은 총 회수액이 아니라 비용을 공제한 회수기여금액이며 신고자의 구체성·정확성 등 회수기여도와 법원 결정에 따라 최종 금액이 달라질 수 있다.",
+          "source_chunk_ids": [
+            "HP-002_chunk_001",
+            "HP-001_chunk_004"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F8",
+          "statement": "예금보험공사나 채권기관이 이미 알고 있던 재산을 신고하면 원칙적으로 포상 대상에서 제외된다.",
+          "source_chunk_ids": [
+            "HP-002_chunk_001"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F9",
+          "statement": "다만 그 신고가 없었으면 해당 은닉재산 회수가 어려웠을 경우에는 포상금이 지급될 수 있다.",
+          "source_chunk_ids": [
+            "HP-002_chunk_001"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F10",
+          "statement": "예금보험공사 또는 채권기관의 전·현직 임직원이 자기 직무와 관련해 알게 된 내용을 신고한 경우와 이에 준하는 경우는 포상 대상에서 제외된다.",
+          "source_chunk_ids": [
+            "HP-002_chunk_001"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F11",
+          "statement": "등기부나 지적공부상 부실관련자 본인 명의로 등록된 국내 부동산은 원칙적으로 은닉재산으로 보지 않고 포상 대상에서도 제외된다.",
+          "source_chunk_ids": [
+            "HP-002_chunk_001",
+            "HP-002_chunk_010"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F12",
+          "statement": "다만 신고 이전에 실시한 재산조사에서 발견되지 않은 경우에는 포상금이 지급될 수 있다.",
+          "source_chunk_ids": [
+            "HP-002_chunk_001"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F13",
+          "statement": "더 구체적인 추가정보로 회수가치가 증대된 경우에는 그 추가 기여도를 평가해 법원 결정 등에 따라 포상금을 지급할 수 있다.",
+          "source_chunk_ids": [
+            "HP-002_chunk_007",
+            "HP-002_chunk_001"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F14",
+          "statement": "실제 포상금은 회수기여금액과 회수기여도, 회수절차와 법원 결정에 따라 정해진다.",
+          "source_chunk_ids": [
+            "HP-002_chunk_001"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        }
+      ],
+      "forbidden_claims": [
+        "신고한 재산 금액에 정해진 한 비율을 곱한 금액을 무조건 받는다.",
+        "익명 신고도 실명 신고와 동일하게 포상금을 받는다.",
+        "신고 후 정해진 며칠 안에 포상금이 자동 입금된다.",
+        "재산을 실제로 회수하기 전에도 포상금이 지급된다.",
+        "재산을 10억원 회수하면 조건과 비용에 관계없이 포상금이 무조건 1억7,500만원이다.",
+        "10억원의 20%인 2억원을 일률적으로 지급한다.",
+        "기관이 이미 알고 있던 재산 신고는 예외 없이 항상 포상금을 받는다.",
+        "기관이 이미 알았다는 이유만으로 예외 가능성도 없이 무조건 배제된다.",
+        "퇴직한 직원이면 과거 직무로 알게 된 정보도 항상 포상금을 받을 수 있다.",
+        "부실관련자 본인 명의 국내 부동산은 언제나 은닉재산이다.",
+        "본인 명의 국내 부동산은 사전 조사에서 발견되지 않았어도 절대 포상 대상이 될 수 없다.",
+        "정보를 조금 더 자세히 썼다는 이유만으로 포상금 지급이 자동 확정된다."
+      ],
+      "related_chunk_ids": [],
+      "source_chunk_ids": [
+        "HP-002_chunk_001"
+      ],
+      "source_urls": [
+        "https://fins.kdic.or.kr/cm/bbs/selectFaqCncmPrptDclr.do"
+      ],
+      "source_evaluation_ids": [
+        "EVAL106",
+        "EVAL107",
+        "EVAL108",
+        "EVAL109",
+        "EVAL110",
+        "EVAL111",
+        "EVAL120"
+      ],
+      "source_questions": [
+        "은닉재산 신고하면 포상금 얼마나 받을 수 있어요?",
+        "은닉재산 신고 포상금은 언제 들어와요?",
+        "은닉재산 신고로 회수한 금액이 10억이면 포상금은 얼마 정도 되나요?",
+        "이미 회수기관이 알고 있던 재산을 은닉재산으로 신고해도 포상금 받을 수 있나요?",
+        "제가 예전에 예금보험공사 직원이었는데, 그때 업무로 알게 된 걸 은닉재산으로 신고해도 포상금 나오나요?",
+        "부동산이 부실관련자 본인 명의로 등기돼 있는 경우에도 은닉재산으로 신고하면 포상금 받을 수 있나요? 근데 조사에서 못 찾은 거면 어떻게 되나요?",
+        "제가 은닉재산으로 신고한 내용이랑 겹치는데 조금 더 구체적인 정보를 추가하면 포상금 받을 수 있나요?"
+      ],
+      "candidate_evidence_summary": "### Q. 은닉재산신고 포상제도는 어떻게 되나요? □ 포상금 지급 기준 회수기여금액 | 포상금 5억원 이하 | 회수기여금액의 20% 5억원 초과 ～ 20억원 이하 | 100백만원＋5억원 초과 회수기여금액의 15% 20억원 초과 ～100억원 이하 | 325백만원＋20억원 초과 회수기여금액의 10% 100억원 초과 | 1125백만원＋100억원 초과 회수기여금액의 5% □ 포상금 지급 절차 신고된 은닉재산 조사 · 회수 > 회수금액에서 회수비용 공제 > 신고자의 회…",
+      "provenance": {
+        "candidate_file": "FACT_SHEET_적용_후보_청크 (1).xlsx",
+        "candidate_sheet": "Fact Sheet 후보",
+        "evaluation_file": "Evaluation_DataSet_v3_AnswerEval_MinColumns (1).xlsx",
+        "evaluation_sheet": "평가데이터셋 V4_1"
+      },
+      "schema_record_version": "c-ver3",
+      "activation_policy": "TRIGGER_CHUNK_AND_BUSINESS_AND_KEYWORD",
+      "activation_keywords": [
+        "은닉재산",
+        "포상금",
+        "회수기여",
+        "은닉재산신고",
+        "포상제도",
+        "되나요",
+        "구간",
+        "계산",
+        "공제",
+        "포상",
+        "제외",
+        "금액",
+        "구간별",
+        "계산식"
+      ],
+      "applies_when": "Top-5에 HP-002_chunk_001가 있고 질문이 은닉재산, 포상금, 회수기여, 은닉재산신고, 포상제도, 되나요, 구간, 계산 중 하나 이상과 직접 관련될 때",
+      "do_not_apply_when": "Trigger 청크가 검색됐더라도 질문이 이 Fact Index의 적용 키워드·대상·조건과 무관하거나 다른 업무를 묻는 경우",
+      "review_dimensions": {
+        "confusion_type": "구간 계산·공제·포상 제외",
+        "exact_subject_scope": [
+          "포상금은 회수기여금액 구간별 비율과 신고자의 회수기여도에 따라 산정되며 최고 30억원이다.",
+          "이미 인지한 재산, 본인 명의 국내 부동산, 직무 관련 임직원 신고, 익명 신고 등은 원칙적으로 포상에서 제외될 수 있다.",
+          "포상금은 신고 접수 직후가 아니라 신고재산 조사와 회수절차가 완료된 뒤 지급대상과 회수기여도를 평가하고 법원 결정 등을 거쳐 지급한다.",
+          "실제 기준은 총 회수액이 아니라 비용을 공제한 회수기여금액이며 신고자의 구체성·정확성 등 회수기여도와 법원 결정에 따라 최종 금액이 달라질 수 있다.",
+          "예금보험공사나 채권기관이 이미 알고 있던 재산을 신고하면 원칙적으로 포상 대상에서 제외된다.",
+          "예금보험공사 또는 채권기관의 전·현직 임직원이 자기 직무와 관련해 알게 된 내용을 신고한 경우와 이에 준하는 경우는 포상 대상에서 제외된다.",
+          "등기부나 지적공부상 부실관련자 본인 명의로 등록된 국내 부동산은 원칙적으로 은닉재산으로 보지 않고 포상 대상에서도 제외된다."
+        ],
+        "similar_scheme_distinctions": [
+          "예금보험공사나 채권기관이 이미 알고 있던 재산을 신고하면 원칙적으로 포상 대상에서 제외된다.",
+          "예금보험공사 또는 채권기관의 전·현직 임직원이 자기 직무와 관련해 알게 된 내용을 신고한 경우와 이에 준하는 경우는 포상 대상에서 제외된다."
+        ],
+        "amount_period_conditions": [
+          "포상금은 회수기여금액 구간별 비율과 신고자의 회수기여도에 따라 산정되며 최고 30억원이다.",
+          "회수기여금액은 단순 신고재산 금액이 아니라 회수금액에서 비용을 공제하고 회수기여도를 반영한 기준이다.",
+          "회수기여금액이 정확히 10억원이라면 구간식은 1억원에 5억원 초과분 5억원의 15%를 더해 1억7,500만원이다.",
+          "실제 기준은 총 회수액이 아니라 비용을 공제한 회수기여금액이며 신고자의 구체성·정확성 등 회수기여도와 법원 결정에 따라 최종 금액이 달라질 수 있다.",
+          "실제 포상금은 회수기여금액과 회수기여도, 회수절차와 법원 결정에 따라 정해진다."
+        ],
+        "exceptions_exclusions": [
+          "회수기여금액은 단순 신고재산 금액이 아니라 회수금액에서 비용을 공제하고 회수기여도를 반영한 기준이다.",
+          "이미 인지한 재산, 본인 명의 국내 부동산, 직무 관련 임직원 신고, 익명 신고 등은 원칙적으로 포상에서 제외될 수 있다.",
+          "포상금은 신고 접수 직후가 아니라 신고재산 조사와 회수절차가 완료된 뒤 지급대상과 회수기여도를 평가하고 법원 결정 등을 거쳐 지급한다.",
+          "근거에는 고정된 지급 소요일이 제시되어 있지 않다.",
+          "실제 기준은 총 회수액이 아니라 비용을 공제한 회수기여금액이며 신고자의 구체성·정확성 등 회수기여도와 법원 결정에 따라 최종 금액이 달라질 수 있다.",
+          "예금보험공사나 채권기관이 이미 알고 있던 재산을 신고하면 원칙적으로 포상 대상에서 제외된다.",
+          "다만 그 신고가 없었으면 해당 은닉재산 회수가 어려웠을 경우에는 포상금이 지급될 수 있다.",
+          "예금보험공사 또는 채권기관의 전·현직 임직원이 자기 직무와 관련해 알게 된 내용을 신고한 경우와 이에 준하는 경우는 포상 대상에서 제외된다.",
+          "등기부나 지적공부상 부실관련자 본인 명의로 등록된 국내 부동산은 원칙적으로 은닉재산으로 보지 않고 포상 대상에서도 제외된다.",
+          "다만 신고 이전에 실시한 재산조사에서 발견되지 않은 경우에는 포상금이 지급될 수 있다."
+        ],
+        "common_misinterpretations": [
+          "신고한 재산 금액에 정해진 한 비율을 곱한 금액을 무조건 받는다.",
+          "익명 신고도 실명 신고와 동일하게 포상금을 받는다.",
+          "신고 후 정해진 며칠 안에 포상금이 자동 입금된다.",
+          "재산을 실제로 회수하기 전에도 포상금이 지급된다.",
+          "재산을 10억원 회수하면 조건과 비용에 관계없이 포상금이 무조건 1억7,500만원이다.",
+          "10억원의 20%인 2억원을 일률적으로 지급한다.",
+          "기관이 이미 알고 있던 재산 신고는 예외 없이 항상 포상금을 받는다.",
+          "기관이 이미 알았다는 이유만으로 예외 가능성도 없이 무조건 배제된다.",
+          "퇴직한 직원이면 과거 직무로 알게 된 정보도 항상 포상금을 받을 수 있다.",
+          "부실관련자 본인 명의 국내 부동산은 언제나 은닉재산이다.",
+          "본인 명의 국내 부동산은 사전 조사에서 발견되지 않았어도 절대 포상 대상이 될 수 없다.",
+          "정보를 조금 더 자세히 썼다는 이유만으로 포상금 지급이 자동 확정된다."
+        ],
+        "answer_must_not_assert": [
+          "신고한 재산 금액에 정해진 한 비율을 곱한 금액을 무조건 받는다.",
+          "익명 신고도 실명 신고와 동일하게 포상금을 받는다.",
+          "신고 후 정해진 며칠 안에 포상금이 자동 입금된다.",
+          "재산을 실제로 회수하기 전에도 포상금이 지급된다.",
+          "재산을 10억원 회수하면 조건과 비용에 관계없이 포상금이 무조건 1억7,500만원이다.",
+          "10억원의 20%인 2억원을 일률적으로 지급한다.",
+          "기관이 이미 알고 있던 재산 신고는 예외 없이 항상 포상금을 받는다.",
+          "기관이 이미 알았다는 이유만으로 예외 가능성도 없이 무조건 배제된다.",
+          "퇴직한 직원이면 과거 직무로 알게 된 정보도 항상 포상금을 받을 수 있다.",
+          "부실관련자 본인 명의 국내 부동산은 언제나 은닉재산이다.",
+          "본인 명의 국내 부동산은 사전 조사에서 발견되지 않았어도 절대 포상 대상이 될 수 없다.",
+          "정보를 조금 더 자세히 썼다는 이유만으로 포상금 지급이 자동 확정된다."
+        ],
+        "related_chunk_ids": [
+          "HP-001_chunk_004",
+          "HP-002_chunk_009",
+          "HP-001_chunk_003",
+          "HP-002_chunk_010",
+          "HP-002_chunk_007"
+        ],
+        "official_evidence": {
+          "chunk_ids": [
+            "HP-002_chunk_001"
+          ],
+          "urls": [
+            "https://fins.kdic.or.kr/cm/bbs/selectFaqCncmPrptDclr.do"
+          ]
+        }
+      },
+      "review_workflow": {
+        "current_status": "검수필요",
+        "reviewer": "",
+        "review_date": "",
+        "review_notes": "",
+        "production_enabled": false
+      }
+    },
+    {
+      "fact_index_id": "FI-CAND-026",
+      "status": "REVIEWED_FOR_PROTOTYPE",
+      "review_status": "HUMAN_APPROVED_EVAL",
+      "trigger_chunk_ids": [
+        "HP-002_chunk_007"
+      ],
+      "business_function": "은닉재산 신고",
+      "business_function_code": "hidden_assets_report",
+      "document_title": "은닉재산 신고 FAQ",
+      "section_title": "이미 접수한 정보와 동일한 정보를 제3자가 신고하는 경우에 신고 정보의 처리절차는 어떻게 되나요?",
+      "priority": "MEDIUM",
+      "recommended_processing": "Fact Sheet",
+      "confusion_type": "원칙과 예외",
+      "confusion_point": "동일 정보는 반려하지만 추가 정보가 회수가치를 높인 경우 포상 가능하다는 예외를 놓치기 쉽다.",
+      "required_review_points": "동일 신고 반려 원칙, 추가정보·회수가치 증대 예외",
+      "verified_claims": [
+        {
+          "claim_id": "F1",
+          "statement": "이미 접수된 정보와 같은 내용을 제3자가 다시 신고하면 동일 정보가 이미 신고되었음을 알리고 반려한다.",
+          "source_chunk_ids": [
+            "HP-002_chunk_007"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F2",
+          "statement": "다만 더 구체적인 추가정보로 회수가치가 높아졌다고 판단되면 회수기여도를 평가해 포상금을 지급할 수 있다.",
+          "source_chunk_ids": [
+            "HP-002_chunk_007"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F3",
+          "statement": "기존 신고와 동일한 내용만 반복하면 반려된다.",
+          "source_chunk_ids": [
+            "HP-002_chunk_007"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F4",
+          "statement": "더 구체적인 추가정보로 회수가치가 증대된 경우에는 그 추가 기여도를 평가해 법원 결정 등에 따라 포상금을 지급할 수 있다.",
+          "source_chunk_ids": [
+            "HP-002_chunk_007",
+            "HP-002_chunk_001"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        }
+      ],
+      "forbidden_claims": [
+        "동일한 내용을 나중에 신고해도 선행 신고와 같은 포상금을 자동으로 받는다.",
+        "중복 신고는 추가정보의 가치와 관계없이 항상 포상 대상이다.",
+        "정보를 조금 더 자세히 썼다는 이유만으로 포상금 지급이 자동 확정된다."
+      ],
+      "related_chunk_ids": [],
+      "source_chunk_ids": [
+        "HP-002_chunk_007"
+      ],
+      "source_urls": [
+        "https://fins.kdic.or.kr/cm/bbs/selectFaqCncmPrptDclr.do"
+      ],
+      "source_evaluation_ids": [
+        "EVAL119",
+        "EVAL120"
+      ],
+      "source_questions": [
+        "다른 사람이 이미 은닉재산으로 신고한 내용이랑 똑같은 걸 제가 또 신고하면 어떻게 되나요?",
+        "제가 은닉재산으로 신고한 내용이랑 겹치는데 조금 더 구체적인 정보를 추가하면 포상금 받을 수 있나요?"
+      ],
+      "candidate_evidence_summary": "### Q. 이미 접수한 정보와 동일한 정보를 제3자가 신고하는 경우에 신고 정보의 처리절차는 어떻게 되나요? 이미 접수된 정보와 내용이 동일한 경우에는 제3자에게 이미 동일한 정보가 신고되어 있음을 통지하고 신고를 반려하게 됩니다. - 다만, 보다 구체적인 추가정보가 신고되어 회수가치가 증대 되었다고 판단되는 경우에는 그 회수기여도를 평가 · 산정하여 법원의 결정 등에 따라 포상금을 지급합니다.",
+      "provenance": {
+        "candidate_file": "FACT_SHEET_적용_후보_청크 (1).xlsx",
+        "candidate_sheet": "Fact Sheet 후보",
+        "evaluation_file": "Evaluation_DataSet_v3_AnswerEval_MinColumns (1).xlsx",
+        "evaluation_sheet": "평가데이터셋 V4_1"
+      },
+      "schema_record_version": "c-ver3",
+      "activation_policy": "TRIGGER_CHUNK_AND_BUSINESS_AND_KEYWORD",
+      "activation_keywords": [
+        "은닉재산",
+        "포상금",
+        "회수기여",
+        "이미",
+        "접수한",
+        "정보와",
+        "동일한",
+        "정보를",
+        "제3자가",
+        "신고하는",
+        "경우에",
+        "신고",
+        "정보의",
+        "처리절차"
+      ],
+      "applies_when": "Top-5에 HP-002_chunk_007가 있고 질문이 은닉재산, 포상금, 회수기여, 이미, 접수한, 정보와, 동일한, 정보를 중 하나 이상과 직접 관련될 때",
+      "do_not_apply_when": "Trigger 청크가 검색됐더라도 질문이 이 Fact Index의 적용 키워드·대상·조건과 무관하거나 다른 업무를 묻는 경우",
+      "review_dimensions": {
+        "confusion_type": "원칙과 예외",
+        "exact_subject_scope": [],
+        "similar_scheme_distinctions": [],
+        "amount_period_conditions": [
+          "이미 접수된 정보와 같은 내용을 제3자가 다시 신고하면 동일 정보가 이미 신고되었음을 알리고 반려한다."
+        ],
+        "exceptions_exclusions": [
+          "이미 접수된 정보와 같은 내용을 제3자가 다시 신고하면 동일 정보가 이미 신고되었음을 알리고 반려한다.",
+          "다만 더 구체적인 추가정보로 회수가치가 높아졌다고 판단되면 회수기여도를 평가해 포상금을 지급할 수 있다.",
+          "기존 신고와 동일한 내용만 반복하면 반려된다."
+        ],
+        "common_misinterpretations": [
+          "동일한 내용을 나중에 신고해도 선행 신고와 같은 포상금을 자동으로 받는다.",
+          "중복 신고는 추가정보의 가치와 관계없이 항상 포상 대상이다.",
+          "정보를 조금 더 자세히 썼다는 이유만으로 포상금 지급이 자동 확정된다."
+        ],
+        "answer_must_not_assert": [
+          "동일한 내용을 나중에 신고해도 선행 신고와 같은 포상금을 자동으로 받는다.",
+          "중복 신고는 추가정보의 가치와 관계없이 항상 포상 대상이다.",
+          "정보를 조금 더 자세히 썼다는 이유만으로 포상금 지급이 자동 확정된다."
+        ],
+        "related_chunk_ids": [
+          "HP-002_chunk_001"
+        ],
+        "official_evidence": {
+          "chunk_ids": [
+            "HP-002_chunk_007"
+          ],
+          "urls": [
+            "https://fins.kdic.or.kr/cm/bbs/selectFaqCncmPrptDclr.do"
+          ]
+        }
+      },
+      "review_workflow": {
+        "current_status": "검수필요",
+        "reviewer": "",
+        "review_date": "",
+        "review_notes": "",
+        "production_enabled": false
+      }
+    },
+    {
+      "fact_index_id": "FI-CAND-027",
+      "status": "REVIEWED_FOR_PROTOTYPE",
+      "review_status": "HUMAN_APPROVED_EVAL",
+      "trigger_chunk_ids": [
+        "HP-002_chunk_009"
+      ],
+      "business_function": "은닉재산 신고",
+      "business_function_code": "hidden_assets_report",
+      "document_title": "은닉재산 신고 FAQ",
+      "section_title": "은닉재산 신고정보의 처리 절차는 어떻게 되나요?",
+      "priority": "MEDIUM",
+      "recommended_processing": "Fact Sheet",
+      "confusion_type": "접수 방법·전화 제한·조건부 포상",
+      "confusion_point": "전화신고는 받지 않지만 상담은 가능하며, 최고 30억원도 조사·회수·기여도·법원 결정 후에만 가능하다.",
+      "required_review_points": "접수 채널, 전화신고 불가·상담 가능, 포상 지급 조건, 최고금액의 조건부 표현",
+      "verified_claims": [
+        {
+          "claim_id": "F1",
+          "statement": "포상금은 신고 접수 직후가 아니라 신고재산 조사와 회수절차가 완료된 뒤 지급대상과 회수기여도를 평가하고 법원 결정 등을 거쳐 지급한다.",
+          "source_chunk_ids": [
+            "HP-002_chunk_001",
+            "HP-002_chunk_009"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F2",
+          "statement": "근거에는 고정된 지급 소요일이 제시되어 있지 않다.",
+          "source_chunk_ids": [
+            "HP-002_chunk_001",
+            "HP-002_chunk_009"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F3",
+          "statement": "은닉재산 신고는 인터넷, 우편, 팩스, 방문 또는 출장 방식으로 접수할 수 있다.",
+          "source_chunk_ids": [
+            "HP-002_chunk_009"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F4",
+          "statement": "실명확인이 필요해 전화로 정식 신고는 받지 않지만 전화 상담은 가능하다.",
+          "source_chunk_ids": [
+            "HP-002_chunk_009"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F5",
+          "statement": "예금보험공사 홈페이지의 금융부실관련자 은닉재산 신고센터에서 인터넷 신고가 가능하다.",
+          "source_chunk_ids": [
+            "HP-002_chunk_009"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F6",
+          "statement": "신고가 접수되면 먼저 신고대상자가 부실관련자인지 확인한다.",
+          "source_chunk_ids": [
+            "HP-002_chunk_009"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F7",
+          "statement": "그 뒤 채권기관 등이 신고재산을 조사하고 법적 절차 등을 통해 회수한다.",
+          "source_chunk_ids": [
+            "HP-002_chunk_009"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        },
+        {
+          "claim_id": "F8",
+          "statement": "조사와 회수절차가 완료되고 포상 대상이면 회수기여도 평가와 법원 결정 등을 거쳐 최고 30억원 범위에서 포상금을 지급한다.",
+          "source_chunk_ids": [
+            "HP-002_chunk_009"
+          ],
+          "origin": "HUMAN_APPROVED_EVAL"
+        }
+      ],
+      "forbidden_claims": [
+        "신고 후 정해진 며칠 안에 포상금이 자동 입금된다.",
+        "재산을 실제로 회수하기 전에도 포상금이 지급된다.",
+        "전화 상담만으로 은닉재산 신고가 정식 접수된다.",
+        "은닉재산은 방문으로만 신고할 수 있다.",
+        "신고 접수만 되면 조사와 회수 결과에 관계없이 포상금이 지급된다."
+      ],
+      "related_chunk_ids": [],
+      "source_chunk_ids": [
+        "HP-002_chunk_009"
+      ],
+      "source_urls": [
+        "https://fins.kdic.or.kr/cm/bbs/selectFaqCncmPrptDclr.do"
+      ],
+      "source_evaluation_ids": [
+        "EVAL107",
+        "EVAL116",
+        "EVAL117",
+        "EVAL118"
+      ],
+      "source_questions": [
+        "은닉재산 신고 포상금은 언제 들어와요?",
+        "은닉재산 신고는 어떻게 해요? 전화로도 되나요?",
+        "은닉재산 인터넷으로 신고 가능한가요?",
+        "은닉재산 신고하면 처리 절차가 어떻게 진행돼요?"
+      ],
+      "candidate_evidence_summary": "### Q. 은닉재산 신고정보의 처리 절차는 어떻게 되나요? 신고센터에 접수된 신고정보는 신고대상자가 부실관련자인지 여부를 확인한 후 신고재산에 대한 예금보험공사 및 채권기관의 조사 및 회수절차를 거쳐 포상금지급대상에 해당하는 경우 법원의 결정 등 정해진 절차에 따라 신고자에게 최고 30억원의 포상금을 지급합니다. 01. 신고접수 - 인터넷, 우편,FAX,방문,출장에 의한 신고 실명확인을 위해 전화신고는 받지 않음(상담은 가능) 인터넷은 예금보험공사 홈페이지(h…",
+      "provenance": {
+        "candidate_file": "FACT_SHEET_적용_후보_청크 (1).xlsx",
+        "candidate_sheet": "Fact Sheet 후보",
+        "evaluation_file": "Evaluation_DataSet_v3_AnswerEval_MinColumns (1).xlsx",
+        "evaluation_sheet": "평가데이터셋 V4_1"
+      },
+      "schema_record_version": "c-ver3",
+      "activation_policy": "TRIGGER_CHUNK_AND_BUSINESS_AND_KEYWORD",
+      "activation_keywords": [
+        "은닉재산",
+        "포상금",
+        "회수기여",
+        "신고정보",
+        "절차는",
+        "되나요",
+        "접수",
+        "방법",
+        "전화",
+        "제한",
+        "조건부",
+        "포상",
+        "채널",
+        "전화신고"
+      ],
+      "applies_when": "Top-5에 HP-002_chunk_009가 있고 질문이 은닉재산, 포상금, 회수기여, 신고정보, 절차는, 되나요, 접수, 방법 중 하나 이상과 직접 관련될 때",
+      "do_not_apply_when": "Trigger 청크가 검색됐더라도 질문이 이 Fact Index의 적용 키워드·대상·조건과 무관하거나 다른 업무를 묻는 경우",
+      "review_dimensions": {
+        "confusion_type": "접수 방법·전화 제한·조건부 포상",
+        "exact_subject_scope": [
+          "포상금은 신고 접수 직후가 아니라 신고재산 조사와 회수절차가 완료된 뒤 지급대상과 회수기여도를 평가하고 법원 결정 등을 거쳐 지급한다.",
+          "예금보험공사 홈페이지의 금융부실관련자 은닉재산 신고센터에서 인터넷 신고가 가능하다.",
+          "신고가 접수되면 먼저 신고대상자가 부실관련자인지 확인한다.",
+          "조사와 회수절차가 완료되고 포상 대상이면 회수기여도 평가와 법원 결정 등을 거쳐 최고 30억원 범위에서 포상금을 지급한다."
+        ],
+        "similar_scheme_distinctions": [
+          "예금보험공사 홈페이지의 금융부실관련자 은닉재산 신고센터에서 인터넷 신고가 가능하다."
+        ],
+        "amount_period_conditions": [
+          "조사와 회수절차가 완료되고 포상 대상이면 회수기여도 평가와 법원 결정 등을 거쳐 최고 30억원 범위에서 포상금을 지급한다."
+        ],
+        "exceptions_exclusions": [
+          "포상금은 신고 접수 직후가 아니라 신고재산 조사와 회수절차가 완료된 뒤 지급대상과 회수기여도를 평가하고 법원 결정 등을 거쳐 지급한다.",
+          "근거에는 고정된 지급 소요일이 제시되어 있지 않다.",
+          "실명확인이 필요해 전화로 정식 신고는 받지 않지만 전화 상담은 가능하다."
+        ],
+        "common_misinterpretations": [
+          "신고 후 정해진 며칠 안에 포상금이 자동 입금된다.",
+          "재산을 실제로 회수하기 전에도 포상금이 지급된다.",
+          "전화 상담만으로 은닉재산 신고가 정식 접수된다.",
+          "은닉재산은 방문으로만 신고할 수 있다.",
+          "신고 접수만 되면 조사와 회수 결과에 관계없이 포상금이 지급된다."
+        ],
+        "answer_must_not_assert": [
+          "신고 후 정해진 며칠 안에 포상금이 자동 입금된다.",
+          "재산을 실제로 회수하기 전에도 포상금이 지급된다.",
+          "전화 상담만으로 은닉재산 신고가 정식 접수된다.",
+          "은닉재산은 방문으로만 신고할 수 있다.",
+          "신고 접수만 되면 조사와 회수 결과에 관계없이 포상금이 지급된다."
+        ],
+        "related_chunk_ids": [
+          "HP-002_chunk_001"
+        ],
+        "official_evidence": {
+          "chunk_ids": [
+            "HP-002_chunk_009"
+          ],
+          "urls": [
+            "https://fins.kdic.or.kr/cm/bbs/selectFaqCncmPrptDclr.do"
+          ]
+        }
+      },
+      "review_workflow": {
+        "current_status": "검수필요",
+        "reviewer": "",
+        "review_date": "",
+        "review_notes": "",
+        "production_enabled": false
+      }
+    }
+  ]
+}

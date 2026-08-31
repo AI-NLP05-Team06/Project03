@@ -1,0 +1,24 @@
+KDIC Hybrid A + BGE Reranker — 업무 필터 없음
+
+목적
+- 기존 Hybrid A + Reranker와 검색·결합·재정렬 설정은 동일합니다.
+- 차이는 업무 필터를 적용하지 않고 전체 청크에서 검색한다는 점뿐입니다.
+
+준비 파일
+1. KDIC_Hybrid_A_Reranker_평가기.zip
+2. KDIC_output.zip
+3. 사용할 평가 데이터셋 XLSX
+
+Colab 실행
+1. 런타임 유형을 T4 GPU로 설정합니다.
+2. KDIC_Hybrid_A_Reranker_업무필터없음_평가_Colab.ipynb를 엽니다.
+3. 준비 파일 3개를 업로드합니다.
+4. 셀을 위에서 아래로 실행합니다.
+5. Dry-run 출력에서 domain_filter가 false인지 확인합니다.
+6. HCX_API_KEY는 Colab Secrets에서 접근 권한을 켜거나 안내 셀에서 입력합니다.
+7. 마지막에 KDIC_Hybrid_A_Reranker_업무필터없음_평가결과.zip을 내려받습니다.
+
+기존 버전과 공정하게 비교할 때
+- 같은 평가 데이터셋을 사용합니다.
+- Dense/Nori 가중치, RRF 상수, 후보 깊이, Reranker 모델을 바꾸지 않습니다.
+- 결과 summary.json의 domain_filter 값만 기존 true, 이번 false인지 확인합니다.

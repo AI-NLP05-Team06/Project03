@@ -1,0 +1,559 @@
+diff --git a/Development/ec2_deploy/kdic_deploy_assets/kdic-admin-ui.html b/Development/ec2_deploy/kdic_deploy_assets/kdic-admin-ui.html
+index c5e012e..7cc0989 100644
+--- a/Development/ec2_deploy/kdic_deploy_assets/kdic-admin-ui.html
++++ b/Development/ec2_deploy/kdic_deploy_assets/kdic-admin-ui.html
+@@ -13,6 +13,7 @@
+ .metric-grid,.eval-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}.metric{position:relative;padding:17px 18px 15px;background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}.metric:before{content:'';position:absolute;inset:0 auto 0 0;width:3px;background:var(--blue)}.metric-purple:before{background:var(--purple)}.metric-cyan:before{background:var(--cyan)}.metric-red:before{background:var(--red)}.metric-top{display:flex;justify-content:space-between;color:var(--muted);font-size:10px}.metric-top b{color:var(--blue)}.metric strong{display:block;font-size:28px;margin:10px 0 5px}.metric small{color:var(--muted);font-size:10px}.dashboard-grid{display:grid;grid-template-columns:1.7fr 1fr;gap:16px;margin-bottom:16px}.quality-panel,.config-panel,.jobs-panel{padding:20px}.panel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:18px}.panel-head h2{font-size:15px;margin:4px 0 0}.panel-head button{border:0;background:none;color:var(--blue);font-size:10px}.quality-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.quality-row div{padding-right:12px;border-right:1px solid var(--line)}.quality-row div:last-child{border:0}.quality-row span,.quality-row strong,.quality-row small{display:block}.quality-row span{font-size:9px;color:var(--muted)}.quality-row strong{font-size:19px;margin:7px 0 4px}.quality-row small{font-size:9px;color:var(--green)}.quality-row .neutral{color:var(--muted)}.spark-bars{height:72px;display:flex;align-items:end;gap:5px;margin-top:18px;padding-top:8px;border-top:1px dashed var(--line)}.spark-bars i{flex:1;background:linear-gradient(#67a8ff,#d9e9ff);border-radius:3px 3px 0 0;opacity:.8}.config-panel dl,.config-card dl{margin:0}.config-panel dl div,.config-card dl div{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-size:10px}.config-panel dt,.config-card dt{color:var(--muted)}.config-panel dd,.config-card dd{font-weight:700;margin:0}.status{display:inline-flex!important;align-items:center;gap:5px;padding:5px 8px;border-radius:999px;background:#edf2f7;color:#64748b;font-size:9px!important;font-weight:700;white-space:nowrap}.status i{width:5px;height:5px;border-radius:50%;background:currentColor}.status-active,.status-succeeded,.status-approved{background:#e8f8f1;color:#13865c}.status-running{background:#eaf3ff;color:#1769e0}.status-failed{background:#fff0f1;color:#d44550}.status-inactive{background:#eef1f4;color:#788596}.status-queued{background:#fff7df;color:#b17800}
+ .job-table{display:grid}.job-row{display:grid;grid-template-columns:1.25fr 1.2fr 1fr .7fr 1.1fr .65fr;gap:12px;align-items:center;padding:11px 5px;border-top:1px solid var(--line);font-size:10px}.job-header{color:var(--muted);font-size:9px;border-top:0;background:var(--bg);border-radius:8px}.job-row b{font-size:10px}.progress-cell{display:flex;align-items:center;gap:7px}.progress-cell>i{height:5px;flex:1;background:var(--line);border-radius:99px;overflow:hidden}.progress-cell em{display:block;height:100%;background:var(--blue);border-radius:99px}.progress-cell small{font-size:9px;color:var(--muted)}
+ .data-layout{display:grid;grid-template-columns:minmax(390px,.85fr) minmax(500px,1.4fr);gap:16px}.document-list,.doc-detail{min-height:680px;overflow:hidden}.filter-row{display:grid;grid-template-columns:1fr 180px;gap:8px;padding:16px;border-bottom:1px solid var(--line)}input,select{border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);padding:10px 11px;font-size:11px;outline:none}input:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px #1769e012}.list-summary{display:flex;justify-content:space-between;padding:12px 16px;font-size:10px;color:var(--muted)}.list-summary b{color:var(--ink)}.doc-scroll{max-height:610px;overflow:auto}.doc-row{width:100%;display:grid;grid-template-columns:54px 1fr 32px 72px;gap:8px;align-items:center;border:0;border-top:1px solid var(--line);background:var(--panel);color:var(--ink);padding:12px 14px;text-align:left}.doc-row:hover,.doc-row.selected{background:var(--soft)}.doc-row.selected{box-shadow:inset 3px 0 var(--blue)}.doc-id{color:var(--blue);font-size:9px;font-weight:800;letter-spacing:.04em}.doc-main b,.doc-main small{display:block}.doc-main b{font-size:11px}.doc-main small{font-size:9px;color:var(--muted);margin-top:4px}.chunk-count{display:grid;place-items:center;width:25px;height:25px;border-radius:7px;background:var(--bg);font-size:9px;font-weight:700}.doc-detail{padding:20px}.detail-head{display:flex;justify-content:space-between;gap:16px}.detail-head h2{margin:6px 0;font-size:21px}.detail-head p{margin:0;color:var(--muted);font-size:10px}.detail-actions{display:flex;align-items:flex-start;gap:8px}.detail-actions a{padding:9px 11px;border:1px solid var(--line);border-radius:8px;color:var(--blue);text-decoration:none;font-size:10px}.meta-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:20px 0;padding:13px;background:var(--bg);border-radius:10px}.meta-strip span{padding:0 10px;border-right:1px solid var(--line)}.meta-strip span:last-child{border:0}.meta-strip small,.meta-strip b{display:block}.meta-strip small{font-size:8px;color:var(--muted);margin-bottom:5px}.meta-strip b{font-size:11px}.sub-title{font-size:12px;margin:0 0 10px}.chunk-stack{display:grid;gap:7px;max-height:500px;overflow:auto;padding-right:3px}.chunk-card{border:1px solid var(--line);border-radius:10px;overflow:hidden}.chunk-card>button{width:100%;display:grid;grid-template-columns:1fr auto 20px;align-items:center;gap:10px;padding:11px 12px;border:0;background:var(--panel);color:var(--ink);text-align:left}.chunk-card>button b,.chunk-card>button small{display:block}.chunk-card>button b{font-size:9px;color:var(--blue)}.chunk-card>button small{font-size:10px;margin-top:4px}.chunk-card>button>span:nth-child(2){font-size:9px;color:var(--muted)}.chunk-card.open{border-color:#83b9fb}.chunk-body{padding:14px;background:var(--soft);border-top:1px solid var(--line)}.chunk-body p{font-size:11px;line-height:1.75;white-space:pre-wrap;margin:0}.chunk-body dl{display:flex;gap:20px;margin:12px 0 0}.chunk-body dl div{display:flex;gap:6px;font-size:9px}.chunk-body dt{color:var(--muted)}.chunk-body dd{margin:0}.empty-state{height:500px;display:grid;place-items:center;color:var(--muted)}
++.rechunk-panel{padding:20px;margin-bottom:16px}.rechunk-panel .panel-head p,.rechunk-note{margin:6px 0 0;color:var(--muted);font-size:11px;line-height:1.6}.rechunk-form{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:end}.rechunk-form label{display:grid;gap:6px}.rechunk-form label span{font-size:10px;font-weight:700;color:var(--muted)}.rechunk-status{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:16px;padding:12px 13px;border:1px solid var(--line);border-radius:10px;background:var(--bg);font-size:11px}.rechunk-status>span:last-child{color:var(--muted)}.rechunk-error{margin:10px 0 0;color:var(--red);font-size:11px;white-space:pre-wrap}.rechunk-preview{margin-top:12px;padding:13px;border:1px solid var(--line);border-radius:10px;background:var(--soft)}.rechunk-preview p,.rechunk-preview small{margin:0;color:var(--muted);font-size:10px;line-height:1.6}.rechunk-preview p b{color:var(--ink)}.rechunk-preview ul{display:grid;gap:7px;margin:10px 0;padding:0;list-style:none}.rechunk-preview li{display:grid;grid-template-columns:minmax(145px,.8fr) 1.6fr;gap:10px;padding:8px 10px;border-radius:7px;background:var(--panel);font-size:10px}.rechunk-preview li b{color:var(--blue);overflow-wrap:anywhere}.rechunk-preview li span{color:var(--muted);overflow-wrap:anywhere}@media(max-width:780px){.rechunk-form{grid-template-columns:1fr}.rechunk-preview li{grid-template-columns:1fr}}
+ .stepper{display:flex;align-items:center;margin-bottom:18px;padding:14px 18px;background:var(--panel);border:1px solid var(--line);border-radius:12px}.stepper span{display:flex;align-items:center;gap:8px;font-size:10px;color:var(--muted)}.stepper span i{width:24px;height:24px;display:grid;place-items:center;border-radius:50%;background:var(--bg);font-style:normal;font-weight:700}.stepper span.done,.stepper span.active{color:var(--blue);font-weight:700}.stepper span.done i{background:var(--blue);color:#fff}.stepper b{flex:1;height:1px;background:var(--line);margin:0 12px}.ingest-form,.eval-setup{padding:20px;margin-bottom:16px}.form-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.form-grid label,.query-box label,.config-card label{display:grid;gap:6px}.form-grid label span,.query-box label span,.config-card label span{font-size:9px;color:var(--muted);font-weight:700}.form-grid .wide{grid-column:span 2}.form-actions{display:flex;justify-content:space-between;align-items:center;margin-top:17px;padding-top:15px;border-top:1px solid var(--line)}.form-actions p{margin:0;font-size:10px;color:var(--muted)}.form-actions p b{color:var(--purple)}.preview-grid{display:grid;grid-template-columns:1fr 1.1fr;gap:16px}.parsed-preview,.chunk-preview{padding:20px}.parse-stats{display:flex;gap:18px;padding:10px;background:var(--bg);border-radius:8px;font-size:9px;color:var(--muted)}.parse-stats b{color:var(--ink)}.paper{margin-top:13px;padding:20px;border:1px solid var(--line);border-radius:10px;min-height:360px;background:color-mix(in srgb,var(--panel) 94%,#faf7ed);font-size:11px;line-height:1.7}.paper h3{font-size:15px}.paper h4{font-size:11px;margin-top:20px}.warning-count{padding:5px 8px;border-radius:99px;background:#fff6df;color:#a26a00;font-size:9px;font-weight:700}.preview-chunk{padding:13px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px}.preview-chunk>div{display:flex;justify-content:space-between}.preview-chunk b{font-size:9px;color:var(--blue)}.preview-chunk h3{font-size:11px;margin:8px 0}.preview-chunk p{font-size:10px;line-height:1.6;color:var(--muted);margin:0}.preview-chunk small{font-size:8px;color:var(--muted)}.preview-chunk em{display:block;margin-top:8px;padding:7px;background:#fff6df;color:#926400;border-radius:6px;font-size:9px;font-style:normal}.mini-warning,.mini-ok{font-size:8px;padding:3px 6px;border-radius:99px}.mini-warning{background:#fff6df;color:#a26a00}.mini-ok{background:#e8f8f1;color:#13865c}.approve-bar{display:flex;gap:8px;justify-content:flex-end;margin-top:15px;padding-top:15px;border-top:1px solid var(--line)}
+ .query-box{padding:15px 18px;display:flex;align-items:end;gap:14px;margin-bottom:14px}.query-box label{flex:1}.env-tag,.test-badge{padding:7px 9px;border-radius:7px;background:#f0ebff;color:#6747c7;font-size:8px;font-weight:800}.config-compare{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}.config-card{padding:19px}.config-title{display:grid;grid-template-columns:38px 1fr auto;gap:11px;align-items:center;margin-bottom:14px}.config-title>span:first-child{width:38px;height:38px;display:grid;place-items:center;border-radius:11px;background:var(--soft);color:var(--blue);font-weight:900}.config-title h2{font-size:14px;margin:0}.config-title p{font-size:9px;color:var(--muted);margin:4px 0 0}.candidate label{padding:8px 0;border-bottom:1px solid var(--line)}.candidate label span{display:flex;justify-content:space-between}.candidate input[type=range]{padding:0;accent-color:var(--blue)}.candidate label small{text-align:right;font-size:8px;color:var(--muted)}.result-compare{padding:20px}.latency{display:flex;gap:8px}.latency span{padding:6px 9px;background:var(--bg);border-radius:7px;font-size:9px}.result-table{display:grid}.result-row{display:grid;grid-template-columns:45px 1.8fr .5fr .5fr .7fr .5fr .5fr;gap:10px;align-items:center;padding:10px 7px;border-top:1px solid var(--line);font-size:9px}.result-header{background:var(--bg);color:var(--muted);border:0;border-radius:8px}.result-row>span>strong,.result-row>span>small{display:block}.result-row>span>strong{font-size:9px}.result-row>span>small{font-size:8px;color:var(--muted);margin-top:3px}.rank-up{color:var(--green)}.rank-down{color:var(--red)}.rank-same{color:var(--muted)}.gold-mark{font-size:7px!important;padding:4px 6px;background:#e8f8f1;color:#13865c;border-radius:5px}.comparison-summary{display:flex;align-items:center;justify-content:flex-end;gap:22px;margin-top:15px;padding-top:15px;border-top:1px solid var(--line)}.comparison-summary span small,.comparison-summary span b{display:block}.comparison-summary small{font-size:8px;color:var(--muted)}.comparison-summary b{font-size:10px;margin-top:4px}.cost-up{color:var(--red)}
+ .risk-banner{display:flex;gap:12px;align-items:center;padding:13px 16px;margin-bottom:14px;border:1px solid #f0cf8b;background:#fff8e8;color:#765113;border-radius:11px}.risk-banner>b{width:24px;height:24px;display:grid;place-items:center;border-radius:50%;background:#f5c85e}.risk-banner span strong,.risk-banner span{display:block}.risk-banner span{font-size:9px}.risk-banner span strong{font-size:10px;margin-bottom:3px}.action-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}.action-card{padding:17px}.action-card>span{width:34px;height:34px;display:grid;place-items:center;border-radius:10px;background:var(--soft);color:var(--blue);font-size:18px}.action-card h3{font-size:11px;margin:12px 0 7px}.action-card p{font-size:9px;color:var(--muted);line-height:1.55;height:30px}.action-card button{width:100%;border:1px solid var(--line);background:var(--panel);color:var(--blue);padding:8px;border-radius:8px;font-size:9px;font-weight:700}.job-table.detailed .job-row{grid-template-columns:1.15fr 1.1fr .9fr .65fr .6fr 1fr .55fr}.panel-head select{padding:7px 10px}.evaluation-progress{padding:20px;margin-bottom:14px}.evaluation-progress>div{display:flex;justify-content:space-between}.evaluation-progress span{font-size:11px;font-weight:700}.evaluation-progress strong{color:var(--blue)}.evaluation-progress>i{display:block;height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin:12px 0}.evaluation-progress em{display:block;height:100%;background:linear-gradient(90deg,var(--blue),#5aa8ff);border-radius:99px}.evaluation-progress p{font-size:9px;color:var(--muted);margin:0}.verdict{padding:19px;display:flex;justify-content:space-between;align-items:center}.verdict>div{display:flex;align-items:center;gap:15px}.verdict-icon{width:42px;height:42px;display:grid;place-items:center;background:#e8f8f1;color:#13865c;border-radius:50%;font-weight:900}.verdict h2{font-size:15px;margin:5px 0}.verdict p{font-size:9px;color:var(--muted);margin:0}footer{height:34px;display:flex;gap:24px;justify-content:flex-end;align-items:center;padding:0 34px;border-top:1px solid var(--line);color:var(--muted);font-size:8px;background:var(--panel)}footer b{color:var(--blue)}.toast{position:fixed;right:24px;bottom:24px;z-index:20;max-width:420px;display:flex;align-items:center;gap:10px;padding:13px 16px;background:#102c51;color:#fff;border-radius:11px;box-shadow:0 15px 40px #0004;font-size:10px}.toast b{width:20px;height:20px;display:grid;place-items:center;border-radius:50%;background:#23aa76}
+@@ -67,7 +68,7 @@
+ .guardrail-finance-note{display:flex;gap:10px;align-items:flex-start;padding:11px 12px;margin:0 0 12px;border:1px solid #b8d4fa;border-radius:9px;background:#eef6ff;color:#245994}.guardrail-finance-note b{font-size:9px;white-space:nowrap}.guardrail-finance-note span{font-size:9px;line-height:1.55}.admin-app.dark .guardrail-finance-note{background:#172d49;border-color:#3267a4;color:#a9d0ff}
+ 
+ /* 운영 파이프라인 밀도·표시명·모니터링 */
+-.content{max-width:1720px;padding:28px 30px}.pipeline-workspace{grid-template-columns:minmax(700px,1fr) minmax(430px,520px);gap:18px}.pipeline-map-wrap{padding:18px}.pipeline-map{grid-template-columns:repeat(5,minmax(170px,1fr));gap:22px;min-width:1010px;min-height:620px}.pipeline-lane>div{gap:20px}.pipeline-node{min-height:106px;padding:13px}.pipeline-node strong{font-size:12px;line-height:1.35}.pipeline-node small{min-height:32px;font-size:8.5px}.pipeline-node.locked{cursor:pointer}.pipeline-node.locked:hover,.pipeline-node.locked.selected{transform:translateY(-1px);border-color:#a7b4c2;box-shadow:0 8px 20px #2037540c}.pipeline-node.locked.selected{box-shadow:0 0 0 3px #8394a51a}.pipeline-setting-panel{padding:20px}.setting-field{grid-template-columns:minmax(0,1fr) 150px;padding:11px 12px}.setting-toggle{display:flex!important;flex-direction:row!important;align-items:center;justify-content:flex-end;gap:8px;white-space:nowrap}.setting-toggle input{width:auto!important;min-width:16px}.pipeline-label-editor{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;margin:14px 0;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}.pipeline-label-editor label{grid-column:1/-1;color:var(--muted);font-size:8px;font-weight:800}.pipeline-label-editor input{min-width:0;background:var(--panel)}.pipeline-label-editor small{grid-column:1/-1;color:var(--muted);font-size:8px}.pipeline-label-editor button{white-space:nowrap}.monitor-toolbar{display:flex;align-items:center;gap:8px}.monitor-toolbar select{min-width:130px}.monitor-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:14px}.monitor-grid .metric strong{font-size:25px}.monitor-chart-grid{display:grid;grid-template-columns:minmax(520px,1.45fr) minmax(330px,.8fr);gap:14px;margin-bottom:14px}.monitor-card{padding:19px}.monitor-card h2{margin:5px 0 3px;font-size:15px}.monitor-card>p{margin:0 0 16px;color:var(--muted);font-size:9px}.activity-chart{height:210px;display:flex;align-items:end;gap:7px;padding:20px 4px 25px;border-bottom:1px solid var(--line)}.activity-column{position:relative;flex:1;height:100%;display:flex;align-items:end;justify-content:center;min-width:8px}.activity-column i{display:block;width:min(28px,72%);height:var(--height);min-height:2px;border-radius:6px 6px 2px 2px;background:linear-gradient(180deg,#4b96f3,var(--blue));animation:monitor-rise .6s ease-out both;transform-origin:bottom}.activity-column em{position:absolute;bottom:-19px;font-style:normal;font-size:7px;color:var(--muted);white-space:nowrap}.activity-column span{position:absolute;bottom:calc(var(--height) + 7px);font-size:7px;color:var(--blue);font-weight:800}@keyframes monitor-rise{from{transform:scaleY(0);opacity:.3}to{transform:scaleY(1);opacity:1}}.distribution-list{display:grid;gap:10px}.distribution-row{display:grid;grid-template-columns:105px 1fr 36px;gap:8px;align-items:center;font-size:9px}.distribution-row b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.distribution-row i{height:8px;border-radius:99px;background:var(--line);overflow:hidden}.distribution-row i:after{content:'';display:block;width:var(--width);height:100%;border-radius:inherit;background:var(--blue);animation:bar-grow .65s ease-out both}.distribution-row em{text-align:right;color:var(--muted);font-style:normal}.monitor-subgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}.monitor-table{overflow:auto}.monitor-row{min-width:850px;display:grid;grid-template-columns:125px minmax(250px,1fr) 90px 130px 90px 90px 85px;gap:10px;align-items:center;padding:10px 8px;border-top:1px solid var(--line);font-size:9px}.monitor-row.header{border:0;border-radius:8px;background:var(--bg);color:var(--muted)}.monitor-row .question-cell{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.monitor-note{margin-top:12px;color:var(--muted);font-size:8px}.admin-app.dark .pipeline-label-editor{background:#111d2b}.admin-app.dark .activity-column i{background:linear-gradient(180deg,#7ebaff,#3b8ff1)}
++.content{max-width:1720px;padding:28px 30px}.pipeline-workspace{grid-template-columns:minmax(700px,1fr) minmax(430px,520px);gap:18px}.pipeline-map-wrap{padding:18px}.pipeline-map{grid-template-columns:repeat(5,minmax(170px,1fr));gap:22px;min-width:1010px;min-height:620px}.pipeline-lane>div{gap:20px}.pipeline-node{min-height:106px;padding:13px}.pipeline-node strong{font-size:12px;line-height:1.35}.pipeline-node small{min-height:32px;font-size:8.5px}.pipeline-node.locked{cursor:pointer}.pipeline-node.locked:hover,.pipeline-node.locked.selected{transform:translateY(-1px);border-color:#a7b4c2;box-shadow:0 8px 20px #2037540c}.pipeline-node.locked.selected{box-shadow:0 0 0 3px #8394a51a}.pipeline-setting-panel{padding:20px}.setting-field{grid-template-columns:minmax(0,1fr) 150px;padding:11px 12px}.setting-toggle{display:flex!important;flex-direction:row!important;align-items:center;justify-content:flex-end;gap:8px;white-space:nowrap}.setting-toggle input{width:auto!important;min-width:16px}.pipeline-label-editor{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;margin:14px 0;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}.pipeline-label-editor label{grid-column:1/-1;color:var(--muted);font-size:8px;font-weight:800}.pipeline-label-editor input{min-width:0;background:var(--panel)}.pipeline-label-editor small{grid-column:1/-1;color:var(--muted);font-size:8px}.pipeline-label-editor button{white-space:nowrap}.monitor-toolbar{display:flex;align-items:center;gap:8px}.monitor-toolbar select{min-width:130px}.monitor-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:14px}.monitor-grid .metric strong{font-size:25px}.monitor-chart-grid{display:grid;grid-template-columns:minmax(520px,1.45fr) minmax(330px,.8fr);gap:14px;margin-bottom:14px}.monitor-card{padding:19px}.monitor-card h2{margin:5px 0 3px;font-size:15px}.monitor-card>p{margin:0 0 16px;color:var(--muted);font-size:9px}.activity-chart{height:210px;display:flex;align-items:end;gap:7px;padding:20px 4px 25px;border-bottom:1px solid var(--line)}.activity-column{position:relative;flex:1;height:100%;display:flex;align-items:end;justify-content:center;min-width:8px}.activity-column i{display:block;width:min(28px,72%);height:var(--height);min-height:2px;border-radius:6px 6px 2px 2px;background:linear-gradient(180deg,#4b96f3,var(--blue));animation:monitor-rise .6s ease-out both;transform-origin:bottom}.activity-column em{position:absolute;bottom:-19px;font-style:normal;font-size:7px;color:var(--muted);white-space:nowrap}.activity-column span{position:absolute;bottom:calc(var(--height) + 7px);font-size:7px;color:var(--blue);font-weight:800}@keyframes monitor-rise{from{transform:scaleY(0);opacity:.3}to{transform:scaleY(1);opacity:1}}.distribution-list{display:grid;gap:10px}.distribution-row{display:grid;grid-template-columns:105px 1fr 36px;gap:8px;align-items:center;font-size:9px}.distribution-row b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.distribution-row i{height:8px;border-radius:99px;background:var(--line);overflow:hidden}.distribution-row i:after{content:'';display:block;width:var(--width);height:100%;border-radius:inherit;background:var(--blue);animation:bar-grow .65s ease-out both}.distribution-row em{text-align:right;color:var(--muted);font-style:normal}.monitor-subgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}.monitor-table{overflow:auto}.monitor-row{min-width:1060px;display:grid;grid-template-columns:125px minmax(230px,1fr) 80px 125px 72px 86px 88px 85px;gap:10px;align-items:center;padding:10px 8px;border-top:1px solid var(--line);font-size:9px}.monitor-row.header{border:0;border-radius:8px;background:var(--bg);color:var(--muted)}.monitor-row .question-cell{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.cache-badge{display:inline-flex;align-items:center;justify-content:center;width:max-content;min-width:42px;padding:4px 7px;border-radius:99px;background:#edf2f7;color:#64748b;font-size:8px;font-weight:800}.cache-badge.hit{background:#e8f8f1;color:#13865c}.monitor-note{margin-top:12px;color:var(--muted);font-size:8px}.job-table.detailed{overflow:auto}.job-table.detailed .job-row{min-width:1120px;grid-template-columns:1.05fr 1.15fr .8fr .6fr 1.25fr .62fr .8fr .78fr .52fr .85fr}.admin-app.dark .pipeline-label-editor{background:#111d2b}.admin-app.dark .activity-column i{background:linear-gradient(180deg,#7ebaff,#3b8ff1)}
+ .monitor-card dl{margin:10px 0 0}.monitor-card dl div{display:flex;justify-content:space-between;gap:15px;padding:10px 0;border-top:1px solid var(--line);font-size:10px}.monitor-card dt{color:var(--muted)}.monitor-card dd{margin:0;font-weight:800}
+ @media(max-width:1400px){.pipeline-workspace{grid-template-columns:1fr}.pipeline-setting-panel{position:static;max-height:none}.monitor-chart-grid{grid-template-columns:1fr}.monitor-subgrid{grid-template-columns:1fr 1fr}}@media(max-width:900px){.monitor-grid{grid-template-columns:1fr 1fr}.monitor-subgrid{grid-template-columns:1fr}}@media(max-width:650px){.content{padding:20px 14px}.monitor-grid{grid-template-columns:1fr}.monitor-toolbar{align-items:stretch;flex-direction:column}.activity-chart{gap:3px}.activity-column em{display:none}}
+ 
+@@ -97,7 +98,7 @@ html,body,button,input,select,textarea{font-family:"Pretendard Variable",Pretend
+ 'use strict';
+ const root=document.getElementById('app');
+ const standardMetricKs={hit:3,recall:5,mrr:10,map:10,complete:5,ndcg:5,precision:5,f1:5};
+-const state={view:'dashboard',dark:localStorage.getItem('kdic-admin-theme')==='dark',summary:null,config:null,capabilities:null,indices:[],jobs:[],monitoring:null,monitorHours:24,index:'',query:'',hits:[],hitTotal:0,document:null,busy:false,chatJob:null,chatResult:null,chatBasis:null,chatQuestion:'예금보험금 신청과 착오송금 반환지원 신청은 어떻게 다른가요?',chatComparison:null,chatCompareBusy:false,sessionId:`admin-${crypto.randomUUID?.()||Date.now()}`,datasets:[],datasetId:'',evalJobs:[],evalJob:null,evalResult:null,evalPolicy:{evaluation_depth:20,baseline_metric_ks:{...standardMetricKs},candidate_metric_ks:{...standardMetricKs},curve_ks:[1,3,5,10,20]},draft:null,keyStatus:null,keyTest:null,pipelineGraph:null,pipelineNode:null,guardrails:null,guardrailTest:null,prompts:null,promptComparison:null,promptQuestion:'가족이 대신 예금보험금을 신청할 때 필요한 서류와 신청 방법을 알려주세요.',promptBusy:false};
++const state={view:'dashboard',dark:localStorage.getItem('kdic-admin-theme')==='dark',summary:null,config:null,capabilities:null,indices:[],jobs:[],monitoring:null,monitorHours:24,index:'',query:'',hits:[],hitTotal:0,document:null,busy:false,chatJob:null,chatResult:null,chatBasis:null,chatQuestion:'예금보험금 신청과 착오송금 반환지원 신청은 어떻게 다른가요?',chatComparison:null,chatCompareBusy:false,sessionId:`admin-${crypto.randomUUID?.()||Date.now()}`,datasets:[],datasetId:'',evalJobs:[],evalJob:null,evalResult:null,evalPolicy:{evaluation_depth:20,baseline_metric_ks:{...standardMetricKs},candidate_metric_ks:{...standardMetricKs},curve_ks:[1,3,5,10,20]},draft:null,keyStatus:null,keyTest:null,pipelineGraph:null,pipelineNode:null,guardrails:null,guardrailTest:null,prompts:null,promptComparison:null,promptQuestion:'가족이 대신 예금보험금을 신청할 때 필요한 서류와 신청 방법을 알려주세요.',promptBusy:false,chunkSources:[],rechunkJob:null,rechunkBusy:false};
+ state.evalReportBusy=false;
+ state.chatCandidateSource='draft';
+ state.chatCustomConfig=null;
+@@ -129,7 +130,7 @@ function metricDefinitions(result){const source=result.metric_definitions||Objec
+ function metricBarChart(result){const defs=metricDefinitions(result),b=result.baseline,c=result.candidate;return `<div class="chart-card"><div class="chart-title"><div><span class="section-kicker">METRIC COMPARISON</span><h3>현재안·개선안 지표 비교</h3></div><div class="chart-legend"><span><i class="legend-a"></i>현재안</span><span><i class="legend-b"></i>개선안</span></div></div><div class="bar-chart">${defs.map(d=>{const av=Number(b[d.baseline_key]||0),bv=Number(c[d.candidate_key]||0);return `<div class="bar-row"><b>${d.label}<small>@${d.baseline_k} / @${d.candidate_k}</small></b><div class="bar-pair"><span class="bar-a" style="--bar:${Math.max(0,av)*100}%"><i></i><em>${pct(av)}</em></span><span class="bar-b" style="--bar:${Math.max(0,bv)*100}%"><i></i><em>${pct(bv)}</em></span></div></div>`;}).join('')}</div></div>`;}
+ function curveChart(result){const curveA=result.baseline.curve||{},curveB=result.candidate.curve||{},ks=(result.evaluation_policy?.curve_ks||Object.keys(curveA).map(Number)).map(Number);if(!ks.length)return'';const width=720,height=250,left=52,right=22,top=24,bottom=42,x=i=>left+(width-left-right)*(ks.length===1?.5:i/(ks.length-1)),y=v=>top+(height-top-bottom)*(1-Math.max(0,Math.min(1,Number(v)||0))),path=(curve,key)=>ks.map((k,i)=>`${i?'L':'M'} ${x(i).toFixed(1)} ${y(curve[String(k)]?.[key]).toFixed(1)}`).join(' '),dots=(curve,key,cls)=>ks.map((k,i)=>`<circle class="${cls}" cx="${x(i)}" cy="${y(curve[String(k)]?.[key])}" r="4"><title>${key} @${k}: ${pct(curve[String(k)]?.[key])}</title></circle>`).join('');return `<div class="chart-card"><div class="chart-title"><div><span class="section-kicker">K CURVE</span><h3>Recall@K 증가 곡선</h3></div><div class="chart-legend"><span><i class="legend-a"></i>현재안</span><span><i class="legend-b"></i>개선안</span></div></div><svg class="curve-chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="K 구간별 Recall 비교"><g class="chart-grid">${[0,.25,.5,.75,1].map(v=>`<line x1="${left}" y1="${y(v)}" x2="${width-right}" y2="${y(v)}"></line><text x="${left-10}" y="${y(v)+4}">${Math.round(v*100)}%</text>`).join('')}</g><path class="curve-a" d="${path(curveA,'recall')}"></path><path class="curve-b" d="${path(curveB,'recall')}"></path>${dots(curveA,'recall','dot-a')}${dots(curveB,'recall','dot-b')}${ks.map((k,i)=>`<text class="x-label" x="${x(i)}" y="${height-14}">@${k}</text>`).join('')}</svg></div>`;}
+ 
+-async function bootstrap(){try{const [summary,config,capabilities,indices,jobs,monitoring,datasets,evalJobs,draft,keyStatus,pipelineGraph,guardrails,prompts]=await Promise.all([api('/api/admin-ui/summary'),api('/api/admin-ui/runtime-config'),api('/api/admin-ui/capabilities'),api('/api/admin-ui/indices'),api('/api/admin-ui/jobs?limit=100'),api('/api/admin-ui/monitoring?hours=24&limit=200'),api('/api/admin-ui/evaluations/datasets'),api('/api/admin-ui/evaluations/jobs'),api('/api/admin-ui/draft'),api('/api/admin-ui/api-keys/status'),api('/api/admin-ui/pipeline/graph'),api('/api/admin-ui/guardrails'),api('/api/admin-ui/prompts')]);Object.assign(state,{summary,config,capabilities,indices:indices.items||[],jobs:jobs.items||[],monitoring,datasets:datasets.items||[],evalJobs:evalJobs.items||[],draft,keyStatus,pipelineGraph,guardrails,prompts});state.index=pickIndex(state.indices);state.datasetId=state.datasets.at(-1)?.dataset_id||'';render();if(state.index)await searchIndex(false);}catch(error){if(error.status===401)return renderLogin();root.innerHTML=`<section class="panel connection-error"><div class="boot-logo">!</div><h1>AWS 관리자 API에 연결하지 못했습니다.</h1><p>${esc(error.message)}</p><ul><li>KDIC FastAPI 서비스 상태를 확인하세요.</li><li>Elasticsearch·PostgreSQL 내부 연결을 확인하세요.</li></ul></section>`;}}
++async function bootstrap(){try{const [summary,config,capabilities,indices,jobs,monitoring,datasets,evalJobs,draft,keyStatus,pipelineGraph,guardrails,prompts,chunkSources]=await Promise.all([api('/api/admin-ui/summary'),api('/api/admin-ui/runtime-config'),api('/api/admin-ui/capabilities'),api('/api/admin-ui/indices'),api('/api/admin-ui/jobs?limit=100'),api('/api/admin-ui/monitoring?hours=24&limit=200'),api('/api/admin-ui/evaluations/datasets'),api('/api/admin-ui/evaluations/jobs'),api('/api/admin-ui/draft'),api('/api/admin-ui/api-keys/status'),api('/api/admin-ui/pipeline/graph'),api('/api/admin-ui/guardrails'),api('/api/admin-ui/prompts'),api('/api/admin-ui/chunk-sources')]);Object.assign(state,{summary,config,capabilities,indices:indices.items||[],jobs:jobs.items||[],monitoring,datasets:datasets.items||[],evalJobs:evalJobs.items||[],draft,keyStatus,pipelineGraph,guardrails,prompts,chunkSources:chunkSources.items||[]});state.index=pickIndex(state.indices);state.datasetId=state.datasets.at(-1)?.dataset_id||'';render();if(state.index)await searchIndex(false);}catch(error){if(error.status===401)return renderLogin();root.innerHTML=`<section class="panel connection-error"><div class="boot-logo">!</div><h1>AWS 관리자 API에 연결하지 못했습니다.</h1><p>${esc(error.message)}</p><ul><li>KDIC FastAPI 서비스 상태를 확인하세요.</li><li>Elasticsearch·PostgreSQL 내부 연결을 확인하세요.</li></ul></section>`;}}
+ function renderLogin(message=''){root.innerHTML=`<main class="admin-login"><section class="panel login-card"><div class="brand-mark">K</div><span class="section-kicker">KDIC AWS ADMIN</span><h1>관리자 접속</h1><p>AWS 서버의 관리자 토큰으로 인증하면 8시간 보안 세션이 설정됩니다.</p>${message?`<div class="login-error">${esc(message)}</div>`:''}<label><span>관리자 토큰</span><input id="admin-token" type="password" autocomplete="current-password" placeholder="KDIC_ADMIN_TOKEN"></label><button class="primary-btn" data-action="login">보안 세션으로 접속</button><small>토큰은 브라우저 저장소에 보관하지 않습니다.</small></section></main>`;document.getElementById('admin-token')?.focus();}
+ async function login(){const input=document.getElementById('admin-token');const admin_token=input?.value||'';if(!admin_token)return renderLogin('관리자 토큰을 입력해 주세요.');try{await api('/api/admin-ui/login',{method:'POST',body:JSON.stringify({admin_token})});if(input)input.value='';await bootstrap();}catch(error){renderLogin(error.message);}}
+ function pickIndex(rows){return String((rows.find(r=>String(r.index).includes('kdic'))||rows[0]||{}).index||'');}
+@@ -214,13 +215,14 @@ function evaluationViewV2(){
+ function datasetNotice(){const d=state.datasets.find(x=>x.dataset_id===state.datasetId);if(!d)return'';return `<div class="dataset-notice"><b>${esc(d.filename)}</b><span>전체 ${d.row_count} · 평가 가능 ${d.usable_count}</span>${d.warnings?.length?`<details><summary>검수 경고 ${d.warnings.length}건</summary><p>${d.warnings.map(esc).join('<br>')}</p></details>`:'<em>Gold 연결 정상</em>'}</div>`;}
+ 
+ function dataViewBase(){const options=state.indices.map(r=>`<option value="${attr(r.index)}" ${state.index===r.index?'selected':''}>${esc(r.index)}</option>`).join('');const hits=state.hits.map(h=>{const s=h._source||{};return `<button class="api-hit" data-action="select-hit" data-id="${attr(h._id)}"><span class="doc-id">${esc(s.chunk_id||h._id)}</span><span><b>${esc(s.section_title||s.title||s.chunk_id||h._id)}</b><small>${esc(s.business_function||s.parent_doc_id||h._index)}</small></span><em>${Number(h._score||0).toFixed(3)}</em></button>`;}).join('')||'<div class="empty-list">검색 결과가 없습니다.</div>';const detail=state.document?`<div class="panel-head"><div><span class="section-kicker">CHUNK DETAIL</span><h2>${esc(state.document._id)}</h2></div><button class="danger-btn" data-action="stage-remove" data-id="${attr(state.document._id)}">제거 초안</button></div><pre class="json-view">${esc(JSON.stringify(state.document.chunk_metadata||state.document._source,null,2))}</pre>`:'<div class="empty-list">왼쪽에서 청크를 선택해 주세요.</div>';return `${heading('CHUNK OPERATIONS','청크 조회·추가·제거','추가와 제거는 초안으로만 저장되며 반영 전까지 챗봇 검색 결과는 바뀌지 않습니다.')}<section class="panel add-chunk"><div class="panel-head"><div><span class="section-kicker">ADD DRAFT</span><h2>신규 청크 JSON</h2></div><button class="secondary-btn" data-action="stage-add">추가 초안 저장</button></div><textarea id="chunk-json" placeholder='{"chunk_id":"NEW-001_chunk_000","document_id":"NEW-001","parent_doc_id":"NEW-001","title":"제목","section_title":"부제목","business_function":"업무","content":"본문"}'></textarea></section><section class="panel"><div class="api-searchbar"><select id="index-select">${options}</select><input id="index-query" value="${attr(state.query)}" placeholder="청크 ID·본문 검색"><button class="primary-btn" data-action="search-index">검색</button></div></section><section class="api-result-layout"><article class="panel api-hit-list"><div class="list-summary"><b>${state.hitTotal}건 중 ${state.hits.length}건</b><span>${esc(state.index)}</span></div><div class="api-hit-scroll">${hits}</div></article><article class="panel api-doc-view" style="padding:20px">${detail}</article></section>`;}
+-function dataView(){const drop=`<label class="chunk-dropzone" for="chunk-file"><input id="chunk-file" type="file" accept=".json,.jsonl,application/json,application/x-ndjson"><b>JSON·JSONL 파일을 여기에 끌어놓으세요</b><span>클릭해서 선택할 수도 있습니다 · 단일 객체, 배열, { chunks: [...] } 지원</span><em class="chunk-file-name">선택된 파일 없음</em></label>`;const manual=`<section class="panel" style="margin:0 0 12px;padding:16px;background:var(--bg)"><div class="panel-head" style="margin-bottom:12px"><div><span class="section-kicker">DIRECT ENTRY</span><h2 style="font-size:13px">직접 입력으로 청크 추가</h2><p style="margin-top:4px">필수 항목은 청크 ID와 본문입니다. 파일이나 JSON을 만들지 않아도 됩니다.</p></div></div><div class="form-grid"><label><span>청크 ID *</span><input id="manual-chunk-id" placeholder="예: HP-001_chunk_000"></label><label><span>문서 ID</span><input id="manual-document-id" placeholder="예: HP-001"></label><label><span>상위 문서 ID</span><input id="manual-parent-id" placeholder="비우면 문서 ID 사용"></label><label><span>업무 분류</span><input id="manual-business-function" placeholder="예: 은닉재산 신고"></label><label class="wide"><span>제목</span><input id="manual-title" placeholder="문서 또는 청크 제목"></label><label class="wide"><span>부제목</span><input id="manual-section-title" placeholder="세부 항목 제목"></label><label class="wide"><span>본문 *</span><textarea id="manual-chunk-content" placeholder="검색과 답변 근거로 사용할 본문을 입력하세요."></textarea></label></div><div class="form-actions"><p>저장 후에도 <b>초안</b> 상태이며, 반영센터 승인 전까지 챗봇에는 적용되지 않습니다.</p><button class="primary-btn" data-action="stage-manual-add">직접 입력 청크를 초안에 저장</button></div></section><p style="margin:14px 0 7px;font-size:10px;font-weight:800;color:var(--muted)">또는 JSON 직접 붙여넣기</p>`;const jsonSave=`</textarea><div class="form-actions"><p>입력한 JSON·JSONL을 검증한 뒤 <b>추가 초안</b>으로 저장합니다.</p><button class="primary-btn" data-action="stage-add">붙여넣은 JSON을 추가 초안으로 저장</button></div></section><section class="panel"><div class="api-searchbar">`;return dataViewBase().replace('<textarea id="chunk-json"',`${drop}${manual}<textarea id="chunk-json"`).replace('</textarea></section><section class="panel"><div class="api-searchbar">',jsonSave);}
++function rechunkPanel(){const sources=state.chunkSources||[],job=state.rechunkJob,selected=job?.source_url||sources[0]?.source_url||'',options=sources.map(row=>`<option value="${attr(row.source_url)}" ${row.source_url===selected?'selected':''}>${esc(row.sample_title||row.document_ids?.join(', ')||'제목 없음')} · ${row.chunk_count}개 청크</option>`).join(''),preview=(job?.preview_chunks||[]).slice(0,6).map(row=>`<li><b>${esc(row.chunk_id)}</b><span>${esc(row.section_title||row.title||'제목 없음')} · ${String(row.content||'').length.toLocaleString()}자</span></li>`).join(''),status=job?`<div class="rechunk-status"><span class="status status-${job.status==='ready'?'approved':job.status==='failed'?'failed':job.status==='running'?'running':'queued'}"><i></i>${esc(job.status==='ready'?'미리보기 준비':job.status==='failed'?'실패':job.status==='running'?'재수집·재청킹 중':'대기')}</span><b>${esc(job.stage||'')}</b><span>기존 ${num(job.old_chunk_count)}개 → 새 ${num(job.new_chunk_count)}개</span></div>${job.error?`<p class="rechunk-error">${esc(job.error)}</p>`:''}${job.status==='ready'?`<div class="rechunk-preview"><p><b>새 청크 ID는 기존 문서 ID를 유지해</b> <code>${esc((job.preview_chunks||[])[0]?.chunk_id||'')}</code> 형식으로 발급됩니다.</p><ul>${preview}</ul>${(job.preview_chunks||[]).length>6?`<small>외 ${(job.preview_chunks||[]).length-6}개 청크는 교체 초안에 함께 포함됩니다.</small>`:''}</div>`:''}`:'<p class="rechunk-note">URL을 선택하면 현재 운영 청크를 바꾸지 않고 재수집·재청킹 결과만 먼저 만듭니다.</p>';return `${heading('CHUNK OPERATIONS','청크 조회·추가·재청킹','신규 청크는 초안으로 추가하고, 기존 URL은 재수집·재청킹 미리보기 후 교체 초안으로 만듭니다.')}<section class="panel rechunk-panel"><div class="panel-head"><div><span class="section-kicker">URL REFRESH</span><h2>기존 URL 재수집·재청킹</h2><p>선택 URL의 기존 청크만 교체합니다. 아직 운영 검색 인덱스에는 반영되지 않습니다.</p></div><button class="secondary-btn" data-action="refresh-chunk-sources">↻ URL 목록 새로고침</button></div>${sources.length?`<div class="rechunk-form"><label><span>현재 수집 URL</span><select id="rechunk-source">${options}</select></label><button class="primary-btn" data-action="start-rechunk" ${state.rechunkBusy?'disabled':''}>${state.rechunkBusy?'재청킹 요청 중…':'재수집·재청킹 미리보기'}</button>${job?`<button class="secondary-btn" data-action="refresh-rechunk">상태 확인</button>`:''}</div>${status}${job?.status==='ready'?`<div class="form-actions"><p>교체 초안을 만들면 이 URL의 기존 청크 ${num(job.old_chunk_count)}개를 제거 초안에 넣고 새 청크 ${num(job.new_chunk_count)}개를 추가합니다.</p><button class="danger-btn" data-action="stage-rechunk" ${job.staged?'disabled':''}>${job.staged?'교체 초안 생성됨':'이 결과로 교체 초안 만들기'}</button></div>`:''}`:'<div class="empty-list">source_url 메타데이터가 있는 운영 청크를 찾지 못했습니다. 기존 데이터에 URL을 보존한 뒤 이용할 수 있습니다.</div>'}</section>`;}
++function dataView(){const drop=`<label class="chunk-dropzone" for="chunk-file"><input id="chunk-file" type="file" accept=".json,.jsonl,application/json,application/x-ndjson"><b>JSON·JSONL 파일을 여기에 끌어놓으세요</b><span>클릭해서 선택할 수도 있습니다 · 단일 객체, 배열, { chunks: [...] } 지원</span><em class="chunk-file-name">선택된 파일 없음</em></label>`;const manual=`<section class="panel" style="margin:0 0 12px;padding:16px;background:var(--bg)"><div class="panel-head" style="margin-bottom:12px"><div><span class="section-kicker">DIRECT ENTRY</span><h2 style="font-size:13px">직접 입력으로 청크 추가</h2><p style="margin-top:4px">필수 항목은 청크 ID와 본문입니다. 파일이나 JSON을 만들지 않아도 됩니다.</p></div></div><div class="form-grid"><label><span>청크 ID *</span><input id="manual-chunk-id" placeholder="예: HP-001_chunk_000"></label><label><span>문서 ID</span><input id="manual-document-id" placeholder="예: HP-001"></label><label><span>상위 문서 ID</span><input id="manual-parent-id" placeholder="비우면 문서 ID 사용"></label><label><span>업무 분류</span><input id="manual-business-function" placeholder="예: 은닉재산 신고"></label><label class="wide"><span>제목</span><input id="manual-title" placeholder="문서 또는 청크 제목"></label><label class="wide"><span>부제목</span><input id="manual-section-title" placeholder="세부 항목 제목"></label><label class="wide"><span>본문 *</span><textarea id="manual-chunk-content" placeholder="검색과 답변 근거로 사용할 본문을 입력하세요."></textarea></label></div><div class="form-actions"><p>저장 후에도 <b>초안</b> 상태이며, 반영센터 승인 전까지 챗봇에는 적용되지 않습니다.</p><button class="primary-btn" data-action="stage-manual-add">직접 입력 청크를 초안에 저장</button></div></section><p style="margin:14px 0 7px;font-size:10px;font-weight:800;color:var(--muted)">또는 JSON 직접 붙여넣기</p>`;const jsonSave=`</textarea><div class="form-actions"><p>입력한 JSON·JSONL을 검증한 뒤 <b>추가 초안</b>으로 저장합니다.</p><button class="primary-btn" data-action="stage-add">붙여넣은 JSON을 추가 초안으로 저장</button></div></section><section class="panel"><div class="api-searchbar">`;return rechunkPanel()+dataViewBase().replace('<textarea id="chunk-json"',`${drop}${manual}<textarea id="chunk-json"`).replace('</textarea></section><section class="panel"><div class="api-searchbar">',jsonSave);}
+ 
+ function keysView(){const k=state.keyStatus||{};const tested=state.keyTest?`<div class="key-test-result"><b>연결 검증 완료</b><span>지문 ${esc(state.keyTest.fingerprint)}</span><span>임베딩 ${Math.round(state.keyTest.embedding_latency_ms)}ms</span><span>답변 ${Math.round(state.keyTest.chat_latency_ms)}ms</span></div>`:'';return `${heading('SERVER SECRET','HCX API 키 관리','키는 HTTPS로 AWS 서버에 전달되며 화면·API 응답·로그에서 다시 조회할 수 없습니다.')}<section class="metric-grid">${metric('설정 상태',k.configured?'등록됨':'미등록',k.source||'—')}${metric('키 지문',k.fingerprint||'—','SHA-256 앞 12자리','purple')}${metric('마지막 교체',k.last_rotated_at?new Date(k.last_rotated_at*1000).toLocaleString('ko-KR'):'교체 이력 없음','AWS 서버','cyan')}${metric('저장 범위','AWS 영구 설정','런타임·systemd 재시작 유지','red')}</section><div class="risk-banner"><b>!</b><span><strong>기존 키는 확인하거나 복사할 수 없습니다.</strong>새 키는 연결 검증 후 현재 챗봇과 AWS 환경파일에 함께 반영됩니다.</span></div><section class="panel key-manager"><div class="panel-head"><div><span class="section-kicker">ROTATE SECRET</span><h2>새 HCX API 키</h2></div><span class="index-health">AWS 서버 전용</span></div><label><span>API 키</span><div class="secret-input"><input id="new-api-key" type="password" autocomplete="new-password" spellcheck="false" placeholder="Bearer 없이 키 값만 입력"><button class="secondary-btn" data-action="toggle-key">보기</button></div></label><label><span>교체 확인 문구</span><input id="key-confirm" placeholder="API 키 교체"></label><div class="approve-bar"><button class="secondary-btn" data-action="test-key">연결 테스트</button><button class="danger-btn" data-action="rotate-key">검증 후 교체</button></div>${tested}<p class="muted-note">연결 테스트는 BGE-M3 임베딩과 HCX 답변 모델에 각각 짧은 요청을 1회 실행합니다.</p></section>`;}
+ 
+ function applyView(){const d=state.draft||{},changes=Object.entries(d.candidate_config||{}).filter(([k,v])=>d.active_config?.[k]!==v);const history=d.history||[];return `${heading('CHANGE CONTROL','운영 반영 센터','초안 내용을 마지막으로 확인한 뒤 같은 챗봇 런타임에 반영합니다.')}<div class="risk-banner"><b>!</b><span><strong>반영 중에는 실행 중인 챗봇 작업이 없어야 합니다.</strong>청크 제거는 운영 인덱스에서 제외되지만 이전 상태가 메모리 스냅샷에 남아 롤백할 수 있습니다.</span></div><section class="change-review"><article class="panel config-card"><h2>파라미터 변경 ${changes.length}건</h2><dl>${changes.length?pairs(changes.map(([k,v])=>[k,`${d.active_config[k]} → ${v}`])):'<div><dt>변경 없음</dt><dd>—</dd></div>'}</dl></article><article class="panel config-card"><h2>청크 추가 ${d.add?.length||0}건</h2><div class="chip-list">${(d.add||[]).map(c=>`<span>${esc(c.chunk_id)}</span>`).join('')||'없음'}</div></article><article class="panel config-card"><h2>청크 제거 ${(d.remove||[]).length}건</h2><div class="chip-list danger">${(d.remove||[]).map(c=>`<span>${esc(c)}</span>`).join('')||'없음'}</div></article></section><section class="panel apply-panel"><div><span class="section-kicker">FINAL APPROVAL</span><h2>운영 반영</h2><p>확인 문구 <b>운영 반영</b>을 입력하면 ES 인덱스와 챗봇 메모리가 함께 갱신됩니다.</p></div><input id="apply-confirm" placeholder="운영 반영"><button class="danger-btn" data-action="apply-changes" ${!d.has_changes?'disabled':''}>실제 반영하기</button><button class="secondary-btn" data-action="clear-draft" ${!d.has_changes?'disabled':''}>초안 비우기</button></section><section class="panel jobs-panel"><div class="panel-head"><div><span class="section-kicker">ROLLBACK</span><h2>반영 이력</h2></div></div>${history.length?history.map(h=>`<div class="history-row"><span><b>${esc(h.version_id)}</b><small>${new Date(h.created_at*1000).toLocaleString('ko-KR')}</small></span><code>+${h.summary.added.length} / -${h.summary.removed.length}</code><button class="secondary-btn" data-action="rollback" data-id="${attr(h.version_id)}">이 버전 반영 전으로 복구</button></div>`).join(''):'<div class="empty-list">아직 반영 이력이 없습니다.</div>'}</section>`;}
+ 
+-function applyViewV2(){const d=state.draft||{},changes=Object.entries(d.candidate_config||{}).filter(([k,v])=>d.active_config?.[k]!==v),prompts=d.prompt_changes||[],history=d.history||[];const added=(d.add||[]).map(c=>`<span class="editable-chip">${esc(c.chunk_id)}<button data-action="undo-add" data-id="${attr(c.chunk_id)}" aria-label="추가 초안 취소">×</button></span>`).join('')||'<span class="empty-inline">없음</span>';const removed=(d.remove||[]).map(id=>`<span class="editable-chip danger">${esc(id)}<button data-action="undo-remove" data-id="${attr(id)}" aria-label="제거 초안 취소">↶</button></span>`).join('')||'<span class="empty-inline">없음</span>';return `${heading('CHANGE CONTROL','통합 반영 센터','검색 파라미터·프롬프트·청크 초안을 하나의 운영 버전으로 승인하고 언제든 이전 상태로 복구합니다.')}<div class="risk-banner"><b>!</b><span><strong>반영 이력은 AWS 런타임에 영구 저장됩니다.</strong>서버를 재시작해도 초기 운영 상태와 이전 버전의 검색 설정·프롬프트·청크를 복구할 수 있습니다.</span></div><section class="change-review"><article class="panel config-card"><div class="panel-head"><h2>파라미터 ${changes.length}건</h2><button class="icon-danger" data-action="clear-config-draft" ${!changes.length?'disabled':''}>비우기</button></div><dl>${changes.length?pairs(changes.map(([k,v])=>[k,`${d.active_config[k]} → ${v}`])):'<div><dt>변경 없음</dt><dd>—</dd></div>'}</dl></article><article class="panel config-card"><div class="panel-head"><h2>프롬프트 ${prompts.length}건</h2></div><div class="chip-list">${prompts.map(x=>`<span>${esc(x)}</span>`).join('')||'<span class="empty-inline">없음</span>'}</div></article><article class="panel config-card"><div class="panel-head"><h2>청크 추가 ${d.add?.length||0}건</h2></div><div class="chip-list">${added}</div></article><article class="panel config-card"><div class="panel-head"><h2>청크 제거 ${(d.remove||[]).length}건</h2></div><div class="chip-list danger">${removed}</div></article></section><section class="panel apply-panel"><div><span class="section-kicker">FINAL APPROVAL</span><h2>통합 운영 반영</h2><p>확인 문구 <b>운영 반영</b>을 입력하면 검증한 초안이 하나의 버전으로 저장되고 다음 질문부터 적용됩니다.</p></div><input id="apply-confirm" placeholder="운영 반영"><button class="danger-btn" data-action="apply-changes" ${!d.has_changes?'disabled':''}>통합 반영하기</button><button class="secondary-btn" data-action="clear-draft" ${!d.has_changes?'disabled':''}>모든 초안 비우기</button></section><section class="panel jobs-panel"><div class="panel-head"><div><span class="section-kicker">PERSISTENT ROLLBACK</span><h2>통합 반영 이력</h2></div><button class="icon-danger" data-action="clear-history" ${!history.length?'disabled':''}>이력 전체 비우기</button></div>${history.length?history.map(h=>{const s=h.summary||{},pc=(s.prompts||[]).length,cc=Object.keys(s.config||{}).length;return `<div class="history-row"><span><b>${esc(s.label||'이전 운영 상태')} · ${esc(h.version_id)}</b><small>${fmtDate(h.created_at)}</small></span><code>파라미터 ${cc} · 프롬프트 ${pc} · 청크 +${(s.added||[]).length}/-${(s.removed||[]).length}</code><div class="row-actions"><button class="secondary-btn" data-action="rollback" data-id="${attr(h.version_id)}">이 상태로 복구</button><button class="icon-danger" data-action="delete-history" data-id="${attr(h.version_id)}">지우기</button></div></div>`;}).join(''):'<div class="empty-list">첫 운영 반영 시 초기 상태가 자동으로 저장됩니다.</div>'}</section>`;}
++function applyViewV2(){const d=state.draft||{},changes=Object.entries(d.candidate_config||{}).filter(([k,v])=>d.active_config?.[k]!==v),prompts=d.prompt_changes||[],history=d.history||[];const added=(d.add||[]).map(c=>`<span class="editable-chip">${esc(c.chunk_id)}<button data-action="undo-add" data-id="${attr(c.chunk_id)}" aria-label="추가 초안 취소">×</button></span>`).join('')||'<span class="empty-inline">없음</span>';const removed=(d.remove||[]).map(id=>`<span class="editable-chip danger">${esc(id)}<button data-action="undo-remove" data-id="${attr(id)}" aria-label="제거 초안 취소">↶</button></span>`).join('')||'<span class="empty-inline">없음</span>';return `${heading('CHANGE CONTROL','통합 반영 센터','검색 파라미터·프롬프트·청크 초안을 하나의 운영 버전으로 승인하고 언제든 이전 상태로 복구합니다.')}<div class="risk-banner"><b>!</b><span><strong>반영 이력은 AWS 런타임에 영구 저장됩니다.</strong>서버를 재시작해도 초기 운영 상태와 이전 버전의 검색 설정·프롬프트·청크를 복구할 수 있습니다.</span></div><section class="change-review"><article class="panel config-card"><div class="panel-head"><h2>파라미터 ${changes.length}건</h2><button class="icon-danger" data-action="clear-config-draft" ${!changes.length?'disabled':''}>비우기</button></div><dl>${changes.length?pairs(changes.map(([k,v])=>[k,`${d.active_config[k]} → ${v}`])):'<div><dt>변경 없음</dt><dd>—</dd></div>'}</dl></article><article class="panel config-card"><div class="panel-head"><h2>프롬프트 ${prompts.length}건</h2></div><div class="chip-list">${prompts.map(x=>`<span>${esc(x)}</span>`).join('')||'<span class="empty-inline">없음</span>'}</div></article><article class="panel config-card"><div class="panel-head"><h2>청크 추가 ${d.add?.length||0}건</h2></div><div class="chip-list">${added}</div></article><article class="panel config-card"><div class="panel-head"><h2>청크 제거 ${(d.remove||[]).length}건</h2></div><div class="chip-list danger">${removed}</div></article></section><section class="panel apply-panel"><div><span class="section-kicker">FINAL APPROVAL</span><h2>통합 운영 반영</h2><p>확인 문구 <b>운영 반영</b>을 입력하면 검증한 초안이 하나의 버전으로 저장되고 다음 질문부터 적용됩니다.</p></div><input id="apply-confirm" placeholder="운영 반영"><button class="danger-btn" data-action="apply-changes" ${!d.has_changes?'disabled':''}>통합 반영하기</button><button class="secondary-btn" data-action="clear-draft" ${!d.has_changes?'disabled':''}>모든 초안 비우기</button></section><section class="panel jobs-panel"><div class="panel-head"><div><span class="section-kicker">PERSISTENT ROLLBACK</span><h2>통합 반영 이력</h2></div><button class="icon-danger" data-action="clear-history" ${!history.length?'disabled':''}>이력 전체 비우기</button></div>${history.length?history.map(h=>{const s=h.summary||{},pc=(s.prompts||[]).length,cc=Object.keys(s.config||{}).length,rc=(s.rechunk||[]).length;return `<div class="history-row"><span><b>${esc(s.label||'이전 운영 상태')} · ${esc(h.version_id)}</b><small>${fmtDate(h.created_at)}</small></span><code>파라미터 ${cc} · 프롬프트 ${pc} · 청크 +${(s.added||[]).length}/-${(s.removed||[]).length}${rc?` · URL 재청킹 ${rc}건`:''}</code><div class="row-actions"><button class="secondary-btn" data-action="rollback" data-id="${attr(h.version_id)}">이 상태로 복구</button><button class="icon-danger" data-action="delete-history" data-id="${attr(h.version_id)}">지우기</button></div></div>`;}).join(''):'<div class="empty-list">첫 운영 반영 시 초기 상태가 자동으로 저장됩니다.</div>'}</section>`;}
+ 
+ function chatCompareCard(label,row,candidate=false){if(!row)return '';return `<article class="panel chat-ab-card ${candidate?'candidate':''}"><div class="panel-head"><div><span class="section-kicker">${candidate?'IMPROVEMENT':'CURRENT'}</span><h2>${esc(label)}</h2></div><span class="env-tag">${Number(row.wall_seconds||0).toFixed(1)}초</span></div>${chatOutput(row,false)}</article>`;}
+ const chatParameterLabels={dense_weight:'Dense 가중치',bm25_weight:'BM25 가중치',candidate_depth:'후보 깊이',final_top_k:'최종 Top-K',min_relevance_score:'최소 관련성 점수',query_fusion_rrf_k:'RRF K',parent_context_max_chars:'Parent 문맥',parent_child:'Parent-Child'};
+@@ -247,13 +249,14 @@ function chatView(){
+ function chatOutput(r,showBasis=true){return `<div class="answer-meta"><span>${esc(r.route)}</span><span>${esc(r.answer_system||'')}</span>${(r.businesses||[]).map(x=>`<span>${esc(x)}</span>`).join('')}</div><div class="chat-answer">${esc(r.answer||'')}</div>${(r.sources||[]).map(s=>`<div class="source-card"><b>${esc(s.title||'공식 출처')}</b><a href="${attr(s.url||'#')}" target="_blank">${esc(s.url||'')}</a></div>`).join('')}${showBasis?'<button class="secondary-btn" data-action="load-basis">답변 근거 보기</button>':''}${showBasis&&state.chatBasis?`<pre class="json-view">${esc(JSON.stringify(state.chatBasis,null,2))}</pre>`:''}`;}
+ function durationText(ms){const value=Number(ms)||0;return value>=1000?`${(value/1000).toFixed(1)}초`:`${Math.round(value)}ms`;}
+ function distributionRows(rows){const max=Math.max(1,...(rows||[]).map(row=>row.count));return (rows||[]).map(row=>`<div class="distribution-row"><b title="${attr(row.name)}">${esc(row.name)}</b><i style="--width:${Math.max(3,row.count/max*100)}%"></i><em>${row.count}</em></div>`).join('')||'<div class="empty-list">집계할 데이터가 없습니다.</div>';}
+-function monitoringView(){const data=state.monitoring||{},s=data.summary||{},series=data.timeseries||[],maxQuestions=Math.max(1,...series.map(row=>row.questions));const chart=series.map((row,index)=>{const date=new Date(row.timestamp*1000),label=state.monitorHours<=48?`${String(date.getHours()).padStart(2,'0')}시`:`${date.getMonth()+1}/${date.getDate()}`,show=index===0||index===series.length-1||index%Math.max(1,Math.floor(series.length/6))===0;return `<div class="activity-column" style="--height:${Math.max(2,row.questions/maxQuestions*100)}%"><span>${row.questions||''}</span><i title="${label} · ${row.questions}건 · ${Number(row.tokens||0).toLocaleString()} 토큰"></i>${show?`<em>${label}</em>`:''}</div>`;}).join('');const recent=(data.recent||[]).map(row=>`<div class="monitor-row"><span>${fmtDate(row.created_at)}</span><span class="question-cell" title="${attr(row.question)}">${esc(row.question)}</span><span>${esc(row.route)}</span><span>${esc((row.businesses||[]).join(', ')||'미분류')}</span><span>${Number(row.total_tokens||0).toLocaleString()}</span><span>${durationText(row.latency_ms)}</span>${statusBadge(row.status)}</div>`).join('')||'<div class="empty-list">최근 질의가 없습니다.</div>';return `${heading('OPERATIONS MONITORING','운영 모니터링','실제 챗봇 작업 이력에서 질의량, HCX 토큰 사용량, 응답시간과 업무 분포를 집계합니다.',`<div class="monitor-toolbar"><select id="monitor-hours"><option value="24" ${state.monitorHours===24?'selected':''}>최근 24시간</option><option value="168" ${state.monitorHours===168?'selected':''}>최근 7일</option><option value="720" ${state.monitorHours===720?'selected':''}>최근 30일</option></select><button class="primary-btn" data-action="refresh-monitoring">↻ 다시 집계</button></div>`)}<section class="monitor-grid">${metric('질의 수',Number(s.questions||0).toLocaleString(),`완료 ${s.completed||0} · 실패 ${s.failed||0}`)}${metric('성공률',pct(s.success_rate),`작업 완료 기준`,'cyan')}${metric('총 토큰',Number(s.total_tokens||0).toLocaleString(),`평균 ${Math.round(s.avg_tokens||0).toLocaleString()} / 완료 질의`,'purple')}${metric('평균 응답시간',durationText(s.avg_latency_ms),`P95 ${durationText(s.p95_latency_ms)}`,'red')}</section><section class="monitor-chart-grid"><article class="panel monitor-card"><span class="section-kicker">QUERY VOLUME</span><h2>시간대별 질의량</h2><p>막대에 마우스를 올리면 질의 수와 토큰 사용량을 확인할 수 있습니다.</p><div class="activity-chart">${chart}</div></article><article class="panel monitor-card"><span class="section-kicker">TOKEN BREAKDOWN</span><h2>토큰 사용 구성</h2><p>HCX 응답의 실제 usage 필드를 기준으로 집계합니다.</p><dl>${pairs([['입력 토큰',Number(s.prompt_tokens||0).toLocaleString()],['출력 토큰',Number(s.completion_tokens||0).toLocaleString()],['집계 가능 비율',pct(s.token_coverage_rate)],['P95 응답시간',durationText(s.p95_latency_ms)]])}</dl></article></section><section class="monitor-subgrid"><article class="panel monitor-card"><span class="section-kicker">ROUTE</span><h2>응답 경로 분포</h2><div class="distribution-list">${distributionRows(data.routes)}</div></article><article class="panel monitor-card"><span class="section-kicker">BUSINESS</span><h2>업무별 질의 분포</h2><div class="distribution-list">${distributionRows(data.businesses)}</div></article></section><section class="panel monitor-card"><div class="panel-head"><div><span class="section-kicker">RECENT QUERIES</span><h2>최근 질의 기록</h2></div><span class="test-badge">최대 30건</span></div><div class="monitor-table"><div class="monitor-row header"><span>시각</span><span>질문</span><span>경로</span><span>업무</span><span>토큰</span><span>응답시간</span><span>상태</span></div>${recent}</div><div class="monitor-note">${esc(data.retention_notice||'')} 원문 개인정보는 가드레일 처리 이후 저장된 질문만 표시합니다.</div></section>`;}
++function cacheBadge(hit){return `<span class="cache-badge ${hit?'hit':''}">${hit?'CACHE HIT':'CACHE MISS'}</span>`;}
++function monitoringView(){const data=state.monitoring||{},s=data.summary||{},series=data.timeseries||[],maxQuestions=Math.max(1,...series.map(row=>row.questions));const chart=series.map((row,index)=>{const date=new Date(row.timestamp*1000),label=state.monitorHours<=48?`${String(date.getHours()).padStart(2,'0')}시`:`${date.getMonth()+1}/${date.getDate()}`,show=index===0||index===series.length-1||index%Math.max(1,Math.floor(series.length/6))===0;return `<div class="activity-column" style="--height:${Math.max(2,row.questions/maxQuestions*100)}%"><span>${row.questions||''}</span><i title="${label} · ${row.questions}건 · 실제 ${Number(row.tokens||0).toLocaleString()} 토큰"></i>${show?`<em>${label}</em>`:''}</div>`;}).join('');const recent=(data.recent||[]).map(row=>`<div class="monitor-row"><span>${fmtDate(row.created_at)}</span><span class="question-cell" title="${attr(row.question)}">${esc(row.question)}</span><span>${esc(row.route)}</span><span>${esc((row.businesses||[]).join(', ')||'미분류')}</span>${cacheBadge(row.cache_hit)}<span>${Number(row.total_tokens||0).toLocaleString()}</span><span>${durationText(row.latency_ms)}</span>${statusBadge(row.status)}</div>`).join('')||'<div class="empty-list">최근 질의가 없습니다.</div>';return `${heading('OPERATIONS MONITORING','운영 모니터링','이번 요청에서 실제 사용한 토큰과 체감 응답시간을 집계합니다. 캐시 적중 건은 LLM 호출 없이 조회 시간만 반영합니다.',`<div class="monitor-toolbar"><select id="monitor-hours"><option value="24" ${state.monitorHours===24?'selected':''}>최근 24시간</option><option value="168" ${state.monitorHours===168?'selected':''}>최근 7일</option><option value="720" ${state.monitorHours===720?'selected':''}>최근 30일</option></select><button class="primary-btn" data-action="refresh-monitoring">↻ 다시 집계</button></div>`)}<section class="monitor-grid">${metric('질의 수',Number(s.questions||0).toLocaleString(),`완료 ${s.completed||0} · 실패 ${s.failed||0}`)}${metric('캐시 적중률',pct(s.cache_hit_rate),`HIT ${s.cache_hits||0} · MISS ${s.cache_misses||0}`,'cyan')}${metric('실제 사용 토큰',Number(s.total_tokens||0).toLocaleString(),`캐시로 ${Number(s.cache_saved_tokens||0).toLocaleString()} 토큰 절감`,'purple')}${metric('평균 체감 응답시간',durationText(s.avg_latency_ms),`캐시로 ${durationText(s.cache_saved_latency_ms)} 절감`,'red')}</section><section class="monitor-chart-grid"><article class="panel monitor-card"><span class="section-kicker">QUERY VOLUME</span><h2>시간대별 질의량</h2><p>막대에 마우스를 올리면 요청 수와 실제 사용 토큰을 확인할 수 있습니다.</p><div class="activity-chart">${chart}</div></article><article class="panel monitor-card"><span class="section-kicker">TOKEN & CACHE</span><h2>실제 사용량·캐시 절감</h2><p>캐시 HIT는 이번 요청의 LLM 토큰을 0으로 처리합니다. 원본 생성 비용은 절감 참고값으로만 남깁니다.</p><dl>${pairs([['입력 토큰',Number(s.prompt_tokens||0).toLocaleString()],['출력 토큰',Number(s.completion_tokens||0).toLocaleString()],['캐시 절감 토큰',Number(s.cache_saved_tokens||0).toLocaleString()],['P95 체감 응답시간',durationText(s.p95_latency_ms)]])}</dl></article></section><section class="monitor-subgrid"><article class="panel monitor-card"><span class="section-kicker">ROUTE</span><h2>응답 경로 분포</h2><div class="distribution-list">${distributionRows(data.routes)}</div></article><article class="panel monitor-card"><span class="section-kicker">BUSINESS</span><h2>업무별 질의 분포</h2><div class="distribution-list">${distributionRows(data.businesses)}</div></article></section><section class="panel monitor-card"><div class="panel-head"><div><span class="section-kicker">RECENT QUERIES</span><h2>최근 질의 기록</h2></div><span class="test-badge">최대 30건</span></div><div class="monitor-table"><div class="monitor-row header"><span>시각</span><span>질문</span><span>경로</span><span>업무</span><span>캐시</span><span>이번 토큰</span><span>이번 응답시간</span><span>상태</span></div>${recent}</div><div class="monitor-note">${esc(data.retention_notice||'')} 캐시 HIT는 원본 생성 시간·토큰을 현재 요청 비용으로 중복 집계하지 않습니다.</div></section>`;}
+ async function refreshMonitoring(){state.monitorHours=num(document.getElementById('monitor-hours')?.value)||state.monitorHours;try{state.monitoring=await api(`/api/admin-ui/monitoring?hours=${state.monitorHours}&limit=500`);render();toast('운영 지표를 다시 집계했습니다.');}catch(e){toast(e.message,true);}}
+-function jobsView(){return `${heading('JOB AUDIT','챗봇 작업 이력','현재 런타임의 실제 Job 상태입니다.')}<section class="panel jobs-panel">${jobsTable(state.jobs)}</section>`;}
+-function jobsTable(rows){return rows.length?`<div class="job-table detailed"><div class="job-row job-header"><span>Job</span><span>질문</span><span>세션</span><span>상태</span><span>단계</span><span>진행률</span><span>시작</span></div>${rows.map(j=>`<div class="job-row"><b>${esc(String(j.job_id).slice(0,12))}</b><span>${esc(String(j.question||'').slice(0,28))}</span><span>${esc(String(j.session_id||'').slice(0,10))}</span>${statusBadge(j.status)}<span>${esc(j.stage)}</span><span>${j.progress||0}%</span><span>${fmtDate(j.created_at)}</span></div>`).join('')}</div>`:'<div class="empty-list">작업 이력이 없습니다.</div>';}
++function jobsView(){return `${heading('JOB AUDIT','챗봇 작업 이력','각 요청의 실제 토큰·체감 응답시간과 캐시 사용 여부를 확인합니다. 캐시 HIT는 이번 요청의 LLM 사용량이 0입니다.')}<section class="panel jobs-panel">${jobsTable(state.jobs)}</section>`;}
++function jobsTable(rows){return rows.length?`<div class="job-table detailed"><div class="job-row job-header"><span>Job</span><span>질문</span><span>세션</span><span>상태</span><span>단계</span><span>캐시</span><span>이번 토큰</span><span>이번 응답시간</span><span>진행률</span><span>시작</span></div>${rows.map(j=>{const t=j.telemetry||{};const title=t.cache_hit?`원본 생성 ${durationText(t.origin_latency_ms)} · ${Number(t.origin_total_tokens||0).toLocaleString()} 토큰을 이번 요청에서 절감`:'이번 요청에서 실제 LLM을 호출했습니다.';return `<div class="job-row"><b>${esc(String(j.job_id).slice(0,12))}</b><span title="${attr(j.question||'')}">${esc(String(j.question||'').slice(0,28))}</span><span>${esc(String(j.session_id||'').slice(0,10))}</span>${statusBadge(j.status)}<span>${esc(j.stage)}</span><span title="${attr(title)}">${cacheBadge(t.cache_hit)}</span><span>${Number(t.total_tokens||0).toLocaleString()}</span><span>${durationText(t.request_latency_ms)}</span><span>${j.progress||0}%</span><span>${fmtDate(j.created_at)}</span></div>`;}).join('')}</div><div class="monitor-note">캐시 HIT에 마우스를 올리면 최초 생성 대비 절감한 원본 시간·토큰을 확인할 수 있습니다.</div>`:'<div class="empty-list">작업 이력이 없습니다.</div>';}
+ 
+ function render(){const sameView=state.renderedView===state.view,oldMap=root.querySelector('.pipeline-map-wrap'),oldNav=root.querySelector('.sidebar nav');if(oldMap)state.pipelineScroll={left:oldMap.scrollLeft,top:oldMap.scrollTop};if(oldNav)state.sidebarScroll=oldNav.scrollTop;if(sameView)state.pageScroll=window.scrollY;else state.pageScroll=0;const views={dashboard,monitoring:monitoringView,pipeline:pipelineView,guardrails:guardrailsView,prompts:promptsView,runtime:runtimeView,evaluation:evaluationViewV2,data:dataView,keys:keysView,apply:applyViewV2,chat:chatView,jobs:jobsView};root.innerHTML=shell(views[state.view]());state.renderedView=state.view;requestAnimationFrame(()=>{const nav=root.querySelector('.sidebar nav');if(nav)nav.scrollTop=state.sidebarScroll||0;window.scrollTo({top:state.pageScroll||0,left:0,behavior:'auto'});if(state.view==='pipeline'){const map=root.querySelector('.pipeline-map-wrap');if(map){map.scrollLeft=state.pipelineScroll.left||0;map.scrollTop=state.pipelineScroll.top||0;}drawPipelineEdges();}});}
+-async function refreshAll(silent=false){state.busy=true;render();try{const [summary,config,indices,jobs,monitoring,datasets,evalJobs,draft,keyStatus,prompts,pipelineGraph]=await Promise.all([api('/api/admin-ui/summary'),api('/api/admin-ui/runtime-config'),api('/api/admin-ui/indices'),api('/api/admin-ui/jobs?limit=100'),api(`/api/admin-ui/monitoring?hours=${state.monitorHours}&limit=200`),api('/api/admin-ui/evaluations/datasets'),api('/api/admin-ui/evaluations/jobs'),api('/api/admin-ui/draft'),api('/api/admin-ui/api-keys/status'),api('/api/admin-ui/prompts'),api('/api/admin-ui/pipeline/graph')]);Object.assign(state,{summary,config,indices:indices.items||[],jobs:jobs.items||[],monitoring,datasets:datasets.items||[],evalJobs:evalJobs.items||[],draft,keyStatus,prompts,pipelineGraph});if(!silent)toast('실제 런타임 상태를 새로고침했습니다.');}catch(e){toast(e.message,true);}finally{state.busy=false;render();}}
++async function refreshAll(silent=false){state.busy=true;render();try{const [summary,config,indices,jobs,monitoring,datasets,evalJobs,draft,keyStatus,prompts,pipelineGraph,chunkSources]=await Promise.all([api('/api/admin-ui/summary'),api('/api/admin-ui/runtime-config'),api('/api/admin-ui/indices'),api('/api/admin-ui/jobs?limit=100'),api(`/api/admin-ui/monitoring?hours=${state.monitorHours}&limit=200`),api('/api/admin-ui/evaluations/datasets'),api('/api/admin-ui/evaluations/jobs'),api('/api/admin-ui/draft'),api('/api/admin-ui/api-keys/status'),api('/api/admin-ui/prompts'),api('/api/admin-ui/pipeline/graph'),api('/api/admin-ui/chunk-sources')]);Object.assign(state,{summary,config,indices:indices.items||[],jobs:jobs.items||[],monitoring,datasets:datasets.items||[],evalJobs:evalJobs.items||[],draft,keyStatus,prompts,pipelineGraph,chunkSources:chunkSources.items||[]});if(!silent)toast('실제 런타임 상태를 새로고침했습니다.');}catch(e){toast(e.message,true);}finally{state.busy=false;render();}}
+ async function searchIndex(notify=true){if(!state.index)return;state.busy=true;render();try{const out=await api('/api/admin-ui/search',{method:'POST',body:JSON.stringify({index:state.index,query:state.query,size:40,offset:0})});state.hits=out.items||[];state.hitTotal=out.total||0;state.document=null;if(notify)toast(`${state.hitTotal}건을 찾았습니다.`);}catch(e){toast(e.message,true);}finally{state.busy=false;render();}}
+ async function loadDocument(id){try{state.document=await api(`/api/admin-ui/documents/${encodeURIComponent(state.index)}/${encodeURIComponent(id)}`);render();}catch(e){toast(e.message,true);}}
+ async function fileBase64(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result).split(',')[1]);reader.onerror=reject;reader.readAsDataURL(file);});}
+@@ -272,6 +275,10 @@ async function loadChunkFile(file){if(!file)return;try{const text=await file.tex
+ function manualChunk(){const value=id=>String(document.getElementById(id)?.value||'').trim();const chunk_id=value('manual-chunk-id'),content=value('manual-chunk-content');if(!chunk_id||!content)throw new Error('직접 입력에서는 청크 ID와 본문이 필요합니다.');const document_id=value('manual-document-id'),parent_doc_id=value('manual-parent-id')||document_id||chunk_id;return {chunk_id,document_id:document_id||parent_doc_id,parent_doc_id,title:value('manual-title'),section_title:value('manual-section-title'),business_function:value('manual-business-function'),content};}
+ async function stageManualAdd(){try{const chunk=manualChunk();state.draft=await api('/api/admin-ui/draft/chunks',{method:'POST',body:JSON.stringify({chunk})});render();toast(`${chunk.chunk_id} 청크를 추가 초안으로 저장했습니다.`);}catch(e){toast(e.message,true);}}
+ async function stageAdd(){try{const chunks=parseChunkText(document.getElementById('chunk-json')?.value||'');let draft=state.draft;for(const chunk of chunks)draft=await api('/api/admin-ui/draft/chunks',{method:'POST',body:JSON.stringify({chunk})});state.draft=draft;render();toast(`${chunks.length}개 신규 청크를 초안에 추가했습니다.`);}catch(e){toast(e.message,true);}}
++async function refreshChunkSources(notify=true){try{const out=await api('/api/admin-ui/chunk-sources');state.chunkSources=out.items||[];if(notify)toast(`재청킹 가능한 URL ${state.chunkSources.length}개를 불러왔습니다.`);render();}catch(e){toast(e.message,true);}}
++async function startRechunk(){const source_url=document.getElementById('rechunk-source')?.value||'';if(!source_url)return toast('재수집할 URL을 선택해 주세요.',true);if(!confirm('선택한 URL만 다시 크롤링하고 재청킹합니다. 현재 운영 청크는 아직 바뀌지 않습니다. 계속할까요?'))return;state.rechunkBusy=true;render();try{state.rechunkJob=await api('/api/admin-ui/chunk-sources/rechunk',{method:'POST',body:JSON.stringify({source_url})});toast('재수집·재청킹을 시작했습니다. 완료되면 상태 확인을 눌러 미리보기를 검토하세요.');}catch(e){toast(e.message,true);}finally{state.rechunkBusy=false;render();}}
++async function refreshRechunk(){const id=state.rechunkJob?.job_id;if(!id)return;try{state.rechunkJob=await api(`/api/admin-ui/chunk-sources/rechunk/${encodeURIComponent(id)}`);render();if(state.rechunkJob.status==='ready')toast(`미리보기 준비 완료: 기존 ${state.rechunkJob.old_chunk_count}개 → 새 ${state.rechunkJob.new_chunk_count}개 청크`);else if(state.rechunkJob.status==='failed')toast(state.rechunkJob.error||'재청킹에 실패했습니다.',true);else toast('재수집·재청킹이 진행 중입니다.');}catch(e){toast(e.message,true);}}
++async function stageRechunk(){const id=state.rechunkJob?.job_id;if(!id||state.rechunkJob?.status!=='ready')return toast('준비된 재청킹 미리보기가 없습니다.',true);if(!confirm(`기존 ${state.rechunkJob.old_chunk_count}개 청크를 제거 초안에 넣고 새 ${state.rechunkJob.new_chunk_count}개 청크를 추가 초안에 만들까요? 실제 반영은 반영센터에서 별도로 승인해야 합니다.`))return;try{const out=await api(`/api/admin-ui/chunk-sources/rechunk/${encodeURIComponent(id)}/stage`,{method:'POST',body:'{}'});state.draft=out.draft;state.rechunkJob={...state.rechunkJob,staged:true};render();toast('URL 교체 초안을 만들었습니다. 반영센터에서 변경 목록과 결과를 확인한 뒤 통합 반영하세요.');}catch(e){toast(e.message,true);}}
+ async function stageRemove(id){if(!confirm(`${id} 청크를 제거 초안에 추가할까요?`))return;try{state.draft=await api(`/api/admin-ui/draft/chunks/${encodeURIComponent(id)}`,{method:'DELETE'});render();toast('제거 초안에 추가했습니다.');}catch(e){toast(e.message,true);}}
+ async function applyChanges(){const confirmation=document.getElementById('apply-confirm')?.value.trim()||'',addedIds=(state.draft?.add||[]).map(row=>row.chunk_id).filter(Boolean);if(confirmation!=='운영 반영')return toast('먼저 확인 문구 칸에 “운영 반영”을 정확히 입력해 주세요.',true);if(!confirm('운영 인덱스와 챗봇 검색에 초안을 반영할까요?'))return;state.busy=true;render();try{const out=await api('/api/admin-ui/apply',{method:'POST',body:JSON.stringify({confirmation})});await refreshAll(true);if(addedIds.length){state.view='data';state.query=addedIds[0];await searchIndex(false);toast(`${out.version_id} 반영 완료. 추가한 청크를 자동으로 검색했습니다.`);return;}state.view='chat';render();toast(`${out.version_id} 반영 완료. 다음 질문부터 적용됩니다.`);}catch(e){state.busy=false;render();toast(e.message,true);}}
+ async function clearDraft(){if(!confirm('저장된 파라미터·청크 초안을 모두 비울까요?'))return;state.draft=await api('/api/admin-ui/draft',{method:'DELETE'});render();toast('초안을 비웠습니다.');}
+@@ -281,7 +288,7 @@ async function deleteHistory(id){if(!confirm('이 반영 이력을 지우면 해
+ async function clearHistory(){if(!confirm('모든 반영 이력과 롤백 스냅샷을 지울까요? 현재 운영 상태는 유지됩니다.'))return;try{await api('/api/admin-ui/history',{method:'DELETE'});await refreshAll(true);toast('반영 이력을 모두 비웠습니다.');}catch(e){toast(e.message,true);}}
+ async function rollback(id){if(!confirm(`${id} 이력이 저장한 ‘반영 전 상태’로 복구할까요?`))return;state.busy=true;render();try{await api(`/api/admin-ui/rollback/${encodeURIComponent(id)}`,{method:'POST',body:'{}'});toast('이력이 저장한 반영 전 상태로 복구했습니다.');await refreshAll(true);}catch(e){state.busy=false;render();toast(e.message,true);}}
+ async function resetDefaults(){const confirmation=prompt('현재 청크·파라미터·프롬프트를 최초 운영 기본값으로 되돌립니다.\n계속하려면 “운영 기본값 초기화”를 입력하세요.');if(confirmation===null)return;if(!confirm('현재 상태는 새 복구 이력으로 보관됩니다. 운영 기본값으로 초기화할까요?'))return;state.busy=true;render();try{const out=await api('/api/admin-ui/reset-defaults',{method:'POST',body:JSON.stringify({confirmation})});toast(`운영 기본값으로 초기화했습니다. ${out.chunk_count}개 청크 상태입니다.`);await refreshAll(true);}catch(e){state.busy=false;render();toast(e.message,true);}}
+-function decorateApplyView(){if(state.view!=='apply'||root.querySelector('.default-reset-panel'))return;const historyPanel=root.querySelector('.jobs-panel');if(!historyPanel)return;historyPanel.insertAdjacentHTML('beforebegin',`<section class="panel default-reset-panel" style="padding:18px;margin:0 0 14px;display:flex;justify-content:space-between;align-items:center;gap:16px"><div><span class="section-kicker">OPERATING BASELINE</span><h2 style="margin:5px 0;font-size:14px">운영 기본값 초기화</h2><p style="margin:0;color:var(--muted);font-size:10px;line-height:1.6">최초 운영 기준의 청크·검색 파라미터·프롬프트로 되돌립니다. 현재 상태는 새 복구 이력으로 남습니다. <b>이력 전체 비우기</b>는 현재 운영값을 바꾸지 않고, 되돌릴 수 있는 이력만 삭제합니다.</p></div><button class="danger-btn" data-action="reset-defaults">운영 기본값 초기화</button></section>`);root.querySelectorAll('button[data-action="rollback"]').forEach(button=>{button.textContent='이 이력의 반영 전 상태로 복구';});const clear=root.querySelector('button[data-action="clear-history"]');if(clear)clear.title='현재 운영값은 유지하고, 되돌릴 수 있는 이력만 삭제합니다.';}
++function decorateApplyView(){if(state.view!=='apply'||root.querySelector('.default-reset-panel'))return;const historyPanel=root.querySelector('.jobs-panel');if(!historyPanel)return;const reChunks=state.draft?.rechunk||[];if(reChunks.length&&!root.querySelector('.rechunk-apply-panel')){const rows=reChunks.map(row=>`<li><b>${esc(row.document_ids?.join(', ')||'문서 ID 없음')}</b><span>${num(row.old_chunk_count)}개 기존 청크 → ${num(row.new_chunk_count)}개 새 청크</span><small>${esc(row.source_url)}</small></li>`).join('');root.querySelector('.apply-panel')?.insertAdjacentHTML('beforebegin',`<section class="panel rechunk-apply-panel" style="padding:18px;margin:0 0 14px"><span class="section-kicker">URL RECHUNK DRAFT</span><h2 style="margin:5px 0 8px;font-size:14px">URL 재청킹 교체 초안</h2><p style="margin:0 0 11px;color:var(--muted);font-size:10px;line-height:1.6">아래 URL의 기존 청크를 새 재청킹 결과로 교체합니다. 통합 운영 반영 전까지 챗봇 검색에는 적용되지 않습니다.</p><ul style="display:grid;gap:8px;list-style:none;padding:0;margin:0">${rows}</ul></section>`);}historyPanel.insertAdjacentHTML('beforebegin',`<section class="panel default-reset-panel" style="padding:18px;margin:0 0 14px;display:flex;justify-content:space-between;align-items:center;gap:16px"><div><span class="section-kicker">OPERATING BASELINE</span><h2 style="margin:5px 0;font-size:14px">운영 기본값 초기화</h2><p style="margin:0;color:var(--muted);font-size:10px;line-height:1.6">최초 운영 기준의 청크·검색 파라미터·프롬프트로 되돌립니다. 현재 상태는 새 복구 이력으로 남습니다. <b>이력 전체 비우기</b>는 현재 운영값을 바꾸지 않고, 되돌릴 수 있는 이력만 삭제합니다.</p></div><button class="danger-btn" data-action="reset-defaults">운영 기본값 초기화</button></section>`);root.querySelectorAll('button[data-action="rollback"]').forEach(button=>{button.textContent='이 이력의 반영 전 상태로 복구';});const clear=root.querySelector('button[data-action="clear-history"]');if(clear)clear.title='현재 운영값은 유지하고, 되돌릴 수 있는 이력만 삭제합니다.';}
+ new MutationObserver(()=>decorateApplyView()).observe(root,{childList:true});
+ function clarifyApplyControls(){if(state.view!=='apply')return;const input=root.querySelector('#apply-confirm'),button=root.querySelector('button[data-action="apply-changes"]');if(input){input.placeholder='확인 문구: 운영 반영';input.title='실제 반영 전 “운영 반영”을 정확히 입력해야 합니다.';}if(button)button.textContent='확인 후 통합 반영하기';}
+ new MutationObserver(()=>clarifyApplyControls()).observe(root,{childList:true});
+@@ -298,7 +305,7 @@ root.addEventListener('click',e=>{if(e.target.closest('button[data-action="reset
+ root.addEventListener('click',e=>{if(e.target.closest('button[data-action="save-chat-candidate"]'))saveChatCandidate();});
+ root.addEventListener('click',e=>{if(e.target.closest('button[data-action="load-chat-draft"]'))loadChatDraft();});
+ root.addEventListener('click',e=>{if(e.target.closest('button[data-action="add-finance-guardrails"]'))addFinanceGuardrails();});
+-root.addEventListener('click',e=>{const t=e.target.closest('button');if(!t)return;if(t.dataset.view){state.view=t.dataset.view;render();return;}const a=t.dataset.action;if(a==='login'){login();return;}if(a==='theme'){state.dark=!state.dark;localStorage.setItem('kdic-admin-theme',state.dark?'dark':'light');render();}if(a==='refresh')refreshAll();if(a==='refresh-monitoring')refreshMonitoring();if(a==='refresh-pipeline')refreshPipeline();if(a==='select-pipeline-node')selectPipelineNode(t.dataset.id);if(a==='save-pipeline-label')savePipelineLabel();if(a==='reset-pipeline-label')resetPipelineLabel();if(a==='save-pipeline-settings')savePipelineSettings();if(a==='refresh-guardrails')refreshGuardrails();if(a==='add-guardrail')addGuardrail();if(a==='delete-guardrail')deleteGuardrail(t.dataset.index);if(a==='save-guardrail-draft')saveGuardrailDraft();if(a==='clear-guardrail-draft')clearGuardrailDraft();if(a==='test-guardrails')testGuardrails();if(a==='apply-guardrails')applyGuardrails();if(a==='rollback-guardrails')rollbackGuardrails(t.dataset.id);if(a==='refresh-prompts')refreshPrompts();if(a==='save-prompt-draft')savePromptDraft().catch(e=>toast(e.message,true));if(a==='clear-prompt-draft')clearPromptDraft();if(a==='compare-prompts')comparePrompts();if(a==='search-index')searchIndex();if(a==='select-hit')loadDocument(t.dataset.id);if(a==='upload-dataset')uploadDataset();if(a==='delete-dataset')deleteDataset();if(a==='clear-datasets')clearDatasets();if(a==='save-config')saveConfig();if(a==='run-eval')runEval();if(a==='generate-eval-report')generateEvalReport();if(a==='open-eval-job')openEvalJob(t.dataset.id);if(a==='delete-eval-job')deleteEvalJob(t.dataset.id);if(a==='clear-eval-jobs')clearEvalJobs();if(a==='reset-eval-policy'){state.evalPolicy={evaluation_depth:20,metric_ks:{hit:3,recall:5,mrr:10,map:10,complete:5,ndcg:5,precision:5,f1:5},curve_ks:[1,3,5,10,20]};render();}if(a==='copy-draft')render();if(a==='stage-add')stageAdd();if(a==='stage-remove')stageRemove(t.dataset.id);if(a==='undo-add')undoDraft('add',t.dataset.id);if(a==='undo-remove')undoDraft('remove',t.dataset.id);if(a==='test-key')testKey();if(a==='rotate-key')rotateKey();if(a==='toggle-key'){const input=document.getElementById('new-api-key');if(input){input.type=input.type==='password'?'text':'password';t.textContent=input.type==='password'?'보기':'숨기기';}}if(a==='apply-changes')applyChanges();if(a==='clear-config-draft')clearConfigDraft();if(a==='clear-draft')clearDraft();if(a==='rollback')rollback(t.dataset.id);if(a==='delete-history')deleteHistory(t.dataset.id);if(a==='clear-history')clearHistory();if(a==='run-chat-compare')runChatCompare();if(a==='load-basis'&&state.chatJob?.job_id)api('/api/basis',{method:'POST',body:JSON.stringify({job_id:state.chatJob.job_id})}).then(x=>{state.chatBasis=x;render();}).catch(x=>toast(x.message,true));if(a==='logout')api('/api/admin-ui/logout',{method:'POST',body:'{}'}).then(()=>location.reload());});
++root.addEventListener('click',e=>{const t=e.target.closest('button');if(!t)return;if(t.dataset.view){state.view=t.dataset.view;render();return;}const a=t.dataset.action;if(a==='login'){login();return;}if(a==='theme'){state.dark=!state.dark;localStorage.setItem('kdic-admin-theme',state.dark?'dark':'light');render();}if(a==='refresh')refreshAll();if(a==='refresh-monitoring')refreshMonitoring();if(a==='refresh-pipeline')refreshPipeline();if(a==='select-pipeline-node')selectPipelineNode(t.dataset.id);if(a==='save-pipeline-label')savePipelineLabel();if(a==='reset-pipeline-label')resetPipelineLabel();if(a==='save-pipeline-settings')savePipelineSettings();if(a==='refresh-guardrails')refreshGuardrails();if(a==='add-guardrail')addGuardrail();if(a==='delete-guardrail')deleteGuardrail(t.dataset.index);if(a==='save-guardrail-draft')saveGuardrailDraft();if(a==='clear-guardrail-draft')clearGuardrailDraft();if(a==='test-guardrails')testGuardrails();if(a==='apply-guardrails')applyGuardrails();if(a==='rollback-guardrails')rollbackGuardrails(t.dataset.id);if(a==='refresh-prompts')refreshPrompts();if(a==='save-prompt-draft')savePromptDraft().catch(e=>toast(e.message,true));if(a==='clear-prompt-draft')clearPromptDraft();if(a==='compare-prompts')comparePrompts();if(a==='search-index')searchIndex();if(a==='select-hit')loadDocument(t.dataset.id);if(a==='refresh-chunk-sources')refreshChunkSources();if(a==='start-rechunk')startRechunk();if(a==='refresh-rechunk')refreshRechunk();if(a==='stage-rechunk')stageRechunk();if(a==='upload-dataset')uploadDataset();if(a==='delete-dataset')deleteDataset();if(a==='clear-datasets')clearDatasets();if(a==='save-config')saveConfig();if(a==='run-eval')runEval();if(a==='generate-eval-report')generateEvalReport();if(a==='open-eval-job')openEvalJob(t.dataset.id);if(a==='delete-eval-job')deleteEvalJob(t.dataset.id);if(a==='clear-eval-jobs')clearEvalJobs();if(a==='reset-eval-policy'){state.evalPolicy={evaluation_depth:20,metric_ks:{hit:3,recall:5,mrr:10,map:10,complete:5,ndcg:5,precision:5,f1:5},curve_ks:[1,3,5,10,20]};render();}if(a==='copy-draft')render();if(a==='stage-add')stageAdd();if(a==='stage-remove')stageRemove(t.dataset.id);if(a==='undo-add')undoDraft('add',t.dataset.id);if(a==='undo-remove')undoDraft('remove',t.dataset.id);if(a==='test-key')testKey();if(a==='rotate-key')rotateKey();if(a==='toggle-key'){const input=document.getElementById('new-api-key');if(input){input.type=input.type==='password'?'text':'password';t.textContent=input.type==='password'?'보기':'숨기기';}}if(a==='apply-changes')applyChanges();if(a==='clear-config-draft')clearConfigDraft();if(a==='clear-draft')clearDraft();if(a==='rollback')rollback(t.dataset.id);if(a==='delete-history')deleteHistory(t.dataset.id);if(a==='clear-history')clearHistory();if(a==='run-chat-compare')runChatCompare();if(a==='load-basis'&&state.chatJob?.job_id)api('/api/basis',{method:'POST',body:JSON.stringify({job_id:state.chatJob.job_id})}).then(x=>{state.chatBasis=x;render();}).catch(x=>toast(x.message,true));if(a==='logout')api('/api/admin-ui/logout',{method:'POST',body:'{}'}).then(()=>location.reload());});
+ root.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target?.id==='admin-token'){e.preventDefault();login();}});
+ root.addEventListener('input',e=>{if(e.target.id==='index-query')state.query=e.target.value;if(e.target.id==='chat-question')state.chatQuestion=e.target.value;if(e.target.id==='prompt-question')state.promptQuestion=e.target.value;if(String(e.target?.id||'').startsWith('chat-')&&e.target.id!=='chat-question')state.chatCustomConfig=readConfig('chat');});
+ root.addEventListener('input',e=>{if(String(e.target?.id||'').startsWith('eval-'))refreshEvalChangeHint();});
+diff --git a/Development/ec2_deploy/kdic_deploy_assets/kdic_admin_extension_aws.py b/Development/ec2_deploy/kdic_deploy_assets/kdic_admin_extension_aws.py
+index 286c41e..58c9429 100644
+--- a/Development/ec2_deploy/kdic_deploy_assets/kdic_admin_extension_aws.py
++++ b/Development/ec2_deploy/kdic_deploy_assets/kdic_admin_extension_aws.py
+@@ -136,6 +136,12 @@ class PipelineLabelsPayload(BaseModel):
+     labels: dict[str, str] = Field(default_factory=dict)
+ 
+ 
++class RechunkPreviewPayload(BaseModel):
++    """기존 수집 URL을 다시 크롤링하고 청킹할 때 사용할 요청값."""
++
++    source_url: str = Field(min_length=8, max_length=4_000)
++
++
+ def _clean(value: Any) -> str:
+     return " ".join(str(value or "").split()).strip()
+ 
+@@ -579,13 +585,16 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
+     app, page = service_module.app, Path(html_path).resolve()
+     sessions: dict[str, float] = {}
+     auth_lock, mutation_lock, eval_lock = threading.RLock(), threading.RLock(), threading.RLock()
++    rechunk_lock = threading.RLock()
+     prompt_compare_lock = threading.Lock()
+     report_lock = threading.Lock()
+     bootstrap_state = {"used": False}
+     datasets: dict[str, dict[str, Any]] = {}
+     eval_jobs: dict[str, dict[str, Any]] = {}
+     executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="kdic-admin-eval")
+-    drafts: dict[str, Any] = {"config": {}, "add": {}, "remove": set()}
++    rechunk_executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="kdic-admin-rechunk")
++    rechunk_jobs: dict[str, dict[str, Any]] = {}
++    drafts: dict[str, Any] = {"config": {}, "add": {}, "remove": set(), "rechunk": []}
+     history_path = Path(os.getenv("KDIC_ADMIN_HISTORY_PATH", "/opt/kdic/runtime/admin_change_history.pkl")).resolve()
+     default_snapshot_path = Path(os.getenv("KDIC_ADMIN_DEFAULT_SNAPSHOT_PATH", "/opt/kdic/runtime/admin_default_snapshot.pkl")).resolve()
+     pipeline_labels_path = Path(os.getenv("KDIC_PIPELINE_LABELS_PATH", "/opt/kdic/runtime/admin_pipeline_labels.json")).resolve()
+@@ -682,6 +691,211 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
+                 "parent_child": bool(runtime_globals.get("PARENT_CHILD_ENABLED", True)),
+                 "parent_context_max_chars": int(runtime_globals.get("PARENT_CONTEXT_MAX_CHARS", 8192))}
+ 
++    def chunk_source_url(chunk: Mapping[str, Any]) -> str:
++        """Runtime 청크의 URL 키를 한 곳에서 정규화한다.
++
++        URL이 없는 예전 청크는 재크롤링할 원문을 특정할 수 없으므로 목록에는
++        보여 주지 않는다. 임의로 제목이나 document_id를 URL처럼 취급하면 다른
++        페이지의 청크를 함께 교체할 위험이 있기 때문이다.
++        """
++        return _clean(chunk.get("source_url"))
++
++    def chunk_source_catalog() -> list[dict[str, Any]]:
++        grouped: dict[str, dict[str, Any]] = {}
++        for chunk in runtime_globals.get("CHUNKS", []):
++            if not isinstance(chunk, Mapping):
++                continue
++            source_url = chunk_source_url(chunk)
++            if not source_url:
++                continue
++            row = grouped.setdefault(source_url, {
++                "source_url": source_url,
++                "document_ids": set(),
++                "business_functions": set(),
++                "chunk_count": 0,
++                "sample_title": "",
++            })
++            row["chunk_count"] += 1
++            document_id = _clean(chunk.get("document_id"))
++            if document_id:
++                row["document_ids"].add(document_id)
++            business = _clean(chunk.get("business_function"))
++            if business:
++                row["business_functions"].add(business)
++            if not row["sample_title"]:
++                row["sample_title"] = _clean(chunk.get("title")) or _clean(chunk.get("section_title"))
++        return [
++            {
++                "source_url": row["source_url"],
++                "document_ids": sorted(row["document_ids"]),
++                "business_functions": sorted(row["business_functions"]),
++                "chunk_count": row["chunk_count"],
++                "sample_title": row["sample_title"],
++            }
++            for row in sorted(grouped.values(), key=lambda item: (str(item["sample_title"]), str(item["source_url"])))
++        ]
++
++    def source_chunks(source_url: str) -> list[dict[str, Any]]:
++        return [
++            copy.deepcopy(dict(chunk))
++            for chunk in runtime_globals.get("CHUNKS", [])
++            if isinstance(chunk, Mapping) and chunk_source_url(chunk) == source_url
++        ]
++
++    def normalized_rechunk_preview(
++        chunks: Sequence[Mapping[str, Any]], *, source_url: str, document_ids: set[str]
++    ) -> list[dict[str, Any]]:
++        """새 청크를 기존 도메인/문서 ID 규칙으로 안전하게 발급한다.
++
++        예를 들어 문서 ID가 DP-002이면 항상 DP-002_chunk_000 형식으로
++        다시 번호를 매긴다. URL 재청킹이므로 NEW- 접두어를 만들지 않으며,
++        다른 문서 ID가 섞인 결과는 반영하지 않는다.
++        """
++        candidates: list[dict[str, Any]] = []
++        for raw in chunks:
++            chunk = copy.deepcopy(dict(raw))
++            document_id = _clean(chunk.get("document_id"))
++            if document_id not in document_ids:
++                continue
++            chunk["document_id"] = document_id
++            chunk["parent_doc_id"] = _clean(chunk.get("parent_doc_id")) or document_id
++            chunk["source_url"] = source_url
++            candidates.append(chunk)
++        if not candidates:
++            raise ValueError("재수집 결과에서 선택한 URL의 청크를 찾지 못했습니다. 매니페스트 문서_ID와 URL 연결을 확인해 주세요.")
++        def ordering_index(row: Mapping[str, Any]) -> int:
++            try:
++                return int(row.get("chunk_index") or 0)
++            except (TypeError, ValueError):
++                return 0
++
++        candidates.sort(key=lambda row: (
++            _clean(row.get("document_id")),
++            ordering_index(row),
++            _clean(row.get("chunk_id")),
++        ))
++        counters: dict[str, int] = {}
++        normalized: list[dict[str, Any]] = []
++        for chunk in candidates:
++            document_id = str(chunk["document_id"])
++            index = counters.get(document_id, 0)
++            counters[document_id] = index + 1
++            chunk["chunk_id"] = f"{document_id}_chunk_{index:03d}"
++            chunk["chunk_index"] = index
++            chunk["title"] = _clean(chunk.get("title"))
++            chunk["section_title"] = _clean(chunk.get("section_title"))
++            chunk["business_function"] = _clean(chunk.get("business_function"))
++            chunk["content"] = str(chunk.get("content") or "").strip()
++            if not chunk["content"]:
++                continue
++            normalized.append(chunk)
++        if not normalized:
++            raise ValueError("재수집 결과의 본문이 비어 있어 청크를 만들지 않았습니다.")
++        return normalized
++
++    def rechunk_public(row: Mapping[str, Any], *, include_preview: bool = False) -> dict[str, Any]:
++        out = {
++            key: copy.deepcopy(row.get(key))
++            for key in ("job_id", "source_url", "status", "stage", "error", "created_at", "updated_at", "old_chunk_count", "new_chunk_count", "document_ids", "business_functions", "staged")
++        }
++        if include_preview and isinstance(row.get("preview_chunks"), Sequence):
++            out["preview_chunks"] = copy.deepcopy(list(row["preview_chunks"]))
++        return out
++
++    def run_rechunk_preview(job_id: str) -> None:
++        """관리 API 응답을 막지 않고, 기존 URL만 범위 제한해 크롤링·청킹한다."""
++        with rechunk_lock:
++            job = rechunk_jobs.get(job_id)
++            if not job:
++                return
++            job.update(status="running", stage="URL 재수집·재청킹 중", updated_at=time.time())
++            source_url = str(job["source_url"])
++            document_ids = set(job["document_ids"])
++        try:
++            config = service_module.kdic_final_pipeline.PipelineConfig(run_only_url_ids=sorted(document_ids))
++            result = service_module.kdic_final_pipeline.run_pipeline(
++                review_csv_path=service_module._review_csv_path(),
++                runtime_root=service_module._crawler_runtime_root(),
++                config=config,
++            )
++            preview_chunks = normalized_rechunk_preview(
++                result.get("chunks") or [], source_url=source_url, document_ids=document_ids
++            )
++            with rechunk_lock:
++                job = rechunk_jobs[job_id]
++                job.update(
++                    status="ready",
++                    stage="재청킹 미리보기 준비 완료",
++                    preview_chunks=preview_chunks,
++                    new_chunk_count=len(preview_chunks),
++                    updated_at=time.time(),
++                )
++        except Exception as error:
++            with rechunk_lock:
++                job = rechunk_jobs.get(job_id)
++                if job is not None:
++                    job.update(status="failed", stage="재청킹 실패", error=f"{type(error).__name__}: {error}", updated_at=time.time())
++
++    def job_telemetry(public: Mapping[str, Any], stored: Any) -> dict[str, Any]:
++        """Return request-time metrics without confusing a cache hit with its origin run."""
++
++        result = public.get("result") if isinstance(public.get("result"), Mapping) else {}
++        raw = getattr(stored, "raw_result", None)
++        raw = raw if isinstance(raw, Mapping) else {}
++        cache = result.get("suggestion_cache") if isinstance(result.get("suggestion_cache"), Mapping) else {}
++        usage = raw.get("usage") if isinstance(raw.get("usage"), Mapping) else {}
++        event = raw.get("event") if isinstance(raw.get("event"), Mapping) else {}
++        latency = raw.get("latency") if isinstance(raw.get("latency"), Mapping) else {}
++
++        def number(value: Any) -> float:
++            try:
++                return float(value or 0)
++            except (TypeError, ValueError):
++                return 0.0
++
++        origin_prompt = int(number(usage.get("prompt_tokens") or event.get("prompt_tokens")))
++        origin_completion = int(number(usage.get("completion_tokens") or event.get("completion_tokens")))
++        origin_total = int(number(usage.get("total_tokens") or event.get("total_tokens")))
++        origin_latency_ms = number(event.get("click_wall_ms") or latency.get("click_wall_ms"))
++        cache_hit = bool(cache.get("hit"))
++
++        if cache_hit:
++            request_latency_ms = number(cache.get("lookup_ms"))
++            if request_latency_ms <= 0:
++                request_latency_ms = sum(
++                    number(value) * 1000.0
++                    for value in (result.get("latency_seconds") or {}).values()
++                )
++            prompt_tokens = completion_tokens = total_tokens = 0
++        else:
++            request_latency_ms = origin_latency_ms
++            prompt_tokens, completion_tokens, total_tokens = (
++                origin_prompt,
++                origin_completion,
++                origin_total,
++            )
++
++        return {
++            "cache_hit": cache_hit,
++            "cache_source": str(cache.get("source") or "").strip(),
++            "request_latency_ms": round(request_latency_ms, 3),
++            "prompt_tokens": prompt_tokens,
++            "completion_tokens": completion_tokens,
++            "total_tokens": total_tokens,
++            "origin_latency_ms": round(origin_latency_ms, 3),
++            "origin_prompt_tokens": origin_prompt,
++            "origin_completion_tokens": origin_completion,
++            "origin_total_tokens": origin_total,
++            "saved_latency_ms": round(max(0.0, origin_latency_ms - request_latency_ms), 3) if cache_hit else 0.0,
++            "saved_tokens": origin_total if cache_hit else 0,
++        }
++
++    def job_public_with_telemetry(public: Mapping[str, Any]) -> dict[str, Any]:
++        item = dict(public)
++        stored = service_module.JOB_STORE.get(str(item.get("job_id") or ""))
++        item["telemetry"] = job_telemetry(item, stored)
++        return item
++
+     def monitoring_snapshot(hours: int, limit: int) -> dict[str, Any]:
+         now = time.time()
+         cutoff = now - (hours * 3600)
+@@ -692,12 +906,10 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
+             if created_at < cutoff:
+                 continue
+             stored = service_module.JOB_STORE.get(str(public.get("job_id") or ""))
+-            raw = stored.raw_result if stored is not None and isinstance(stored.raw_result, Mapping) else {}
+             result = public.get("result") if isinstance(public.get("result"), Mapping) else {}
+-            usage = raw.get("usage") if isinstance(raw.get("usage"), Mapping) else {}
+-            event = raw.get("event") if isinstance(raw.get("event"), Mapping) else {}
+-            latency = raw.get("latency") if isinstance(raw.get("latency"), Mapping) else {}
+-            wall_ms = float(event.get("click_wall_ms") or latency.get("click_wall_ms") or 0)
++            raw = getattr(stored, "raw_result", None)
++            raw = raw if isinstance(raw, Mapping) else {}
++            telemetry = job_telemetry(public, stored)
+             businesses = result.get("businesses") if isinstance(result.get("businesses"), Sequence) and not isinstance(result.get("businesses"), (str, bytes)) else []
+             records.append({
+                 "job_id": str(public.get("job_id") or ""),
+@@ -706,10 +918,8 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
+                 "status": _clean(public.get("status")) or "unknown",
+                 "route": _clean(result.get("route") or raw.get("route")) or "UNKNOWN",
+                 "businesses": [_clean(value) for value in businesses if _clean(value)],
+-                "prompt_tokens": int(usage.get("prompt_tokens") or event.get("prompt_tokens") or 0),
+-                "completion_tokens": int(usage.get("completion_tokens") or event.get("completion_tokens") or 0),
+-                "total_tokens": int(usage.get("total_tokens") or event.get("total_tokens") or 0),
+-                "latency_ms": round(wall_ms, 3),
++                **telemetry,
++                "latency_ms": telemetry["request_latency_ms"],
+                 "validation_passed": result.get("validation_passed"),
+                 "coverage_status": _clean(result.get("coverage_status")),
+             })
+@@ -744,6 +954,7 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
+             })
+ 
+         total_tokens = sum(row["total_tokens"] for row in completed)
++        cache_hits = sum(bool(row["cache_hit"]) for row in completed)
+         return {
+             "generated_at": now,
+             "hours": hours,
+@@ -760,6 +971,11 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
+                 "token_coverage_rate": len(token_rows) / len(completed) if completed else 0,
+                 "avg_latency_ms": sum(latency_values) / len(latency_values) if latency_values else 0,
+                 "p95_latency_ms": latency_values[p95_index] if latency_values else 0,
++                "cache_hits": cache_hits,
++                "cache_misses": len(completed) - cache_hits,
++                "cache_hit_rate": cache_hits / len(completed) if completed else 0,
++                "cache_saved_tokens": sum(row["saved_tokens"] for row in completed),
++                "cache_saved_latency_ms": sum(row["saved_latency_ms"] for row in completed),
+             },
+             "timeseries": buckets,
+             "routes": [{"name": key, "count": value} for key, value in sorted(route_counts.items(), key=lambda item: (-item[1], item[0]))],
+@@ -785,6 +1001,7 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
+         prompt_state = prompt_manager.public() if prompt_manager is not None else {"has_changes": False, "slots": []}
+         return {"active_config": active_config(), "candidate_config": _validate_config(drafts["config"], active_config()),
+                 "add": list(drafts["add"].values()), "remove": sorted(drafts["remove"]),
++                "rechunk": copy.deepcopy(drafts["rechunk"]),
+                 "prompt_changes": [row["slot"] for row in prompt_state.get("slots") or [] if row.get("changed")],
+                 "has_changes": bool(drafts["config"] or drafts["add"] or drafts["remove"] or prompt_state.get("has_changes")),
+                 "history": [{k: v for k, v in row.items() if k != "snapshot"} for row in history[-10:]][::-1]}
+@@ -1282,7 +1499,13 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
+                 "datasets": [dataset_summary(row) for row in datasets.values()]}
+ 
+     @app.get("/api/admin-ui/jobs")
+-    def jobs(limit: int = Query(default=100, ge=1, le=500), _: None = Depends(require_admin_session)): return service_module.admin_jobs(limit)
++    def jobs(limit: int = Query(default=100, ge=1, le=500), _: None = Depends(require_admin_session)):
++        payload = service_module.admin_jobs(limit)
++        items = payload.get("items") if isinstance(payload.get("items"), Sequence) else []
++        return {
++            **payload,
++            "items": [job_public_with_telemetry(item) for item in items if isinstance(item, Mapping)],
++        }
+ 
+     @app.get("/api/admin-ui/indices")
+     def indices(_: None = Depends(require_admin_session)): return service_module.admin_indices()
+@@ -1296,6 +1519,94 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
+         base = service_module.admin_document(index, document_id)
+         return {**base, "chunk_metadata": copy.deepcopy(runtime_globals.get("CHUNKS_BY_ID", {}).get(str(document_id)))}
+ 
++    @app.get("/api/admin-ui/chunk-sources")
++    def list_chunk_sources(_: None = Depends(require_admin_session)):
++        """재수집 가능한 URL 단위의 현재 운영 청크 목록."""
++        return {"items": chunk_source_catalog(), "count": len(chunk_source_catalog())}
++
++    @app.post("/api/admin-ui/chunk-sources/rechunk")
++    def start_rechunk_preview(payload: RechunkPreviewPayload, _: None = Depends(require_admin_session)):
++        source_url = _clean(payload.source_url)
++        matches = [item for item in chunk_source_catalog() if item["source_url"] == source_url]
++        if not matches:
++            raise HTTPException(status_code=404, detail="현재 운영 청크에서 해당 URL을 찾지 못했습니다. URL이 없는 기존 청크는 재청킹할 수 없습니다.")
++        source = matches[0]
++        if not source["document_ids"]:
++            raise HTTPException(status_code=422, detail="해당 URL의 document_id가 없어 도메인별 청크 ID를 재발급할 수 없습니다.")
++        with rechunk_lock:
++            if any(row.get("source_url") == source_url and row.get("status") in {"queued", "running"} for row in rechunk_jobs.values()):
++                raise HTTPException(status_code=409, detail="이 URL은 이미 재수집·재청킹 중입니다.")
++            job_id = f"rechunk-{uuid.uuid4().hex[:12]}"
++            rechunk_jobs[job_id] = {
++                "job_id": job_id,
++                "source_url": source_url,
++                "status": "queued",
++                "stage": "재수집 대기",
++                "error": None,
++                "created_at": time.time(),
++                "updated_at": time.time(),
++                "old_chunk_count": int(source["chunk_count"]),
++                "new_chunk_count": 0,
++                "document_ids": list(source["document_ids"]),
++                "business_functions": list(source["business_functions"]),
++                "preview_chunks": [],
++                "staged": False,
++            }
++        rechunk_executor.submit(run_rechunk_preview, job_id)
++        return rechunk_public(rechunk_jobs[job_id])
++
++    @app.get("/api/admin-ui/chunk-sources/rechunk/{job_id}")
++    def get_rechunk_preview(job_id: str, _: None = Depends(require_admin_session)):
++        with rechunk_lock:
++            job = rechunk_jobs.get(job_id)
++            if job is None:
++                raise HTTPException(status_code=404, detail="재청킹 작업을 찾지 못했습니다. 서버 재시작 후에는 새로 재수집해 주세요.")
++            return rechunk_public(job, include_preview=job.get("status") == "ready")
++
++    @app.post("/api/admin-ui/chunk-sources/rechunk/{job_id}/stage")
++    def stage_rechunk_preview(job_id: str, _: None = Depends(require_admin_session)):
++        with rechunk_lock:
++            job = copy.deepcopy(rechunk_jobs.get(job_id))
++        if job is None:
++            raise HTTPException(status_code=404, detail="재청킹 작업을 찾지 못했습니다.")
++        if job.get("status") != "ready":
++            raise HTTPException(status_code=409, detail="재청킹 미리보기가 준비된 뒤에만 교체 초안을 만들 수 있습니다.")
++        new_chunks = job.get("preview_chunks") or []
++        if not new_chunks:
++            raise HTTPException(status_code=422, detail="교체할 새 청크가 없습니다.")
++        source_url = str(job["source_url"])
++        with mutation_lock:
++            current = source_chunks(source_url)
++            current_ids = {str(row.get("chunk_id")) for row in current}
++            if not current_ids:
++                raise HTTPException(status_code=409, detail="현재 운영 청크가 바뀌었습니다. URL 목록을 새로고침하고 다시 재청킹해 주세요.")
++            new_ids = {str(row.get("chunk_id")) for row in new_chunks}
++            all_ids = set(map(str, runtime_globals.get("CHUNKS_BY_ID", {})))
++            conflicts = sorted((new_ids & (all_ids - current_ids)) | (new_ids & (set(drafts["add"]) - current_ids)))
++            if conflicts:
++                raise HTTPException(status_code=409, detail=f"다른 운영 문서와 청크 ID가 충돌합니다: {', '.join(conflicts[:5])}")
++            # 동일 URL 청크를 먼저 전부 제거하고, 재청킹 결과를 같은 document_id 기반
++            # ID로 넣는다. 실제 ES/메모리 변경은 기존 '통합 운영 반영'에서 한 번에 수행한다.
++            drafts["remove"].update(current_ids)
++            for chunk in new_chunks:
++                drafts["add"][str(chunk["chunk_id"])] = copy.deepcopy(chunk)
++            drafts["rechunk"] = [
++                row for row in drafts["rechunk"]
++                if row.get("source_url") != source_url
++            ] + [{
++                "job_id": job_id,
++                "source_url": source_url,
++                "document_ids": list(job["document_ids"]),
++                "old_chunk_count": len(current_ids),
++                "new_chunk_count": len(new_chunks),
++                "status": "staged",
++            }]
++        with rechunk_lock:
++            if job_id in rechunk_jobs:
++                rechunk_jobs[job_id]["staged"] = True
++                rechunk_jobs[job_id]["updated_at"] = time.time()
++        return {"staged": True, "job_id": job_id, "old_chunk_count": len(current_ids), "new_chunk_count": len(new_chunks), "draft": draft_public()}
++
+     @app.post("/api/admin-ui/evaluations/upload")
+     def upload(payload: DatasetUploadPayload, _: None = Depends(require_admin_session)):
+         try:
+@@ -1513,7 +1824,7 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
+ 
+     @app.delete("/api/admin-ui/draft")
+     def clear_draft(_: None = Depends(require_admin_session)):
+-        drafts["config"].clear(); drafts["add"].clear(); drafts["remove"].clear()
++        drafts["config"].clear(); drafts["add"].clear(); drafts["remove"].clear(); drafts["rechunk"].clear()
+         if prompt_manager is not None:
+             prompt_manager.clear_draft()
+         return draft_public()
+@@ -1543,11 +1854,11 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
+                 apply_snapshot(target, archive_prompts=bool(prompt_changes))
+                 history.append({"version_id": version_id, "created_at": time.time(), "snapshot": before, "active": True,
+                                 "summary": {"config": copy.deepcopy(drafts["config"]), "added": sorted(drafts["add"]),
+-                                            "removed": sorted(drafts["remove"]), "prompts": prompt_changes,
++                                            "removed": sorted(drafts["remove"]), "rechunk": copy.deepcopy(drafts["rechunk"]), "prompts": prompt_changes,
+                                             "label": "초기 운영 상태" if not history else "이전 운영 상태"}})
+                 history[:] = history[-10:]
+                 for row in history[:-1]: row["active"] = False
+-                drafts["config"].clear(); drafts["add"].clear(); drafts["remove"].clear()
++                drafts["config"].clear(); drafts["add"].clear(); drafts["remove"].clear(); drafts["rechunk"].clear()
+                 save_history()
+                 return {"applied": True, "version_id": version_id, "chunk_count": len(target_chunks), "active_config": active_config()}
+             except Exception as error:
+@@ -1581,7 +1892,7 @@ def install_admin_routes(service_module: Any, html_path: str | Path, runtime_glo
+                 history[:] = history[-10:]
+                 for row in history[:-1]:
+                     row["active"] = False
+-                drafts["config"].clear(); drafts["add"].clear(); drafts["remove"].clear()
++                drafts["config"].clear(); drafts["add"].clear(); drafts["remove"].clear(); drafts["rechunk"].clear()
+                 if prompt_manager is not None:
+                     prompt_manager.clear_draft()
+                 save_history()
+diff --git a/Development/ec2_deploy/requirements.txt b/Development/ec2_deploy/requirements.txt
+index bf20a92..3dcde33 100644
+--- a/Development/ec2_deploy/requirements.txt
++++ b/Development/ec2_deploy/requirements.txt
+@@ -14,3 +14,4 @@ ipywidgets>=8.1
+ ipython>=8.20
+ tqdm>=4.66
+ beautifulsoup4>=4.12
++lxml>=5.2

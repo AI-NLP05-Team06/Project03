@@ -1,0 +1,18 @@
+{
+  "dataset_source": "C:\\Users\\임도균\\Downloads\\Evaluation_DataSet_v3.5.xlsx",
+  "dataset_sha256_before": "ef70f5a591ad580f1979053adb37f6c1bd3425454f8feda0a506770aaed32cd5",
+  "dataset_sha256_after": "ef70f5a591ad580f1979053adb37f6c1bd3425454f8feda0a506770aaed32cd5",
+  "packaged_dataset_sha256": "ef70f5a591ad580f1979053adb37f6c1bd3425454f8feda0a506770aaed32cd5",
+  "dataset_modified": false,
+  "evaluation_sheet": "평가데이터셋 v3",
+  "expected_valid_questions": 132,
+  "domain_filter": false,
+  "methods": [
+    "BM25 Nori Discard (업무 필터 없음)",
+    "BGE-M3 Dense content (업무 필터 없음)",
+    "BGE-M3 Dense structured (업무 필터 없음)",
+    "BGE-M3 Sparse (업무 필터 없음)",
+    "Hybrid A Dense + BM25 Nori (업무 필터 없음)",
+    "Hybrid A + BGE Reranker (업무 필터 없음)"
+  ]
+}

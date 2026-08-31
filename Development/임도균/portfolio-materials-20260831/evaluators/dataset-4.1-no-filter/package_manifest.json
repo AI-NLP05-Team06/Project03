@@ -1,0 +1,10 @@
+{
+  "dataset": "test_dataset_4.1.xlsx",
+  "dataset_sha256": "b7c9d28a73549f7f9a6a417ed21f8fa540f94e792f8020121f1767614bbce63f",
+  "packaged_dataset_sha256": "b7c9d28a73549f7f9a6a417ed21f8fa540f94e792f8020121f1767614bbce63f",
+  "dataset_unchanged": true,
+  "sheet_name": "Sheet1",
+  "evaluation_target_column": "evaluation_target",
+  "domain_filter": false,
+  "method_count": 7
+}

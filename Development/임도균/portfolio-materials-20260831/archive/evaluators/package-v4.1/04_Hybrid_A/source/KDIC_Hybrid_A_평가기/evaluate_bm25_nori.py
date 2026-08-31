@@ -1,0 +1,651 @@
+"""KDIC BM25 + Lucene Nori 검색 일괄 평가기.
+
+답변과 임베딩은 생성하지 않습니다. Lucene KoreanAnalyzer(Nori) 형태소
+토큰화와 BM25 점수로 427개 청크를 검색하고 질문별 Top-10을 Gold와 비교합니다.
+"""
+
+from __future__ import annotations
+
+import argparse
+import csv
+import json
+import math
+import re
+import time
+import unicodedata
+import urllib.request
+import zipfile
+from collections import Counter
+from dataclasses import dataclass
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any
+
+import pandas as pd
+
+from metrics import evaluate_ranking
+
+
+DEFAULT_SHEET = "검색평가용"
+TOP_K = 10
+
+BUSINESS_FUNCTION_MAP = {
+    "deposit_protection": "예금자보호제도",
+    "deposit_insurance_payout": "예금보험금 안내",
+    "unclaimed_funds": "고객 미수령금 신청",
+    "mistaken_transfer": "착오송금 반환 신청",
+    "debt_adjustment": "채무조정 안내",
+    "hidden_assets_report": "은닉재산 신고",
+}
+
+REQUIRED_COLUMNS = {
+    "검색평가대상",
+    "evaluation_id",
+    "예상질문",
+    "도메인",
+    "gold_business_function",
+    "gold_primary_chunk_ids",
+    "gold_supporting_chunk_ids",
+    "gold_chunk_ids",
+    "multi_chunk_required",
+    "gold_review_status",
+}
+
+METRIC_KEYS = [
+    "hit_at_3",
+    "recall_at_5",
+    "mrr_at_10",
+    "ap_at_10",
+    "complete_at_5",
+    "ndcg_at_5",
+    "precision_at_5",
+    "f1_at_5",
+]
+
+
+def utc_now_iso() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
+
+def parse_json_array(value: Any, field_name: str, evaluation_id: str) -> list[str]:
+    if isinstance(value, list):
+        parsed = value
+    else:
+        text = "" if pd.isna(value) else str(value).strip()
+        if not text:
+            return []
+        try:
+            parsed = json.loads(text)
+        except json.JSONDecodeError as error:
+            raise ValueError(
+                f"{evaluation_id}: {field_name}이 JSON 배열이 아닙니다: {text}"
+            ) from error
+    if not isinstance(parsed, list):
+        raise ValueError(f"{evaluation_id}: {field_name}이 배열이 아닙니다.")
+    return list(dict.fromkeys(str(item).strip() for item in parsed if str(item).strip()))
+
+
+def load_jsonl_from_zip(archive: zipfile.ZipFile, suffix: str) -> list[dict[str, Any]]:
+    candidates = [
+        name for name in archive.namelist()
+        if name.replace("\\", "/").endswith(suffix)
+    ]
+    if len(candidates) != 1:
+        raise RuntimeError(f"ZIP에서 {suffix} 파일을 하나로 결정할 수 없습니다: {candidates}")
+    records: list[dict[str, Any]] = []
+    with archive.open(candidates[0], "r") as raw:
+        for line_number, raw_line in enumerate(raw, start=1):
+            line = raw_line.decode("utf-8").strip()
+            if not line:
+                continue
+            try:
+                records.append(json.loads(line))
+            except json.JSONDecodeError as error:
+                raise ValueError(
+                    f"{candidates[0]} {line_number}행 JSON 파싱 실패"
+                ) from error
+    return records
+
+
+@dataclass
+class EvaluationQuestion:
+    evaluation_id: str
+    original_question_id: str
+    question: str
+    domain_display: str
+    business_function_code: str
+    business_function_label: str
+    complexity: str
+    importance: str
+    primary_gold: list[str]
+    supporting_gold: list[str]
+    all_gold: list[str]
+    multi_chunk_required: bool
+    review_status: str
+
+
+def load_questions(
+    dataset_path: Path,
+    *,
+    sheet_name: str,
+    approved_only: bool,
+    limit: int | None,
+) -> list[EvaluationQuestion]:
+    frame = pd.read_excel(dataset_path, sheet_name=sheet_name, dtype=str).fillna("")
+    missing_columns = sorted(REQUIRED_COLUMNS - set(frame.columns))
+    if missing_columns:
+        raise ValueError(f"평가데이터셋 필수 칼럼 누락: {missing_columns}")
+
+    frame = frame[frame["검색평가대상"].str.upper().eq("Y")].copy()
+    if approved_only:
+        frame = frame[frame["gold_review_status"].eq("auto_approved")].copy()
+    if limit is not None:
+        frame = frame.head(limit)
+
+    questions: list[EvaluationQuestion] = []
+    for _, row in frame.iterrows():
+        evaluation_id = row["evaluation_id"].strip()
+        business_code = row["gold_business_function"].strip()
+        business_label = BUSINESS_FUNCTION_MAP.get(business_code)
+        if not business_label:
+            raise ValueError(
+                f"{evaluation_id}: 지원하지 않는 gold_business_function={business_code}"
+            )
+        primary = parse_json_array(
+            row["gold_primary_chunk_ids"], "gold_primary_chunk_ids", evaluation_id
+        )
+        supporting = parse_json_array(
+            row["gold_supporting_chunk_ids"], "gold_supporting_chunk_ids", evaluation_id
+        )
+        all_gold = parse_json_array(row["gold_chunk_ids"], "gold_chunk_ids", evaluation_id)
+        if not all_gold:
+            raise ValueError(f"{evaluation_id}: 검색평가대상 Y인데 Gold 청크가 없습니다.")
+        primary_set = set(primary)
+        questions.append(
+            EvaluationQuestion(
+                evaluation_id=evaluation_id,
+                original_question_id=row.get("질문ID(원본)", "").strip(),
+                question=row["예상질문"].strip(),
+                domain_display=row["도메인"].strip(),
+                business_function_code=business_code,
+                business_function_label=business_label,
+                complexity=row.get("질문 복잡도", "").strip(),
+                importance=row.get("중요도", "").strip(),
+                primary_gold=primary or all_gold,
+                supporting_gold=[x for x in supporting if x not in primary_set],
+                all_gold=all_gold,
+                multi_chunk_required=row["multi_chunk_required"].strip().upper() == "Y",
+                review_status=row["gold_review_status"].strip(),
+            )
+        )
+
+    ids = [question.evaluation_id for question in questions]
+    duplicates = sorted({value for value in ids if ids.count(value) > 1})
+    if duplicates:
+        raise ValueError(f"evaluation_id 중복: {duplicates}")
+    return questions
+
+
+def clean_text(value: Any) -> str:
+    return str(value or "").replace("\x00", "").strip()
+
+
+LUCENE_VERSION = "9.12.2"
+LUCENE_ARTIFACTS = (
+    "lucene-core",
+    "lucene-analysis-common",
+    "lucene-analysis-nori",
+)
+
+
+class NoriTokenizer:
+    """JPype로 Apache Lucene KoreanAnalyzer(Nori)를 직접 호출합니다."""
+
+    def __init__(
+        self,
+        cache_dir: Path,
+        lucene_version: str = LUCENE_VERSION,
+        decompound_mode: str = "discard",
+    ) -> None:
+        self.cache_dir = cache_dir
+        self.lucene_version = lucene_version
+        self.decompound_mode = decompound_mode.lower()
+        if self.decompound_mode not in {"discard", "mixed"}:
+            raise ValueError("decompound_mode는 discard 또는 mixed여야 합니다.")
+        jars = self._ensure_jars()
+        try:
+            import jpype
+        except ImportError as error:
+            raise RuntimeError(
+                "JPype1이 없습니다. pip install JPype1을 실행하세요."
+            ) from error
+        self.jpype = jpype
+        if not jpype.isJVMStarted():
+            jpype.startJVM(classpath=[str(path) for path in jars], convertStrings=True)
+        else:
+            for path in jars:
+                jpype.addClassPath(str(path))
+        try:
+            KoreanAnalyzer = jpype.JClass(
+                "org.apache.lucene.analysis.ko.KoreanAnalyzer"
+            )
+            DecompoundMode = jpype.JClass(
+                "org.apache.lucene.analysis.ko.KoreanTokenizer$DecompoundMode"
+            )
+            KoreanPartOfSpeechStopFilter = jpype.JClass(
+                "org.apache.lucene.analysis.ko.KoreanPartOfSpeechStopFilter"
+            )
+            self.CharTermAttribute = jpype.JClass(
+                "org.apache.lucene.analysis.tokenattributes.CharTermAttribute"
+            )
+            mode = DecompoundMode.valueOf(self.decompound_mode.upper())
+            self.analyzer = KoreanAnalyzer(
+                None,
+                mode,
+                KoreanPartOfSpeechStopFilter.DEFAULT_STOP_TAGS,
+                False,
+            )
+        except Exception as error:
+            raise RuntimeError(
+                "Lucene Nori KoreanAnalyzer 로딩에 실패했습니다. "
+                "Java 11 이상과 Lucene JAR를 확인하세요."
+            ) from error
+
+    def _ensure_jars(self) -> list[Path]:
+        self.cache_dir.mkdir(parents=True, exist_ok=True)
+        paths: list[Path] = []
+        for artifact in LUCENE_ARTIFACTS:
+            filename = f"{artifact}-{self.lucene_version}.jar"
+            target = self.cache_dir / filename
+            if not target.exists() or target.stat().st_size == 0:
+                url = (
+                    "https://repo1.maven.org/maven2/org/apache/lucene/"
+                    f"{artifact}/{self.lucene_version}/{filename}"
+                )
+                print(f"Lucene 구성요소 다운로드: {filename}")
+                try:
+                    urllib.request.urlretrieve(url, target)
+                except Exception as error:
+                    raise RuntimeError(f"Lucene JAR 다운로드 실패: {url}") from error
+            paths.append(target)
+        return paths
+
+    def tokenize(self, text: Any) -> list[str]:
+        normalized = unicodedata.normalize("NFKC", clean_text(text))
+        if not normalized:
+            return []
+        stream = self.analyzer.tokenStream("content", normalized)
+        attribute = stream.addAttribute(self.CharTermAttribute.class_)
+        tokens: list[str] = []
+        try:
+            stream.reset()
+            while stream.incrementToken():
+                token = str(attribute.toString()).strip()
+                if token:
+                    tokens.append(token)
+            stream.end()
+        finally:
+            stream.close()
+        return tokens
+
+
+class BM25Index:
+    def __init__(
+        self,
+        *,
+        chunks: list[dict[str, Any]],
+        tokenizer: NoriTokenizer,
+        k1: float,
+        b: float,
+    ) -> None:
+        chunks_by_id = {str(chunk["chunk_id"]): chunk for chunk in chunks}
+        if len(chunks_by_id) != len(chunks):
+            raise RuntimeError("chunks.jsonl에 중복 chunk_id가 있습니다.")
+        if k1 <= 0:
+            raise ValueError("BM25 k1은 0보다 커야 합니다.")
+        if not 0 <= b <= 1:
+            raise ValueError("BM25 b는 0 이상 1 이하여야 합니다.")
+
+        self.k1 = float(k1)
+        self.b = float(b)
+        self.tokenizer = tokenizer
+        self.chunk_ids = [str(chunk["chunk_id"]) for chunk in chunks]
+        self.business_labels = [
+            str(chunk.get("business_function", "")).strip() for chunk in chunks
+        ]
+        self.chunks_by_id = chunks_by_id
+        self.term_frequencies = [
+            Counter(tokenizer.tokenize(chunk.get("content"))) for chunk in chunks
+        ]
+        self.document_lengths = [
+            sum(frequencies.values()) for frequencies in self.term_frequencies
+        ]
+        if not self.document_lengths or any(length == 0 for length in self.document_lengths):
+            empty_ids = [
+                self.chunk_ids[index]
+                for index, length in enumerate(self.document_lengths)
+                if length == 0
+            ]
+            raise RuntimeError(f"토큰이 없는 청크가 있습니다: {empty_ids[:10]}")
+        self.average_document_length = (
+            sum(self.document_lengths) / len(self.document_lengths)
+        )
+        document_frequency: Counter[str] = Counter()
+        for frequencies in self.term_frequencies:
+            document_frequency.update(frequencies.keys())
+        document_count = len(self.chunk_ids)
+        self.idf = {
+            term: math.log(
+                1.0 + (document_count - frequency + 0.5) / (frequency + 0.5)
+            )
+            for term, frequency in document_frequency.items()
+        }
+
+    def score(self, query_tokens: list[str], document_index: int) -> float:
+        frequencies = self.term_frequencies[document_index]
+        document_length = self.document_lengths[document_index]
+        length_normalizer = self.k1 * (
+            1.0 - self.b + self.b * document_length / self.average_document_length
+        )
+        score = 0.0
+        for term in dict.fromkeys(query_tokens):
+            frequency = frequencies.get(term, 0)
+            if frequency == 0:
+                continue
+            score += self.idf.get(term, 0.0) * (
+                frequency * (self.k1 + 1.0)
+                / (frequency + length_normalizer)
+            )
+        return score
+
+    def search(
+        self,
+        query: str,
+        *,
+        top_k: int,
+        business_function_label: str | None,
+    ) -> list[dict[str, Any]]:
+        candidate_indices = [
+            index for index, label in enumerate(self.business_labels)
+            if business_function_label is None or label == business_function_label
+        ]
+        if not candidate_indices:
+            raise RuntimeError(
+                f"업무 필터에 해당하는 청크가 없습니다: {business_function_label}"
+            )
+        query_tokens = self.tokenizer.tokenize(query)
+        if not query_tokens:
+            raise ValueError("질문에서 검색 토큰을 추출하지 못했습니다.")
+        scored = [
+            (self.score(query_tokens, index), index)
+            for index in candidate_indices
+        ]
+        scored.sort(key=lambda item: (-item[0], item[1]))
+        results = []
+        for score, index in scored[:min(top_k, len(scored))]:
+            chunk_id = self.chunk_ids[index]
+            results.append({
+                "chunk_id": chunk_id,
+                "score": float(score),
+                "chunk": self.chunks_by_id[chunk_id],
+            })
+        return results
+
+
+def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if not rows:
+        return
+    with path.open("w", encoding="utf-8-sig", newline="") as file:
+        writer = csv.DictWriter(file, fieldnames=list(rows[0]))
+        writer.writeheader()
+        writer.writerows(rows)
+
+
+def mean_metric(rows: list[dict[str, Any]], key: str) -> float | None:
+    values = [
+        float(row[key]) for row in rows
+        if row.get(key) is not None and row.get(key) != ""
+    ]
+    return sum(values) / len(values) if values else None
+
+
+def summarize(rows: list[dict[str, Any]], group_name: str, group_value: str) -> dict[str, Any]:
+    summary: dict[str, Any] = {
+        "group_name": group_name,
+        "group_value": group_value,
+        "question_count": len(rows),
+        "complete_applicable_count": sum(
+            row.get("complete_at_5") is not None for row in rows
+        ),
+    }
+    for key in METRIC_KEYS:
+        summary["map_at_10" if key == "ap_at_10" else key] = mean_metric(rows, key)
+    summary["latency_ms_mean"] = mean_metric(rows, "latency_ms")
+    return summary
+
+
+def validate_gold_chunks(
+    questions: list[EvaluationQuestion],
+    available_chunk_ids: set[str],
+) -> list[dict[str, str]]:
+    issues = []
+    for question in questions:
+        for chunk_id in question.all_gold:
+            if chunk_id not in available_chunk_ids:
+                issues.append({
+                    "evaluation_id": question.evaluation_id,
+                    "question": question.question,
+                    "missing_gold_chunk_id": chunk_id,
+                })
+    return issues
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--dataset", type=Path, required=True)
+    parser.add_argument("--kdic-zip", type=Path, required=True)
+    parser.add_argument("--output-dir", type=Path, default=Path("results"))
+    parser.add_argument("--sheet-name", default=DEFAULT_SHEET)
+    parser.add_argument("--top-k", type=int, default=TOP_K)
+    parser.add_argument("--k1", type=float, default=1.5)
+    parser.add_argument("--b", type=float, default=0.75)
+    parser.add_argument("--lucene-version", default=LUCENE_VERSION)
+    parser.add_argument("--lucene-cache-dir", type=Path)
+    parser.add_argument(
+        "--decompound-mode",
+        choices=("discard", "mixed"),
+        default="discard",
+    )
+    parser.add_argument("--limit", type=int)
+    parser.add_argument("--approved-only", action="store_true")
+    parser.add_argument("--no-domain-filter", action="store_true")
+    parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--allow-missing-gold", action="store_true")
+    return parser
+
+
+def main() -> int:
+    args = build_parser().parse_args()
+    if args.top_k < 10:
+        raise ValueError("MRR@10과 MAP@10 계산을 위해 --top-k는 10 이상이어야 합니다.")
+
+    questions = load_questions(
+        args.dataset,
+        sheet_name=args.sheet_name,
+        approved_only=args.approved_only,
+        limit=args.limit,
+    )
+    with zipfile.ZipFile(args.kdic_zip) as archive:
+        chunks = load_jsonl_from_zip(archive, "/processed/chunks.jsonl")
+    chunk_ids = {str(chunk["chunk_id"]) for chunk in chunks}
+    missing_gold = validate_gold_chunks(questions, chunk_ids)
+
+    args.output_dir.mkdir(parents=True, exist_ok=True)
+    dry_report = {
+        "status": "ready" if not missing_gold else "gold_validation_failed",
+        "retriever": f"BM25 + Lucene Nori ({args.decompound_mode})",
+        "dataset": str(args.dataset.resolve()),
+        "kdic_zip": str(args.kdic_zip.resolve()),
+        "question_count": len(questions),
+        "chunk_count": len(chunks),
+        "tokenizer": "Apache Lucene KoreanAnalyzer (Nori)",
+        "lucene_version": args.lucene_version,
+        "decompound_mode": args.decompound_mode,
+        "k1": args.k1,
+        "b": args.b,
+        "domain_filter": not args.no_domain_filter,
+        "missing_gold_count": len(missing_gold),
+        "generated_at": utc_now_iso(),
+    }
+    (args.output_dir / "dry_run_report.json").write_text(
+        json.dumps(dry_report, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+    write_csv(args.output_dir / "missing_gold.csv", missing_gold)
+    print(json.dumps(dry_report, ensure_ascii=False, indent=2))
+
+    if missing_gold and not args.allow_missing_gold:
+        raise RuntimeError(
+            "평가데이터셋의 Gold 청크 일부가 chunks.jsonl에 없습니다. "
+            "missing_gold.csv를 확인하세요."
+        )
+    if args.dry_run:
+        print("Dry-run 완료: Nori JAR 다운로드와 BM25 검색은 실행하지 않았습니다.")
+        return 0
+
+    lucene_cache_dir = (
+        args.lucene_cache_dir
+        if args.lucene_cache_dir
+        else args.output_dir / "lucene_jars"
+    )
+    print(
+        f"Lucene Nori 로딩: {args.lucene_version}, "
+        f"decompound_mode={args.decompound_mode}"
+    )
+    tokenizer = NoriTokenizer(
+        lucene_cache_dir,
+        args.lucene_version,
+        args.decompound_mode,
+    )
+    sample_text = "예금보험금을 신청하려면 어떤 서류가 필요한가요?"
+    print("Nori 토큰화 확인:", tokenizer.tokenize(sample_text))
+    print(f"BM25-Nori 인덱스 생성: k1={args.k1}, b={args.b}")
+    index = BM25Index(
+        chunks=chunks,
+        tokenizer=tokenizer,
+        k1=args.k1,
+        b=args.b,
+    )
+
+    details: list[dict[str, Any]] = []
+    run_started = time.perf_counter()
+    for number, question in enumerate(questions, start=1):
+        query_started = time.perf_counter()
+        results = index.search(
+            question.question,
+            top_k=args.top_k,
+            business_function_label=(
+                None if args.no_domain_filter else question.business_function_label
+            ),
+        )
+        latency_ms = (time.perf_counter() - query_started) * 1000
+        ranked_ids = [result["chunk_id"] for result in results]
+        metrics = evaluate_ranking(
+            ranked_ids,
+            gold_ids=question.all_gold,
+            primary_gold_ids=question.primary_gold,
+            supporting_gold_ids=question.supporting_gold,
+            multi_chunk_required=question.multi_chunk_required,
+        )
+        details.append({
+            "evaluation_id": question.evaluation_id,
+            "question_id_original": question.original_question_id,
+            "question": question.question,
+            "domain": question.domain_display,
+            "gold_business_function": question.business_function_code,
+            "question_complexity": question.complexity,
+            "importance": question.importance,
+            "gold_review_status": question.review_status,
+            "gold_primary_chunk_ids": json.dumps(question.primary_gold, ensure_ascii=False),
+            "gold_supporting_chunk_ids": json.dumps(
+                question.supporting_gold, ensure_ascii=False
+            ),
+            "gold_chunk_ids": json.dumps(question.all_gold, ensure_ascii=False),
+            "retrieved_chunk_ids": json.dumps(ranked_ids, ensure_ascii=False),
+            "retrieved_scores": json.dumps(
+                [round(result["score"], 8) for result in results]
+            ),
+            "hit_at_3": metrics["hit_at_3"],
+            "recall_at_5": metrics["recall_at_5"],
+            "mrr_at_10": metrics["mrr_at_10"],
+            "ap_at_10": metrics["ap_at_10"],
+            "complete_at_5": metrics["complete_at_5"],
+            "ndcg_at_5": metrics["ndcg_at_5"],
+            "precision_at_5": metrics["precision_at_5"],
+            "f1_at_5": metrics["f1_at_5"],
+            "latency_ms": round(latency_ms, 3),
+            "query_token_count": len(tokenizer.tokenize(question.question)),
+        })
+        print(
+            f"[{number:03d}/{len(questions):03d}] "
+            f"{question.evaluation_id} Hit@3={metrics['hit_at_3']:.0f} "
+            f"Recall@5={metrics['recall_at_5']:.3f}"
+        )
+
+    write_csv(args.output_dir / "question_results.csv", details)
+    overall = summarize(details, "overall", "all")
+    domain_summaries = [
+        summarize(
+            [row for row in details if row["gold_business_function"] == domain],
+            "gold_business_function",
+            domain,
+        )
+        for domain in sorted({row["gold_business_function"] for row in details})
+    ]
+    write_csv(args.output_dir / "summary_by_domain.csv", domain_summaries)
+
+    result_summary = {
+        "retriever": f"BM25 + Lucene Nori ({args.decompound_mode})",
+        "tokenizer": "Apache Lucene KoreanAnalyzer (Nori)",
+        "lucene_version": args.lucene_version,
+        "decompound_mode": args.decompound_mode,
+        "k1": args.k1,
+        "b": args.b,
+        "top_k": args.top_k,
+        "domain_filter": not args.no_domain_filter,
+        "approved_only": args.approved_only,
+        "overall": overall,
+        "by_domain": domain_summaries,
+        "total_runtime_seconds": round(time.perf_counter() - run_started, 3),
+        "generated_at": utc_now_iso(),
+    }
+    (args.output_dir / "summary.json").write_text(
+        json.dumps(result_summary, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+    (args.output_dir / "run_config.json").write_text(
+        json.dumps({
+            "dataset": str(args.dataset.resolve()),
+            "kdic_zip": str(args.kdic_zip.resolve()),
+            "retriever": result_summary["retriever"],
+            "tokenizer": result_summary["tokenizer"],
+            "lucene_version": args.lucene_version,
+            "decompound_mode": args.decompound_mode,
+            "k1": args.k1,
+            "b": args.b,
+            "top_k": args.top_k,
+            "domain_filter": not args.no_domain_filter,
+            "approved_only": args.approved_only,
+            "question_count": len(questions),
+            "chunk_count": len(chunks),
+            "average_document_length": index.average_document_length,
+        }, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+    print("\n평가 완료")
+    print(json.dumps(overall, ensure_ascii=False, indent=2))
+    print("결과 폴더:", args.output_dir.resolve())
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

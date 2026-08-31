@@ -1,0 +1,2171 @@
+﻿--- ARTIFACT CSV INSPECT ---
+{"kind":"workbook","id":"wb/oiakk9","sheets":1,"tables":1}
+{"kind":"sheet","id":"ws/0gjlo2","name":"평균비교","index":0,"range":"A1:L7","address":"A1:L7","tables":1}
+{"kind":"table","sheet":"평균비교","address":"A1:L7","rows":7,"cols":12,"values":[["﻿검색 방식","평가 질문","8개 지표 단순 평균","Top-3 적중률 (Hit@K, K=3)","Top-5 재현율 (Recall@K, K=5)","첫 정답 순위 (MRR@K, K=10)","다중 정답 순위 (MAP@K, K=10)","주요 근거 완전회수 (Complete@K, K=5)","순위 품질 (nDCG@K, K=5)","Top-5 정밀도 (Precision@K, K=5)","정밀·재현 균형 (F1@K, K=5)","평균 검색시간(ms)"],["BM25 + Lucene Nori (discard)","132","0.30485725424806165","0.5","0.4515151515151516","0.42814754689754697","0.35832070707070707","0","0.36460719223365134","0.13636363636363624","0.19990379990379983","2.3688560606060594"],["BGE-M3 Sparse lexical matching","132","0.324061493315851","0.5454545454545454","0.4816919191919192","0.43149951899951905","0.3688337742504409","0.015151515151515152","0.38445007397735986","0.14848484848484836","0.2169257510166601","42.55681060606061"],["BGE-M3 Dense","132","0.38985672108650204","0.6363636363636364","0.5670454545454546","0.5408820346320348","0.46463083213083234","0.015151515151515152","0.4816784986758372","0.16666666666666644","0.24643513052603944","915.4007651515153"],["Hybrid A: BGE-M3 Dense 0.85 + BM25-Nori Discard 0.15 (Weighted RRF)","132","0.39981017298571186","0.6287878787878788","0.5958333333333333","0.5528799903799904","0.4715494227994229","0.022727272727272728","0.4971514722148741","0.17272727272727245","0.2568247409156499","888.0105227272725"],["Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)","132","0.4665985180399831","0.7348484848484849","0.6941919191919191","0.6206108706108706","0.5535418670835338","0.030303030303030304","0.5882163896155352","0.20757575757575725","0.3034998250907341","611.5996060606063"],["BGE-M3 Dense structured","132","0.42545263304984926","0.6666666666666666","0.6289141414141413","0.5763738576238577","0.5124164261664262","0.030303030303030304","0.5370644812513022","0.18181818181818155","0.27006427915518816","684.1361590909092"]]}
+--- COMPUTED SUMMARY ---
+{
+  "methods": [
+    {
+      "name": "BM25 + Lucene Nori (discard)",
+      "overall": {
+        "question_count": 132,
+        "complete_applicable_count": 132,
+        "hit_at_3": 0.5,
+        "recall_at_5": 0.4515151515151516,
+        "mrr_at_10": 0.42814754689754697,
+        "map_at_10": 0.35832070707070707,
+        "complete_at_5": 0,
+        "ndcg_at_5": 0.36460719223365134,
+        "precision_at_5": 0.13636363636363624,
+        "f1_at_5": 0.19990379990379983,
+        "latency_ms_mean": 2.3688560606060594
+      },
+      "composite7_excluding_complete": 0.3484
+    },
+    {
+      "name": "BGE-M3 Sparse lexical matching",
+      "overall": {
+        "question_count": 132,
+        "complete_applicable_count": 132,
+        "hit_at_3": 0.5454545454545454,
+        "recall_at_5": 0.4816919191919192,
+        "mrr_at_10": 0.43149951899951905,
+        "map_at_10": 0.3688337742504409,
+        "complete_at_5": 0.015151515151515152,
+        "ndcg_at_5": 0.38445007397735986,
+        "precision_at_5": 0.14848484848484836,
+        "f1_at_5": 0.2169257510166601,
+        "latency_ms_mean": 42.55681060606061
+      },
+      "composite7_excluding_complete": 0.3682
+    },
+    {
+      "name": "BGE-M3 Dense",
+      "overall": {
+        "question_count": 132,
+        "complete_applicable_count": 132,
+        "hit_at_3": 0.6363636363636364,
+        "recall_at_5": 0.5670454545454546,
+        "mrr_at_10": 0.5408820346320348,
+        "map_at_10": 0.46463083213083234,
+        "complete_at_5": 0.015151515151515152,
+        "ndcg_at_5": 0.4816784986758372,
+        "precision_at_5": 0.16666666666666644,
+        "f1_at_5": 0.24643513052603944,
+        "latency_ms_mean": 915.4007651515153
+      },
+      "composite7_excluding_complete": 0.4434
+    },
+    {
+      "name": "Hybrid A: BGE-M3 Dense 0.85 + BM25-Nori Discard 0.15 (Weighted RRF)",
+      "overall": {
+        "question_count": 132,
+        "complete_applicable_count": 132,
+        "hit_at_3": 0.6287878787878788,
+        "recall_at_5": 0.5958333333333333,
+        "mrr_at_10": 0.5528799903799904,
+        "map_at_10": 0.4715494227994229,
+        "complete_at_5": 0.022727272727272728,
+        "ndcg_at_5": 0.4971514722148741,
+        "precision_at_5": 0.17272727272727245,
+        "f1_at_5": 0.2568247409156499,
+        "latency_ms_mean": 888.0105227272725
+      },
+      "composite7_excluding_complete": 0.4537
+    },
+    {
+      "name": "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)",
+      "overall": {
+        "question_count": 132,
+        "complete_applicable_count": 132,
+        "hit_at_3": 0.7348484848484849,
+        "recall_at_5": 0.6941919191919191,
+        "mrr_at_10": 0.6206108706108706,
+        "map_at_10": 0.5535418670835338,
+        "complete_at_5": 0.030303030303030304,
+        "ndcg_at_5": 0.5882163896155352,
+        "precision_at_5": 0.20757575757575725,
+        "f1_at_5": 0.3034998250907341,
+        "latency_ms_mean": 611.5996060606063
+      },
+      "composite7_excluding_complete": 0.5289
+    },
+    {
+      "name": "BGE-M3 Dense structured",
+      "overall": {
+        "question_count": 132,
+        "complete_applicable_count": 132,
+        "hit_at_3": 0.6666666666666666,
+        "recall_at_5": 0.6289141414141413,
+        "mrr_at_10": 0.5763738576238577,
+        "map_at_10": 0.5124164261664262,
+        "complete_at_5": 0.030303030303030304,
+        "ndcg_at_5": 0.5370644812513022,
+        "precision_at_5": 0.18181818181818155,
+        "f1_at_5": 0.27006427915518816,
+        "latency_ms_mean": 684.1361590909092
+      },
+      "composite7_excluding_complete": 0.4819
+    }
+  ],
+  "domain_summary": [
+    {
+      "domain": "deposit_protection",
+      "question_count": 20,
+      "ranking_by_composite7": [
+        {
+          "method": "BGE-M3 Dense structured",
+          "composite7": 0.5425,
+          "ndcg_at_5": 0.6487,
+          "hit_at_3": 0.75,
+          "recall_at_5": 0.675,
+          "mrr_at_10": 0.6583
+        },
+        {
+          "method": "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)",
+          "composite7": 0.5324,
+          "ndcg_at_5": 0.6559,
+          "hit_at_3": 0.6,
+          "recall_at_5": 0.75,
+          "mrr_at_10": 0.6325
+        },
+        {
+          "method": "BGE-M3 Dense",
+          "composite7": 0.4981,
+          "ndcg_at_5": 0.5861,
+          "hit_at_3": 0.7,
+          "recall_at_5": 0.625,
+          "mrr_at_10": 0.5988
+        },
+        {
+          "method": "Hybrid A: BGE-M3 Dense 0.85 + BM25-Nori Discard 0.15 (Weighted RRF)",
+          "composite7": 0.4964,
+          "ndcg_at_5": 0.5932,
+          "hit_at_3": 0.65,
+          "recall_at_5": 0.625,
+          "mrr_at_10": 0.6208
+        },
+        {
+          "method": "BGE-M3 Sparse lexical matching",
+          "composite7": 0.4127,
+          "ndcg_at_5": 0.4671,
+          "hit_at_3": 0.65,
+          "recall_at_5": 0.55,
+          "mrr_at_10": 0.4567
+        },
+        {
+          "method": "BM25 + Lucene Nori (discard)",
+          "composite7": 0.4039,
+          "ndcg_at_5": 0.4627,
+          "hit_at_3": 0.6,
+          "recall_at_5": 0.525,
+          "mrr_at_10": 0.4896
+        }
+      ],
+      "metric_winners": {
+        "hit_at_3": [
+          "BGE-M3 Dense structured"
+        ],
+        "recall_at_5": [
+          "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)"
+        ],
+        "mrr_at_10": [
+          "BGE-M3 Dense structured"
+        ],
+        "map_at_10": [
+          "BGE-M3 Dense structured"
+        ],
+        "ndcg_at_5": [
+          "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)"
+        ],
+        "precision_at_5": [
+          "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)"
+        ],
+        "f1_at_5": [
+          "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)"
+        ],
+        "composite7": [
+          "BGE-M3 Dense structured"
+        ]
+      }
+    },
+    {
+      "domain": "deposit_insurance_payout",
+      "question_count": 19,
+      "ranking_by_composite7": [
+        {
+          "method": "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)",
+          "composite7": 0.4493,
+          "ndcg_at_5": 0.4974,
+          "hit_at_3": 0.6316,
+          "recall_at_5": 0.6491,
+          "mrr_at_10": 0.502
+        },
+        {
+          "method": "BGE-M3 Dense structured",
+          "composite7": 0.3529,
+          "ndcg_at_5": 0.373,
+          "hit_at_3": 0.5263,
+          "recall_at_5": 0.5351,
+          "mrr_at_10": 0.3528
+        },
+        {
+          "method": "Hybrid A: BGE-M3 Dense 0.85 + BM25-Nori Discard 0.15 (Weighted RRF)",
+          "composite7": 0.3452,
+          "ndcg_at_5": 0.377,
+          "hit_at_3": 0.4737,
+          "recall_at_5": 0.4912,
+          "mrr_at_10": 0.4211
+        },
+        {
+          "method": "BGE-M3 Dense",
+          "composite7": 0.3289,
+          "ndcg_at_5": 0.3554,
+          "hit_at_3": 0.4737,
+          "recall_at_5": 0.4649,
+          "mrr_at_10": 0.3922
+        },
+        {
+          "method": "BGE-M3 Sparse lexical matching",
+          "composite7": 0.2207,
+          "ndcg_at_5": 0.2109,
+          "hit_at_3": 0.4211,
+          "recall_at_5": 0.2544,
+          "mrr_at_10": 0.2662
+        },
+        {
+          "method": "BM25 + Lucene Nori (discard)",
+          "composite7": 0.1991,
+          "ndcg_at_5": 0.2182,
+          "hit_at_3": 0.2632,
+          "recall_at_5": 0.2544,
+          "mrr_at_10": 0.2766
+        }
+      ],
+      "metric_winners": {
+        "hit_at_3": [
+          "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)"
+        ],
+        "recall_at_5": [
+          "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)"
+        ],
+        "mrr_at_10": [
+          "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)"
+        ],
+        "map_at_10": [
+          "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)"
+        ],
+        "ndcg_at_5": [
+          "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)"
+        ],
+        "precision_at_5": [
+          "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)"
+        ],
+        "f1_at_5": [
+          "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)"
+        ],
+        "composite7": [
+          "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)"
+        ]
+      }
+    },
+    {
+      "domain": "unclaimed_funds",
+      "question_count": 19,
+      "ranking_by_composite7": [
+        {
+          "method": "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)",
+          "composite7": 0.5004,
+          "ndcg_at_5": 0.5342,
+          "hit_at_3": 0.6842,
+          "recall_at_5": 0.6719,
+          "mrr_at_10": 0.5105
+        },
+        {
+          "method": "BGE-M3 Dense structured",
+          "composite7": 0.381,
+          "ndcg_at_5": 0.4207,
+          "hit_at_3": 0.4737,
+          "recall_at_5": 0.4719,
+          "mrr_at_10": 0.4649
+        },
+        {
+          "method": "Hybrid A: BGE-M3 Dense 0.85 + BM25-Nori Discard 0.15 (Weighted RRF)",
+          "composite7": 0.3703,
+          "ndcg_at_5": 0.3717,
+          "hit_at_3": 0.5263,
+          "recall_at_5": 0.4877,
+          "mrr_at_10": 0.4491
+        },
+        {
+          "method": "BGE-M3 Dense",
+          "composite7": 0.3684,
+          "ndcg_at_5": 0.3815,
+          "hit_at_3": 0.5263,
+          "recall_at_5": 0.4456,
+          "mrr_at_10": 0.4505
+        },
+        {
+          "method": "BM25 + Lucene Nori (discard)",
+          "composite7": 0.3169,
+          "ndcg_at_5": 0.3089,
+          "hit_at_3": 0.4737,
+          "recall_at_5": 0.4105,
+          "mrr_at_10": 0.3392
+        },
+        {
+          "method": "BGE-M3 Sparse lexical matching",
+          "composite7": 0.2416,
+          "ndcg_at_5": 0.2414,
+          "hit_at_3": 0.3158,
+          "recall_at_5": 0.314,
+          "mrr_at_10": 0.279
+        }
+      ],
+      "metric_winners": {
+        "hit_at_3": [
+          "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)"
+        ],
+        "recall_at_5": [
+          "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)"
+        ],
+        "mrr_at_10": [
+          "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)"
+        ],
+        "map_at_10": [
+          "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)"
+        ],
+        "ndcg_at_5": [
+          "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)"
+        ],
+        "precision_at_5": [
+          "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)"
+        ],
+        "f1_at_5": [
+          "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)"
+        ],
+        "composite7": [
+          "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)"
+        ]
+      }
+    },
+    {
+      "domain": "mistaken_transfer",
+      "question_count": 33,
+      "ranking_by_composite7": [
+        {
+          "method": "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)",
+          "composite7": 0.4705,
+          "ndcg_at_5": 0.5499,
+          "hit_at_3": 0.6364,
+          "recall_at_5": 0.6152,
+          "mrr_at_10": 0.5641
+        },
+        {
+          "method": "BGE-M3 Dense structured",
+          "composite7": 0.4447,
+          "ndcg_at_5": 0.5177,
+          "hit_at_3": 0.6061,
+          "recall_at_5": 0.6091,
+          "mrr_at_10": 0.5329
+        },
+        {
+          "method": "Hybrid A: BGE-M3 Dense 0.85 + BM25-Nori Discard 0.15 (Weighted RRF)",
+          "composite7": 0.4034,
+          "ndcg_at_5": 0.4807,
+          "hit_at_3": 0.5152,
+          "recall_at_5": 0.5485,
+          "mrr_at_10": 0.4908
+        },
+        {
+          "method": "BGE-M3 Dense",
+          "composite7": 0.3813,
+          "ndcg_at_5": 0.437,
+          "hit_at_3": 0.5152,
+          "recall_at_5": 0.5182,
+          "mrr_at_10": 0.4586
+        },
+        {
+          "method": "BGE-M3 Sparse lexical matching",
+          "composite7": 0.3169,
+          "ndcg_at_5": 0.3578,
+          "hit_at_3": 0.4545,
+          "recall_at_5": 0.4495,
+          "mrr_at_10": 0.3542
+        },
+        {
+          "method": "BM25 + Lucene Nori (discard)",
+          "composite7": 0.2395,
+          "ndcg_at_5": 0.2529,
+          "hit_at_3": 0.3636,
+          "recall_at_5": 0.3263,
+          "mrr_at_10": 0.2774
+        }
+      ],
+      "metric_winners": {
+        "hit_at_3": [
+          "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)"
+        ],
+        "recall_at_5": [
+          "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)"
+        ],
+        "mrr_at_10": [
+          "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)"
+        ],
+        "map_at_10": [
+          "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)"
+        ],
+        "ndcg_at_5": [
+          "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)"
+        ],
+        "precision_at_5": [
+          "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)"
+        ],
+        "f1_at_5": [
+          "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)"
+        ],
+        "composite7": [
+          "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)"
+        ]
+      }
+    },
+    {
+      "domain": "debt_adjustment",
+      "question_count": 16,
+      "ranking_by_composite7": [
+        {
+          "method": "BGE-M3 Dense structured",
+          "composite7": 0.6119,
+          "ndcg_at_5": 0.705,
+          "hit_at_3": 0.8125,
+          "recall_at_5": 0.825,
+          "mrr_at_10": 0.7173
+        },
+        {
+          "method": "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)",
+          "composite7": 0.5894,
+          "ndcg_at_5": 0.6466,
+          "hit_at_3": 0.875,
+          "recall_at_5": 0.8375,
+          "mrr_at_10": 0.6094
+        },
+        {
+          "method": "BGE-M3 Sparse lexical matching",
+          "composite7": 0.5282,
+          "ndcg_at_5": 0.6249,
+          "hit_at_3": 0.6875,
+          "recall_at_5": 0.7,
+          "mrr_at_10": 0.6312
+        },
+        {
+          "method": "Hybrid A: BGE-M3 Dense 0.85 + BM25-Nori Discard 0.15 (Weighted RRF)",
+          "composite7": 0.5126,
+          "ndcg_at_5": 0.5826,
+          "hit_at_3": 0.6875,
+          "recall_at_5": 0.7312,
+          "mrr_at_10": 0.575
+        },
+        {
+          "method": "BGE-M3 Dense",
+          "composite7": 0.4944,
+          "ndcg_at_5": 0.5585,
+          "hit_at_3": 0.6875,
+          "recall_at_5": 0.6687,
+          "mrr_at_10": 0.5714
+        },
+        {
+          "method": "BM25 + Lucene Nori (discard)",
+          "composite7": 0.3792,
+          "ndcg_at_5": 0.4124,
+          "hit_at_3": 0.4375,
+          "recall_at_5": 0.6375,
+          "mrr_at_10": 0.3818
+        }
+      ],
+      "metric_winners": {
+        "hit_at_3": [
+          "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)"
+        ],
+        "recall_at_5": [
+          "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)"
+        ],
+        "mrr_at_10": [
+          "BGE-M3 Dense structured"
+        ],
+        "map_at_10": [
+          "BGE-M3 Dense structured"
+        ],
+        "ndcg_at_5": [
+          "BGE-M3 Dense structured"
+        ],
+        "precision_at_5": [
+          "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)"
+        ],
+        "f1_at_5": [
+          "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)"
+        ],
+        "composite7": [
+          "BGE-M3 Dense structured"
+        ]
+      }
+    },
+    {
+      "domain": "hidden_assets_report",
+      "question_count": 25,
+      "ranking_by_composite7": [
+        {
+          "method": "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)",
+          "composite7": 0.6467,
+          "ndcg_at_5": 0.6572,
+          "hit_at_3": 1,
+          "recall_at_5": 0.7133,
+          "mrr_at_10": 0.8667
+        },
+        {
+          "method": "Hybrid A: BGE-M3 Dense 0.85 + BM25-Nori Discard 0.15 (Weighted RRF)",
+          "composite7": 0.594,
+          "ndcg_at_5": 0.5741,
+          "hit_at_3": 0.92,
+          "recall_at_5": 0.71,
+          "mrr_at_10": 0.7453
+        },
+        {
+          "method": "BGE-M3 Dense",
+          "composite7": 0.5929,
+          "ndcg_at_5": 0.58,
+          "hit_at_3": 0.92,
+          "recall_at_5": 0.69,
+          "mrr_at_10": 0.7653
+        },
+        {
+          "method": "BGE-M3 Dense structured",
+          "composite7": 0.5741,
+          "ndcg_at_5": 0.5789,
+          "hit_at_3": 0.84,
+          "recall_at_5": 0.6833,
+          "mrr_at_10": 0.7327
+        },
+        {
+          "method": "BM25 + Lucene Nori (discard)",
+          "composite7": 0.5654,
+          "ndcg_at_5": 0.5566,
+          "hit_at_3": 0.84,
+          "recall_at_5": 0.62,
+          "mrr_at_10": 0.7904
+        },
+        {
+          "method": "BGE-M3 Sparse lexical matching",
+          "composite7": 0.5062,
+          "ndcg_at_5": 0.4402,
+          "hit_at_3": 0.76,
+          "recall_at_5": 0.63,
+          "mrr_at_10": 0.627
+        }
+      ],
+      "metric_winners": {
+        "hit_at_3": [
+          "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)"
+        ],
+        "recall_at_5": [
+          "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)"
+        ],
+        "mrr_at_10": [
+          "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)"
+        ],
+        "map_at_10": [
+          "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)"
+        ],
+        "ndcg_at_5": [
+          "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)"
+        ],
+        "precision_at_5": [
+          "Hybrid A: BGE-M3 Dense 0.85 + BM25-Nori Discard 0.15 (Weighted RRF)",
+          "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)"
+        ],
+        "f1_at_5": [
+          "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)"
+        ],
+        "composite7": [
+          "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)"
+        ]
+      }
+    }
+  ],
+  "pairwise": [
+    {
+      "domain": "deposit_protection",
+      "left": "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)",
+      "right": "BGE-M3 Dense structured",
+      "count": 20,
+      "ndcg_mean_delta": 0.0072,
+      "ndcg_delta_ci95_low": -0.072,
+      "ndcg_delta_ci95_high": 0.0887,
+      "ndcg_better": 3,
+      "ndcg_worse": 5,
+      "ndcg_tied": 12,
+      "hit_gained": 0,
+      "hit_lost": 3,
+      "hit_mean_delta": -0.15,
+      "hit_delta_ci95_low": -0.3,
+      "hit_delta_ci95_high": 0
+    },
+    {
+      "domain": "deposit_protection",
+      "left": "BGE-M3 Dense structured",
+      "right": "BGE-M3 Dense",
+      "count": 20,
+      "ndcg_mean_delta": 0.0626,
+      "ndcg_delta_ci95_low": -0.0098,
+      "ndcg_delta_ci95_high": 0.1851,
+      "ndcg_better": 2,
+      "ndcg_worse": 2,
+      "ndcg_tied": 16,
+      "hit_gained": 1,
+      "hit_lost": 0,
+      "hit_mean_delta": 0.05,
+      "hit_delta_ci95_low": 0,
+      "hit_delta_ci95_high": 0.15
+    },
+    {
+      "domain": "deposit_insurance_payout",
+      "left": "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)",
+      "right": "BGE-M3 Dense structured",
+      "count": 19,
+      "ndcg_mean_delta": 0.1244,
+      "ndcg_delta_ci95_low": -0.0251,
+      "ndcg_delta_ci95_high": 0.2798,
+      "ndcg_better": 8,
+      "ndcg_worse": 3,
+      "ndcg_tied": 8,
+      "hit_gained": 4,
+      "hit_lost": 2,
+      "hit_mean_delta": 0.1053,
+      "hit_delta_ci95_low": -0.1579,
+      "hit_delta_ci95_high": 0.3684
+    },
+    {
+      "domain": "deposit_insurance_payout",
+      "left": "BGE-M3 Dense structured",
+      "right": "BGE-M3 Dense",
+      "count": 19,
+      "ndcg_mean_delta": 0.0176,
+      "ndcg_delta_ci95_low": -0.0715,
+      "ndcg_delta_ci95_high": 0.1021,
+      "ndcg_better": 6,
+      "ndcg_worse": 4,
+      "ndcg_tied": 9,
+      "hit_gained": 1,
+      "hit_lost": 0,
+      "hit_mean_delta": 0.0526,
+      "hit_delta_ci95_low": 0,
+      "hit_delta_ci95_high": 0.1579
+    },
+    {
+      "domain": "unclaimed_funds",
+      "left": "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)",
+      "right": "BGE-M3 Dense structured",
+      "count": 19,
+      "ndcg_mean_delta": 0.1135,
+      "ndcg_delta_ci95_low": -0.0401,
+      "ndcg_delta_ci95_high": 0.2768,
+      "ndcg_better": 8,
+      "ndcg_worse": 4,
+      "ndcg_tied": 7,
+      "hit_gained": 5,
+      "hit_lost": 1,
+      "hit_mean_delta": 0.2105,
+      "hit_delta_ci95_low": 0,
+      "hit_delta_ci95_high": 0.4211
+    },
+    {
+      "domain": "unclaimed_funds",
+      "left": "BGE-M3 Dense structured",
+      "right": "BGE-M3 Dense",
+      "count": 19,
+      "ndcg_mean_delta": 0.0391,
+      "ndcg_delta_ci95_low": -0.0053,
+      "ndcg_delta_ci95_high": 0.101,
+      "ndcg_better": 3,
+      "ndcg_worse": 3,
+      "ndcg_tied": 13,
+      "hit_gained": 1,
+      "hit_lost": 2,
+      "hit_mean_delta": -0.0526,
+      "hit_delta_ci95_low": -0.2105,
+      "hit_delta_ci95_high": 0.1053
+    },
+    {
+      "domain": "mistaken_transfer",
+      "left": "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)",
+      "right": "BGE-M3 Dense structured",
+      "count": 33,
+      "ndcg_mean_delta": 0.0322,
+      "ndcg_delta_ci95_low": -0.0808,
+      "ndcg_delta_ci95_high": 0.1473,
+      "ndcg_better": 9,
+      "ndcg_worse": 6,
+      "ndcg_tied": 18,
+      "hit_gained": 3,
+      "hit_lost": 2,
+      "hit_mean_delta": 0.0303,
+      "hit_delta_ci95_low": -0.0909,
+      "hit_delta_ci95_high": 0.1515
+    },
+    {
+      "domain": "mistaken_transfer",
+      "left": "BGE-M3 Dense structured",
+      "right": "BGE-M3 Dense",
+      "count": 33,
+      "ndcg_mean_delta": 0.0807,
+      "ndcg_delta_ci95_low": -0.0261,
+      "ndcg_delta_ci95_high": 0.1964,
+      "ndcg_better": 9,
+      "ndcg_worse": 5,
+      "ndcg_tied": 19,
+      "hit_gained": 3,
+      "hit_lost": 0,
+      "hit_mean_delta": 0.0909,
+      "hit_delta_ci95_low": 0,
+      "hit_delta_ci95_high": 0.2121
+    },
+    {
+      "domain": "debt_adjustment",
+      "left": "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)",
+      "right": "BGE-M3 Dense structured",
+      "count": 16,
+      "ndcg_mean_delta": -0.0584,
+      "ndcg_delta_ci95_low": -0.1513,
+      "ndcg_delta_ci95_high": 0.0289,
+      "ndcg_better": 3,
+      "ndcg_worse": 6,
+      "ndcg_tied": 7,
+      "hit_gained": 2,
+      "hit_lost": 1,
+      "hit_mean_delta": 0.0625,
+      "hit_delta_ci95_low": -0.125,
+      "hit_delta_ci95_high": 0.25
+    },
+    {
+      "domain": "debt_adjustment",
+      "left": "BGE-M3 Dense structured",
+      "right": "BGE-M3 Dense",
+      "count": 16,
+      "ndcg_mean_delta": 0.1466,
+      "ndcg_delta_ci95_low": 0.0269,
+      "ndcg_delta_ci95_high": 0.2957,
+      "ndcg_better": 6,
+      "ndcg_worse": 1,
+      "ndcg_tied": 9,
+      "hit_gained": 3,
+      "hit_lost": 1,
+      "hit_mean_delta": 0.125,
+      "hit_delta_ci95_low": -0.125,
+      "hit_delta_ci95_high": 0.375
+    },
+    {
+      "domain": "hidden_assets_report",
+      "left": "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)",
+      "right": "BGE-M3 Dense structured",
+      "count": 25,
+      "ndcg_mean_delta": 0.0783,
+      "ndcg_delta_ci95_low": -0.0013,
+      "ndcg_delta_ci95_high": 0.1783,
+      "ndcg_better": 7,
+      "ndcg_worse": 4,
+      "ndcg_tied": 14,
+      "hit_gained": 4,
+      "hit_lost": 0,
+      "hit_mean_delta": 0.16,
+      "hit_delta_ci95_low": 0.04,
+      "hit_delta_ci95_high": 0.32
+    },
+    {
+      "domain": "hidden_assets_report",
+      "left": "BGE-M3 Dense structured",
+      "right": "BGE-M3 Dense",
+      "count": 25,
+      "ndcg_mean_delta": -0.0011,
+      "ndcg_delta_ci95_low": -0.0585,
+      "ndcg_delta_ci95_high": 0.0585,
+      "ndcg_better": 4,
+      "ndcg_worse": 7,
+      "ndcg_tied": 14,
+      "hit_gained": 0,
+      "hit_lost": 2,
+      "hit_mean_delta": -0.08,
+      "hit_delta_ci95_low": -0.2,
+      "hit_delta_ci95_high": 0
+    }
+  ],
+  "question_level": {
+    "common_failure_count": 20,
+    "common_failures": [
+      {
+        "id": "EVAL003",
+        "domain": "deposit_protection",
+        "complexity": "L2_multi_fact",
+        "question": "원금과 이자를 합쳐서 계산하나요, 따로 계산하나요?"
+      },
+      {
+        "id": "EVAL007",
+        "domain": "deposit_protection",
+        "complexity": "L2_multi_fact",
+        "question": "어떤 금융회사가 예금보호 대상인가요?"
+      },
+      {
+        "id": "EVAL008",
+        "domain": "deposit_protection",
+        "complexity": "L2_multi_fact",
+        "question": "상호저축은행도 보호되나요?"
+      },
+      {
+        "id": "EVAL009",
+        "domain": "deposit_protection",
+        "complexity": "L2_multi_fact",
+        "question": "증권사는 예금보호 대상에 포함되나요?"
+      },
+      {
+        "id": "EVAL010",
+        "domain": "deposit_protection",
+        "complexity": "L2_multi_fact",
+        "question": "어떤 금융상품이 보호되나요?"
+      },
+      {
+        "id": "EVAL021",
+        "domain": "deposit_insurance_payout",
+        "complexity": "L2_multi_fact",
+        "question": "예금보험금 신청할 때 필요한 서류가 뭔가요?"
+      },
+      {
+        "id": "EVAL030",
+        "domain": "deposit_insurance_payout",
+        "complexity": "L4_multi_turn",
+        "question": "은행이 문을 닫았다는데 제 돈 찾으려면 뭐부터 해야 해요?"
+      },
+      {
+        "id": "EVAL033",
+        "domain": "deposit_insurance_payout",
+        "complexity": "L4_multi_turn",
+        "question": "제가 직접 못 가는데 가족이 대신 받아도 되나요?"
+      },
+      {
+        "id": "EVAL036",
+        "domain": "deposit_insurance_payout",
+        "complexity": "L3_conditional",
+        "question": "지금 해외에 있는데 보험금을 신청할 수 있나요?"
+      },
+      {
+        "id": "EVAL043",
+        "domain": "unclaimed_funds",
+        "complexity": "L4_multi_turn",
+        "question": "법인 명의로 남아있는 미수령금도 조회·신청이 가능한가요?"
+      },
+      {
+        "id": "EVAL046",
+        "domain": "unclaimed_funds",
+        "complexity": "L3_conditional",
+        "question": "이미 폐업한 저축은행의 미수령금도 예금보험공사가 대신 지급하나요?"
+      },
+      {
+        "id": "EVAL049",
+        "domain": "unclaimed_funds",
+        "complexity": "L4_multi_turn",
+        "question": "조회했는데 못 받은 돈 나오면 바로 통장에 들어와? 돈 들어오기까지 얼마나 걸려?"
+      },
+      {
+        "id": "EVAL051",
+        "domain": "unclaimed_funds",
+        "complexity": "L1_single_fact",
+        "question": "돈 안찾아간 거 있는지 어떻게 확인해?"
+      },
+      {
+        "id": "EVAL062",
+        "domain": "mistaken_transfer",
+        "complexity": "L1_single_fact",
+        "question": "신청부터 돈을 돌려받기까지 몇 단계인가요?"
+      },
+      {
+        "id": "EVAL064",
+        "domain": "mistaken_transfer",
+        "complexity": "L2_multi_fact",
+        "question": "인터넷 신청과 방문 신청 중 뭐가 더 빠른가요?"
+      },
+      {
+        "id": "EVAL071",
+        "domain": "mistaken_transfer",
+        "complexity": "L3_conditional",
+        "question": "반환에 동의하지 않으면 어떻게 되나요?"
+      },
+      {
+        "id": "EVAL076",
+        "domain": "mistaken_transfer",
+        "complexity": "L2_multi_fact",
+        "question": "대리인이 신청할 때 구비서류가 다른가요?"
+      },
+      {
+        "id": "EVAL078",
+        "domain": "mistaken_transfer",
+        "complexity": "L2_multi_fact",
+        "question": "신청하면 어떤 순서로 돈을 돌려받게 되나요?"
+      },
+      {
+        "id": "EVAL079",
+        "domain": "mistaken_transfer",
+        "complexity": "L2_multi_fact",
+        "question": "착오송금 반환지원의 법적 근거가 뭔가요?"
+      },
+      {
+        "id": "EVAL104",
+        "domain": "debt_adjustment",
+        "complexity": "L1_single_fact",
+        "question": "개인회생은 몇 년간 분할상환하나요?"
+      }
+    ],
+    "common_success_count": 41,
+    "reranker_only_rescue_count": 5,
+    "reranker_only_rescues": [
+      {
+        "id": "EVAL025",
+        "domain": "deposit_insurance_payout",
+        "complexity": "L1_single_fact",
+        "question": "보험사고 발생 후 지급까지 얼마나 걸리나요?"
+      },
+      {
+        "id": "EVAL038",
+        "domain": "deposit_insurance_payout",
+        "complexity": "L4_multi_turn",
+        "question": "돈을 먼저 일부 받을 수 있다는데 그게 무슨 돈이에요?"
+      },
+      {
+        "id": "EVAL060",
+        "domain": "mistaken_transfer",
+        "complexity": "L1_single_fact",
+        "question": "착오송금 반환지원 제도는 왜 운영되나요?"
+      },
+      {
+        "id": "EVAL069",
+        "domain": "mistaken_transfer",
+        "complexity": "L2_multi_fact",
+        "question": "자주 묻는 착오송금 질문 알려주세요"
+      },
+      {
+        "id": "EVAL092",
+        "domain": "debt_adjustment",
+        "complexity": "L1_single_fact",
+        "question": "채무조정 신청자격이 어떻게 되나요?"
+      }
+    ],
+    "structured_hit_reranker_miss_count": 9,
+    "structured_hit_reranker_miss": [
+      {
+        "id": "EVAL011",
+        "domain": "deposit_protection",
+        "complexity": "L2_multi_fact",
+        "question": "투자신탁 상품도 보호 대상인가요?"
+      },
+      {
+        "id": "EVAL012",
+        "domain": "deposit_protection",
+        "complexity": "L2_multi_fact",
+        "question": "보호상품과 비보호상품은 어떻게 구분하나요?"
+      },
+      {
+        "id": "EVAL014",
+        "domain": "deposit_protection",
+        "complexity": "L3_conditional",
+        "question": "은행이 영업정지되면 예금은 어떻게 찾나요?"
+      },
+      {
+        "id": "EVAL022",
+        "domain": "deposit_insurance_payout",
+        "complexity": "L3_conditional",
+        "question": "미성년자 명의로 신청할 때는 어떤 서류가 필요하나요?"
+      },
+      {
+        "id": "EVAL035",
+        "domain": "deposit_insurance_payout",
+        "complexity": "L4_multi_turn",
+        "question": "돌아가신 가족의 예금보험금은 누가 신청해야 하나요?"
+      },
+      {
+        "id": "EVAL050",
+        "domain": "unclaimed_funds",
+        "complexity": "L3_conditional",
+        "question": "부모님이 이런걸 잘 못해서 내가 대신해서 찾을 수 있어?"
+      },
+      {
+        "id": "EVAL063",
+        "domain": "mistaken_transfer",
+        "complexity": "L2_multi_fact",
+        "question": "착오송금 반환지원은 어디서 신청하나요?"
+      },
+      {
+        "id": "EVAL067",
+        "domain": "mistaken_transfer",
+        "complexity": "L1_single_fact",
+        "question": "반환지원을 받을 수 없는 경우는 어떤 경우인가요?"
+      },
+      {
+        "id": "EVAL105",
+        "domain": "debt_adjustment",
+        "complexity": "L2_multi_fact",
+        "question": "부채증명원은 어떻게 발급받나요?"
+      }
+    ],
+    "reranker_hit_structured_miss_count": 18,
+    "reranker_hit_structured_miss": [
+      {
+        "id": "EVAL025",
+        "domain": "deposit_insurance_payout",
+        "complexity": "L1_single_fact",
+        "question": "보험사고 발생 후 지급까지 얼마나 걸리나요?"
+      },
+      {
+        "id": "EVAL032",
+        "domain": "deposit_insurance_payout",
+        "complexity": "L4_multi_turn",
+        "question": "보험금 신청하려는데 신분증만 가져가면 되나요?"
+      },
+      {
+        "id": "EVAL037",
+        "domain": "deposit_insurance_payout",
+        "complexity": "L3_conditional",
+        "question": "신청은 인터넷으로 하나요, 직접 방문해야 하나요?"
+      },
+      {
+        "id": "EVAL038",
+        "domain": "deposit_insurance_payout",
+        "complexity": "L4_multi_turn",
+        "question": "돈을 먼저 일부 받을 수 있다는데 그게 무슨 돈이에요?"
+      },
+      {
+        "id": "EVAL040",
+        "domain": "unclaimed_funds",
+        "complexity": "L2_multi_fact",
+        "question": "미수령금의 종류는 뭐뭐 있어?"
+      },
+      {
+        "id": "EVAL044",
+        "domain": "unclaimed_funds",
+        "complexity": "L4_multi_turn",
+        "question": "미수령금에 이자가 붙나요? 붙는다면 어느 시점까지 계산되나요?"
+      },
+      {
+        "id": "EVAL045",
+        "domain": "unclaimed_funds",
+        "complexity": "L3_conditional",
+        "question": "외화예금으로 남아있는 미수령금은 어느 시점 환율로 환산해서 지급하나요?"
+      },
+      {
+        "id": "EVAL047",
+        "domain": "unclaimed_funds",
+        "complexity": "L3_conditional",
+        "question": "공동명의 계좌 미수령금은 명의자 중 한 명만 신청해도 지급되나요?"
+      },
+      {
+        "id": "EVAL056",
+        "domain": "unclaimed_funds",
+        "complexity": "L2_multi_fact",
+        "question": "미수령금에는 어떤 종류가 있나요?"
+      },
+      {
+        "id": "EVAL060",
+        "domain": "mistaken_transfer",
+        "complexity": "L1_single_fact",
+        "question": "착오송금 반환지원 제도는 왜 운영되나요?"
+      },
+      {
+        "id": "EVAL065",
+        "domain": "mistaken_transfer",
+        "complexity": "L1_single_fact",
+        "question": "착오송금 얼마부터 반환지원 신청이 가능한가요?"
+      },
+      {
+        "id": "EVAL069",
+        "domain": "mistaken_transfer",
+        "complexity": "L2_multi_fact",
+        "question": "자주 묻는 착오송금 질문 알려주세요"
+      },
+      {
+        "id": "EVAL092",
+        "domain": "debt_adjustment",
+        "complexity": "L1_single_fact",
+        "question": "채무조정 신청자격이 어떻게 되나요?"
+      },
+      {
+        "id": "EVAL093",
+        "domain": "debt_adjustment",
+        "complexity": "L1_single_fact",
+        "question": "채무조정을 신청할 수 없는 경우는 뭔가요?"
+      },
+      {
+        "id": "EVAL109",
+        "domain": "hidden_assets_report",
+        "complexity": "L1_single_fact",
+        "question": "은닉재산은 어떻게 신고하나요?"
+      },
+      {
+        "id": "EVAL116",
+        "domain": "hidden_assets_report",
+        "complexity": "L3_conditional",
+        "question": "부동산이 부실관련자 본인 명의로 등기돼 있는 경우에도 은닉재산으로 신고하면 포상금 받을 수 있나요? 근데 조사에서 못 찾은 거면 어떻게 되나요?"
+      },
+      {
+        "id": "EVAL131",
+        "domain": "hidden_assets_report",
+        "complexity": "L2_multi_fact",
+        "question": "횡령이나 배임도 은닉재산 신고센터에 신고하나요?"
+      },
+      {
+        "id": "EVAL132",
+        "domain": "hidden_assets_report",
+        "complexity": "L2_multi_fact",
+        "question": "은닉재산 신고와 불법행위 신고는 어떻게 다른가요?"
+      }
+    ]
+  },
+  "complete_metric_audit": {
+    "reported_applicable_count": 132,
+    "inferred_multi_evidence_2_to_5_count": 58,
+    "impossible_over_5_count": 2,
+    "impossible_ids": [
+      {
+        "id": "EVAL068",
+        "required_count": 10
+      },
+      {
+        "id": "EVAL069",
+        "required_count": 10
+      }
+    ],
+    "recomputed_complete_at_5_on_inferred_eligible": {
+      "BM25 + Lucene Nori (discard)": 0.1379,
+      "BGE-M3 Sparse lexical matching": 0.1897,
+      "BGE-M3 Dense": 0.2069,
+      "Hybrid A: BGE-M3 Dense 0.85 + BM25-Nori Discard 0.15 (Weighted RRF)": 0.2241,
+      "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)": 0.3103,
+      "BGE-M3 Dense structured": 0.2586
+    },
+    "exact_applicable_count_from_v3_5": 60,
+    "exact_impossible_count_from_v3_5": 3,
+    "exact_impossible_ids": [
+      {
+        "id": "EVAL050",
+        "requirement": "ALL",
+        "required_count": 6
+      },
+      {
+        "id": "EVAL068",
+        "requirement": "ALL",
+        "required_count": 10
+      },
+      {
+        "id": "EVAL069",
+        "requirement": "ALL",
+        "required_count": 10
+      }
+    ],
+    "exact_recomputed_complete_at_5": {
+      "BM25 + Lucene Nori (discard)": 0.2333,
+      "BGE-M3 Sparse lexical matching": 0.2333,
+      "BGE-M3 Dense": 0.35,
+      "Hybrid A: BGE-M3 Dense 0.85 + BM25-Nori Discard 0.15 (Weighted RRF)": 0.3667,
+      "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)": 0.4333,
+      "BGE-M3 Dense structured": 0.4167
+    }
+  },
+  "business_contamination": [
+    {
+      "method": "BM25 + Lucene Nori (discard)",
+      "overall": {
+        "question_count": 132,
+        "top1_off_gold_business_rate": 0.2576,
+        "top5_off_gold_business_chunk_fraction": 0.2773,
+        "questions_with_any_off_business_in_top5_rate": 0.5
+      },
+      "by_domain": [
+        {
+          "domain": "deposit_protection",
+          "question_count": 20,
+          "top1_off_gold_business_rate": 0.1,
+          "top5_off_gold_business_chunk_fraction": 0.13,
+          "questions_with_any_off_business_in_top5_rate": 0.4
+        },
+        {
+          "domain": "deposit_insurance_payout",
+          "question_count": 19,
+          "top1_off_gold_business_rate": 0.5789,
+          "top5_off_gold_business_chunk_fraction": 0.7474,
+          "questions_with_any_off_business_in_top5_rate": 1
+        },
+        {
+          "domain": "unclaimed_funds",
+          "question_count": 19,
+          "top1_off_gold_business_rate": 0.4737,
+          "top5_off_gold_business_chunk_fraction": 0.4842,
+          "questions_with_any_off_business_in_top5_rate": 0.8421
+        },
+        {
+          "domain": "mistaken_transfer",
+          "question_count": 33,
+          "top1_off_gold_business_rate": 0.3333,
+          "top5_off_gold_business_chunk_fraction": 0.2667,
+          "questions_with_any_off_business_in_top5_rate": 0.4848
+        },
+        {
+          "domain": "debt_adjustment",
+          "question_count": 16,
+          "top1_off_gold_business_rate": 0.0625,
+          "top5_off_gold_business_chunk_fraction": 0.0875,
+          "questions_with_any_off_business_in_top5_rate": 0.3125
+        },
+        {
+          "domain": "hidden_assets_report",
+          "question_count": 25,
+          "top1_off_gold_business_rate": 0,
+          "top5_off_gold_business_chunk_fraction": 0.016,
+          "questions_with_any_off_business_in_top5_rate": 0.08
+        }
+      ]
+    },
+    {
+      "method": "BGE-M3 Sparse lexical matching",
+      "overall": {
+        "question_count": 132,
+        "top1_off_gold_business_rate": 0.2121,
+        "top5_off_gold_business_chunk_fraction": 0.2076,
+        "questions_with_any_off_business_in_top5_rate": 0.3788
+      },
+      "by_domain": [
+        {
+          "domain": "deposit_protection",
+          "question_count": 20,
+          "top1_off_gold_business_rate": 0.05,
+          "top5_off_gold_business_chunk_fraction": 0.07,
+          "questions_with_any_off_business_in_top5_rate": 0.2
+        },
+        {
+          "domain": "deposit_insurance_payout",
+          "question_count": 19,
+          "top1_off_gold_business_rate": 0.7368,
+          "top5_off_gold_business_chunk_fraction": 0.6316,
+          "questions_with_any_off_business_in_top5_rate": 0.8947
+        },
+        {
+          "domain": "unclaimed_funds",
+          "question_count": 19,
+          "top1_off_gold_business_rate": 0.4737,
+          "top5_off_gold_business_chunk_fraction": 0.4,
+          "questions_with_any_off_business_in_top5_rate": 0.6316
+        },
+        {
+          "domain": "mistaken_transfer",
+          "question_count": 33,
+          "top1_off_gold_business_rate": 0.1212,
+          "top5_off_gold_business_chunk_fraction": 0.1515,
+          "questions_with_any_off_business_in_top5_rate": 0.3636
+        },
+        {
+          "domain": "debt_adjustment",
+          "question_count": 16,
+          "top1_off_gold_business_rate": 0,
+          "top5_off_gold_business_chunk_fraction": 0.0875,
+          "questions_with_any_off_business_in_top5_rate": 0.3125
+        },
+        {
+          "domain": "hidden_assets_report",
+          "question_count": 25,
+          "top1_off_gold_business_rate": 0,
+          "top5_off_gold_business_chunk_fraction": 0,
+          "questions_with_any_off_business_in_top5_rate": 0
+        }
+      ]
+    },
+    {
+      "method": "BGE-M3 Dense",
+      "overall": {
+        "question_count": 132,
+        "top1_off_gold_business_rate": 0.1591,
+        "top5_off_gold_business_chunk_fraction": 0.2076,
+        "questions_with_any_off_business_in_top5_rate": 0.3712
+      },
+      "by_domain": [
+        {
+          "domain": "deposit_protection",
+          "question_count": 20,
+          "top1_off_gold_business_rate": 0,
+          "top5_off_gold_business_chunk_fraction": 0.13,
+          "questions_with_any_off_business_in_top5_rate": 0.3
+        },
+        {
+          "domain": "deposit_insurance_payout",
+          "question_count": 19,
+          "top1_off_gold_business_rate": 0.7368,
+          "top5_off_gold_business_chunk_fraction": 0.6842,
+          "questions_with_any_off_business_in_top5_rate": 0.9474
+        },
+        {
+          "domain": "unclaimed_funds",
+          "question_count": 19,
+          "top1_off_gold_business_rate": 0.2105,
+          "top5_off_gold_business_chunk_fraction": 0.3684,
+          "questions_with_any_off_business_in_top5_rate": 0.7368
+        },
+        {
+          "domain": "mistaken_transfer",
+          "question_count": 33,
+          "top1_off_gold_business_rate": 0.0909,
+          "top5_off_gold_business_chunk_fraction": 0.0909,
+          "questions_with_any_off_business_in_top5_rate": 0.1818
+        },
+        {
+          "domain": "debt_adjustment",
+          "question_count": 16,
+          "top1_off_gold_business_rate": 0,
+          "top5_off_gold_business_chunk_fraction": 0.0875,
+          "questions_with_any_off_business_in_top5_rate": 0.1875
+        },
+        {
+          "domain": "hidden_assets_report",
+          "question_count": 25,
+          "top1_off_gold_business_rate": 0,
+          "top5_off_gold_business_chunk_fraction": 0.016,
+          "questions_with_any_off_business_in_top5_rate": 0.08
+        }
+      ]
+    },
+    {
+      "method": "Hybrid A: BGE-M3 Dense 0.85 + BM25-Nori Discard 0.15 (Weighted RRF)",
+      "overall": {
+        "question_count": 132,
+        "top1_off_gold_business_rate": 0.1591,
+        "top5_off_gold_business_chunk_fraction": 0.2015,
+        "questions_with_any_off_business_in_top5_rate": 0.3636
+      },
+      "by_domain": [
+        {
+          "domain": "deposit_protection",
+          "question_count": 20,
+          "top1_off_gold_business_rate": 0,
+          "top5_off_gold_business_chunk_fraction": 0.13,
+          "questions_with_any_off_business_in_top5_rate": 0.35
+        },
+        {
+          "domain": "deposit_insurance_payout",
+          "question_count": 19,
+          "top1_off_gold_business_rate": 0.6842,
+          "top5_off_gold_business_chunk_fraction": 0.6737,
+          "questions_with_any_off_business_in_top5_rate": 0.9474
+        },
+        {
+          "domain": "unclaimed_funds",
+          "question_count": 19,
+          "top1_off_gold_business_rate": 0.2632,
+          "top5_off_gold_business_chunk_fraction": 0.3579,
+          "questions_with_any_off_business_in_top5_rate": 0.6316
+        },
+        {
+          "domain": "mistaken_transfer",
+          "question_count": 33,
+          "top1_off_gold_business_rate": 0.0909,
+          "top5_off_gold_business_chunk_fraction": 0.0909,
+          "questions_with_any_off_business_in_top5_rate": 0.1818
+        },
+        {
+          "domain": "debt_adjustment",
+          "question_count": 16,
+          "top1_off_gold_business_rate": 0,
+          "top5_off_gold_business_chunk_fraction": 0.0625,
+          "questions_with_any_off_business_in_top5_rate": 0.1875
+        },
+        {
+          "domain": "hidden_assets_report",
+          "question_count": 25,
+          "top1_off_gold_business_rate": 0,
+          "top5_off_gold_business_chunk_fraction": 0.016,
+          "questions_with_any_off_business_in_top5_rate": 0.08
+        }
+      ]
+    },
+    {
+      "method": "Hybrid A + BGE Reranker v2-m3 (Dense 0.85, Nori 0.15, RRF c=10)",
+      "overall": {
+        "question_count": 132,
+        "top1_off_gold_business_rate": 0.1515,
+        "top5_off_gold_business_chunk_fraction": 0.1879,
+        "questions_with_any_off_business_in_top5_rate": 0.3636
+      },
+      "by_domain": [
+        {
+          "domain": "deposit_protection",
+          "question_count": 20,
+          "top1_off_gold_business_rate": 0,
+          "top5_off_gold_business_chunk_fraction": 0.08,
+          "questions_with_any_off_business_in_top5_rate": 0.2
+        },
+        {
+          "domain": "deposit_insurance_payout",
+          "question_count": 19,
+          "top1_off_gold_business_rate": 0.6316,
+          "top5_off_gold_business_chunk_fraction": 0.6,
+          "questions_with_any_off_business_in_top5_rate": 0.9474
+        },
+        {
+          "domain": "unclaimed_funds",
+          "question_count": 19,
+          "top1_off_gold_business_rate": 0.2632,
+          "top5_off_gold_business_chunk_fraction": 0.3368,
+          "questions_with_any_off_business_in_top5_rate": 0.6842
+        },
+        {
+          "domain": "mistaken_transfer",
+          "question_count": 33,
+          "top1_off_gold_business_rate": 0.0909,
+          "top5_off_gold_business_chunk_fraction": 0.1273,
+          "questions_with_any_off_business_in_top5_rate": 0.2727
+        },
+        {
+          "domain": "debt_adjustment",
+          "question_count": 16,
+          "top1_off_gold_business_rate": 0,
+          "top5_off_gold_business_chunk_fraction": 0.0625,
+          "questions_with_any_off_business_in_top5_rate": 0.1875
+        },
+        {
+          "domain": "hidden_assets_report",
+          "question_count": 25,
+          "top1_off_gold_business_rate": 0,
+          "top5_off_gold_business_chunk_fraction": 0.008,
+          "questions_with_any_off_business_in_top5_rate": 0.04
+        }
+      ]
+    },
+    {
+      "method": "BGE-M3 Dense structured",
+      "overall": {
+        "question_count": 132,
+        "top1_off_gold_business_rate": 0.1591,
+        "top5_off_gold_business_chunk_fraction": 0.1848,
+        "questions_with_any_off_business_in_top5_rate": 0.3712
+      },
+      "by_domain": [
+        {
+          "domain": "deposit_protection",
+          "question_count": 20,
+          "top1_off_gold_business_rate": 0,
+          "top5_off_gold_business_chunk_fraction": 0.11,
+          "questions_with_any_off_business_in_top5_rate": 0.3
+        },
+        {
+          "domain": "deposit_insurance_payout",
+          "question_count": 19,
+          "top1_off_gold_business_rate": 0.7895,
+          "top5_off_gold_business_chunk_fraction": 0.6316,
+          "questions_with_any_off_business_in_top5_rate": 0.8947
+        },
+        {
+          "domain": "unclaimed_funds",
+          "question_count": 19,
+          "top1_off_gold_business_rate": 0.1579,
+          "top5_off_gold_business_chunk_fraction": 0.3474,
+          "questions_with_any_off_business_in_top5_rate": 0.7895
+        },
+        {
+          "domain": "mistaken_transfer",
+          "question_count": 33,
+          "top1_off_gold_business_rate": 0.0909,
+          "top5_off_gold_business_chunk_fraction": 0.0788,
+          "questions_with_any_off_business_in_top5_rate": 0.2121
+        },
+        {
+          "domain": "debt_adjustment",
+          "question_count": 16,
+          "top1_off_gold_business_rate": 0,
+          "top5_off_gold_business_chunk_fraction": 0.05,
+          "questions_with_any_off_business_in_top5_rate": 0.1875
+        },
+        {
+          "domain": "hidden_assets_report",
+          "question_count": 25,
+          "top1_off_gold_business_rate": 0,
+          "top5_off_gold_business_chunk_fraction": 0.008,
+          "questions_with_any_off_business_in_top5_rate": 0.04
+        }
+      ]
+    }
+  ],
+  "common_failure_details": [
+    {
+      "id": "EVAL003",
+      "domain": "deposit_protection",
+      "complexity": "L2_multi_fact",
+      "question": "원금과 이자를 합쳐서 계산하나요, 따로 계산하나요?",
+      "allowed_business_functions": [
+        "예금자보호제도"
+      ],
+      "reranker_top3": [
+        {
+          "chunk_id": "DP-006_chunk_008",
+          "business_function": "예금자보호제도",
+          "title": "예금자보호제도 FAQ",
+          "section_title": "원금뿐만 아니라 이자도 보호되나요?"
+        },
+        {
+          "chunk_id": "DP-005_chunk_004",
+          "business_function": "예금자보호제도",
+          "title": "예금자보호제도 FAQ",
+          "section_title": "계열 저축은행에 분산하여 예금을 하였는데 각각 1억원까지 예금 보호가 되나요?"
+        },
+        {
+          "chunk_id": "DP-005_chunk_005",
+          "business_function": "예금자보호제도",
+          "title": "예금자보호제도 FAQ",
+          "section_title": "현재 정상적으로 영업중인 저축은행에 맡긴 이자포함 1억원이하 예금의 경우, 저축은행이 불안하다고 해서 중도해지 할 필요가 있나요?"
+        }
+      ]
+    },
+    {
+      "id": "EVAL007",
+      "domain": "deposit_protection",
+      "complexity": "L2_multi_fact",
+      "question": "어떤 금융회사가 예금보호 대상인가요?",
+      "allowed_business_functions": [
+        "예금자보호제도"
+      ],
+      "reranker_top3": [
+        {
+          "chunk_id": "DP-006_chunk_002",
+          "business_function": "예금자보호제도",
+          "title": "예금자보호제도 FAQ",
+          "section_title": "어떤 금융회사의 예금이 보호되나요?"
+        },
+        {
+          "chunk_id": "DP-006_chunk_003",
+          "business_function": "예금자보호제도",
+          "title": "예금자보호제도 FAQ",
+          "section_title": "어떤 금융상품이 보호되나요?"
+        },
+        {
+          "chunk_id": "DP-003_chunk_003",
+          "business_function": "예금자보호제도",
+          "title": "보호대상 금융회사 개요",
+          "section_title": "농협은행, 수협은행 및 외국은행 국내지점"
+        }
+      ]
+    },
+    {
+      "id": "EVAL008",
+      "domain": "deposit_protection",
+      "complexity": "L2_multi_fact",
+      "question": "상호저축은행도 보호되나요?",
+      "allowed_business_functions": [
+        "예금자보호제도"
+      ],
+      "reranker_top3": [
+        {
+          "chunk_id": "DP-006_chunk_002",
+          "business_function": "예금자보호제도",
+          "title": "예금자보호제도 FAQ",
+          "section_title": "어떤 금융회사의 예금이 보호되나요?"
+        },
+        {
+          "chunk_id": "DP-004_chunk_010",
+          "business_function": "예금자보호제도",
+          "title": "보호대상 금융상품 개요",
+          "section_title": "상호저축은행 및 상호저축 은행중앙회 보호 금융상품"
+        },
+        {
+          "chunk_id": "DP-004_chunk_011",
+          "business_function": "예금자보호제도",
+          "title": "보호대상 금융상품 개요",
+          "section_title": "상호저축은행 및 상호저축 은행중앙회 비보호 금융상품"
+        }
+      ]
+    },
+    {
+      "id": "EVAL009",
+      "domain": "deposit_protection",
+      "complexity": "L2_multi_fact",
+      "question": "증권사는 예금보호 대상에 포함되나요?",
+      "allowed_business_functions": [
+        "예금자보호제도"
+      ],
+      "reranker_top3": [
+        {
+          "chunk_id": "DP-006_chunk_002",
+          "business_function": "예금자보호제도",
+          "title": "예금자보호제도 FAQ",
+          "section_title": "어떤 금융회사의 예금이 보호되나요?"
+        },
+        {
+          "chunk_id": "DP-006_chunk_003",
+          "business_function": "예금자보호제도",
+          "title": "예금자보호제도 FAQ",
+          "section_title": "어떤 금융상품이 보호되나요?"
+        },
+        {
+          "chunk_id": "DP-003_chunk_003",
+          "business_function": "예금자보호제도",
+          "title": "보호대상 금융회사 개요",
+          "section_title": "농협은행, 수협은행 및 외국은행 국내지점"
+        }
+      ]
+    },
+    {
+      "id": "EVAL010",
+      "domain": "deposit_protection",
+      "complexity": "L2_multi_fact",
+      "question": "어떤 금융상품이 보호되나요?",
+      "allowed_business_functions": [
+        "예금자보호제도"
+      ],
+      "reranker_top3": [
+        {
+          "chunk_id": "DP-006_chunk_003",
+          "business_function": "예금자보호제도",
+          "title": "예금자보호제도 FAQ",
+          "section_title": "어떤 금융상품이 보호되나요?"
+        },
+        {
+          "chunk_id": "DP-006_chunk_004",
+          "business_function": "예금자보호제도",
+          "title": "예금자보호제도 FAQ",
+          "section_title": "어떤 금융상품이 보호되지 않나요?"
+        },
+        {
+          "chunk_id": "DP-004_chunk_002",
+          "business_function": "예금자보호제도",
+          "title": "보호대상 금융상품 개요",
+          "section_title": "은행 보호 금융상품"
+        }
+      ]
+    },
+    {
+      "id": "EVAL021",
+      "domain": "deposit_insurance_payout",
+      "complexity": "L2_multi_fact",
+      "question": "예금보험금 신청할 때 필요한 서류가 뭔가요?",
+      "allowed_business_functions": [
+        "예금보험금 안내"
+      ],
+      "reranker_top3": [
+        {
+          "chunk_id": "DP-005_chunk_020",
+          "business_function": "예금자보호제도",
+          "title": "예금자보호제도 FAQ",
+          "section_title": "예금자가 단체 또는 법인인 경우, 가지급금(또는 예금보험금) 신청시 필요한 서류는 무엇인가요?"
+        },
+        {
+          "chunk_id": "DP-005_chunk_033",
+          "business_function": "예금자보호제도",
+          "title": "예금자보호제도 FAQ",
+          "section_title": "예금보험금은 어떻게 신청하면 되나요?"
+        },
+        {
+          "chunk_id": "DP-005_chunk_024",
+          "business_function": "예금자보호제도",
+          "title": "예금자보호제도 FAQ",
+          "section_title": "외국에 거주하는 예금자(유학생, 장기 체류자 등)가 가지급금(또는 예금보험금) 등을 지급 받기 위해서는 어떻게 해야 하나요?"
+        }
+      ]
+    },
+    {
+      "id": "EVAL030",
+      "domain": "deposit_insurance_payout",
+      "complexity": "L4_multi_turn",
+      "question": "은행이 문을 닫았다는데 제 돈 찾으려면 뭐부터 해야 해요?",
+      "allowed_business_functions": [
+        "예금보험금 안내"
+      ],
+      "reranker_top3": [
+        {
+          "chunk_id": "DP-005_chunk_006",
+          "business_function": "예금자보호제도",
+          "title": "예금자보호제도 FAQ",
+          "section_title": "예금은 언제부터 찾을 수 있나요?"
+        },
+        {
+          "chunk_id": "DP-005_chunk_021",
+          "business_function": "예금자보호제도",
+          "title": "예금자보호제도 FAQ",
+          "section_title": "예금자가 사망하였을 경우 가지급금(또는 예금보험금)은 어떻게 청구하면 되나요?"
+        },
+        {
+          "chunk_id": "DP-005_chunk_014",
+          "business_function": "예금자보호제도",
+          "title": "예금자보호제도 FAQ",
+          "section_title": "영업정지가 되면 내 대출거래는 어떻게 되나요?"
+        }
+      ]
+    },
+    {
+      "id": "EVAL033",
+      "domain": "deposit_insurance_payout",
+      "complexity": "L4_multi_turn",
+      "question": "제가 직접 못 가는데 가족이 대신 받아도 되나요?",
+      "allowed_business_functions": [
+        "예금보험금 안내"
+      ],
+      "reranker_top3": [
+        {
+          "chunk_id": "DP-005_chunk_026",
+          "business_function": "예금자보호제도",
+          "title": "예금자보호제도 FAQ",
+          "section_title": "미성년자에 대한 예금은 친권자가 친권을 행사하여 찾을 수 있다던데 부모 중 한명이 친권을 행사하면 가지급금(또는 예금보험금)을 찾을 수 있는 것 아닌가요?"
+        },
+        {
+          "chunk_id": "DP-005_chunk_025",
+          "business_function": "예금자보호제도",
+          "title": "예금자보호제도 FAQ",
+          "section_title": "손자(孫子: 미성년자) 명의의 예금에 대한 가지급금(또는 예금보험금)을 조부모(祖父母) 등이 대리인 자격으로 수령하고 싶은데 어떻게 해야 하나요?"
+        },
+        {
+          "chunk_id": "BI-001_chunk_004",
+          "business_function": "예금보험금 안내",
+          "title": "신청시 구비서류",
+          "section_title": "예금자가 사망한 경우"
+        }
+      ]
+    },
+    {
+      "id": "EVAL036",
+      "domain": "deposit_insurance_payout",
+      "complexity": "L3_conditional",
+      "question": "지금 해외에 있는데 보험금을 신청할 수 있나요?",
+      "allowed_business_functions": [
+        "예금보험금 안내"
+      ],
+      "reranker_top3": [
+        {
+          "chunk_id": "DP-005_chunk_024",
+          "business_function": "예금자보호제도",
+          "title": "예금자보호제도 FAQ",
+          "section_title": "외국에 거주하는 예금자(유학생, 장기 체류자 등)가 가지급금(또는 예금보험금) 등을 지급 받기 위해서는 어떻게 해야 하나요?"
+        },
+        {
+          "chunk_id": "DP-005_chunk_023",
+          "business_function": "예금자보호제도",
+          "title": "예금자보호제도 FAQ",
+          "section_title": "외국 시민권자가 본인의 가지급금(또는 예금보험금)을 찾기 위해서는 어떻게 해야 하나요?"
+        },
+        {
+          "chunk_id": "DP-005_chunk_033",
+          "business_function": "예금자보호제도",
+          "title": "예금자보호제도 FAQ",
+          "section_title": "예금보험금은 어떻게 신청하면 되나요?"
+        }
+      ]
+    },
+    {
+      "id": "EVAL043",
+      "domain": "unclaimed_funds",
+      "complexity": "L4_multi_turn",
+      "question": "법인 명의로 남아있는 미수령금도 조회·신청이 가능한가요?",
+      "allowed_business_functions": [
+        "예금자보호제도",
+        "착오송금 반환 신청"
+      ],
+      "reranker_top3": [
+        {
+          "chunk_id": "UN-004_chunk_002",
+          "business_function": "고객 미수령금 신청",
+          "title": "상속인 금융거래조회",
+          "section_title": "상속인 미수령금 조회결과 안내"
+        },
+        {
+          "chunk_id": "UN-004_chunk_000",
+          "business_function": "고객 미수령금 신청",
+          "title": "상속인 금융거래조회",
+          "section_title": "상속인 금융거래 조회서비스란?"
+        },
+        {
+          "chunk_id": "UN-003_chunk_006",
+          "business_function": "고객 미수령금 신청",
+          "title": "통합신청 소개와 신청방법 안내",
+          "section_title": "(온라인) 금융안심포털에서 미수령금통합신청"
+        }
+      ]
+    },
+    {
+      "id": "EVAL046",
+      "domain": "unclaimed_funds",
+      "complexity": "L3_conditional",
+      "question": "이미 폐업한 저축은행의 미수령금도 예금보험공사가 대신 지급하나요?",
+      "allowed_business_functions": [
+        "예금보험금 안내",
+        "고객 미수령금 신청"
+      ],
+      "reranker_top3": [
+        {
+          "chunk_id": "UN-001_chunk_002",
+          "business_function": "고객 미수령금 신청",
+          "title": "고객미수령금",
+          "section_title": "고객 미수령금의 종류"
+        },
+        {
+          "chunk_id": "UN-004_chunk_000",
+          "business_function": "고객 미수령금 신청",
+          "title": "상속인 금융거래조회",
+          "section_title": "상속인 금융거래 조회서비스란?"
+        },
+        {
+          "chunk_id": "DP-005_chunk_037",
+          "business_function": "예금자보호제도",
+          "title": "예금자보호제도 FAQ",
+          "section_title": "가지급금 지급시기 및 금액, 수령 방법은 어떻게 되나요?"
+        }
+      ]
+    },
+    {
+      "id": "EVAL049",
+      "domain": "unclaimed_funds",
+      "complexity": "L4_multi_turn",
+      "question": "조회했는데 못 받은 돈 나오면 바로 통장에 들어와? 돈 들어오기까지 얼마나 걸려?",
+      "allowed_business_functions": [
+        "예금자보호제도"
+      ],
+      "reranker_top3": [
+        {
+          "chunk_id": "MT-005_chunk_000",
+          "business_function": "착오송금 반환 신청",
+          "title": "착오송금 반환지원 주요 FAQ",
+          "section_title": "1. 착오송금 반환지원 신청 접수부터 실제 반환까지 예상되는 소요 기간은 어떻게 되나요?"
+        },
+        {
+          "chunk_id": "MT-004_chunk_005",
+          "business_function": "착오송금 반환 신청",
+          "title": "착오송금 반환지원 FAQ",
+          "section_title": "착오송금 반환지원 신청 접수부터 실제 반환까지 예상되는 소요 기간은 어떻게 되나요?"
+        },
+        {
+          "chunk_id": "MT-005_chunk_005",
+          "business_function": "착오송금 반환 신청",
+          "title": "착오송금 반환지원 주요 FAQ",
+          "section_title": "6. 상속인금융거래조회기간은 어떻게 되나요?"
+        }
+      ]
+    },
+    {
+      "id": "EVAL051",
+      "domain": "unclaimed_funds",
+      "complexity": "L1_single_fact",
+      "question": "돈 안찾아간 거 있는지 어떻게 확인해?",
+      "allowed_business_functions": [
+        "고객 미수령금 신청"
+      ],
+      "reranker_top3": [
+        {
+          "chunk_id": "UN-001_chunk_000",
+          "business_function": "고객 미수령금 신청",
+          "title": "고객미수령금",
+          "section_title": ""
+        },
+        {
+          "chunk_id": "UN-003_chunk_000",
+          "business_function": "고객 미수령금 신청",
+          "title": "통합신청 소개와 신청방법 안내",
+          "section_title": "고객 미수령금이란?"
+        },
+        {
+          "chunk_id": "UN-001_chunk_001",
+          "business_function": "고객 미수령금 신청",
+          "title": "고객미수령금",
+          "section_title": "고객 미수령금이란?"
+        }
+      ]
+    },
+    {
+      "id": "EVAL062",
+      "domain": "mistaken_transfer",
+      "complexity": "L1_single_fact",
+      "question": "신청부터 돈을 돌려받기까지 몇 단계인가요?",
+      "allowed_business_functions": [
+        "착오송금 반환 신청"
+      ],
+      "reranker_top3": [
+        {
+          "chunk_id": "MT-004_chunk_005",
+          "business_function": "착오송금 반환 신청",
+          "title": "착오송금 반환지원 FAQ",
+          "section_title": "착오송금 반환지원 신청 접수부터 실제 반환까지 예상되는 소요 기간은 어떻게 되나요?"
+        },
+        {
+          "chunk_id": "MT-005_chunk_000",
+          "business_function": "착오송금 반환 신청",
+          "title": "착오송금 반환지원 주요 FAQ",
+          "section_title": "1. 착오송금 반환지원 신청 접수부터 실제 반환까지 예상되는 소요 기간은 어떻게 되나요?"
+        },
+        {
+          "chunk_id": "MT-012_chunk_000",
+          "business_function": "착오송금 반환 신청",
+          "title": "방문접수안내",
+          "section_title": "방문접수 절차"
+        }
+      ]
+    },
+    {
+      "id": "EVAL064",
+      "domain": "mistaken_transfer",
+      "complexity": "L2_multi_fact",
+      "question": "인터넷 신청과 방문 신청 중 뭐가 더 빠른가요?",
+      "allowed_business_functions": [
+        "착오송금 반환 신청"
+      ],
+      "reranker_top3": [
+        {
+          "chunk_id": "DP-005_chunk_036",
+          "business_function": "예금자보호제도",
+          "title": "예금자보호제도 FAQ",
+          "section_title": "가지급금을 인터넷으로 신청할 경우 유리한 점은 무엇인가요?"
+        },
+        {
+          "chunk_id": "BI-002_chunk_002",
+          "business_function": "예금보험금 안내",
+          "title": "예금보험금 신청절차",
+          "section_title": "예금자의 예금보험금 지급 신청"
+        },
+        {
+          "chunk_id": "DA-007_chunk_003",
+          "business_function": "채무조정 안내",
+          "title": "부채증명원/금융거래정보신청",
+          "section_title": "신청 시 구비서류"
+        }
+      ]
+    },
+    {
+      "id": "EVAL071",
+      "domain": "mistaken_transfer",
+      "complexity": "L3_conditional",
+      "question": "반환에 동의하지 않으면 어떻게 되나요?",
+      "allowed_business_functions": [
+        "착오송금 반환 신청"
+      ],
+      "reranker_top3": [
+        {
+          "chunk_id": "MT-008_chunk_001",
+          "business_function": "착오송금 반환 신청",
+          "title": "착오송금인 구비서류 안내",
+          "section_title": "대리인 > 공통 서류"
+        },
+        {
+          "chunk_id": "MT-010_rule_layer01_chunk_030",
+          "business_function": "착오송금 반환 신청",
+          "title": "착오송금 반환지원 등에 관한 규정",
+          "section_title": "제24조(지급명령)"
+        },
+        {
+          "chunk_id": "MT-010_rule_layer01_chunk_017",
+          "business_function": "착오송금 반환 신청",
+          "title": "착오송금 반환지원 등에 관한 규정",
+          "section_title": "제13조(반환지원신청 보완요구)"
+        }
+      ]
+    },
+    {
+      "id": "EVAL076",
+      "domain": "mistaken_transfer",
+      "complexity": "L2_multi_fact",
+      "question": "대리인이 신청할 때 구비서류가 다른가요?",
+      "allowed_business_functions": [
+        "착오송금 반환 신청"
+      ],
+      "reranker_top3": [
+        {
+          "chunk_id": "DA-003_chunk_003",
+          "business_function": "채무조정 안내",
+          "title": "채무조정",
+          "section_title": "구비서류"
+        },
+        {
+          "chunk_id": "BI-001_chunk_001",
+          "business_function": "예금보험금 안내",
+          "title": "신청시 구비서류",
+          "section_title": "대리인이 찾을 경우"
+        },
+        {
+          "chunk_id": "DA-001_chunk_002",
+          "business_function": "채무조정 안내",
+          "title": "채무조정제도",
+          "section_title": "신청자격 및 구비서류"
+        }
+      ]
+    },
+    {
+      "id": "EVAL078",
+      "domain": "mistaken_transfer",
+      "complexity": "L2_multi_fact",
+      "question": "신청하면 어떤 순서로 돈을 돌려받게 되나요?",
+      "allowed_business_functions": [
+        "착오송금 반환 신청"
+      ],
+      "reranker_top3": [
+        {
+          "chunk_id": "MT-015_chunk_002",
+          "business_function": "착오송금 반환 신청",
+          "title": "착오송금 반환지원 신청대상",
+          "section_title": "예금보험공사에 신청하기 전에 해야 할 일이 있나요?"
+        },
+        {
+          "chunk_id": "MT-011_chunk_000",
+          "business_function": "착오송금 반환 신청",
+          "title": "상황선택",
+          "section_title": ""
+        },
+        {
+          "chunk_id": "MT-004_chunk_005",
+          "business_function": "착오송금 반환 신청",
+          "title": "착오송금 반환지원 FAQ",
+          "section_title": "착오송금 반환지원 신청 접수부터 실제 반환까지 예상되는 소요 기간은 어떻게 되나요?"
+        }
+      ]
+    },
+    {
+      "id": "EVAL079",
+      "domain": "mistaken_transfer",
+      "complexity": "L2_multi_fact",
+      "question": "착오송금 반환지원의 법적 근거가 뭔가요?",
+      "allowed_business_functions": [
+        "착오송금 반환 신청"
+      ],
+      "reranker_top3": [
+        {
+          "chunk_id": "MT-010_rule_layer01_chunk_000",
+          "business_function": "착오송금 반환 신청",
+          "title": "착오송금 반환지원 등에 관한 규정",
+          "section_title": "제1조(목적)"
+        },
+        {
+          "chunk_id": "MT-010_rule_layer01_chunk_014",
+          "business_function": "착오송금 반환 신청",
+          "title": "착오송금 반환지원 등에 관한 규정",
+          "section_title": "제10조(반환지원대상)"
+        },
+        {
+          "chunk_id": "MT-010_rule_layer01_chunk_004",
+          "business_function": "착오송금 반환 신청",
+          "title": "착오송금 반환지원 등에 관한 규정",
+          "section_title": "제5조(착오송금 반환지원 운영원칙)"
+        }
+      ]
+    },
+    {
+      "id": "EVAL104",
+      "domain": "debt_adjustment",
+      "complexity": "L1_single_fact",
+      "question": "개인회생은 몇 년간 분할상환하나요?",
+      "allowed_business_functions": [
+        "채무조정 안내"
+      ],
+      "reranker_top3": [
+        {
+          "chunk_id": "DA-006_chunk_009",
+          "business_function": "채무조정 안내",
+          "title": "개인회생",
+          "section_title": "개인회생과 워크아웃"
+        },
+        {
+          "chunk_id": "DA-004_chunk_003",
+          "business_function": "채무조정 안내",
+          "title": "신용회복 지원",
+          "section_title": "상환기간"
+        },
+        {
+          "chunk_id": "DA-006_chunk_000",
+          "business_function": "채무조정 안내",
+          "title": "개인회생",
+          "section_title": "개인회생제도란"
+        }
+      ]
+    }
+  ],
+  "reranker_failure_audit": {
+    "total": 35,
+    "by_domain": {
+      "deposit_protection": 8,
+      "deposit_insurance_payout": 7,
+      "unclaimed_funds": 6,
+      "mistaken_transfer": 12,
+      "debt_adjustment": 2,
+      "hidden_assets_report": 0
+    },
+    "by_complexity": {
+      "L1_single_fact": 5,
+      "L2_multi_fact": 16,
+      "L3_conditional": 7,
+      "L4_multi_turn": 7
+    },
+    "top1_outside_allowed_business_count": 13
+  },
+  "diagnostics": [
+    {
+      "evaluation_id": "EVAL050",
+      "issues": [
+        {
+          "severity": "high",
+          "code": "complete_impossible",
+          "message": "필수 Gold가 6개라 Complete@5로 완전 회수할 수 없습니다."
+        }
+      ]
+    },
+    {
+      "evaluation_id": "EVAL058",
+      "issues": [
+        {
+          "severity": "medium",
+          "code": "role_not_in_gold",
+          "message": "primary/supporting 청크 중 전체 Gold 목록에 없는 항목이 있습니다."
+        }
+      ]
+    },
+    {
+      "evaluation_id": "EVAL068",
+      "issues": [
+        {
+          "severity": "high",
+          "code": "complete_impossible",
+          "message": "필수 Gold가 10개라 Complete@5로 완전 회수할 수 없습니다."
+        }
+      ]
+    },
+    {
+      "evaluation_id": "EVAL069",
+      "issues": [
+        {
+          "severity": "high",
+          "code": "complete_impossible",
+          "message": "필수 Gold가 10개라 Complete@5로 완전 회수할 수 없습니다."
+        }
+      ]
+    },
+    {
+      "evaluation_id": "EVAL085",
+      "issues": [
+        {
+          "severity": "medium",
+          "code": "role_not_in_gold",
+          "message": "primary/supporting 청크 중 전체 Gold 목록에 없는 항목이 있습니다."
+        }
+      ]
+    },
+    {
+      "evaluation_id": "EVAL121",
+      "issues": [
+        {
+          "severity": "medium",
+          "code": "role_not_in_gold",
+          "message": "primary/supporting 청크 중 전체 Gold 목록에 없는 항목이 있습니다."
+        }
+      ]
+    },
+    {
+      "evaluation_id": "EVAL129",
+      "issues": [
+        {
+          "severity": "medium",
+          "code": "role_not_in_gold",
+          "message": "primary/supporting 청크 중 전체 Gold 목록에 없는 항목이 있습니다."
+        }
+      ]
+    }
+  ]
+}

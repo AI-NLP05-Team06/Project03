@@ -1,0 +1,8 @@
+{
+  "package": "KDIC_Structured_Hybrid_ParentChild_업무필터없음_Colab",
+  "dataset_sha256": "ef70f5a591ad580f1979053adb37f6c1bd3425454f8feda0a506770aaed32cd5",
+  "packaged_dataset_sha256": "ef70f5a591ad580f1979053adb37f6c1bd3425454f8feda0a506770aaed32cd5",
+  "kdic_sha256": "f001c049c0eb3a2a1a5f7c2658a0c35be00af1183eb370281f02887f032a0247",
+  "evaluator_sha256": "254b76a30131fac27d24d95cdcc1ebce81c434218025f132287a229ce3f1062e",
+  "notebook_sha256": "3bb98b0662ba35ebcbc90c7c014f54943fe2388e7e5ca920035eaedcf2e06f6f"
+}

@@ -1,0 +1,8 @@
+Presentation source notes
+
+All screenshots in this deck were supplied by the user in this conversation on 2026-08-26.
+They depict the KDIC chatbot and the corresponding administrator UI. No external assets or researched claims were used.
+
+The search-comparison evaluation result screen was intentionally not included because the user stated that this UI is currently being revised.
+
+Two requested screenshot categories (chunk-management add/view) were not present among the supplied image attachments. Their operational behavior is summarized as visible text on slide 14, rather than represented with a fabricated image.

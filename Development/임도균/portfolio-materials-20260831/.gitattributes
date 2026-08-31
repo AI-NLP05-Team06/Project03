@@ -1,0 +1,5 @@
+# Preserve exported source bytes and provenance hashes across platforms.
+* -text
+*.xlsx binary
+*.pptx binary
+*.zip binary

@@ -1,0 +1,1 @@
+{"chunk_id":"ADMIN-DRAGDROP-TEST-001_chunk_000","document_id":"ADMIN-DRAGDROP-TEST-001","parent_doc_id":"ADMIN-DRAGDROP-TEST-001","title":"관리자 드래그앤드롭 테스트","section_title":"JSONL 파일 드래그앤드롭 확인","business_function":"테스트","content":"관리자 UI에서 JSONL 파일 드래그앤드롭 기능이 정상 동작하는지 확인하기 위한 테스트 청크입니다. 운영 반영 전에는 챗봇 검색에 사용되지 않습니다."}

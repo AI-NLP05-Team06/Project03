@@ -1,0 +1,1762 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KDIC 검색 품질 비교 대시보드 V3</title>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <style>
+    :root {
+      --navy: #123b73;
+      --blue: #1768d4;
+      --blue-soft: #eaf3ff;
+      --ink: #14243b;
+      --muted: #65758b;
+      --line: #dce5f0;
+      --panel: #ffffff;
+      --bg: #f5f8fc;
+      --green: #16835b;
+      --amber: #c47b10;
+      --red: #cf4d57;
+      --shadow: 0 10px 30px rgba(24, 55, 95, 0.08);
+      --series-1: #1768d4;
+      --series-2: #13a27c;
+      --series-3: #8b5cf6;
+      --series-4: #ef8b2c;
+      --series-5: #e34f6f;
+      --series-6: #5b718e;
+      color-scheme: light;
+    }
+    :root[data-theme="dark"] {
+      --navy: #8ab8ff;
+      --blue: #63a4ff;
+      --blue-soft: #182b46;
+      --ink: #e7eef8;
+      --muted: #a9b7ca;
+      --line: #33465f;
+      --panel: #162235;
+      --bg: #0c1422;
+      --green: #57d6a5;
+      --amber: #f0b75f;
+      --red: #ff8792;
+      --shadow: 0 12px 34px rgba(0,0,0,.28);
+      color-scheme: dark;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Pretendard", "Noto Sans KR", "Malgun Gothic", sans-serif;
+    }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    .shell { max-width: 1480px; margin: 0 auto; padding: 28px 24px 64px; }
+    .hero {
+      background: linear-gradient(135deg, #0e3467 0%, #1768d4 100%);
+      color: white;
+      padding: 30px 34px;
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 28px;
+    }
+    .hero h1 { margin: 0 0 8px; font-size: clamp(24px, 3vw, 38px); }
+    .hero p { margin: 0; color: rgba(255,255,255,.8); line-height: 1.65; }
+    .hero-meta {
+      min-width: 230px;
+      padding: 16px 18px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.2);
+    }
+    .hero-meta strong { display: block; font-size: 28px; margin-top: 3px; }
+    .hero-tools { display: flex; justify-content: flex-end; margin-top: 12px; }
+    .theme-toggle {
+      border: 1px solid rgba(255,255,255,.35); background: rgba(255,255,255,.12);
+      color: white; border-radius: 999px; padding: 8px 12px; font-weight: 700;
+    }
+    .section { margin-top: 22px; }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      padding: 22px;
+    }
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 18px;
+      margin-bottom: 16px;
+    }
+    .section-head h2 { margin: 0; font-size: 21px; }
+    .section-head p { margin: 5px 0 0; color: var(--muted); font-size: 14px; }
+    .upload-grid {
+      display: grid;
+      grid-template-columns: minmax(280px, .7fr) minmax(360px, 1.3fr);
+      gap: 18px;
+    }
+    .controls { display: grid; gap: 12px; align-content: start; }
+    .field label {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 6px;
+      font-weight: 700;
+    }
+    .field input, .field select {
+      width: 100%;
+      min-height: 44px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 12px;
+      background: white;
+      color: var(--ink);
+    }
+    .button-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .btn {
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      padding: 10px 14px;
+      background: white;
+      color: var(--ink);
+      font-weight: 700;
+    }
+    .btn.primary { background: var(--blue); color: white; border-color: var(--blue); }
+    .btn.danger { color: var(--red); }
+    .btn[aria-pressed="true"], .btn.pressed {
+      background: var(--navy); color: var(--panel); border-color: var(--navy);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--blue) 24%, transparent);
+    }
+    .drop-zone {
+      min-height: 188px;
+      border: 2px dashed #9fb9da;
+      border-radius: 17px;
+      background: #f7fbff;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 22px;
+      transition: .18s ease;
+    }
+    .drop-zone.drag { border-color: var(--blue); background: var(--blue-soft); transform: translateY(-2px); }
+    .drop-zone strong { display: block; font-size: 18px; margin-bottom: 8px; }
+    .drop-zone span { color: var(--muted); line-height: 1.65; font-size: 14px; }
+    .drop-zone input { display: none; }
+    .status {
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 14px;
+      background: var(--blue-soft);
+      color: var(--navy);
+      display: none;
+    }
+    .status.show { display: block; }
+    .status.error { background: #fff0f1; color: #9f2631; }
+    .method-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+    .method-tab {
+      border: 1px solid var(--line);
+      background: white;
+      color: var(--muted);
+      padding: 9px 13px;
+      border-radius: 999px;
+      font-weight: 700;
+    }
+    .method-tab.active { background: var(--navy); color: white; border-color: var(--navy); }
+    :root[data-theme="dark"] .method-tab.active { color: #09111e; }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(150px, 1fr));
+      gap: 12px;
+    }
+    .stat {
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 17px;
+      min-height: 112px;
+    }
+    .stat label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 9px; }
+    .stat strong { display: block; font-size: 27px; color: var(--navy); }
+    .stat small { display: block; margin-top: 7px; color: var(--muted); }
+    .charts-grid {
+      display: grid;
+      grid-template-columns: minmax(560px, 1.45fr) minmax(340px, .8fr);
+      gap: 18px;
+    }
+    .chart-title { font-size: 16px; font-weight: 800; margin-bottom: 16px; }
+    .metric-chart { display: grid; gap: 14px; }
+    .metric-group {
+      display: grid;
+      grid-template-columns: 205px 1fr;
+      gap: 15px;
+      align-items: start;
+    }
+    .metric-label { font-weight: 700; font-size: 13px; padding-top: 5px; }
+    .bars { display: grid; gap: 6px; }
+    .bar-line { display: grid; grid-template-columns: 120px 1fr 54px; gap: 9px; align-items: center; }
+    .bar-name { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .bar-track { height: 18px; background: #edf2f8; border-radius: 999px; overflow: hidden; }
+    .bar-fill {
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      min-width: 1px;
+      animation: bar-rise .9s cubic-bezier(.2,.8,.2,1) forwards;
+    }
+    .bar-value { text-align: right; font-variant-numeric: tabular-nums; font-weight: 800; font-size: 12px; }
+    .radar-wrap { display: grid; place-items: center; min-height: 420px; }
+    .radar-wrap svg { width: min(100%, 430px); height: auto; overflow: visible; }
+    .radar-series {
+      transform-box: fill-box;
+      transform-origin: center;
+      opacity: 0;
+      animation: radar-rise .8s cubic-bezier(.2,.8,.2,1) forwards;
+    }
+    @keyframes bar-rise { from { width: 0; } to { width: var(--target-width); } }
+    @keyframes radar-rise {
+      from { opacity: 0; transform: scale(.2); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .legend { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 14px; }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+    .swatch { width: 11px; height: 11px; border-radius: 3px; }
+    .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; }
+    table { border-collapse: collapse; width: 100%; min-width: 780px; }
+    th, td { border-bottom: 1px solid var(--line); padding: 11px 12px; text-align: left; font-size: 13px; }
+    th { background: #f2f6fb; color: #41546d; position: sticky; top: 0; z-index: 1; }
+    td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+    tr:last-child td { border-bottom: 0; }
+    .heat { border-radius: 7px; padding: 5px 7px; text-align: center; font-weight: 800; display: inline-block; min-width: 54px; }
+    .filters { display: grid; grid-template-columns: 1fr 180px 180px 190px; gap: 10px; margin-bottom: 14px; }
+    .filters input, .filters select {
+      width: 100%; min-height: 42px; border: 1px solid var(--line);
+      border-radius: 11px; padding: 9px 11px; background: white;
+    }
+    .question-main { max-width: 460px; line-height: 1.55; }
+    .view-settings {
+      display: grid;
+      grid-template-columns: minmax(260px, 1fr) minmax(260px, 1fr) auto;
+      gap: 12px;
+      align-items: end;
+    }
+    .setting-note {
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: #f2f6fb;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .diagnostic-panel {
+      margin-top: 14px;
+      border: 1px solid #f0cf8a;
+      background: #fffaf0;
+      border-radius: 16px;
+      padding: 18px;
+    }
+    .diagnostic-panel[hidden], .row-diagnostic[hidden] { display: none; }
+    .diagnostic-summary {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(140px, 1fr));
+      gap: 10px;
+      margin: 14px 0;
+    }
+    .diagnostic-card {
+      border: 1px solid #efd69f;
+      background: white;
+      border-radius: 12px;
+      padding: 13px;
+    }
+    .diagnostic-card strong { display: block; color: #7c4d08; font-size: 22px; margin-top: 4px; }
+    .diagnostic-card span { color: var(--muted); font-size: 12px; }
+    .diag-list { display: grid; gap: 9px; }
+    .diag-item {
+      display: grid;
+      grid-template-columns: 90px minmax(180px, .7fr) 1.5fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 11px 12px;
+      background: white;
+      border: 1px solid #ead9b6;
+      border-radius: 11px;
+      font-size: 13px;
+    }
+    .severity {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      width: fit-content;
+      min-width: 62px;
+      min-height: 26px;
+      border-radius: 999px;
+      padding: 4px 8px;
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .severity.high { background: #fff0f1; color: #a32935; }
+    .severity.medium { background: #fff4d9; color: #8a580c; }
+    .severity.low { background: #eaf3ff; color: #1556a7; }
+    .diag-button {
+      border: 1px solid #c9d7e8;
+      background: white;
+      color: var(--navy);
+      border-radius: 9px;
+      padding: 7px 9px;
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .row-diagnostic td { background: #fffaf0; padding: 14px 18px; }
+    .row-diagnostic ul { margin: 0; padding-left: 20px; line-height: 1.7; }
+    .row-diagnostic .diagnostic-disclaimer { margin: 0 0 8px; color: var(--muted); font-size: 12px; }
+    .filter-result {
+      color: var(--navy);
+      font-weight: 800;
+      font-size: 13px;
+      margin: 0 0 12px;
+    }
+    .bad { color: var(--red); font-weight: 800; }
+    .good { color: var(--green); font-weight: 800; }
+    .method-list { display: grid; gap: 10px; }
+    .method-row {
+      display: grid;
+      grid-template-columns: 14px minmax(160px, 1fr) repeat(3, 120px) auto;
+      gap: 12px;
+      align-items: center;
+      border-bottom: 1px solid var(--line);
+      padding: 10px 0;
+    }
+    .method-row:last-child { border-bottom: 0; }
+    .method-row strong { overflow: hidden; text-overflow: ellipsis; }
+    .method-row span { color: var(--muted); font-size: 13px; }
+    .method-actions { display: flex; justify-content: flex-end; gap: 7px; align-items: center; }
+    .method-color { width: 38px; height: 34px; padding: 2px; border: 1px solid var(--line); border-radius: 9px; background: var(--panel); }
+    .btn.compact { min-height: 34px; padding: 6px 10px; font-size: 12px; }
+    .base-badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: var(--blue-soft);
+      color: var(--blue) !important;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    dialog {
+      width: min(92vw, 470px);
+      border: 0;
+      border-radius: 18px;
+      padding: 0;
+      box-shadow: 0 24px 70px rgba(10,35,70,.28);
+      color: var(--text);
+    }
+    dialog::backdrop { background: rgba(8,25,48,.48); backdrop-filter: blur(2px); }
+    .dialog-body { padding: 24px; }
+    .dialog-body h3 { margin: 0 0 8px; font-size: 21px; color: var(--navy); }
+    .dialog-body p { margin: 0 0 18px; color: var(--muted); font-size: 14px; line-height: 1.55; }
+    .dialog-body input {
+      width: 100%;
+      min-height: 46px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      padding: 10px 12px;
+      font: inherit;
+    }
+    .dialog-error { min-height: 20px; margin-top: 7px; color: var(--red); font-size: 13px; }
+    .dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+    @media (prefers-reduced-motion: reduce) {
+      .bar-fill { width: var(--target-width); animation: none; }
+      .radar-series { opacity: 1; transform: none; animation: none; }
+    }
+    .dot { width: 10px; height: 10px; border-radius: 999px; }
+    .empty { color: var(--muted); text-align: center; padding: 42px 10px; }
+    .hint {
+      background: #fff8e8; border: 1px solid #f3d697; color: #755014;
+      padding: 11px 13px; border-radius: 11px; font-size: 13px; line-height: 1.55;
+    }
+    .pipeline-toolbar { display: grid; grid-template-columns: minmax(220px,.7fr) minmax(300px,1.3fr); gap: 14px; margin-bottom: 18px; }
+    .pipeline-palette { display: flex; flex-wrap: wrap; gap: 8px; }
+    .pipeline-flow { display: flex; align-items: stretch; gap: 8px; overflow-x: auto; padding: 8px 2px 14px; }
+    .pipeline-node {
+      flex: 0 0 180px; min-height: 92px; border: 1px solid var(--line); border-radius: 14px;
+      background: var(--panel); color: var(--ink); padding: 14px; text-align: left;
+    }
+    .pipeline-node[aria-pressed="true"] { background: var(--blue-soft); border-color: var(--blue); box-shadow: 0 0 0 3px color-mix(in srgb, var(--blue) 20%, transparent); }
+    .pipeline-node strong { display: block; margin-bottom: 7px; }
+    .pipeline-node small { color: var(--muted); line-height: 1.45; }
+    .pipeline-arrow { display: grid; place-items: center; color: var(--muted); font-weight: 800; }
+    .pipeline-detail { min-height: 48px; padding: 11px 13px; background: var(--blue-soft); border-radius: 11px; color: var(--ink); }
+    .custom-stage-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; margin-top: 10px; }
+    .custom-stage-row input {
+      min-width: 0; min-height: 42px; border: 1px solid var(--line); border-radius: 10px;
+      padding: 0 12px; background: var(--panel); color: var(--ink); font: inherit;
+    }
+    .archive-list { display: grid; gap: 8px; }
+    .archive-row { display: grid; grid-template-columns: 12px minmax(160px,1fr) auto; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); }
+    .archive-row:last-child { border-bottom: 0; }
+    .compat-grid { display: grid; grid-template-columns: repeat(2,minmax(180px,1fr)); gap: 10px; max-height: 56vh; overflow-y: auto; padding-right: 4px; }
+    .compat-grid .field select { width: 100%; min-height: 40px; }
+    .subsection-head { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-top:20px; padding-top:18px; border-top:1px solid var(--line); }
+    .subsection-head h3 { margin:0; }
+    .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+    :root[data-theme="dark"] .hero { background: linear-gradient(135deg,#142b4a 0%,#1f579b 100%); }
+    :root[data-theme="dark"] .field input,
+    :root[data-theme="dark"] .field select,
+    :root[data-theme="dark"] .filters input,
+    :root[data-theme="dark"] .filters select,
+    :root[data-theme="dark"] .btn,
+    :root[data-theme="dark"] .method-tab,
+    :root[data-theme="dark"] .stat,
+    :root[data-theme="dark"] .diagnostic-card,
+    :root[data-theme="dark"] .diag-item,
+    :root[data-theme="dark"] .diag-button,
+    :root[data-theme="dark"] dialog { background: var(--panel); color: var(--ink); }
+    :root[data-theme="dark"] .drop-zone { background:#101e31; border-color:#49698f; }
+    :root[data-theme="dark"] .bar-track,
+    :root[data-theme="dark"] .setting-note,
+    :root[data-theme="dark"] th { background:#1c2b40; color:#c5d3e5; }
+    :root[data-theme="dark"] .diagnostic-panel,
+    :root[data-theme="dark"] .row-diagnostic td { background:#2b2418; }
+    :root[data-theme="dark"] .custom-stage-row input { background:var(--panel); color:var(--ink); }
+    :root[data-theme="dark"] .hint { background:#2b2418; border-color:#635333; color:#efd8a9; }
+    :root[data-theme="dark"] .status.error { background:#351d24; color:#ffadb5; }
+    @media (max-width: 1000px) {
+      .upload-grid, .charts-grid { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 720px) {
+      .shell { padding: 16px 12px 40px; }
+      .hero { padding: 24px 20px; align-items: flex-start; flex-direction: column; }
+      .hero-meta { width: 100%; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .metric-group { grid-template-columns: 1fr; }
+      .bar-line { grid-template-columns: 90px 1fr 48px; }
+      .filters { grid-template-columns: 1fr; }
+      .view-settings { grid-template-columns: 1fr; }
+      .diagnostic-summary { grid-template-columns: 1fr; }
+      .diag-item { grid-template-columns: 1fr; }
+      .method-row { grid-template-columns: 12px 1fr auto; }
+      .method-row span:nth-of-type(n+2) { display: none; }
+      .method-actions { grid-column: 2 / -1; justify-content: flex-start; }
+      .metric-group { grid-template-columns: 1fr; gap: 7px; }
+      .pipeline-toolbar, .compat-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <div>
+        <h1>KDIC 검색 품질 비교 대시보드</h1>
+        <p>Dense·Sparse·BM25·Hybrid 결과를 한 화면에서 비교하고,<br>도메인별 약점과 실패 질문을 빠르게 확인합니다.</p>
+      </div>
+      <div class="hero-meta">
+        <span>등록된 검색 방식</span>
+        <strong id="heroMethodCount">0개</strong>
+        <span id="heroQuestionCount">평가 결과를 추가해 주세요</span>
+        <div class="hero-tools"><button class="theme-toggle" id="themeToggle" type="button" aria-pressed="false">🌙 다크모드</button></div>
+      </div>
+    </section>
+
+    <section class="section panel">
+      <div class="section-head">
+        <div>
+          <h2>평가 결과 추가</h2>
+          <p>결과 ZIP 하나를 올리는 방식이 가장 간단합니다. CSV·JSON·XLSX 여러 개도 동시에 선택할 수 있습니다.</p>
+        </div>
+      </div>
+      <div class="upload-grid">
+        <div class="controls">
+          <div class="field">
+            <label for="methodPreset">검색 방식</label>
+            <select id="methodPreset">
+              <option value="">파일에서 자동 인식</option>
+              <option>BGE-M3 Dense</option>
+              <option>BGE-M3 Sparse</option>
+              <option>BM25 기본</option>
+              <option>BM25-Nori</option>
+              <option>Dense + Sparse</option>
+              <option>Dense + BM25-Nori</option>
+              <option>Dense + Sparse + BM25-Nori</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="methodName">직접 입력할 이름(선택)</label>
+            <input id="methodName" placeholder="예: BGE-M3 Sparse 또는 Hybrid RRF">
+          </div>
+          <div class="hint">
+            엑셀은 첫 행에 <b>hit_at_3, recall_at_5, ndcg_at_5</b> 같은 지표명이 있으면 자동 인식합니다.
+            영어 칼럼은 화면에서 한국어와 평가식으로 함께 표시됩니다. 자동 인식된 검색 방식이 다르면
+            아래 <b>등록된 검색 방식 관리</b>에서 바로 이름을 바꿀 수 있습니다.
+            자세한 데이터 진단이 필요하면 <b>검색 결과와 평가데이터셋 XLSX를 함께 선택</b>해 주세요.
+          </div>
+          <div class="button-row">
+            <button class="btn" id="exportComparison">비교표 CSV 저장</button>
+            <button class="btn primary" id="exportAI">AI 분석용 ZIP 저장</button>
+            <button class="btn" id="compatibilitySetup" disabled>칼럼 호환성 설정</button>
+            <button class="btn danger" id="resetAll">전체 결과 비우기</button>
+          </div>
+        </div>
+        <label class="drop-zone" id="dropZone" for="fileInput">
+          <input type="file" id="fileInput" multiple accept=".zip,.xlsx,.xls,.csv,.json,.jsonl">
+          <div>
+            <strong>파일을 끌어 놓거나 눌러서 선택</strong>
+            <span>평가 결과 ZIP · question_results.csv · summary.json · 평가데이터셋 XLSX 동시 선택 지원</span>
+          </div>
+        </label>
+      </div>
+      <div class="status" id="statusBox"></div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <h2>선택 검색 방식 요약</h2>
+          <p>각 값은 해당 검색 방식의 전체 평가 질문 평균입니다.</p>
+        </div>
+        <div class="method-tabs" id="methodTabs"></div>
+      </div>
+      <div class="stats" id="summaryStats"></div>
+    </section>
+
+    <section class="section panel">
+      <div class="section-head">
+        <div>
+          <h2>검색 베이스라인 다이어그램</h2>
+          <p>선택한 검색 방식별 파이프라인을 저장하고, 단계 버튼을 눌러 포함 여부와 역할을 확인합니다.</p>
+        </div>
+      </div>
+      <div class="pipeline-toolbar">
+        <div class="field">
+          <label for="pipelinePreset">다이어그램 프리셋</label>
+          <select id="pipelinePreset">
+            <option value="dense">Dense Baseline</option>
+            <option value="structured">Structured Dense</option>
+            <option value="hybrid">Structured Hybrid</option>
+            <option value="reranker">Structured Hybrid + Reranker</option>
+            <option value="parent">Structured Hybrid + Reranker + Parent-Child</option>
+            <option value="custom">직접 구성</option>
+          </select>
+        </div>
+        <div>
+          <label class="field"><span>단계 포함/제외</span></label>
+          <div class="pipeline-palette" id="pipelinePalette"></div>
+          <div class="custom-stage-row">
+            <input id="customStageName" maxlength="40" placeholder="직접 추가할 단계 이름">
+            <button class="btn" id="addCustomStage" type="button">+ 단계 추가</button>
+          </div>
+        </div>
+      </div>
+      <div class="pipeline-flow" id="pipelineFlow" aria-label="선택 검색 방식 파이프라인"></div>
+      <div class="pipeline-detail" id="pipelineDetail">단계를 누르면 역할과 현재 설정을 확인할 수 있습니다.</div>
+    </section>
+
+    <section class="section charts-grid">
+      <div class="panel">
+        <div class="chart-title">검색 방식별 평균 지표 비교</div>
+        <div class="metric-chart" id="barChart"></div>
+      </div>
+      <div class="panel">
+        <div class="chart-title">균형 비교</div>
+        <div class="radar-wrap" id="radarChart"></div>
+        <div class="legend" id="radarLegend"></div>
+      </div>
+    </section>
+
+    <section class="section panel">
+      <div class="section-head">
+        <div>
+          <h2>도메인별 성능</h2>
+          <p>선택한 지표를 업무별로 나누어 어떤 영역에서 검색이 약한지 확인합니다.</p>
+        </div>
+        <div class="field" style="min-width:220px">
+          <label for="domainMetric">표시 지표</label>
+          <select id="domainMetric"></select>
+        </div>
+      </div>
+      <div class="table-wrap" id="domainTable"></div>
+    </section>
+
+    <section class="section panel">
+      <div class="section-head">
+        <div>
+          <h2>평가 보기 설정</h2>
+          <p>다중 청크 문항이 평균 지표에 미치는 영향을 분리해 확인할 수 있습니다.</p>
+        </div>
+      </div>
+      <div class="view-settings">
+        <div class="field">
+          <label for="multiChunkFilter">다중 청크 문항 처리</label>
+          <select id="multiChunkFilter">
+            <option value="all">모든 질문 포함</option>
+            <option value="exclude_required">필수 다중 청크 문항 제외</option>
+            <option value="exclude_any_multi">Gold 청크가 2개 이상인 질문 제외</option>
+            <option value="only_multi">다중 청크 질문만 보기</option>
+          </select>
+        </div>
+        <div class="setting-note" id="viewFilterNote">현재 모든 평가 질문을 평균 지표에 포함합니다.</div>
+        <button class="btn" id="toggleDiagnostics" aria-expanded="false">평가데이터 진단 보기</button>
+      </div>
+      <div class="diagnostic-panel" id="diagnosticPanel" hidden>
+        <div class="section-head">
+          <div>
+            <h2>평가데이터 진단 모아보기</h2>
+            <p>자동 규칙으로 찾은 검토 후보입니다. 실제 오류로 확정하기 전에 원문과 Gold를 확인해 주세요.</p>
+          </div>
+          <button class="btn compact" id="closeDiagnostics">닫기</button>
+        </div>
+        <div id="diagnosticContent"></div>
+      </div>
+    </section>
+
+    <section class="section panel">
+      <div class="section-head">
+        <div>
+          <h2>질문별 검색 결과</h2>
+          <p>question_results 파일을 올린 검색 방식에서 실패 질문과 Gold·검색 청크를 확인합니다.</p>
+        </div>
+      </div>
+      <div class="filters">
+        <input id="questionSearch" placeholder="질문 또는 평가ID 검색">
+        <select id="questionDomain"><option value="">전체 도메인</option></select>
+        <select id="questionStatus">
+          <option value="all">전체 질문</option>
+          <option value="fail">Hit@3 실패</option>
+          <option value="partial">Recall@5 미달</option>
+          <option value="success">Hit@3 성공</option>
+        </select>
+        <select id="questionDiagnostic">
+          <option value="all">전체 진단 상태</option>
+          <option value="suspect">검토 후보만</option>
+          <option value="clean">자동 점검 이상 없음</option>
+        </select>
+      </div>
+      <div class="filter-result" id="questionFilterResult"></div>
+      <div class="table-wrap" id="questionTable"></div>
+    </section>
+
+    <section class="section panel">
+      <div class="section-head">
+        <div>
+          <h2>등록된 검색 방식 관리</h2>
+          <p>새 결과를 추가하면 기존 방식과 자동으로 평균 비교됩니다.</p>
+        </div>
+      </div>
+      <div class="method-list" id="methodList"></div>
+      <div class="subsection-head">
+        <div><h3>보관함</h3><p>차트 비교에서는 숨기고 필요할 때 다시 복원합니다.</p></div>
+        <span id="archiveCount">0개</span>
+      </div>
+      <div class="archive-list" id="archiveList"></div>
+    </section>
+  </main>
+
+  <dialog id="renameDialog" aria-labelledby="renameTitle">
+    <form class="dialog-body" id="renameForm">
+      <h3 id="renameTitle">검색 방식 이름 변경</h3>
+      <p>파일에서 자동으로 추정된 이름이 실제 실험 방식과 다를 때 수정해 주세요. 차트·표·CSV에도 새 이름이 바로 반영됩니다.</p>
+      <label class="field" for="renameInput">
+        <span>새 검색 방식 이름</span>
+        <input id="renameInput" maxlength="80" autocomplete="off" required>
+      </label>
+      <div class="dialog-error" id="renameError" role="alert"></div>
+      <div class="dialog-actions">
+        <button class="btn" type="button" id="renameCancel">취소</button>
+        <button class="btn primary" type="submit">이름 저장</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="compatibilityDialog" aria-labelledby="compatibilityTitle">
+    <form class="dialog-body" id="compatibilityForm">
+      <h3 id="compatibilityTitle">칼럼 호환성 직접 설정</h3>
+      <p>자동 인식되지 않는 결과 파일의 칼럼을 표준 필드에 연결합니다. 비워 둔 항목은 가져오지 않습니다.</p>
+      <label class="field" for="compatibilitySource">
+        <span>설정할 파일·시트</span>
+        <select id="compatibilitySource"></select>
+      </label>
+      <div class="compat-grid" id="compatibilityGrid"></div>
+      <div class="dialog-error" id="compatibilityError" role="alert"></div>
+      <div class="dialog-actions">
+        <button class="btn" type="button" id="compatibilityCancel">취소</button>
+        <button class="btn primary" type="submit">매핑하여 추가</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script>
+    const METRICS = [
+      ["hit_at_3", "Top-3 적중률 (Hit@K, K=3)", "상위 3개 안에 정답 청크가 하나라도 포함된 비율", "Hit@3"],
+      ["recall_at_5", "Top-5 재현율 (Recall@K, K=5)", "필요한 정답 청크를 상위 5개에서 회수한 비율", "Recall@5"],
+      ["mrr_at_10", "첫 정답 순위 (MRR@K, K=10)", "첫 번째 정답이 얼마나 앞에 나오는지", "MRR@10"],
+      ["map_at_10", "다중 정답 순위 (MAP@K, K=10)", "여러 정답 청크의 순위를 함께 평가", "MAP@10"],
+      ["complete_at_5", "주요 근거 완전회수 (Complete@K, K=5)", "필수 주요 청크를 상위 5개에서 모두 찾은 비율", "Complete@5"],
+      ["ndcg_at_5", "순위 품질 (nDCG@K, K=5)", "주요·보조 근거의 중요도와 순위를 함께 반영", "nDCG@5"],
+      ["precision_at_5", "Top-5 정밀도 (Precision@K, K=5)", "상위 5개 중 실제 정답 청크 비율", "Precision@5"],
+      ["f1_at_5", "정밀·재현 균형 (F1@K, K=5)", "정밀도와 재현율의 조화평균", "F1@5"]
+    ];
+    const METRIC_LABEL = Object.fromEntries(METRICS.map(([k,l]) => [k,l]));
+    const METRIC_DESC = Object.fromEntries(METRICS.map(([k,,d]) => [k,d]));
+    const DOMAIN_LABEL = {
+      deposit_protection: "예금자보호제도",
+      deposit_insurance_payout: "예금보험금 안내",
+      unclaimed_funds: "고객 미수령금",
+      mistaken_transfer: "착오송금 반환지원",
+      debt_adjustment: "채무조정",
+      hidden_assets_report: "은닉재산 신고",
+      overall: "전체"
+    };
+    const COLORS = ["#1768d4","#13a27c","#8b5cf6","#ef8b2c","#e34f6f","#5b718e"];
+    const PIPELINE_STAGES = {
+      query:{label:"질문 분석",description:"질문을 정리하고 업무·의도·복잡도를 확인합니다."},
+      filter:{label:"업무 필터",description:"선택 또는 분류된 업무로 검색 범위를 제한합니다."},
+      dense:{label:"BGE-M3 Dense",description:"질문과 청크 벡터의 의미 유사도로 후보를 찾습니다."},
+      structured:{label:"Structured Dense",description:"제목·소제목·경로·본문을 결합한 임베딩으로 검색합니다."},
+      bm25:{label:"BM25-Nori",description:"한국어 형태소와 정확한 핵심어를 중심으로 후보를 찾습니다."},
+      rrf:{label:"Weighted RRF",description:"Dense와 BM25 순위를 가중 결합해 Hybrid 후보를 만듭니다."},
+      reranker:{label:"BGE Reranker",description:"질문과 후보 청크를 함께 읽어 관련성 순서를 다시 정합니다."},
+      parent:{label:"Parent-Child",description:"상위 Child를 보존하고 같은 문서의 인접 문맥을 확장합니다."},
+      answer:{label:"답변 컨텍스트",description:"중복과 길이를 정리해 답변 모델에 전달할 근거를 구성합니다."}
+    };
+    const PIPELINE_PRESETS = {
+      dense:["query","dense","answer"],
+      structured:["query","structured","answer"],
+      hybrid:["query","structured","bm25","rrf","answer"],
+      reranker:["query","structured","bm25","rrf","reranker","answer"],
+      parent:["query","structured","bm25","rrf","reranker","parent","answer"]
+    };
+    const COMPAT_FIELDS = [
+      ["evaluation_id","평가 ID"],["question","질문"],["gold_business_function","업무·도메인"],
+      ["gold_chunk_ids","Gold 청크"],["retrieved_chunk_ids","검색 청크"],
+      ["hit_at_3","Hit@3"],["recall_at_5","Recall@5"],["mrr_at_10","MRR@10"],
+      ["map_at_10","MAP@10"],["complete_at_5","Complete@5"],["ndcg_at_5","nDCG@5"],
+      ["precision_at_5","Precision@5"],["f1_at_5","F1@5"],["latency_ms","검색시간(ms)"],
+      ["multi_chunk_required","다중 청크 필수"],["gold_primary_chunk_ids","Primary Gold"],
+      ["gold_supporting_chunk_ids","Supporting Gold"]
+    ];
+    const COMPAT_ALIASES = {
+      evaluation_id:["evaluation_id","question_id","질문ID","평가ID","id"],
+      question:["question","예상질문","질문","query"],
+      gold_business_function:["gold_business_function","domain","도메인(원본)","업무라벨","business_function"],
+      gold_chunk_ids:["gold_chunk_ids","gold_chunks","정답청크ID","gold_chunk"],
+      retrieved_chunk_ids:["retrieved_chunk_ids","top_k_chunk_ids","검색청크","retrieved_ids"],
+      hit_at_3:["hit_at_3","hit@3","hit_3"], recall_at_5:["recall_at_5","recall@5","recall_5"],
+      mrr_at_10:["mrr_at_10","mrr@10","mrr_10"], map_at_10:["map_at_10","ap_at_10","map@10","map_10"],
+      complete_at_5:["complete_at_5","complete@5","complete_5"], ndcg_at_5:["ndcg_at_5","ndcg@5","ndcg_5"],
+      precision_at_5:["precision_at_5","precision@5","precision_5"], f1_at_5:["f1_at_5","f1@5","f1_5"],
+      latency_ms:["latency_ms","latency_ms_mean","검색지연시간","검색시간"],
+      multi_chunk_required:["multi_chunk_required","gold_multi_chunk_required","다중청크필수"],
+      gold_primary_chunk_ids:["gold_primary_chunk_ids","primary_chunk_ids"],
+      gold_supporting_chunk_ids:["gold_supporting_chunk_ids","supporting_chunk_ids"]
+    };
+
+    const state = {
+      methods: loadSavedMethods(),
+      selectedId: null,
+      multiChunkFilter: localStorage.getItem("kdic-multi-chunk-filter") || "all",
+      diagnosticsOpen: false,
+      openQuestionDiagnostics: new Set(),
+      selectedPipelineStage: null,
+      pendingParsed: null,
+      compatibilitySources: []
+    };
+    state.selectedId = state.methods.find(method=>!method.archived)?.id || null;
+
+    function defaultPipelineForName(name="") {
+      const text=String(name).toLowerCase();
+      if(text.includes("parent"))return [...PIPELINE_PRESETS.parent];
+      if(text.includes("rerank"))return [...PIPELINE_PRESETS.reranker];
+      if(text.includes("hybrid")||text.includes("rrf")||text.includes("bm25")&&text.includes("dense"))return [...PIPELINE_PRESETS.hybrid];
+      if(text.includes("structured"))return [...PIPELINE_PRESETS.structured];
+      return [...PIPELINE_PRESETS.dense];
+    }
+
+    function loadSavedMethods() {
+      try {
+        const saved = JSON.parse(localStorage.getItem("kdic-search-dashboard-methods") || "[]");
+        return Array.isArray(saved) ? saved.filter(method => method?.id !== "bge-m3-dense-default").map((method,index)=>({
+          ...method,
+          archived:Boolean(method.archived),
+          color:method.color||COLORS[index%COLORS.length],
+          pipeline:Array.isArray(method.pipeline)&&method.pipeline.length?method.pipeline:defaultPipelineForName(method.name)
+        })) : [];
+      } catch { return []; }
+    }
+    function saveMethods() {
+      try { localStorage.setItem("kdic-search-dashboard-methods", JSON.stringify(state.methods)); }
+      catch { showStatus("브라우저 저장 공간이 부족해 현재 화면에서만 유지됩니다.", true); }
+    }
+    function applyTheme(theme) {
+      const resolved=theme==="dark"?"dark":"light";
+      document.documentElement.dataset.theme=resolved;
+      localStorage.setItem("kdic-dashboard-theme",resolved);
+      const button=document.getElementById("themeToggle");
+      if(button){button.setAttribute("aria-pressed",String(resolved==="dark"));button.textContent=resolved==="dark"?"☀️ 라이트모드":"🌙 다크모드";}
+    }
+    function n(value) {
+      const v = Number(value);
+      return Number.isFinite(v) ? v : null;
+    }
+    function pct(value) { return value == null ? "—" : `${(Number(value) * 100).toFixed(1)}%`; }
+    function ms(value) { return value == null ? "—" : `${Number(value).toFixed(0)}ms`; }
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]));
+    }
+    function methodColor(index,method=null) { return method?.color || COLORS[index % COLORS.length]; }
+    function activeMethods() { return state.methods.filter(method=>!method.archived); }
+    function archivedMethods() { return state.methods.filter(method=>method.archived); }
+    function selectedMethod() { const active=activeMethods(); return active.find(m => m.id === state.selectedId) || active[0] || null; }
+    function ensureSelectedMethod() {
+      const method=selectedMethod();
+      state.selectedId=method?.id||null;
+      return method;
+    }
+    function composite(overall) {
+      const values = METRICS.map(([key]) => n(overall[key])).filter(v => v != null);
+      return values.length ? values.reduce((a,b) => a+b, 0) / values.length : null;
+    }
+    function firstValue(row, keys) {
+      for (const key of keys) {
+        if (row?.[key] !== undefined && row?.[key] !== null && row?.[key] !== "") return row[key];
+      }
+      return "";
+    }
+    function rowId(row) {
+      return String(firstValue(row, ["evaluation_id","question_id","질문ID","평가ID"]) || "").trim();
+    }
+    function parseList(value) {
+      if (Array.isArray(value)) return value.flat(Infinity).map(v=>String(v).trim()).filter(Boolean);
+      if (value == null || value === "") return [];
+      if (typeof value === "string") {
+        const text=value.trim();
+        try {
+          const parsed=JSON.parse(text);
+          if(Array.isArray(parsed)) return parsed.flat(Infinity).map(v=>String(v).trim()).filter(Boolean);
+        } catch {}
+        return text.split(/[,\n;|]+/).map(v=>v.trim().replace(/^['"\[\]]+|['"\[\]]+$/g,"")).filter(Boolean);
+      }
+      return [String(value)];
+    }
+    function flagValue(value) {
+      const text=String(value??"").trim().toLowerCase();
+      if(["y","yes","true","1","예","대상"].includes(text)) return true;
+      if(["n","no","false","0","아니오","비대상"].includes(text)) return false;
+      return null;
+    }
+    function goldChunks(row) {
+      const direct=parseList(firstValue(row,["gold_chunk_ids","gold_chunks","정답청크ID"]));
+      if(direct.length) return direct;
+      return [...new Set([
+        ...parseList(firstValue(row,["gold_primary_chunk_ids","primary_chunk_ids"])),
+        ...parseList(firstValue(row,["gold_supporting_chunk_ids","supporting_chunk_ids"]))
+      ])];
+    }
+    function isRequiredMulti(row) {
+      const explicit=flagValue(firstValue(row,["multi_chunk_required","gold_multi_chunk_required","다중청크필수"]));
+      if(explicit != null) return explicit;
+      return n(row?.complete_at_5)!=null && goldChunks(row).length>=2;
+    }
+    function isAnyMulti(row) { return goldChunks(row).length >= 2; }
+    function rowIncludedByMultiFilter(row) {
+      if(state.multiChunkFilter==="exclude_required") return !isRequiredMulti(row);
+      if(state.multiChunkFilter==="exclude_any_multi") return !isAnyMulti(row);
+      if(state.multiChunkFilter==="only_multi") return isRequiredMulti(row)||isAnyMulti(row);
+      return true;
+    }
+    function activeQuestions(method) {
+      return (method?.questions||[]).filter(rowIncludedByMultiFilter);
+    }
+    function activeAggregate(method) {
+      const rows=activeQuestions(method);
+      if(rows.length) return aggregateQuestions(rows);
+      if(state.multiChunkFilter==="all") {
+        return {overall:method?.overall||{},byDomain:method?.byDomain||[],questions:method?.questions||[]};
+      }
+      return {overall:{question_count:0,complete_applicable_count:0},byDomain:[],questions:[]};
+    }
+    function metricInRange(row,key) {
+      const value=n(row[key]);
+      return value==null || (value>=0&&value<=1);
+    }
+    function diagnosticsForRow(row, context={}) {
+      const issues=[];
+      const add=(severity,code,message)=>issues.push({severity,code,message});
+      const id=rowId(row);
+      const gold=goldChunks(row);
+      const primary=parseList(firstValue(row,["gold_primary_chunk_ids","primary_chunk_ids"]));
+      const supporting=parseList(firstValue(row,["gold_supporting_chunk_ids","supporting_chunk_ids"]));
+      const retrieved=parseList(firstValue(row,["retrieved_chunk_ids","top_k_chunk_ids"]));
+      const documents=parseList(firstValue(row,["gold_document_ids","gold_documents"]));
+      const sections=parseList(firstValue(row,["gold_section_titles","gold_sections"]));
+      const hasSectionField=["gold_section_titles","gold_sections"].some(key=>Object.prototype.hasOwnProperty.call(row,key));
+      const answerable=flagValue(firstValue(row,["gold_answerable"]));
+      const applicable=flagValue(firstValue(row,["retrieval_evaluation_applicable","검색평가대상"]));
+      const ambiguity=String(firstValue(row,["gold_ambiguity_status"])||"").toLowerCase();
+      const action=String(firstValue(row,["gold_expected_action"])||"").toLowerCase();
+      if(!id) add("high","missing_id","평가 질문을 구분할 ID가 없습니다.");
+      if(context.duplicateIds?.has(id)&&id) add("high","duplicate_id",`같은 평가ID가 ${context.idCounts[id]}회 들어 있습니다.`);
+      if(!gold.length) add("high","missing_gold","Gold 청크가 비어 있어 검색 적중 여부를 판단하기 어렵습니다.");
+      if(new Set(gold).size!==gold.length) add("medium","duplicate_gold","Gold 청크 목록에 같은 청크가 중복되어 있습니다.");
+      if(documents.length&&gold.length){
+        const chunkDocuments=[...new Set(gold.map(id=>id.split(/_chunk_/i)[0]).filter(Boolean))];
+        const mismatched=chunkDocuments.filter(id=>!documents.includes(id));
+        if(mismatched.length)add("high","document_chunk_mismatch",`Gold 문서ID와 청크ID의 문서가 일치하지 않습니다: ${mismatched.join(", ")}`);
+      }
+      if(hasSectionField&&gold.length&&!sections.length)add("low","missing_section","Gold 청크는 있지만 부제목(gold_section_titles)이 비어 있습니다.");
+      if(retrieved.length&&new Set(retrieved).size!==retrieved.length) add("medium","duplicate_retrieved","검색 Top-K 결과에 같은 청크가 중복되어 있습니다.");
+      if(isRequiredMulti(row)&&gold.length<2) add("high","multi_without_gold","다중 청크 필수 문항인데 Gold 청크가 2개 미만입니다.");
+      if(!isRequiredMulti(row)&&gold.length>=2) add("low","multi_policy_check","Gold가 여러 개인데 다중 청크 필수 여부가 명시되지 않았거나 N입니다.");
+      if(isRequiredMulti(row)&&gold.length>5) add("high","complete_impossible",`필수 Gold가 ${gold.length}개라 Complete@5로 완전 회수할 수 없습니다.`);
+      if(answerable===false&&gold.length) add("medium","unanswerable_with_gold","답변 불가 문항인데 직접 정답 Gold 청크가 연결되어 있습니다.");
+      if(applicable===false&&METRICS.some(([key])=>n(row[key])!=null)) add("medium","excluded_but_scored","검색평가 비대상 문항에 검색 지표가 계산되어 있습니다.");
+      if(["needs_clarification","out_of_scope","no_intent"].includes(ambiguity)&&applicable!==false) {
+        add("medium","policy_in_retrieval",`${ambiguity} 문항이 검색평가에 포함되었을 가능성이 있습니다.`);
+      }
+      if(["ask_clarification","redirect_out_of_scope","request_intent"].includes(action)&&applicable!==false) {
+        add("medium","action_in_retrieval",`${action} 응답정책 문항이 검색 성능 평균에 포함되었을 가능성이 있습니다.`);
+      }
+      if(primary.some(v=>supporting.includes(v))) add("medium","role_overlap","같은 청크가 primary와 supporting에 동시에 들어 있습니다.");
+      if(gold.length&&(primary.length||supporting.length)) {
+        const outside=[...primary,...supporting].filter(v=>!gold.includes(v));
+        if(outside.length) add("medium","role_not_in_gold","primary/supporting 청크 중 전체 Gold 목록에 없는 항목이 있습니다.");
+      }
+      for(const [key] of METRICS) if(!metricInRange(row,key)) add("high","metric_range",`${key} 값이 0~1 범위를 벗어났습니다.`);
+      if(!firstValue(row,["gold_business_function","domain","도메인(원본)","업무라벨"])) add("low","missing_domain","업무 도메인이 비어 있어 도메인별 비교에서 누락될 수 있습니다.");
+      return issues;
+    }
+    function methodDiagnosticContext(method) {
+      const counts={};
+      for(const row of method?.questions||[]) {
+        const id=rowId(row);
+        if(id) counts[id]=(counts[id]||0)+1;
+      }
+      return {idCounts:counts,duplicateIds:new Set(Object.keys(counts).filter(id=>counts[id]>1))};
+    }
+    function allDiagnostics(method) {
+      const context=methodDiagnosticContext(method);
+      return (method?.questions||[]).map((row,index)=>({row,index,issues:diagnosticsForRow(row,context)})).filter(item=>item.issues.length);
+    }
+
+    function parseCSV(text) {
+      const rows = []; let row = []; let cell = ""; let quoted = false;
+      for (let i=0; i<text.length; i++) {
+        const ch = text[i];
+        if (quoted) {
+          if (ch === '"' && text[i+1] === '"') { cell += '"'; i++; }
+          else if (ch === '"') quoted = false;
+          else cell += ch;
+        } else {
+          if (ch === '"') quoted = true;
+          else if (ch === ",") { row.push(cell); cell = ""; }
+          else if (ch === "\n") { row.push(cell.replace(/\r$/,"")); rows.push(row); row=[]; cell=""; }
+          else cell += ch;
+        }
+      }
+      if (cell.length || row.length) { row.push(cell.replace(/\r$/,"")); rows.push(row); }
+      const headers = (rows.shift() || []).map(h => h.replace(/^\uFEFF/, "").trim());
+      return rows.filter(r => r.some(v => v !== "")).map(r =>
+        Object.fromEntries(headers.map((h,i) => [h, r[i] ?? ""]))
+      );
+    }
+
+    async function parseSingleFile(name, data) {
+      const lower = name.toLowerCase();
+      if (lower.endsWith(".csv")) return {kind:"rows", name, rows:parseCSV(new TextDecoder("utf-8").decode(data))};
+      if (lower.endsWith(".jsonl")) {
+        const rows = new TextDecoder("utf-8").decode(data).split(/\r?\n/).filter(Boolean).map(line => JSON.parse(line));
+        return {kind:"rows", name, rows};
+      }
+      if (lower.endsWith(".json")) return {kind:"json", name, json:JSON.parse(new TextDecoder("utf-8").decode(data))};
+      if (lower.endsWith(".xlsx") || lower.endsWith(".xls")) {
+        if (!window.XLSX) throw new Error("엑셀 분석 모듈을 불러오지 못했습니다. 인터넷 연결 후 다시 열어 주세요.");
+        const workbook = XLSX.read(data, {type:"array"});
+        const sheets = workbook.SheetNames.map(sheetName => ({
+          sheetName, rows:XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], {defval:""})
+        }));
+        return {kind:"workbook", name, sheets};
+      }
+      return null;
+    }
+
+    async function collectInputs(files) {
+      const parsed = [];
+      for (const file of files) {
+        const buffer = await file.arrayBuffer();
+        if (file.name.toLowerCase().endsWith(".zip")) {
+          if (!window.JSZip) throw new Error("ZIP 분석 모듈을 불러오지 못했습니다. 인터넷 연결 후 다시 열어 주세요.");
+          const zip = await JSZip.loadAsync(buffer);
+          const entries = Object.values(zip.files).filter(entry => !entry.dir && /\.(csv|json|jsonl|xlsx|xls)$/i.test(entry.name));
+          for (const entry of entries) {
+            if (/query_embedding_cache/i.test(entry.name)) continue;
+            const bytes = await entry.async("uint8array");
+            const result = await parseSingleFile(entry.name, bytes);
+            if (result) parsed.push(result);
+          }
+        } else {
+          const result = await parseSingleFile(file.name, new Uint8Array(buffer));
+          if (result) parsed.push(result);
+        }
+      }
+      return parsed;
+    }
+
+    function prepareCompatibilitySources(parsed) {
+      const sources=[];
+      for(const item of parsed||[]){
+        if(item.kind==="rows"&&item.rows?.length)sources.push({name:item.name,rows:item.rows});
+        if(item.kind==="json"&&Array.isArray(item.json)&&item.json.length)sources.push({name:item.name,rows:item.json});
+        if(item.kind==="workbook")for(const sheet of item.sheets||[])if(sheet.rows?.length)sources.push({name:`${item.name} · ${sheet.sheetName}`,rows:sheet.rows});
+      }
+      state.compatibilitySources=sources;
+      return sources;
+    }
+    function normalizedHeader(value){return String(value||"").trim().toLowerCase().replace(/[\s_@()\-·]/g,"");}
+    function guessCompatibilityColumn(canonical,headers){
+      const aliases=(COMPAT_ALIASES[canonical]||[canonical]).map(normalizedHeader);
+      return headers.find(header=>aliases.includes(normalizedHeader(header)))||"";
+    }
+    function renderCompatibilityGrid() {
+      const source=state.compatibilitySources[Number(document.getElementById("compatibilitySource").value)||0];
+      const target=document.getElementById("compatibilityGrid");
+      if(!source){target.innerHTML='<div class="empty">매핑할 표 데이터를 찾지 못했습니다.</div>';return;}
+      const headers=[...new Set(source.rows.slice(0,30).flatMap(row=>Object.keys(row)))];
+      target.innerHTML=COMPAT_FIELDS.map(([canonical,label])=>{
+        const guessed=guessCompatibilityColumn(canonical,headers);
+        return `<label class="field"><span>${escapeHtml(label)}</span><select data-canonical="${canonical}"><option value="">연결 안 함</option>${headers.map(header=>`<option value="${escapeHtml(header)}" ${header===guessed?"selected":""}>${escapeHtml(header)}</option>`).join("")}</select></label>`;
+      }).join("");
+    }
+    function openCompatibilityDialog() {
+      if(!state.compatibilitySources.length){showStatus("먼저 결과 파일을 선택해 주세요.",true);return;}
+      const sourceSelect=document.getElementById("compatibilitySource");
+      sourceSelect.innerHTML=state.compatibilitySources.map((source,index)=>`<option value="${index}">${escapeHtml(source.name)} · ${source.rows.length}행</option>`).join("");
+      sourceSelect.value="0";document.getElementById("compatibilityError").textContent="";
+      renderCompatibilityGrid();document.getElementById("compatibilityDialog").showModal();
+    }
+    function closeCompatibilityDialog(){document.getElementById("compatibilityDialog").close();}
+
+    function classifyRows(rows) {
+      if (!rows.length) return "unknown";
+      const keys = new Set(Object.keys(rows[0]));
+      if (keys.has("evaluation_id") && keys.has("retrieved_chunk_ids")) return "questions";
+      if ((keys.has("evaluation_id") || keys.has("question_id") || keys.has("질문ID") || keys.has("평가ID"))
+          && [...keys].some(key=>METRICS.some(([metric])=>metric===key)||key==="ap_at_10")) return "questions";
+      if ((keys.has("evaluation_id") || keys.has("question_id") || keys.has("질문ID") || keys.has("평가ID"))
+          && (keys.has("gold_chunk_ids") || keys.has("gold_document_ids") || keys.has("gold_answerable"))) return "dataset";
+      if (keys.has("group_value") && keys.has("question_count")) return "domains";
+      if (keys.has("hit_at_3") || keys.has("recall_at_5")) return "metrics";
+      return "unknown";
+    }
+
+    function normalizeMetricObject(source) {
+      const obj = {...source};
+      obj.map_at_10 = n(obj.map_at_10 ?? obj.ap_at_10);
+      for (const [key] of METRICS) obj[key] = n(obj[key]);
+      obj.question_count = n(obj.question_count) ?? 0;
+      obj.latency_ms_mean = n(obj.latency_ms_mean ?? obj.latency_ms);
+      return obj;
+    }
+
+    function aggregateQuestions(rows) {
+      const normalized = rows.map(row => {
+        const r = {...row};
+        r.map_at_10 = n(r.map_at_10 ?? r.ap_at_10);
+        for (const [key] of METRICS) r[key] = n(r[key]);
+        r.latency_ms = n(r.latency_ms);
+        return r;
+      });
+      const avg = key => {
+        const values = normalized.map(r => n(r[key])).filter(v => v != null);
+        return values.length ? values.reduce((a,b)=>a+b,0) / values.length : null;
+      };
+      const overall = {question_count: normalized.length, complete_applicable_count: normalized.filter(r => r.complete_at_5 != null).length};
+      for (const [key] of METRICS) overall[key] = avg(key);
+      overall.latency_ms_mean = avg("latency_ms");
+      const domains = [...new Set(normalized.map(r => r.gold_business_function).filter(Boolean))];
+      const byDomain = domains.map(domain => {
+        const subset = normalized.filter(r => r.gold_business_function === domain);
+        const result = {group_value:domain, question_count:subset.length, complete_applicable_count:subset.filter(r=>r.complete_at_5!=null).length};
+        for (const [key] of METRICS) {
+          const vals = subset.map(r=>n(r[key])).filter(v=>v!=null);
+          result[key] = vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : null;
+        }
+        return result;
+      });
+      return {overall, byDomain, questions:normalized};
+    }
+
+    function inferMethodName(parsed, explicit) {
+      if (explicit) return explicit;
+      for (const item of parsed) {
+        if (item.kind === "json" && item.json?.retriever) return String(item.json.retriever).replace(/cosine/i,"").trim();
+      }
+      const combined = parsed.map(p=>p.name).join(" ").toLowerCase();
+      if (combined.includes("sparse") && combined.includes("dense")) return "Dense + Sparse";
+      if (combined.includes("sparse")) return "BGE-M3 Sparse";
+      if (combined.includes("nori") && combined.includes("dense")) return "Dense + BM25-Nori";
+      if (combined.includes("nori")) return "BM25-Nori";
+      if (combined.includes("bm25")) return "BM25 기본";
+      if (combined.includes("dense")) return "BGE-M3 Dense";
+      return `검색 방식 ${state.methods.length + 1}`;
+    }
+
+    function buildMethod(parsed, name) {
+      let summary = null, byDomain = [], questions = [], datasetRows = [];
+      for (const item of parsed) {
+        if (item.kind === "json") {
+          if (item.json?.overall) {
+            summary = normalizeMetricObject(item.json.overall);
+            byDomain = (item.json.by_domain || item.json.byDomain || []).map(normalizeMetricObject);
+          } else if (Array.isArray(item.json)) {
+            const type = classifyRows(item.json);
+            if (type === "questions") questions.push(...item.json);
+            if (type === "dataset") datasetRows.push(...item.json);
+            if (type === "domains") byDomain.push(...item.json.map(normalizeMetricObject));
+          }
+        }
+        if (item.kind === "rows") {
+          const type = classifyRows(item.rows);
+          if (type === "questions") questions.push(...item.rows);
+          else if (type === "dataset") datasetRows.push(...item.rows);
+          else if (type === "domains") byDomain.push(...item.rows.map(normalizeMetricObject));
+          else if (type === "metrics" && item.rows.length === 1) summary = normalizeMetricObject(item.rows[0]);
+        }
+        if (item.kind === "workbook") {
+          for (const sheet of item.sheets) {
+            const type = classifyRows(sheet.rows);
+            if (type === "questions") questions.push(...sheet.rows);
+            else if (type === "dataset") datasetRows.push(...sheet.rows);
+            else if (type === "domains") byDomain.push(...sheet.rows.map(normalizeMetricObject));
+            else if (type === "metrics" && sheet.rows.length) summary = normalizeMetricObject(sheet.rows[0]);
+          }
+        }
+      }
+      if (questions.length) {
+        if(datasetRows.length){
+          const metadataById=new Map(datasetRows.map(row=>[rowId(row),row]).filter(([id])=>id));
+          questions=questions.map(row=>({...metadataById.get(rowId(row)),...row}));
+        }
+        const aggregate = aggregateQuestions(questions);
+        summary = aggregate.overall;
+        byDomain = aggregate.byDomain;
+        questions = aggregate.questions;
+      }
+      if (!summary && byDomain.length) {
+        const total = byDomain.reduce((sum,row)=>sum+(n(row.question_count)||0),0);
+        summary = {question_count:total};
+        for (const [key] of METRICS) {
+          const valid = byDomain.filter(r=>n(r[key])!=null && n(r.question_count)>0);
+          const denom = valid.reduce((s,r)=>s+n(r.question_count),0);
+          summary[key] = denom ? valid.reduce((s,r)=>s+n(r[key])*n(r.question_count),0)/denom : null;
+        }
+      }
+      if (!summary) throw new Error("평가 지표 칼럼을 찾지 못했습니다. summary.json, question_results.csv 또는 같은 구조의 XLSX를 넣어 주세요.");
+      const existing = state.methods.find(m => m.name === name);
+      return {
+        id: existing?.id || `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+        name, source: parsed.map(p=>p.name).join(", "),
+        color: existing?.color || methodColor(state.methods.length),
+        archived:false,
+        pipeline:existing?.pipeline || defaultPipelineForName(name),
+        overall: normalizeMetricObject(summary),
+        byDomain: byDomain.map(normalizeMetricObject),
+        questions
+      };
+    }
+
+    async function handleFiles(fileList) {
+      const files = [...fileList];
+      if (!files.length) return;
+      showStatus(`${files.length}개 파일을 분석하고 있습니다…`);
+      try {
+        const parsed = await collectInputs(files);
+        state.pendingParsed=parsed;
+        prepareCompatibilitySources(parsed);
+        document.getElementById("compatibilitySetup").disabled=!state.compatibilitySources.length;
+        const explicit = document.getElementById("methodName").value.trim() || document.getElementById("methodPreset").value;
+        const name = inferMethodName(parsed, explicit);
+        const method = buildMethod(parsed, name);
+        const index = state.methods.findIndex(m => m.name === name);
+        if (index >= 0) state.methods[index] = method; else state.methods.push(method);
+        state.selectedId = method.id;
+        saveMethods(); renderAll();
+        document.getElementById("methodName").value = "";
+        showStatus(`${name} 결과를 추가했습니다. ${method.overall.question_count || 0}개 질문의 평균을 반영했습니다.`);
+      } catch (error) {
+        console.error(error);
+        const suffix=state.compatibilitySources.length?" 아래 ‘칼럼 호환성 설정’에서 직접 연결할 수 있습니다.":"";
+        showStatus((error.message || String(error))+suffix, true);
+        if(state.compatibilitySources.length)openCompatibilityDialog();
+      }
+    }
+
+    function pipelineStageInfo(stage) {
+      if(PIPELINE_STAGES[stage])return PIPELINE_STAGES[stage];
+      if(String(stage).startsWith("custom:")){
+        const label=String(stage).slice(7);
+        return {label,description:"사용자가 직접 추가한 실험 단계입니다."};
+      }
+      return {label:String(stage),description:"직접 구성한 검색 단계입니다."};
+    }
+    function matchingPipelinePreset(pipeline) {
+      const serialized=JSON.stringify(pipeline||[]);
+      return Object.entries(PIPELINE_PRESETS).find(([,stages])=>JSON.stringify(stages)===serialized)?.[0]||"custom";
+    }
+    function renderPipeline() {
+      const method=selectedMethod(), palette=document.getElementById("pipelinePalette"), flow=document.getElementById("pipelineFlow");
+      const preset=document.getElementById("pipelinePreset");
+      if(!method){
+        palette.innerHTML="";flow.innerHTML='<div class="empty">검색 방식을 선택하면 다이어그램을 설정할 수 있습니다.</div>';
+        document.getElementById("pipelineDetail").textContent="평가 결과를 먼저 추가해 주세요.";
+        preset.disabled=true;return;
+      }
+      preset.disabled=false;
+      method.pipeline=Array.isArray(method.pipeline)&&method.pipeline.length?method.pipeline:defaultPipelineForName(method.name);
+      preset.value=matchingPipelinePreset(method.pipeline);
+      palette.innerHTML=Object.entries(PIPELINE_STAGES).map(([key,info])=>
+        `<button class="btn compact pipeline-toggle" type="button" data-stage="${key}" aria-pressed="${method.pipeline.includes(key)}">${escapeHtml(info.label)}</button>`
+      ).join("");
+      palette.querySelectorAll(".pipeline-toggle").forEach(button=>button.onclick=()=>{
+        const stage=button.dataset.stage, index=method.pipeline.indexOf(stage);
+        if(index>=0)method.pipeline.splice(index,1);
+        else {
+          const answerIndex=method.pipeline.indexOf("answer");
+          if(answerIndex>=0)method.pipeline.splice(answerIndex,0,stage);else method.pipeline.push(stage);
+        }
+        state.selectedPipelineStage=stage;saveMethods();renderPipeline();
+      });
+      flow.innerHTML=method.pipeline.map((stage,index)=>{
+        const info=pipelineStageInfo(stage), selected=state.selectedPipelineStage===stage;
+        return `${index?'<div class="pipeline-arrow" aria-hidden="true">→</div>':''}<button class="pipeline-node" type="button" data-stage="${escapeHtml(stage)}" aria-pressed="${selected}"><strong>${escapeHtml(info.label)}</strong><small>${escapeHtml(info.description)}</small></button>`;
+      }).join("");
+      flow.querySelectorAll(".pipeline-node").forEach(button=>button.onclick=()=>{
+        state.selectedPipelineStage=button.dataset.stage;renderPipeline();
+      });
+      const selected=state.selectedPipelineStage;
+      const detail=document.getElementById("pipelineDetail");
+      if(selected&&method.pipeline.includes(selected)){
+        const info=pipelineStageInfo(selected);
+        detail.innerHTML=`<b>${escapeHtml(info.label)}</b> · ${escapeHtml(info.description)} <button class="btn compact" id="removePipelineStage" type="button">이 단계 제거</button>`;
+        document.getElementById("removePipelineStage").onclick=()=>{
+          method.pipeline=method.pipeline.filter(stage=>stage!==selected);state.selectedPipelineStage=null;saveMethods();renderPipeline();
+        };
+      } else detail.textContent="다이어그램의 단계를 누르면 선택 상태와 역할이 표시됩니다.";
+    }
+
+    function renderAll() {
+      ensureSelectedMethod();
+      renderTabs(); renderStats(); renderBarChart(); renderRadar();
+      renderDomainTable(); renderQuestionFilters(); renderQuestionTable(); renderMethodList();
+      renderArchiveList(); renderPipeline(); renderViewFilterNote(); renderDiagnostics();
+      document.getElementById("heroMethodCount").textContent = `${activeMethods().length}개`;
+      const selected = selectedMethod();
+      document.getElementById("heroQuestionCount").textContent = selected
+        ? `${selected.name} ${selected.overall.question_count || 0}문항`
+        : "평가 결과를 추가해 주세요";
+    }
+    function renderTabs() {
+      const methods=activeMethods();
+      document.getElementById("methodTabs").innerHTML = methods.length ? methods.map(m =>
+        `<button class="method-tab ${m.id===state.selectedId?"active":""}" data-id="${escapeHtml(m.id)}">${escapeHtml(m.name)}</button>`
+      ).join("") : '<span class="empty" style="padding:8px 0">등록된 검색 방식 없음</span>';
+      document.querySelectorAll(".method-tab").forEach(btn => btn.onclick=()=>{state.selectedId=btn.dataset.id;renderAll();});
+    }
+    function renderStats() {
+      const m = selectedMethod();
+      if(!m){
+        document.getElementById("summaryStats").innerHTML='<div class="empty" style="grid-column:1/-1">평가 결과를 추가하면 요약 지표가 표시됩니다.</div>';
+        return;
+      }
+      const active=activeAggregate(m), o = active.overall;
+      const total=(m.questions||[]).length||m.overall.question_count||0;
+      const stats = [
+        ["평가 질문", `${o.question_count || 0}개`, state.multiChunkFilter==="all"?"검색평가대상 기준":`전체 ${total}개 중 필터 적용`],
+        ["Top-3 적중률 · Hit@3", pct(o.hit_at_3), "정답 청크 1개 이상"],
+        ["Top-5 재현율 · Recall@5", pct(o.recall_at_5), "필요 Gold 회수 비율"],
+        ["순위 품질 · nDCG@5", pct(o.ndcg_at_5), "주요·보조 중요도 반영"],
+        ["8개 지표 단순 평균", pct(composite(o)), "참고용 종합 비교"]
+      ];
+      document.getElementById("summaryStats").innerHTML = stats.map(([l,v,s]) =>
+        `<div class="stat"><label>${l}</label><strong>${v}</strong><small>${s}</small></div>`
+      ).join("");
+    }
+    function renderBarChart() {
+      const chart = document.getElementById("barChart");
+      const methods=activeMethods();
+      if(!methods.length){
+        chart.innerHTML='<div class="empty">비교할 검색 방식이 없습니다.<br>평가 결과 ZIP·CSV·XLSX를 추가해 주세요.</div>';
+        return;
+      }
+      chart.innerHTML = METRICS.map(([key,label]) => `
+        <div class="metric-group">
+          <div class="metric-label" title="${escapeHtml(METRIC_DESC[key])}">${label}</div>
+          <div class="bars">${methods.map((m,i)=>{
+            const rawValue=n(activeAggregate(m).overall[key]), value=rawValue??0;
+            return `<div class="bar-line">
+              <span class="bar-name">${escapeHtml(m.name)}</span>
+              <div class="bar-track"><div class="bar-fill" style="--target-width:${Math.max(0,Math.min(100,value*100))}%;background:${methodColor(i,m)}"></div></div>
+              <span class="bar-value">${pct(rawValue)}</span>
+            </div>`;
+          }).join("")}</div>
+        </div>`).join("");
+    }
+    function radarPoint(index, count, value, radius, center) {
+      const angle = -Math.PI/2 + index*(Math.PI*2/count);
+      return [center+Math.cos(angle)*radius*value, center+Math.sin(angle)*radius*value];
+    }
+    function renderRadar() {
+      const methods=activeMethods();
+      if(!methods.length){
+        document.getElementById("radarChart").innerHTML='<div class="empty">비교할 검색 방식이 없습니다.</div>';
+        document.getElementById("radarLegend").innerHTML="";
+        return;
+      }
+      const size=430, center=215, radius=150, count=METRICS.length;
+      const rings=[.25,.5,.75,1].map(level=>{
+        const pts=METRICS.map((_,i)=>radarPoint(i,count,level,radius,center).join(",")).join(" ");
+        return `<polygon points="${pts}" fill="none" stroke="var(--line)" stroke-width="1"/>`;
+      }).join("");
+      const axes=METRICS.map(([,label,,shortLabel],i)=>{
+        const [x,y]=radarPoint(i,count,1,radius,center);
+        const [lx,ly]=radarPoint(i,count,1.18,radius,center);
+        return `<line x1="${center}" y1="${center}" x2="${x}" y2="${y}" stroke="var(--line)"/>
+          <text x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="middle" font-size="11" fill="var(--muted)">${shortLabel}</text>`;
+      }).join("");
+      const polygons=methods.slice(0,6).map((m,i)=>{
+        const overall=activeAggregate(m).overall;
+        const pts=METRICS.map(([key],j)=>radarPoint(j,count,n(overall[key])||0,radius,center).join(",")).join(" ");
+        return `<polygon class="radar-series" points="${pts}" fill="${methodColor(i,m)}22" stroke="${methodColor(i,m)}" stroke-width="2" style="animation-delay:${i*.08}s"/>`;
+      }).join("");
+      document.getElementById("radarChart").innerHTML =
+        `<svg viewBox="0 0 ${size} ${size}" role="img" aria-label="검색 방식별 지표 레이더 차트">${rings}${axes}${polygons}</svg>`;
+      document.getElementById("radarLegend").innerHTML=methods.slice(0,6).map((m,i)=>
+        `<span class="legend-item"><i class="swatch" style="background:${methodColor(i,m)}"></i>${escapeHtml(m.name)}</span>`
+      ).join("");
+    }
+    function renderDomainTable() {
+      const metric=document.getElementById("domainMetric").value||"ndcg_at_5";
+      const methods=activeMethods();
+      const aggregates=new Map(methods.map(m=>[m.id,activeAggregate(m)]));
+      const domains=[...new Set(methods.flatMap(m=>aggregates.get(m.id).byDomain.map(d=>d.group_value)).filter(Boolean))];
+      if(!domains.length){document.getElementById("domainTable").innerHTML='<div class="empty">도메인별 결과 파일을 추가하면 표시됩니다.</div>';return;}
+      const header=`<tr><th>도메인</th>${methods.map(m=>`<th class="num">${escapeHtml(m.name)}</th>`).join("")}</tr>`;
+      const rows=domains.map(domain=>`<tr><td>${escapeHtml(DOMAIN_LABEL[domain]||domain)}</td>${methods.map(m=>{
+        const row=aggregates.get(m.id).byDomain.find(d=>d.group_value===domain), value=n(row?.[metric]);
+        const alpha=value==null?0:Math.max(.08,Math.min(.55,value*.6));
+        return `<td class="num"><span class="heat" style="background:rgba(23,104,212,${alpha})">${pct(value)}</span></td>`;
+      }).join("")}</tr>`).join("");
+      document.getElementById("domainTable").innerHTML=`<table><thead>${header}</thead><tbody>${rows}</tbody></table>`;
+    }
+    function renderQuestionFilters() {
+      const selected=selectedMethod(), domains=selected
+        ? [...new Set((selected.questions||[]).map(q=>q.gold_business_function).filter(Boolean))]
+        : [];
+      const select=document.getElementById("questionDomain"), current=select.value;
+      select.innerHTML='<option value="">전체 도메인</option>'+domains.map(d=>`<option value="${escapeHtml(d)}">${escapeHtml(DOMAIN_LABEL[d]||d)}</option>`).join("");
+      if(domains.includes(current))select.value=current;
+    }
+    function shortJson(value) {
+      if(!value)return "[]";
+      try { const v=typeof value==="string"?JSON.parse(value):value; return Array.isArray(v)?v.join(", "):String(value); }
+      catch{return String(value);}
+    }
+    function renderQuestionTable() {
+      const m=selectedMethod(), target=document.getElementById("questionTable");
+      if(!m){document.getElementById("questionFilterResult").textContent="";target.innerHTML='<div class="empty">평가 결과를 추가하면 질문별 결과가 표시됩니다.</div>';return;}
+      if(!(m.questions||[]).length){document.getElementById("questionFilterResult").textContent="";target.innerHTML='<div class="empty">현재 요약 지표만 표시 중입니다.<br>평가 결과 ZIP 또는 question_results.csv를 추가하면 질문별 결과가 나타납니다.</div>';return;}
+      const query=document.getElementById("questionSearch").value.trim().toLowerCase();
+      const domain=document.getElementById("questionDomain").value;
+      const status=document.getElementById("questionStatus").value;
+      const diagnostic=document.getElementById("questionDiagnostic").value;
+      const context=methodDiagnosticContext(m);
+      let rows=m.questions.map((row,index)=>({row,index,issues:diagnosticsForRow(row,context)})).filter(item=>{
+        const r=item.row;
+        if(!rowIncludedByMultiFilter(r))return false;
+        const text=`${rowId(r)} ${r.question||r.예상질문||""}`.toLowerCase();
+        if(query&&!text.includes(query))return false;
+        if(domain&&r.gold_business_function!==domain)return false;
+        if(status==="fail"&&n(r.hit_at_3)!==0)return false;
+        if(status==="partial"&&!(n(r.recall_at_5)<1))return false;
+        if(status==="success"&&n(r.hit_at_3)!==1)return false;
+        if(diagnostic==="suspect"&&!item.issues.length)return false;
+        if(diagnostic==="clean"&&item.issues.length)return false;
+        return true;
+      });
+      rows=rows.sort((a,b)=>(n(a.row.hit_at_3)||0)-(n(b.row.hit_at_3)||0)||(n(a.row.recall_at_5)||0)-(n(b.row.recall_at_5)||0));
+      const total=rows.length;
+      rows=rows.slice(0,100);
+      document.getElementById("questionFilterResult").textContent=`조건에 맞는 질문 ${total}개${total>100?" · 화면에는 앞의 100개 표시":""}`;
+      target.innerHTML=`<table><thead><tr><th>평가ID·질문</th><th>도메인</th><th class="num">Hit@3</th><th class="num">Recall@5</th><th>Gold 청크</th><th>검색 Top-10</th><th>데이터 점검</th></tr></thead>
+        <tbody>${rows.map(item=>{
+          const r=item.row, key=`${m.id}:${item.index}`, open=state.openQuestionDiagnostics.has(key);
+          const issueHtml=item.issues.length
+            ? item.issues.map(issue=>`<li><span class="severity ${issue.severity}">${issue.severity==="high"?"우선 확인":issue.severity==="medium"?"확인 권장":"참고"}</span> ${escapeHtml(issue.message)}</li>`).join("")
+            : "<li>현재 자동 점검 규칙에서 발견된 이상은 없습니다.</li>";
+          return `<tr><td class="question-main"><b>${escapeHtml(rowId(r))}</b><br>${escapeHtml(r.question||r.예상질문||"")}</td>
+          <td>${escapeHtml(DOMAIN_LABEL[r.gold_business_function]||r.domain||r.gold_business_function||"")}</td>
+          <td class="num ${n(r.hit_at_3)===1?"good":"bad"}">${pct(r.hit_at_3)}</td><td class="num">${pct(r.recall_at_5)}</td>
+          <td>${escapeHtml(goldChunks(r).join(", "))}</td><td>${escapeHtml(shortJson(r.retrieved_chunk_ids))}</td>
+          <td><button class="diag-button question-diag-toggle" data-key="${escapeHtml(key)}">${open?"진단 닫기":"진단 보기"}</button></td></tr>
+          <tr class="row-diagnostic" data-detail-key="${escapeHtml(key)}" ${open?"":"hidden"}><td colspan="7">
+            <p class="diagnostic-disclaimer">자동 판단은 검수 우선순위를 돕기 위한 참고 정보이며, 평가데이터 오류를 확정하지 않습니다.</p>
+            <ul>${issueHtml}</ul>
+          </td></tr>`;
+        }).join("")}</tbody></table>`;
+      document.querySelectorAll(".question-diag-toggle").forEach(button=>button.onclick=()=>{
+        const key=button.dataset.key;
+        if(state.openQuestionDiagnostics.has(key))state.openQuestionDiagnostics.delete(key);
+        else state.openQuestionDiagnostics.add(key);
+        renderQuestionTable();
+      });
+    }
+    function renderViewFilterNote() {
+      const selected=selectedMethod();
+      const total=(selected?.questions||[]).length;
+      const included=selected?activeQuestions(selected).length:0;
+      const labels={
+        all:"현재 모든 평가 질문을 평균 지표에 포함합니다.",
+        exclude_required:`필수 다중 청크 문항을 제외했습니다. ${included}/${total}문항 반영`,
+        exclude_any_multi:`Gold 청크가 2개 이상인 질문을 제외했습니다. ${included}/${total}문항 반영`,
+        only_multi:`다중 청크 질문만 남겼습니다. ${included}/${total}문항 반영`
+      };
+      document.getElementById("viewFilterNote").textContent=selected?labels[state.multiChunkFilter]:"평가 결과를 추가하면 필터 적용 문항 수가 표시됩니다.";
+      const select=document.getElementById("multiChunkFilter");
+      if(select.value!==state.multiChunkFilter)select.value=state.multiChunkFilter;
+    }
+    function renderDiagnostics() {
+      const panel=document.getElementById("diagnosticPanel");
+      panel.hidden=!state.diagnosticsOpen;
+      document.getElementById("toggleDiagnostics").setAttribute("aria-expanded",String(state.diagnosticsOpen));
+      if(!state.diagnosticsOpen)return;
+      const method=selectedMethod(), target=document.getElementById("diagnosticContent");
+      if(!method){target.innerHTML='<div class="empty">진단할 평가 결과를 먼저 추가해 주세요.</div>';return;}
+      if(!(method.questions||[]).length){target.innerHTML='<div class="empty">질문별 결과가 없어 평가데이터 자동 진단을 수행할 수 없습니다.</div>';return;}
+      const diagnostics=allDiagnostics(method);
+      const severityCounts={high:0,medium:0,low:0};
+      diagnostics.forEach(item=>item.issues.forEach(issue=>severityCounts[issue.severity]++));
+      if(!diagnostics.length){
+        target.innerHTML='<div class="empty">현재 자동 점검 규칙에서 검토 후보를 찾지 못했습니다.<br>이는 평가데이터가 완전히 정확하다는 보장은 아닙니다.</div>';
+        return;
+      }
+      const rows=diagnostics.flatMap(item=>item.issues.map(issue=>({item,issue})))
+        .sort((a,b)=>["high","medium","low"].indexOf(a.issue.severity)-["high","medium","low"].indexOf(b.issue.severity))
+        .slice(0,200);
+      target.innerHTML=`
+        <div class="diagnostic-summary">
+          <div class="diagnostic-card"><span>검토 후보 질문</span><strong>${diagnostics.length}개</strong></div>
+          <div class="diagnostic-card"><span>우선 확인 신호</span><strong>${severityCounts.high}건</strong></div>
+          <div class="diagnostic-card"><span>확인 권장·참고</span><strong>${severityCounts.medium+severityCounts.low}건</strong></div>
+        </div>
+        <div class="diag-list">${rows.map(({item,issue})=>`
+          <div class="diag-item">
+            <span class="severity ${issue.severity}">${issue.severity==="high"?"우선 확인":issue.severity==="medium"?"확인 권장":"참고"}</span>
+            <b>${escapeHtml(rowId(item.row)||"(ID 없음)")}</b>
+            <span>${escapeHtml(issue.message)}</span>
+            <button class="diag-button diag-jump" data-index="${item.index}">질문에서 보기</button>
+          </div>`).join("")}
+        </div>`;
+      document.querySelectorAll(".diag-jump").forEach(button=>button.onclick=()=>{
+        document.getElementById("questionSearch").value=rowId(method.questions[Number(button.dataset.index)]);
+        document.getElementById("questionDiagnostic").value="all";
+        state.openQuestionDiagnostics.add(`${method.id}:${button.dataset.index}`);
+        renderQuestionTable();
+        document.getElementById("questionTable").scrollIntoView({behavior:"smooth",block:"start"});
+      });
+    }
+    function renderMethodList() {
+      const target=document.getElementById("methodList");
+      const methods=activeMethods();
+      if(!methods.length){
+        target.innerHTML='<div class="empty">현재 비교 중인 검색 방식이 없습니다.<br>새 결과를 추가하거나 보관함에서 복원해 주세요.</div>';
+        return;
+      }
+      target.innerHTML=methods.map((m,i)=>`
+        ${(()=>{const active=activeAggregate(m).overall;return `
+        <div class="method-row"><i class="dot" style="background:${methodColor(i,m)}"></i><strong>${escapeHtml(m.name)}</strong>
+        <span>질문 ${active.question_count||0}개</span><span>Hit@3 ${pct(active.hit_at_3)}</span>
+        <span>nDCG@5 ${pct(active.ndcg_at_5)}</span>
+        <div class="method-actions">
+          <label><span class="sr-only">${escapeHtml(m.name)} 색상</span><input class="method-color" type="color" value="${escapeHtml(m.color||methodColor(i,m))}" data-id="${escapeHtml(m.id)}" aria-label="${escapeHtml(m.name)} 차트 색상"></label>
+          <button class="btn compact rename-method" data-id="${escapeHtml(m.id)}">이름 변경</button>
+          <button class="btn compact archive-method" data-id="${escapeHtml(m.id)}">보관</button>
+          <button class="btn compact danger remove-method" data-id="${escapeHtml(m.id)}">삭제</button>
+        </div></div>`})()}
+      `).join("");
+      document.querySelectorAll(".method-color").forEach(input=>input.oninput=()=>{
+        const method=state.methods.find(m=>m.id===input.dataset.id);if(!method)return;
+        method.color=input.value;saveMethods();renderBarChart();renderRadar();renderTabs();
+      });
+      document.querySelectorAll(".rename-method").forEach(btn=>btn.onclick=()=>openRenameDialog(btn.dataset.id));
+      document.querySelectorAll(".archive-method").forEach(btn=>btn.onclick=()=>{
+        const method=state.methods.find(m=>m.id===btn.dataset.id);if(!method)return;
+        method.archived=true;
+        if(state.selectedId===method.id)state.selectedId=activeMethods()[0]?.id||null;
+        saveMethods();renderAll();showStatus(`${method.name} 결과를 보관했습니다. 차트 비교에서 제외됩니다.`);
+      });
+      document.querySelectorAll(".remove-method").forEach(btn=>btn.onclick=()=>{
+        const method=state.methods.find(m=>m.id===btn.dataset.id);
+        if(!method||!confirm(`${method.name} 결과를 삭제할까요?`))return;
+        state.methods=state.methods.filter(m=>m.id!==btn.dataset.id);
+        state.selectedId=activeMethods()[0]?.id||null;saveMethods();renderAll();
+        showStatus(`${method.name} 결과를 삭제했습니다.`);
+      });
+    }
+
+    function renderArchiveList() {
+      const methods=archivedMethods(), target=document.getElementById("archiveList");
+      document.getElementById("archiveCount").textContent=`${methods.length}개`;
+      if(!methods.length){target.innerHTML='<div class="empty" style="padding:20px 8px">보관된 검색 방식이 없습니다.</div>';return;}
+      target.innerHTML=methods.map((m,i)=>`<div class="archive-row">
+        <i class="dot" style="background:${escapeHtml(m.color||methodColor(i,m))}"></i>
+        <strong>${escapeHtml(m.name)}</strong>
+        <div class="method-actions">
+          <button class="btn compact restore-method" data-id="${escapeHtml(m.id)}">다시 비교</button>
+          <button class="btn compact danger remove-archived" data-id="${escapeHtml(m.id)}">완전 삭제</button>
+        </div></div>`).join("");
+      document.querySelectorAll(".restore-method").forEach(btn=>btn.onclick=()=>{
+        const method=state.methods.find(m=>m.id===btn.dataset.id);if(!method)return;
+        method.archived=false;state.selectedId=method.id;saveMethods();renderAll();showStatus(`${method.name} 결과를 비교 화면으로 복원했습니다.`);
+      });
+      document.querySelectorAll(".remove-archived").forEach(btn=>btn.onclick=()=>{
+        const method=state.methods.find(m=>m.id===btn.dataset.id);
+        if(!method||!confirm(`${method.name} 보관 데이터를 완전히 삭제할까요?`))return;
+        state.methods=state.methods.filter(m=>m.id!==method.id);saveMethods();renderAll();showStatus(`${method.name} 결과를 완전히 삭제했습니다.`);
+      });
+    }
+
+    let renameTargetId = null;
+    function openRenameDialog(id) {
+      const method=state.methods.find(m=>m.id===id);
+      if(!method)return;
+      renameTargetId=id;
+      document.getElementById("renameInput").value=method.name;
+      document.getElementById("renameError").textContent="";
+      const dialog=document.getElementById("renameDialog");
+      dialog.showModal();
+      requestAnimationFrame(()=>document.getElementById("renameInput").select());
+    }
+    function closeRenameDialog() {
+      renameTargetId=null;
+      document.getElementById("renameDialog").close();
+    }
+    document.getElementById("renameCancel").onclick=closeRenameDialog;
+    document.getElementById("renameForm").onsubmit=event=>{
+      event.preventDefault();
+      const newName=document.getElementById("renameInput").value.trim();
+      const error=document.getElementById("renameError");
+      if(!newName){error.textContent="검색 방식 이름을 입력해 주세요.";return;}
+      if(state.methods.some(m=>m.id!==renameTargetId&&m.name.toLowerCase()===newName.toLowerCase())){
+        error.textContent="이미 같은 이름의 검색 방식이 있습니다.";return;
+      }
+      const method=state.methods.find(m=>m.id===renameTargetId);
+      if(!method){closeRenameDialog();return;}
+      const previousName=method.name;
+      method.name=newName;
+      saveMethods();
+      closeRenameDialog();
+      renderAll();
+      showStatus(`${previousName}의 이름을 ${newName}(으)로 변경했습니다.`);
+    };
+    function showStatus(message,error=false) {
+      const box=document.getElementById("statusBox");box.textContent=message;
+      box.className=`status show${error?" error":""}`;
+    }
+    function exportComparison() {
+      const methods=activeMethods();
+      if(!methods.length){showStatus("현재 비교 중인 검색 방식 결과가 없습니다. 보관함에서 복원하거나 결과를 추가해 주세요.",true);return;}
+      const headers=["검색 방식","평가 질문","8개 지표 단순 평균",...METRICS.map(([,label])=>label),"평균 검색시간(ms)"];
+      const rows=methods.map(m=>{const o=activeAggregate(m).overall;return [m.name,o.question_count||0,composite(o),...METRICS.map(([k])=>o[k]),o.latency_ms_mean];});
+      downloadBlob("\uFEFF"+toCSV([headers,...rows]),"KDIC_검색방식_평균비교.csv","text/csv;charset=utf-8");
+    }
+    function toCSV(rows) {
+      return rows.map(row=>row.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(",")).join("\r\n");
+    }
+    function downloadBlob(content,filename,type="application/octet-stream") {
+      const blob=content instanceof Blob?content:new Blob([content],{type});
+      const a=document.createElement("a");
+      a.href=URL.createObjectURL(blob);a.download=filename;a.click();
+      setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+    }
+    function buildAnalysisPayload() {
+      const methods=activeMethods();
+      return {
+        schema_version:"kdic-search-evaluation-export-v1",
+        generated_at:new Date().toISOString(),
+        purpose:"KDIC RAG 검색 방식의 객관적 비교와 운영 방식 선정",
+        excluded_archived_method_count:archivedMethods().length,
+        active_question_filter:state.multiChunkFilter,
+        evaluation_protocol:{
+          metrics:METRICS.map(([key,label,description,short_label])=>({key,label,short_label,description})),
+          selection_note:"8개 지표 단순 평균만으로 결론내리지 말고 질문 수, 도메인별 편차, 실패 질문, 지연시간을 함께 검토해야 합니다.",
+          expected_comparability_checks:[
+            "검색 방식별 평가 질문 수가 같은지",
+            "동일한 Gold 청크와 업무 필터를 사용했는지",
+            "동일한 Top-K 및 평가 코드인지",
+            "문서·질문 전처리 조건이 같은지"
+          ]
+        },
+        methods:methods.map((m,i)=>{
+          const active=activeAggregate(m);
+          return {
+          name:m.name,
+          source:m.source||"",
+          display_color:methodColor(i,m),
+          pipeline:m.pipeline||[],
+          composite_reference_mean:composite(active.overall),
+          overall:active.overall,
+          by_domain:active.byDomain||[],
+          question_results:active.questions||[],
+          dataset_diagnostics:allDiagnostics(m).map(item=>({
+            evaluation_id:rowId(item.row),
+            issues:item.issues
+          }))
+        }})
+      };
+    }
+    async function exportAIAnalysis() {
+      const methods=activeMethods();
+      if(!methods.length){showStatus("AI 분석용으로 내보낼 비교 중 결과가 없습니다.",true);return;}
+      const payload=buildAnalysisPayload();
+      const headers=["검색 방식","평가 질문","8개 지표 단순 평균",...METRICS.map(([,label])=>label),"평균 검색시간(ms)"];
+      const rows=methods.map(m=>{const o=activeAggregate(m).overall;return [m.name,o.question_count||0,composite(o),...METRICS.map(([k])=>o[k]),o.latency_ms_mean];});
+      const prompt=`# KDIC 검색 방식 선정 분석 요청
+
+첨부된 JSON과 CSV를 바탕으로 RAG 검색 방식 선정안을 작성해 주세요.
+
+## 분석 원칙
+1. 먼저 검색 방식별 질문 수·Gold·Top-K·업무 필터 등 비교 조건이 동일한지 확인하세요.
+2. Hit@3, Recall@5, MRR@10, MAP@10, Complete@5, nDCG@5, Precision@5, F1@5를 각각 해석하세요.
+3. 단순 평균 1위만 고르지 말고 도메인별 편차와 실패 질문 유형을 함께 분석하세요.
+4. 질문별 결과가 있으면 공통 실패, 특정 방식만 성공한 질문, Hard Negative 혼입을 찾아주세요.
+5. 검색 지연시간이 있으면 품질 향상 대비 비용을 비교하세요.
+6. 최종적으로 기본 검색 방식 1개와 보완용 Hybrid 후보를 제안하고 근거를 표로 정리하세요.
+7. 데이터가 부족하거나 비교 조건이 다르면 확정 결론 대신 추가 실험 항목을 제안하세요.
+8. dataset_diagnostics는 자동 점검 결과이므로 오류로 단정하지 말고 Gold 원문 검수가 필요한 후보로 분류하세요.
+
+## 원하는 출력
+- 비교 조건 검증
+- 전체 지표 비교
+- 도메인별 강점·약점
+- 대표 성공·실패 사례
+- 권장 검색 방식과 선정 근거
+- 다음 실험 제안
+`;
+      if(!window.JSZip){
+        downloadBlob(JSON.stringify(payload,null,2),"KDIC_검색평가_AI분석데이터.json","application/json;charset=utf-8");
+        showStatus("ZIP 모듈을 불러오지 못해 AI 분석용 JSON으로 저장했습니다.",true);
+        return;
+      }
+      const zip=new JSZip();
+      zip.file("KDIC_검색평가_AI분석데이터.json",JSON.stringify(payload,null,2));
+      zip.file("KDIC_검색방식_평균비교.csv","\uFEFF"+toCSV([headers,...rows]));
+      zip.file("AI_분석요청문.md",prompt);
+      zip.file("사용안내.txt","이 ZIP을 ChatGPT, Codex 또는 다른 AI에 첨부하고 AI_분석요청문.md의 기준으로 검색 방식 비교를 요청하세요. 원본 수치는 JSON에 보존되어 있습니다.");
+      const blob=await zip.generateAsync({type:"blob",compression:"DEFLATE",compressionOptions:{level:6}});
+      downloadBlob(blob,"KDIC_검색평가_AI분석패키지.zip");
+      showStatus(`${methods.length}개 비교 중 검색 방식의 AI 분석용 패키지를 저장했습니다.`);
+    }
+
+    document.getElementById("themeToggle").onclick=()=>{
+      applyTheme(document.documentElement.dataset.theme==="dark"?"light":"dark");
+      renderRadar();
+    };
+    document.getElementById("pipelinePreset").onchange=event=>{
+      const method=selectedMethod();if(!method)return;
+      const key=event.target.value;
+      if(key!=="custom"&&PIPELINE_PRESETS[key])method.pipeline=[...PIPELINE_PRESETS[key]];
+      state.selectedPipelineStage=null;saveMethods();renderPipeline();
+    };
+    document.getElementById("addCustomStage").onclick=()=>{
+      const method=selectedMethod(),input=document.getElementById("customStageName");
+      const name=input.value.trim();
+      if(!method){showStatus("검색 방식을 먼저 선택해 주세요.",true);return;}
+      if(!name){input.focus();showStatus("추가할 단계 이름을 입력해 주세요.",true);return;}
+      const stage=`custom:${name}`;
+      if(method.pipeline.includes(stage)){showStatus("같은 이름의 단계가 이미 있습니다.",true);return;}
+      const answerIndex=method.pipeline.indexOf("answer");
+      if(answerIndex>=0)method.pipeline.splice(answerIndex,0,stage);else method.pipeline.push(stage);
+      input.value="";state.selectedPipelineStage=stage;saveMethods();renderPipeline();
+      showStatus(`${method.name} 다이어그램에 ‘${name}’ 단계를 추가했습니다.`);
+    };
+    document.getElementById("customStageName").addEventListener("keydown",event=>{
+      if(event.key==="Enter"){event.preventDefault();document.getElementById("addCustomStage").click();}
+    });
+
+    document.getElementById("compatibilitySetup").onclick=openCompatibilityDialog;
+    document.getElementById("compatibilitySource").onchange=renderCompatibilityGrid;
+    document.getElementById("compatibilityCancel").onclick=closeCompatibilityDialog;
+    document.getElementById("compatibilityForm").onsubmit=event=>{
+      event.preventDefault();
+      const error=document.getElementById("compatibilityError"),sourceIndex=Number(document.getElementById("compatibilitySource").value)||0;
+      const source=state.compatibilitySources[sourceIndex];
+      if(!source){error.textContent="매핑할 파일 또는 시트를 선택해 주세요.";return;}
+      const mapping={};
+      document.querySelectorAll("#compatibilityGrid select[data-canonical]").forEach(select=>{
+        if(select.value)mapping[select.dataset.canonical]=select.value;
+      });
+      const mappedMetrics=METRICS.filter(([key])=>mapping[key]);
+      if(!mappedMetrics.length){error.textContent="8개 평가 지표 중 하나 이상을 연결해 주세요.";return;}
+      const mappedRows=source.rows.map(row=>{
+        const output={};
+        for(const [canonical,column] of Object.entries(mapping))output[canonical]=row[column];
+        return output;
+      }).filter(row=>Object.values(row).some(value=>value!==""&&value!=null));
+      const explicit=document.getElementById("methodName").value.trim()||document.getElementById("methodPreset").value;
+      const name=explicit||`${source.name.replace(/\.[^.]+(?: · .+)?$/i,"")} · 수동 매핑`;
+      try{
+        const method=buildMethod([{kind:"rows",name:`${source.name} · 수동 칼럼 매핑`,rows:mappedRows}],name);
+        const index=state.methods.findIndex(item=>item.name.toLowerCase()===name.toLowerCase());
+        if(index>=0)state.methods[index]=method;else state.methods.push(method);
+        state.selectedId=method.id;document.getElementById("methodName").value="";
+        saveMethods();closeCompatibilityDialog();renderAll();
+        showStatus(`${name} 결과를 수동 칼럼 매핑으로 추가했습니다. ${method.overall.question_count||0}개 질문을 반영했습니다.`);
+      }catch(mappingError){error.textContent=mappingError.message||String(mappingError);}
+    };
+
+    const dropZone=document.getElementById("dropZone"), fileInput=document.getElementById("fileInput");
+    fileInput.addEventListener("change",e=>handleFiles(e.target.files));
+    ["dragenter","dragover"].forEach(type=>dropZone.addEventListener(type,e=>{e.preventDefault();dropZone.classList.add("drag");}));
+    ["dragleave","drop"].forEach(type=>dropZone.addEventListener(type,e=>{e.preventDefault();dropZone.classList.remove("drag");}));
+    dropZone.addEventListener("drop",e=>handleFiles(e.dataTransfer.files));
+    document.getElementById("domainMetric").innerHTML=METRICS.map(([k,l])=>`<option value="${k}" ${k==="ndcg_at_5"?"selected":""}>${l}</option>`).join("");
+    document.getElementById("domainMetric").onchange=renderDomainTable;
+    ["questionSearch","questionDomain","questionStatus","questionDiagnostic"].forEach(id=>document.getElementById(id).addEventListener(id==="questionSearch"?"input":"change",renderQuestionTable));
+    document.getElementById("multiChunkFilter").value=state.multiChunkFilter;
+    document.getElementById("multiChunkFilter").onchange=event=>{
+      state.multiChunkFilter=event.target.value;
+      localStorage.setItem("kdic-multi-chunk-filter",state.multiChunkFilter);
+      state.openQuestionDiagnostics.clear();
+      renderAll();
+    };
+    document.getElementById("toggleDiagnostics").onclick=()=>{
+      state.diagnosticsOpen=!state.diagnosticsOpen;
+      renderDiagnostics();
+      if(state.diagnosticsOpen)document.getElementById("diagnosticPanel").scrollIntoView({behavior:"smooth",block:"start"});
+    };
+    document.getElementById("closeDiagnostics").onclick=()=>{
+      state.diagnosticsOpen=false;
+      renderDiagnostics();
+    };
+    document.getElementById("exportComparison").onclick=exportComparison;
+    document.getElementById("exportAI").onclick=exportAIAnalysis;
+    document.getElementById("resetAll").onclick=()=>{
+      if(!state.methods.length){showStatus("이미 모든 결과가 비어 있습니다.");return;}
+      if(!confirm(`등록된 검색 방식 ${state.methods.length}개와 지표를 모두 지울까요? 이 작업은 되돌릴 수 없습니다.`))return;
+      state.methods=[];state.selectedId=null;saveMethods();renderAll();showStatus("모든 검색 방식과 지표를 비웠습니다.");
+    };
+    applyTheme(localStorage.getItem("kdic-dashboard-theme") || (window.matchMedia?.("(prefers-color-scheme: dark)").matches?"dark":"light"));
+    renderAll();
+  </script>
+</body>
+</html>

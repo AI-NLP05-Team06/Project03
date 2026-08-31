@@ -1,0 +1,70 @@
+[
+  {
+    "source": "outputs/KDIC_검색평가_test_dataset_4_1_업무필터없음_Colab_패키지/08_공통입력_원본그대로/KDIC_output.zip",
+    "reason": "raw data or duplicate distribution ZIP"
+  },
+  {
+    "source": "outputs/KDIC_검색평가_v3_5_업무필터없음_Colab_패키지/07_공통입력_원본그대로/KDIC_output.zip",
+    "reason": "raw data or duplicate distribution ZIP"
+  },
+  {
+    "source": "outputs/KDIC_검색평가_v4_1_Colab_비교패키지/06_공통입력/KDIC_output.zip",
+    "reason": "raw data or duplicate distribution ZIP"
+  },
+  {
+    "source": "outputs/KDIC_Structured_Hybrid_ParentChild_Reranker_업무필터없음_Colab_패키지/KDIC_output.zip",
+    "reason": "raw data or duplicate distribution ZIP"
+  },
+  {
+    "source": "outputs/KDIC_Structured_Hybrid_ParentChild_업무필터없음_Colab/KDIC_output.zip",
+    "reason": "raw data or duplicate distribution ZIP"
+  },
+  {
+    "source": "outputs/KDIC_Hybrid_A_Reranker_업무필터없음_Colab/KDIC_Hybrid_A_Reranker_업무필터없음_Colab_실행패키지.zip",
+    "reason": "raw data or duplicate distribution ZIP"
+  },
+  {
+    "source": "outputs/KDIC_Hybrid_A_Reranker_업무필터없음_Colab/KDIC_output.zip",
+    "reason": "raw data or duplicate distribution ZIP"
+  },
+  {
+    "source": "outputs/KDIC_검색방식_Colab_산출물_제출본/Colab_노트북.zip",
+    "reason": "raw data or duplicate distribution ZIP"
+  },
+  {
+    "source": "outputs/KDIC_검색방식_Colab_산출물_제출본/결과비교_도구.zip",
+    "reason": "raw data or duplicate distribution ZIP"
+  },
+  {
+    "source": "outputs/KDIC_검색방식_Colab_산출물_제출본/03_평가결과/01_KDIC_BM25_기본_평가결과.zip",
+    "reason": "raw data or duplicate distribution ZIP"
+  },
+  {
+    "source": "outputs/KDIC_검색방식_Colab_산출물_제출본/03_평가결과/02_KDIC_BM25_Nori_Mixed_평가결과.zip",
+    "reason": "raw data or duplicate distribution ZIP"
+  },
+  {
+    "source": "outputs/KDIC_검색방식_Colab_산출물_제출본/03_평가결과/03_KDIC_BM25_Nori_Discard_평가결과.zip",
+    "reason": "raw data or duplicate distribution ZIP"
+  },
+  {
+    "source": "outputs/KDIC_검색방식_Colab_산출물_제출본/03_평가결과/04_KDIC_BGE_M3_Dense_평가결과.zip",
+    "reason": "raw data or duplicate distribution ZIP"
+  },
+  {
+    "source": "outputs/KDIC_검색방식_Colab_산출물_제출본/03_평가결과/05_KDIC_BGE_M3_Sparse_평가결과.zip",
+    "reason": "raw data or duplicate distribution ZIP"
+  },
+  {
+    "source": "outputs/KDIC_검색방식_Colab_산출물_제출본/03_평가결과/06_KDIC_Hybrid_A_평가결과.zip",
+    "reason": "raw data or duplicate distribution ZIP"
+  },
+  {
+    "source": "outputs/KDIC_검색방식_Colab_산출물_제출본/03_평가결과/07_KDIC_Hybrid_A_Reranker_평가결과.zip",
+    "reason": "raw data or duplicate distribution ZIP"
+  },
+  {
+    "source": "outputs/KDIC_검색방식_Colab_산출물_제출본/04_공통입력/KDIC_output.zip",
+    "reason": "raw data or duplicate distribution ZIP"
+  }
+]

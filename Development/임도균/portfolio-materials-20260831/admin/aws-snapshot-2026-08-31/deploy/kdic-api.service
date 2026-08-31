@@ -1,0 +1,18 @@
+[Unit]
+Description=KDIC FastAPI service
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/opt/kdic/repo/Development/ec2_deploy/kdic_deploy_assets
+EnvironmentFile=/opt/kdic/kdic.env
+ExecStart=/opt/kdic/venv/bin/python /opt/kdic/repo/Development/ec2_deploy/kdic_deploy_assets/kdic_ec2_launcher.py
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

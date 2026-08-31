@@ -1,0 +1,3017 @@
+{
+  "metadata": {
+    "active_question_filter": "all",
+    "question_count": 121,
+    "method_count": 5,
+    "complete_applicable_reported": [
+      {
+        "method": "Nori",
+        "count": 121
+      },
+      {
+        "method": "Dense",
+        "count": 121
+      },
+      {
+        "method": "Sparse",
+        "count": 121
+      },
+      {
+        "method": "Hybrid",
+        "count": 121
+      },
+      {
+        "method": "Reranker",
+        "count": 121
+      }
+    ],
+    "multi_primary_proxy_count": 22
+  },
+  "overall": [
+    {
+      "method": "Nori",
+      "question_count": 121,
+      "complete_applicable_count": 121,
+      "hit_at_3": 0.5785123966942148,
+      "recall_at_5": 0.581267217630854,
+      "mrr_at_10": 0.5030958940049851,
+      "map_at_10": 0.43663081026717415,
+      "complete_at_5": 0.03305785123966942,
+      "ndcg_at_5": 0.45856041552168825,
+      "precision_at_5": 0.16859504132231376,
+      "f1_at_5": 0.2514102059556603,
+      "latency_ms_mean": 1.0853553719008264
+    },
+    {
+      "method": "Dense",
+      "question_count": 121,
+      "complete_applicable_count": 121,
+      "hit_at_3": 0.71900826446281,
+      "recall_at_5": 0.6949035812672175,
+      "mrr_at_10": 0.6276957890594255,
+      "map_at_10": 0.5584812409812411,
+      "complete_at_5": 0.04132231404958678,
+      "ndcg_at_5": 0.583710903305587,
+      "precision_at_5": 0.1999999999999997,
+      "f1_at_5": 0.2992916174734356,
+      "latency_ms_mean": 287.147049586777
+    },
+    {
+      "method": "Sparse",
+      "question_count": 121,
+      "complete_applicable_count": 121,
+      "hit_at_3": 0.6033057851239669,
+      "recall_at_5": 0.5544077134986225,
+      "mrr_at_10": 0.5143545848091304,
+      "map_at_10": 0.45029242642879014,
+      "complete_at_5": 0.04132231404958678,
+      "ndcg_at_5": 0.4592412921371788,
+      "precision_at_5": 0.17024793388429735,
+      "f1_at_5": 0.24999999999999994,
+      "latency_ms_mean": 36.75349586776859
+    },
+    {
+      "method": "Hybrid",
+      "question_count": 121,
+      "complete_applicable_count": 121,
+      "hit_at_3": 0.7355371900826446,
+      "recall_at_5": 0.6973829201101928,
+      "mrr_at_10": 0.6241243604879969,
+      "map_at_10": 0.5589876033057851,
+      "complete_at_5": 0.04132231404958678,
+      "ndcg_at_5": 0.5839670242183012,
+      "precision_at_5": 0.1999999999999997,
+      "f1_at_5": 0.3,
+      "latency_ms_mean": 729.135694214876
+    },
+    {
+      "method": "Reranker",
+      "question_count": 121,
+      "complete_applicable_count": 121,
+      "hit_at_3": 0.8181818181818182,
+      "recall_at_5": 0.7796143250688705,
+      "mrr_at_10": 0.6994490358126723,
+      "map_at_10": 0.6386615068433249,
+      "complete_at_5": 0.05785123966942149,
+      "ndcg_at_5": 0.666941293117587,
+      "precision_at_5": 0.22975206611570212,
+      "f1_at_5": 0.34025318116227193,
+      "latency_ms_mean": 700.8585619834711
+    }
+  ],
+  "domainRows": [
+    {
+      "method": "Nori",
+      "group_value": "deposit_protection",
+      "question_count": 20,
+      "complete_applicable_count": 20,
+      "hit_at_3": 0.55,
+      "recall_at_5": 0.575,
+      "mrr_at_10": 0.48083333333333333,
+      "map_at_10": 0.4121428571428572,
+      "complete_at_5": 0,
+      "ndcg_at_5": 0.4769881762449389,
+      "precision_at_5": 0.15000000000000002,
+      "f1_at_5": 0.23333333333333334
+    },
+    {
+      "method": "Nori",
+      "group_value": "deposit_insurance_payout",
+      "question_count": 19,
+      "complete_applicable_count": 19,
+      "hit_at_3": 0.5263157894736842,
+      "recall_at_5": 0.5964912280701755,
+      "mrr_at_10": 0.5342105263157895,
+      "map_at_10": 0.4819688109161794,
+      "complete_at_5": 0.15789473684210525,
+      "ndcg_at_5": 0.5221634479726712,
+      "precision_at_5": 0.16842105263157894,
+      "f1_at_5": 0.25626566416040103
+    },
+    {
+      "method": "Nori",
+      "group_value": "unclaimed_funds",
+      "question_count": 11,
+      "complete_applicable_count": 11,
+      "hit_at_3": 0.7272727272727273,
+      "recall_at_5": 0.6181818181818183,
+      "mrr_at_10": 0.419047619047619,
+      "map_at_10": 0.4077561327561327,
+      "complete_at_5": 0,
+      "ndcg_at_5": 0.3692906176663007,
+      "precision_at_5": 0.19999999999999998,
+      "f1_at_5": 0.2761904761904762
+    },
+    {
+      "method": "Nori",
+      "group_value": "mistaken_transfer",
+      "question_count": 30,
+      "complete_applicable_count": 30,
+      "hit_at_3": 0.4666666666666667,
+      "recall_at_5": 0.4777777777777778,
+      "mrr_at_10": 0.36648148148148146,
+      "map_at_10": 0.3412037037037036,
+      "complete_at_5": 0.03333333333333333,
+      "ndcg_at_5": 0.37645880801488285,
+      "precision_at_5": 0.12000000000000004,
+      "f1_at_5": 0.18769841269841267
+    },
+    {
+      "method": "Nori",
+      "group_value": "debt_adjustment",
+      "question_count": 16,
+      "complete_applicable_count": 16,
+      "hit_at_3": 0.4375,
+      "recall_at_5": 0.7,
+      "mrr_at_10": 0.39027777777777783,
+      "map_at_10": 0.38712301587301584,
+      "complete_at_5": 0,
+      "ndcg_at_5": 0.4393624660599865,
+      "precision_at_5": 0.17500000000000002,
+      "f1_at_5": 0.27142857142857146
+    },
+    {
+      "method": "Nori",
+      "group_value": "hidden_assets_report",
+      "question_count": 25,
+      "complete_applicable_count": 25,
+      "hit_at_3": 0.8,
+      "recall_at_5": 0.6066666666666667,
+      "mrr_at_10": 0.7703809523809524,
+      "map_at_10": 0.5806666666666667,
+      "complete_at_5": 0,
+      "ndcg_at_5": 0.5455672300003674,
+      "precision_at_5": 0.22400000000000006,
+      "f1_at_5": 0.3149206349206348
+    },
+    {
+      "method": "Dense",
+      "group_value": "deposit_protection",
+      "question_count": 20,
+      "complete_applicable_count": 20,
+      "hit_at_3": 0.65,
+      "recall_at_5": 0.575,
+      "mrr_at_10": 0.5488095238095239,
+      "map_at_10": 0.4946428571428571,
+      "complete_at_5": 0.05,
+      "ndcg_at_5": 0.5360616266636304,
+      "precision_at_5": 0.16000000000000003,
+      "f1_at_5": 0.24523809523809526
+    },
+    {
+      "method": "Dense",
+      "group_value": "deposit_insurance_payout",
+      "question_count": 19,
+      "complete_applicable_count": 19,
+      "hit_at_3": 0.7368421052631579,
+      "recall_at_5": 0.7982456140350876,
+      "mrr_at_10": 0.7736842105263158,
+      "map_at_10": 0.685923141186299,
+      "complete_at_5": 0.15789473684210525,
+      "ndcg_at_5": 0.7439871277291231,
+      "precision_at_5": 0.2315789473684211,
+      "f1_at_5": 0.3496240601503759
+    },
+    {
+      "method": "Dense",
+      "group_value": "unclaimed_funds",
+      "question_count": 11,
+      "complete_applicable_count": 11,
+      "hit_at_3": 0.8181818181818182,
+      "recall_at_5": 0.890909090909091,
+      "mrr_at_10": 0.6727272727272727,
+      "map_at_10": 0.6548989898989899,
+      "complete_at_5": 0,
+      "ndcg_at_5": 0.6818248272652564,
+      "precision_at_5": 0.2727272727272727,
+      "f1_at_5": 0.38874458874458884
+    },
+    {
+      "method": "Dense",
+      "group_value": "mistaken_transfer",
+      "question_count": 30,
+      "complete_applicable_count": 30,
+      "hit_at_3": 0.5333333333333333,
+      "recall_at_5": 0.6166666666666667,
+      "mrr_at_10": 0.49694444444444447,
+      "map_at_10": 0.45944444444444443,
+      "complete_at_5": 0.03333333333333333,
+      "ndcg_at_5": 0.5004925065550632,
+      "precision_at_5": 0.1466666666666667,
+      "f1_at_5": 0.23333333333333328
+    },
+    {
+      "method": "Dense",
+      "group_value": "debt_adjustment",
+      "question_count": 16,
+      "complete_applicable_count": 16,
+      "hit_at_3": 0.75,
+      "recall_at_5": 0.73125,
+      "mrr_at_10": 0.5833333333333334,
+      "map_at_10": 0.5431994047619048,
+      "complete_at_5": 0,
+      "ndcg_at_5": 0.5897072632798264,
+      "precision_at_5": 0.18750000000000003,
+      "f1_at_5": 0.2892857142857143
+    },
+    {
+      "method": "Dense",
+      "group_value": "hidden_assets_report",
+      "question_count": 25,
+      "complete_applicable_count": 25,
+      "hit_at_3": 0.92,
+      "recall_at_5": 0.6966666666666665,
+      "mrr_at_10": 0.7453333333333333,
+      "map_at_10": 0.5988968253968254,
+      "complete_at_5": 0,
+      "ndcg_at_5": 0.5528746732321267,
+      "precision_at_5": 0.2480000000000001,
+      "f1_at_5": 0.35047619047619044
+    },
+    {
+      "method": "Sparse",
+      "group_value": "deposit_protection",
+      "question_count": 20,
+      "complete_applicable_count": 20,
+      "hit_at_3": 0.6,
+      "recall_at_5": 0.5,
+      "mrr_at_10": 0.4388690476190476,
+      "map_at_10": 0.3732738095238095,
+      "complete_at_5": 0.05,
+      "ndcg_at_5": 0.4355812689610129,
+      "precision_at_5": 0.14,
+      "f1_at_5": 0.21428571428571433
+    },
+    {
+      "method": "Sparse",
+      "group_value": "deposit_insurance_payout",
+      "question_count": 19,
+      "complete_applicable_count": 19,
+      "hit_at_3": 0.5263157894736842,
+      "recall_at_5": 0.4385964912280702,
+      "mrr_at_10": 0.525877192982456,
+      "map_at_10": 0.4293859649122807,
+      "complete_at_5": 0.15789473684210525,
+      "ndcg_at_5": 0.4285035081306749,
+      "precision_at_5": 0.1368421052631579,
+      "f1_at_5": 0.2036340852130326
+    },
+    {
+      "method": "Sparse",
+      "group_value": "unclaimed_funds",
+      "question_count": 11,
+      "complete_applicable_count": 11,
+      "hit_at_3": 0.5454545454545454,
+      "recall_at_5": 0.6636363636363637,
+      "mrr_at_10": 0.5811688311688312,
+      "map_at_10": 0.5868037518037519,
+      "complete_at_5": 0,
+      "ndcg_at_5": 0.5231073308764407,
+      "precision_at_5": 0.21818181818181817,
+      "f1_at_5": 0.30216450216450225
+    },
+    {
+      "method": "Sparse",
+      "group_value": "mistaken_transfer",
+      "question_count": 30,
+      "complete_applicable_count": 30,
+      "hit_at_3": 0.5333333333333333,
+      "recall_at_5": 0.5111111111111112,
+      "mrr_at_10": 0.41,
+      "map_at_10": 0.37731481481481477,
+      "complete_at_5": 0,
+      "ndcg_at_5": 0.4105329613350695,
+      "precision_at_5": 0.12666666666666668,
+      "f1_at_5": 0.19880952380952382
+    },
+    {
+      "method": "Sparse",
+      "group_value": "debt_adjustment",
+      "question_count": 16,
+      "complete_applicable_count": 16,
+      "hit_at_3": 0.6875,
+      "recall_at_5": 0.7,
+      "mrr_at_10": 0.63125,
+      "map_at_10": 0.5821875,
+      "complete_at_5": 0.0625,
+      "ndcg_at_5": 0.6248775866261728,
+      "precision_at_5": 0.18750000000000003,
+      "f1_at_5": 0.28630952380952385
+    },
+    {
+      "method": "Sparse",
+      "group_value": "hidden_assets_report",
+      "question_count": 25,
+      "complete_applicable_count": 25,
+      "hit_at_3": 0.72,
+      "recall_at_5": 0.5966666666666667,
+      "mrr_at_10": 0.587,
+      "map_at_10": 0.47089153439153447,
+      "complete_at_5": 0,
+      "ndcg_at_5": 0.42587173796735456,
+      "precision_at_5": 0.24000000000000007,
+      "f1_at_5": 0.329047619047619
+    },
+    {
+      "method": "Hybrid",
+      "group_value": "deposit_protection",
+      "question_count": 20,
+      "complete_applicable_count": 20,
+      "hit_at_3": 0.6,
+      "recall_at_5": 0.575,
+      "mrr_at_10": 0.5708333333333333,
+      "map_at_10": 0.5037499999999999,
+      "complete_at_5": 0.05,
+      "ndcg_at_5": 0.5431689539364515,
+      "precision_at_5": 0.16000000000000003,
+      "f1_at_5": 0.24523809523809526
+    },
+    {
+      "method": "Hybrid",
+      "group_value": "deposit_insurance_payout",
+      "question_count": 19,
+      "complete_applicable_count": 19,
+      "hit_at_3": 0.7894736842105263,
+      "recall_at_5": 0.7982456140350876,
+      "mrr_at_10": 0.6815789473684211,
+      "map_at_10": 0.6307852965747702,
+      "complete_at_5": 0.15789473684210525,
+      "ndcg_at_5": 0.6857298127357848,
+      "precision_at_5": 0.2315789473684211,
+      "f1_at_5": 0.3496240601503759
+    },
+    {
+      "method": "Hybrid",
+      "group_value": "unclaimed_funds",
+      "question_count": 11,
+      "complete_applicable_count": 11,
+      "hit_at_3": 0.8181818181818182,
+      "recall_at_5": 0.8727272727272729,
+      "mrr_at_10": 0.703030303030303,
+      "map_at_10": 0.653903318903319,
+      "complete_at_5": 0,
+      "ndcg_at_5": 0.6746792404411356,
+      "precision_at_5": 0.2545454545454545,
+      "f1_at_5": 0.3705627705627707
+    },
+    {
+      "method": "Hybrid",
+      "group_value": "mistaken_transfer",
+      "question_count": 30,
+      "complete_applicable_count": 30,
+      "hit_at_3": 0.6,
+      "recall_at_5": 0.6166666666666667,
+      "mrr_at_10": 0.5373015873015874,
+      "map_at_10": 0.5011904761904762,
+      "complete_at_5": 0.03333333333333333,
+      "ndcg_at_5": 0.5389712735121756,
+      "precision_at_5": 0.1466666666666667,
+      "f1_at_5": 0.23333333333333328
+    },
+    {
+      "method": "Hybrid",
+      "group_value": "debt_adjustment",
+      "question_count": 16,
+      "complete_applicable_count": 16,
+      "hit_at_3": 0.75,
+      "recall_at_5": 0.73125,
+      "mrr_at_10": 0.5833333333333334,
+      "map_at_10": 0.5431994047619048,
+      "complete_at_5": 0,
+      "ndcg_at_5": 0.5897072632798264,
+      "precision_at_5": 0.18750000000000003,
+      "f1_at_5": 0.2892857142857143
+    },
+    {
+      "method": "Hybrid",
+      "group_value": "hidden_assets_report",
+      "question_count": 25,
+      "complete_applicable_count": 25,
+      "hit_at_3": 0.92,
+      "recall_at_5": 0.7166666666666666,
+      "mrr_at_10": 0.7186666666666666,
+      "map_at_10": 0.5863095238095238,
+      "complete_at_5": 0,
+      "ndcg_at_5": 0.5496735338804218,
+      "precision_at_5": 0.25600000000000006,
+      "f1_at_5": 0.3619047619047619
+    },
+    {
+      "method": "Reranker",
+      "group_value": "deposit_protection",
+      "question_count": 20,
+      "complete_applicable_count": 20,
+      "hit_at_3": 0.55,
+      "recall_at_5": 0.7,
+      "mrr_at_10": 0.5825,
+      "map_at_10": 0.5333333333333332,
+      "complete_at_5": 0.05,
+      "ndcg_at_5": 0.6068942351317572,
+      "precision_at_5": 0.19000000000000009,
+      "f1_at_5": 0.2928571428571428
+    },
+    {
+      "method": "Reranker",
+      "group_value": "deposit_insurance_payout",
+      "question_count": 19,
+      "complete_applicable_count": 19,
+      "hit_at_3": 0.9473684210526315,
+      "recall_at_5": 0.8859649122807017,
+      "mrr_at_10": 0.7719298245614035,
+      "map_at_10": 0.7285087719298246,
+      "complete_at_5": 0.15789473684210525,
+      "ndcg_at_5": 0.7852868530432261,
+      "precision_at_5": 0.2631578947368422,
+      "f1_at_5": 0.3934837092731829
+    },
+    {
+      "method": "Reranker",
+      "group_value": "unclaimed_funds",
+      "question_count": 11,
+      "complete_applicable_count": 11,
+      "hit_at_3": 0.9090909090909091,
+      "recall_at_5": 0.9636363636363636,
+      "mrr_at_10": 0.75,
+      "map_at_10": 0.7881818181818182,
+      "complete_at_5": 0,
+      "ndcg_at_5": 0.8009930214235983,
+      "precision_at_5": 0.34545454545454546,
+      "f1_at_5": 0.46147186147186153
+    },
+    {
+      "method": "Reranker",
+      "group_value": "mistaken_transfer",
+      "question_count": 30,
+      "complete_applicable_count": 30,
+      "hit_at_3": 0.6666666666666666,
+      "recall_at_5": 0.7,
+      "mrr_at_10": 0.6022222222222222,
+      "map_at_10": 0.5772222222222222,
+      "complete_at_5": 0.03333333333333333,
+      "ndcg_at_5": 0.6076191810375067,
+      "precision_at_5": 0.1666666666666667,
+      "f1_at_5": 0.265079365079365
+    },
+    {
+      "method": "Reranker",
+      "group_value": "debt_adjustment",
+      "question_count": 16,
+      "complete_applicable_count": 16,
+      "hit_at_3": 0.9375,
+      "recall_at_5": 0.86875,
+      "mrr_at_10": 0.6145833333333333,
+      "map_at_10": 0.6070833333333333,
+      "complete_at_5": 0.125,
+      "ndcg_at_5": 0.6640948670962296,
+      "precision_at_5": 0.23750000000000004,
+      "f1_at_5": 0.3583333333333333
+    },
+    {
+      "method": "Reranker",
+      "group_value": "hidden_assets_report",
+      "question_count": 25,
+      "complete_applicable_count": 25,
+      "hit_at_3": 1,
+      "recall_at_5": 0.7199999999999999,
+      "mrr_at_10": 0.8866666666666666,
+      "map_at_10": 0.6827883597883598,
+      "complete_at_5": 0,
+      "ndcg_at_5": 0.6390618006578844,
+      "precision_at_5": 0.2560000000000001,
+      "f1_at_5": 0.36301587301587296
+    }
+  ],
+  "common_failure_count": 15,
+  "commonFailures": [
+    {
+      "evaluation_id": "EVAL002",
+      "domain": "예금자보호제도",
+      "question": "한도를 초과한 금액은 어떻게 되나요?",
+      "gold": "[\"DP-001_chunk_000\"]",
+      "retrieved_top3": {
+        "Nori": [
+          "DP-005_chunk_028",
+          "DP-006_chunk_015",
+          "DP-005_chunk_037"
+        ],
+        "Dense": [
+          "DP-006_chunk_015",
+          "DP-006_chunk_001",
+          "DP-006_chunk_000"
+        ],
+        "Sparse": [
+          "DP-006_chunk_015",
+          "DP-005_chunk_027",
+          "DP-005_chunk_028"
+        ],
+        "Hybrid": [
+          "DP-006_chunk_015",
+          "DP-006_chunk_001",
+          "DP-006_chunk_000"
+        ],
+        "Reranker": [
+          "DP-006_chunk_015",
+          "DP-005_chunk_028",
+          "DP-005_chunk_037"
+        ]
+      }
+    },
+    {
+      "evaluation_id": "EVAL003",
+      "domain": "예금자보호제도",
+      "question": "원금과 이자를 합쳐서 계산하나요, 따로 계산하나요?",
+      "gold": "[\"DP-001_chunk_000\"]",
+      "retrieved_top3": {
+        "Nori": [
+          "DP-006_chunk_008",
+          "DP-006_chunk_010",
+          "DP-006_chunk_009"
+        ],
+        "Dense": [
+          "DP-006_chunk_008",
+          "DP-005_chunk_027",
+          "DP-005_chunk_031"
+        ],
+        "Sparse": [
+          "DP-006_chunk_008",
+          "DP-006_chunk_010",
+          "DP-005_chunk_004"
+        ],
+        "Hybrid": [
+          "DP-006_chunk_008",
+          "DP-005_chunk_031",
+          "DP-005_chunk_027"
+        ],
+        "Reranker": [
+          "DP-006_chunk_008",
+          "DP-005_chunk_004",
+          "DP-005_chunk_005"
+        ]
+      }
+    },
+    {
+      "evaluation_id": "EVAL007",
+      "domain": "예금자보호제도",
+      "question": "어떤 금융회사가 예금보호 대상인가요?",
+      "gold": "[\"DP-003_chunk_001\", \"DP-003_chunk_002\"]",
+      "retrieved_top3": {
+        "Nori": [
+          "DP-006_chunk_012",
+          "DP-001_chunk_000",
+          "DP-004_chunk_000"
+        ],
+        "Dense": [
+          "DP-006_chunk_002",
+          "DP-003_chunk_000",
+          "DP-003_chunk_003"
+        ],
+        "Sparse": [
+          "DP-006_chunk_002",
+          "DP-004_chunk_005",
+          "DP-002_chunk_001"
+        ],
+        "Hybrid": [
+          "DP-006_chunk_002",
+          "DP-003_chunk_003",
+          "DP-003_chunk_000"
+        ],
+        "Reranker": [
+          "DP-006_chunk_002",
+          "DP-006_chunk_003",
+          "DP-003_chunk_003"
+        ]
+      }
+    },
+    {
+      "evaluation_id": "EVAL008",
+      "domain": "예금자보호제도",
+      "question": "상호저축은행도 보호되나요?",
+      "gold": "[\"DP-003_chunk_001\", \"DP-003_chunk_002\"]",
+      "retrieved_top3": {
+        "Nori": [
+          "DP-004_chunk_011",
+          "DP-004_chunk_010",
+          "DP-006_chunk_002"
+        ],
+        "Dense": [
+          "DP-004_chunk_010",
+          "DP-004_chunk_011",
+          "DP-004_chunk_001"
+        ],
+        "Sparse": [
+          "DP-004_chunk_010",
+          "DP-006_chunk_002",
+          "DP-003_chunk_000"
+        ],
+        "Hybrid": [
+          "DP-004_chunk_010",
+          "DP-004_chunk_011",
+          "DP-004_chunk_001"
+        ],
+        "Reranker": [
+          "DP-006_chunk_002",
+          "DP-004_chunk_010",
+          "DP-004_chunk_011"
+        ]
+      }
+    },
+    {
+      "evaluation_id": "EVAL009",
+      "domain": "예금자보호제도",
+      "question": "증권사는 예금보호 대상에 포함되나요?",
+      "gold": "[\"DP-003_chunk_002\"]",
+      "retrieved_top3": {
+        "Nori": [
+          "DP-004_chunk_009",
+          "DP-006_chunk_002",
+          "DP-004_chunk_005"
+        ],
+        "Dense": [
+          "DP-003_chunk_000",
+          "DP-003_chunk_003",
+          "DP-006_chunk_002"
+        ],
+        "Sparse": [
+          "DP-004_chunk_005",
+          "DP-004_chunk_004",
+          "DP-004_chunk_003"
+        ],
+        "Hybrid": [
+          "DP-003_chunk_003",
+          "DP-006_chunk_002",
+          "DP-003_chunk_000"
+        ],
+        "Reranker": [
+          "DP-006_chunk_002",
+          "DP-006_chunk_003",
+          "DP-003_chunk_003"
+        ]
+      }
+    },
+    {
+      "evaluation_id": "EVAL010",
+      "domain": "예금자보호제도",
+      "question": "어떤 금융상품이 보호되나요?",
+      "gold": "[\"DP-004_chunk_007\", \"DP-004_chunk_012\"]",
+      "retrieved_top3": {
+        "Nori": [
+          "DP-006_chunk_003",
+          "DP-004_chunk_006",
+          "DP-004_chunk_002"
+        ],
+        "Dense": [
+          "DP-004_chunk_004",
+          "DP-004_chunk_002",
+          "DP-006_chunk_003"
+        ],
+        "Sparse": [
+          "DP-006_chunk_003",
+          "DP-004_chunk_006",
+          "DP-004_chunk_004"
+        ],
+        "Hybrid": [
+          "DP-004_chunk_004",
+          "DP-004_chunk_002",
+          "DP-006_chunk_003"
+        ],
+        "Reranker": [
+          "DP-006_chunk_003",
+          "DP-006_chunk_004",
+          "DP-004_chunk_002"
+        ]
+      }
+    },
+    {
+      "evaluation_id": "EVAL032",
+      "domain": "예금보험금",
+      "question": "은행이 문을 닫았다는데 제 돈 찾으려면 뭐부터 해야 해요?",
+      "gold": "[\"BI-002_chunk_000\", \"BI-002_chunk_001\", \"BI-002_chunk_002\"]",
+      "retrieved_top3": {
+        "Nori": [
+          "BI-001_chunk_001",
+          "BI-001_chunk_000",
+          "BI-003_chunk_008"
+        ],
+        "Dense": [
+          "BI-001_chunk_000",
+          "BI-004_chunk_029",
+          "BI-004_chunk_031"
+        ],
+        "Sparse": [
+          "BI-004_chunk_001",
+          "BI-004_chunk_037",
+          "BI-004_chunk_015"
+        ],
+        "Hybrid": [
+          "BI-001_chunk_000",
+          "BI-004_chunk_029",
+          "BI-004_chunk_031"
+        ],
+        "Reranker": [
+          "BI-001_chunk_004",
+          "BI-001_chunk_000",
+          "BI-003_chunk_008"
+        ]
+      }
+    },
+    {
+      "evaluation_id": "EVAL064",
+      "domain": "착오송금 반환지원",
+      "question": "신청부터 돈을 돌려받기까지 몇 단계인가요?",
+      "gold": "[\"MT-002_chunk_000\"]",
+      "retrieved_top3": {
+        "Nori": [
+          "MT-011_chunk_000",
+          "MT-001_chunk_000",
+          "MT-015_chunk_002"
+        ],
+        "Dense": [
+          "MT-013_chunk_006",
+          "MT-010_rule_layer01_chunk_040",
+          "MT-005_chunk_000"
+        ],
+        "Sparse": [
+          "MT-015_chunk_002",
+          "MT-015_chunk_001",
+          "MT-011_chunk_000"
+        ],
+        "Hybrid": [
+          "MT-013_chunk_006",
+          "MT-010_rule_layer01_chunk_040",
+          "MT-005_chunk_000"
+        ],
+        "Reranker": [
+          "MT-004_chunk_005",
+          "MT-005_chunk_000",
+          "MT-012_chunk_000"
+        ]
+      }
+    },
+    {
+      "evaluation_id": "EVAL065",
+      "domain": "착오송금 반환지원",
+      "question": "착오송금 반환지원은 어디서 신청하나요?",
+      "gold": "[\"MT-003_chunk_000\", \"MT-011_chunk_000\"]",
+      "retrieved_top3": {
+        "Nori": [
+          "MT-008_chunk_007",
+          "MT-010_rule_layer01_chunk_019",
+          "MT-010_rule_layer01_chunk_017"
+        ],
+        "Dense": [
+          "MT-002_chunk_000",
+          "MT-004_chunk_004",
+          "MT-013_chunk_000"
+        ],
+        "Sparse": [
+          "MT-013_chunk_002",
+          "MT-013_chunk_000",
+          "MT-010_rule_layer01_chunk_004"
+        ],
+        "Hybrid": [
+          "MT-004_chunk_004",
+          "MT-002_chunk_000",
+          "MT-008_chunk_007"
+        ],
+        "Reranker": [
+          "MT-004_chunk_004",
+          "MT-002_chunk_000",
+          "MT-005_chunk_004"
+        ]
+      }
+    },
+    {
+      "evaluation_id": "EVAL066",
+      "domain": "착오송금 반환지원",
+      "question": "인터넷 신청과 방문 신청 중 뭐가 더 빠른가요?",
+      "gold": "[\"MT-004_chunk_005\"]",
+      "retrieved_top3": {
+        "Nori": [
+          "MT-001_chunk_000",
+          "MT-012_chunk_000",
+          "MT-004_chunk_004"
+        ],
+        "Dense": [
+          "MT-012_chunk_000",
+          "MT-003_chunk_000",
+          "MT-004_chunk_004"
+        ],
+        "Sparse": [
+          "MT-003_chunk_000",
+          "MT-008_chunk_011",
+          "MT-007_chunk_000"
+        ],
+        "Hybrid": [
+          "MT-012_chunk_000",
+          "MT-004_chunk_004",
+          "MT-005_chunk_004"
+        ],
+        "Reranker": [
+          "MT-007_chunk_000",
+          "MT-008_chunk_002",
+          "MT-008_chunk_008"
+        ]
+      }
+    },
+    {
+      "evaluation_id": "EVAL069",
+      "domain": "착오송금 반환지원",
+      "question": "반환지원을 받을 수 없는 경우는 어떤 경우인가요?",
+      "gold": "[\"MT-004_chunk_001\"]",
+      "retrieved_top3": {
+        "Nori": [
+          "MT-013_chunk_001",
+          "MT-010_rule_layer01_chunk_019",
+          "MT-010_rule_layer01_chunk_010"
+        ],
+        "Dense": [
+          "MT-013_chunk_001",
+          "MT-010_rule_layer01_chunk_014",
+          "MT-004_chunk_008"
+        ],
+        "Sparse": [
+          "MT-004_chunk_009",
+          "MT-005_chunk_003",
+          "MT-010_rule_layer01_chunk_014"
+        ],
+        "Hybrid": [
+          "MT-013_chunk_001",
+          "MT-004_chunk_008",
+          "MT-010_rule_layer01_chunk_014"
+        ],
+        "Reranker": [
+          "MT-013_chunk_001",
+          "MT-010_rule_layer01_chunk_014",
+          "MT-005_chunk_001"
+        ]
+      }
+    },
+    {
+      "evaluation_id": "EVAL073",
+      "domain": "착오송금 반환지원",
+      "question": "반환에 동의하지 않으면 어떻게 되나요?",
+      "gold": "[\"MT-006_chunk_000\"]",
+      "retrieved_top3": {
+        "Nori": [
+          "MT-008_chunk_001",
+          "MT-004_chunk_010",
+          "MT-008_chunk_011"
+        ],
+        "Dense": [
+          "MT-010_rule_layer01_chunk_040",
+          "MT-010_rule_layer01_chunk_030",
+          "MT-010_rule_layer01_chunk_014"
+        ],
+        "Sparse": [
+          "MT-004_chunk_009",
+          "MT-005_chunk_003",
+          "MT-013_chunk_003"
+        ],
+        "Hybrid": [
+          "MT-010_rule_layer01_chunk_040",
+          "MT-010_rule_layer01_chunk_030",
+          "MT-010_rule_layer01_chunk_014"
+        ],
+        "Reranker": [
+          "MT-013_chunk_002",
+          "MT-008_chunk_001",
+          "MT-010_rule_layer01_chunk_030"
+        ]
+      }
+    },
+    {
+      "evaluation_id": "EVAL080",
+      "domain": "착오송금 반환지원",
+      "question": "신청하면 어떤 순서로 돈을 돌려받게 되나요?",
+      "gold": "[\"MT-009_chunk_000\"]",
+      "retrieved_top3": {
+        "Nori": [
+          "MT-011_chunk_000",
+          "MT-015_chunk_002",
+          "MT-001_chunk_000"
+        ],
+        "Dense": [
+          "MT-015_chunk_002",
+          "MT-010_rule_layer01_chunk_040",
+          "MT-011_chunk_000"
+        ],
+        "Sparse": [
+          "MT-003_chunk_000",
+          "MT-015_chunk_002",
+          "MT-008_chunk_011"
+        ],
+        "Hybrid": [
+          "MT-015_chunk_002",
+          "MT-011_chunk_000",
+          "MT-010_rule_layer01_chunk_040"
+        ],
+        "Reranker": [
+          "MT-015_chunk_002",
+          "MT-011_chunk_000",
+          "MT-004_chunk_005"
+        ]
+      }
+    },
+    {
+      "evaluation_id": "EVAL081",
+      "domain": "착오송금 반환지원",
+      "question": "착오송금 반환지원의 법적 근거가 뭔가요?",
+      "gold": "[\"MT-010_chunk_002\", \"MT-010_chunk_003\", \"MT-010_chunk_001\", \"MT-010_chunk_000\"]",
+      "retrieved_top3": {
+        "Nori": [
+          "MT-010_rule_layer01_chunk_004",
+          "MT-010_rule_layer01_chunk_002",
+          "MT-010_rule_layer01_chunk_018"
+        ],
+        "Dense": [
+          "MT-010_rule_layer01_chunk_014",
+          "MT-013_chunk_002",
+          "MT-010_operation_layer01_chunk_000"
+        ],
+        "Sparse": [
+          "MT-013_chunk_002",
+          "MT-009_chunk_000",
+          "MT-010_rule_layer01_chunk_014"
+        ],
+        "Hybrid": [
+          "MT-010_rule_layer01_chunk_014",
+          "MT-013_chunk_002",
+          "MT-010_operation_layer01_chunk_000"
+        ],
+        "Reranker": [
+          "MT-010_rule_layer01_chunk_000",
+          "MT-010_rule_layer01_chunk_014",
+          "MT-010_rule_layer01_chunk_004"
+        ]
+      }
+    },
+    {
+      "evaluation_id": "EVAL106",
+      "domain": "채무조정",
+      "question": "개인회생은 몇 년간 분할상환하나요?",
+      "gold": "[\"DA-006_chunk_003\"]",
+      "retrieved_top3": {
+        "Nori": [
+          "DA-006_chunk_009",
+          "DA-004_chunk_003",
+          "DA-004_chunk_000"
+        ],
+        "Dense": [
+          "DA-004_chunk_003",
+          "DA-006_chunk_000",
+          "DA-006_chunk_009"
+        ],
+        "Sparse": [
+          "DA-006_chunk_000",
+          "DA-006_chunk_009",
+          "DA-006_chunk_007"
+        ],
+        "Hybrid": [
+          "DA-004_chunk_003",
+          "DA-006_chunk_000",
+          "DA-006_chunk_009"
+        ],
+        "Reranker": [
+          "DA-006_chunk_009",
+          "DA-004_chunk_003",
+          "DA-006_chunk_000"
+        ]
+      }
+    }
+  ],
+  "all_success_count": 49,
+  "onlySuccess": {
+    "Nori": [],
+    "Dense": [],
+    "Sparse": [
+      {
+        "evaluation_id": "EVAL053",
+        "domain": "고객 미수령금",
+        "question": "돈 안찾아간 거 있는지 어떻게 확인해?"
+      },
+      {
+        "evaluation_id": "EVAL087",
+        "domain": "착오송금 반환지원",
+        "question": "얼마까지 착오송금 반환지원을 신청할 수 있나요?"
+      }
+    ],
+    "Hybrid": [],
+    "Reranker": [
+      {
+        "evaluation_id": "EVAL020",
+        "domain": "예금자보호제도",
+        "question": "오늘 너무 힘든데 예금 얼마까지 보호되나요?"
+      },
+      {
+        "evaluation_id": "EVAL023",
+        "domain": "예금보험금",
+        "question": "예금보험금 신청할 때 필요한 서류가 뭔가요?"
+      },
+      {
+        "evaluation_id": "EVAL027",
+        "domain": "예금보험금",
+        "question": "보험사고 발생 후 지급까지 얼마나 걸리나요?"
+      },
+      {
+        "evaluation_id": "EVAL038",
+        "domain": "예금보험금",
+        "question": "지금 해외에 있는데 보험금을 신청할 수 있나요?"
+      },
+      {
+        "evaluation_id": "EVAL062",
+        "domain": "착오송금 반환지원",
+        "question": "착오송금 반환지원 제도는 왜 운영되나요?"
+      },
+      {
+        "evaluation_id": "EVAL094",
+        "domain": "채무조정",
+        "question": "채무조정 신청자격이 어떻게 되나요?"
+      },
+      {
+        "evaluation_id": "EVAL102",
+        "domain": "채무조정",
+        "question": "신용회복위원회를 통한 지원은 어떤 건가요?"
+      },
+      {
+        "evaluation_id": "EVAL107",
+        "domain": "채무조정",
+        "question": "부채증명원은 어떻게 발급받나요?"
+      }
+    ]
+  },
+  "comparisons": [
+    {
+      "pair": "Dense->Hybrid",
+      "hit_gained": 3,
+      "hit_lost": 1,
+      "improved_count": 13,
+      "degraded_count": 10,
+      "top_improvements": [
+        {
+          "evaluation_id": "EVAL034",
+          "domain": "예금보험금",
+          "question": "보험금 신청하려는데 신분증만 가져가면 되나요?",
+          "hit_delta": 1,
+          "recall_delta": 0,
+          "mrr_delta": 0.08333333333333331,
+          "ndcg_delta": 0.06932344192660689,
+          "left_top5": [
+            "BI-001_chunk_003",
+            "BI-001_chunk_000",
+            "BI-001_chunk_001",
+            "BI-003_chunk_008",
+            "BI-001_chunk_005"
+          ],
+          "right_top5": [
+            "BI-001_chunk_003",
+            "BI-001_chunk_001",
+            "BI-003_chunk_008",
+            "BI-001_chunk_000",
+            "BI-001_chunk_005"
+          ],
+          "gold": [
+            "BI-003_chunk_008"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL068",
+          "domain": "착오송금 반환지원",
+          "question": "신청 가능한 기간은 언제까지인가요?",
+          "hit_delta": 1,
+          "recall_delta": 0,
+          "mrr_delta": 0.08333333333333331,
+          "ndcg_delta": 0.06932344192660689,
+          "left_top5": [
+            "MT-015_chunk_001",
+            "MT-012_chunk_000",
+            "MT-005_chunk_007",
+            "MT-004_chunk_011",
+            "MT-003_chunk_000"
+          ],
+          "right_top5": [
+            "MT-015_chunk_001",
+            "MT-005_chunk_007",
+            "MT-004_chunk_011",
+            "MT-012_chunk_000",
+            "MT-005_chunk_000"
+          ],
+          "gold": [
+            "MT-004_chunk_011"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL078",
+          "domain": "착오송금 반환지원",
+          "question": "대리인이 신청할 때 구비서류가 다른가요?",
+          "hit_delta": 1,
+          "recall_delta": 0,
+          "mrr_delta": 0.08333333333333331,
+          "ndcg_delta": 0.04250547381013825,
+          "left_top5": [
+            "MT-008_chunk_002",
+            "MT-008_chunk_004",
+            "MT-008_chunk_010",
+            "MT-008_chunk_001",
+            "MT-008_chunk_006"
+          ],
+          "right_top5": [
+            "MT-008_chunk_002",
+            "MT-008_chunk_004",
+            "MT-008_chunk_001",
+            "MT-008_chunk_006",
+            "MT-008_chunk_010"
+          ],
+          "gold": [
+            "MT-008_chunk_000",
+            "MT-008_chunk_001"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL067",
+          "domain": "착오송금 반환지원",
+          "question": "착오송금 얼마부터 반환지원 신청이 가능한가요?",
+          "hit_delta": 0,
+          "recall_delta": 1,
+          "mrr_delta": 0.08333333333333334,
+          "ndcg_delta": 0.4306765580733931,
+          "left_top5": [
+            "MT-004_chunk_011",
+            "MT-005_chunk_007",
+            "MT-013_chunk_000",
+            "MT-005_chunk_000",
+            "MT-004_chunk_005"
+          ],
+          "right_top5": [
+            "MT-004_chunk_011",
+            "MT-005_chunk_007",
+            "MT-005_chunk_000",
+            "MT-004_chunk_000",
+            "MT-013_chunk_000"
+          ],
+          "gold": [
+            "MT-004_chunk_000"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL113",
+          "domain": "은닉재산 신고",
+          "question": "은닉재산 신고하면 포상금 얼마나 받을 수 있어요?",
+          "hit_delta": 0,
+          "recall_delta": 0.5,
+          "mrr_delta": 0,
+          "ndcg_delta": 0.31963119654465244,
+          "left_top5": [
+            "HP-002_chunk_001",
+            "HP-002_chunk_009",
+            "HP-001_chunk_000",
+            "HP-001_chunk_002",
+            "HP-001_chunk_003"
+          ],
+          "right_top5": [
+            "HP-002_chunk_001",
+            "HP-002_chunk_009",
+            "HP-001_chunk_000",
+            "HP-001_chunk_002",
+            "HP-001_chunk_004"
+          ],
+          "gold": [
+            "HP-002_chunk_001",
+            "HP-001_chunk_004"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL014",
+          "domain": "예금자보호제도",
+          "question": "은행이 영업정지되면 예금은 어떻게 찾나요?",
+          "hit_delta": 0,
+          "recall_delta": 0,
+          "mrr_delta": 0.5,
+          "ndcg_delta": 0.2262943855309168,
+          "left_top5": [
+            "DP-005_chunk_007",
+            "DP-005_chunk_009",
+            "DP-005_chunk_014",
+            "DP-005_chunk_006",
+            "DP-005_chunk_018"
+          ],
+          "right_top5": [
+            "DP-005_chunk_009",
+            "DP-005_chunk_007",
+            "DP-005_chunk_014",
+            "DP-005_chunk_006",
+            "DP-005_chunk_018"
+          ],
+          "gold": [
+            "DP-005_chunk_002",
+            "DP-005_chunk_009"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL075",
+          "domain": "착오송금 반환지원",
+          "question": "착오송금 수취인이 이의를 제기하려면 무슨 서류가 필요한가요?",
+          "hit_delta": 0,
+          "recall_delta": 0,
+          "mrr_delta": 0.5,
+          "ndcg_delta": 0.3690702464285426,
+          "left_top5": [
+            "MT-008_chunk_001",
+            "MT-007_chunk_000",
+            "MT-008_chunk_000",
+            "MT-010_operation_layer01_chunk_003",
+            "MT-010_operation_layer01_chunk_002"
+          ],
+          "right_top5": [
+            "MT-007_chunk_000",
+            "MT-008_chunk_001",
+            "MT-008_chunk_000",
+            "MT-011_chunk_000",
+            "MT-010_operation_layer01_chunk_003"
+          ],
+          "gold": [
+            "MT-007_chunk_000"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL079",
+          "domain": "착오송금 반환지원",
+          "question": "착오송금 반환지원 절차를 쉽게 설명해주세요",
+          "hit_delta": 0,
+          "recall_delta": 0,
+          "mrr_delta": 0.5,
+          "ndcg_delta": 0.3690702464285426,
+          "left_top5": [
+            "MT-002_chunk_000",
+            "MT-009_chunk_000",
+            "MT-013_chunk_000",
+            "MT-010_rule_layer01_chunk_016",
+            "MT-011_chunk_000"
+          ],
+          "right_top5": [
+            "MT-009_chunk_000",
+            "MT-002_chunk_000",
+            "MT-010_rule_layer01_chunk_016",
+            "MT-013_chunk_000",
+            "MT-011_chunk_000"
+          ],
+          "gold": [
+            "MT-009_chunk_000"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL088",
+          "domain": "착오송금 반환지원",
+          "question": "신청 대상에서 제외되는 경우는 뭔가요?",
+          "hit_delta": 0,
+          "recall_delta": 0,
+          "mrr_delta": 0.5,
+          "ndcg_delta": 0.3049386285142399,
+          "left_top5": [
+            "MT-013_chunk_003",
+            "MT-013_chunk_002",
+            "MT-013_chunk_001",
+            "MT-004_chunk_001",
+            "MT-004_chunk_008"
+          ],
+          "right_top5": [
+            "MT-013_chunk_002",
+            "MT-013_chunk_003",
+            "MT-013_chunk_001",
+            "MT-004_chunk_001",
+            "MT-004_chunk_008"
+          ],
+          "gold": [
+            "MT-013_chunk_002",
+            "MT-013_chunk_000"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL042",
+          "domain": "고객 미수령금",
+          "question": "미수령금의 종류는 뭐뭐 있어?",
+          "hit_delta": 0,
+          "recall_delta": 0,
+          "mrr_delta": 0.16666666666666669,
+          "ndcg_delta": 0.04440616209771947,
+          "left_top5": [
+            "UN-001_chunk_001",
+            "UN-001_chunk_002",
+            "UN-003_chunk_003",
+            "UN-003_chunk_000",
+            "UN-003_chunk_002"
+          ],
+          "right_top5": [
+            "UN-001_chunk_001",
+            "UN-003_chunk_003",
+            "UN-001_chunk_002",
+            "UN-003_chunk_000",
+            "UN-003_chunk_002"
+          ],
+          "gold": [
+            "UN-003_chunk_001",
+            "UN-003_chunk_002",
+            "UN-003_chunk_003",
+            "UN-003_chunk_004",
+            "UN-003_chunk_005"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL077",
+          "domain": "착오송금 반환지원",
+          "question": "법인을 대리해 착오송금 반환지원을 신청할 때 추가로 필요한 서류는 무엇인가요?",
+          "hit_delta": 0,
+          "recall_delta": 0,
+          "mrr_delta": 0.04166666666666666,
+          "ndcg_delta": 0,
+          "left_top5": [
+            "MT-010_operation_layer01_chunk_004",
+            "MT-008_chunk_001",
+            "MT-010_operation_layer01_chunk_003",
+            "MT-010_operation_layer01_chunk_002",
+            "MT-010_rule_layer01_chunk_018"
+          ],
+          "right_top5": [
+            "MT-010_operation_layer01_chunk_004",
+            "MT-008_chunk_001",
+            "MT-010_operation_layer01_chunk_002",
+            "MT-010_operation_layer01_chunk_003",
+            "MT-008_chunk_004"
+          ],
+          "gold": [
+            "MT-008_chunk_002"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL020",
+          "domain": "예금자보호제도",
+          "question": "오늘 너무 힘든데 예금 얼마까지 보호되나요?",
+          "hit_delta": 0,
+          "recall_delta": 0,
+          "mrr_delta": 0.023809523809523808,
+          "ndcg_delta": 0,
+          "left_top5": [
+            "DP-006_chunk_007",
+            "DP-006_chunk_000",
+            "DP-006_chunk_006",
+            "DP-006_chunk_009",
+            "DP-006_chunk_005"
+          ],
+          "right_top5": [
+            "DP-006_chunk_000",
+            "DP-006_chunk_007",
+            "DP-006_chunk_005",
+            "DP-006_chunk_006",
+            "DP-006_chunk_009"
+          ],
+          "gold": [
+            "DP-001_chunk_000"
+          ]
+        }
+      ],
+      "top_degradations": [
+        {
+          "evaluation_id": "EVAL011",
+          "domain": "예금자보호제도",
+          "question": "투자신탁 상품도 보호 대상인가요?",
+          "hit_delta": -1,
+          "recall_delta": 0,
+          "mrr_delta": -0.08333333333333331,
+          "ndcg_delta": -0.05727743027120169,
+          "left_top5": [
+            "DP-004_chunk_004",
+            "DP-004_chunk_000",
+            "DP-004_chunk_005",
+            "DP-006_chunk_003",
+            "DP-003_chunk_000"
+          ],
+          "right_top5": [
+            "DP-004_chunk_004",
+            "DP-004_chunk_000",
+            "DP-006_chunk_003",
+            "DP-004_chunk_005",
+            "DP-004_chunk_002"
+          ],
+          "gold": [
+            "DP-004_chunk_005",
+            "DP-004_chunk_007"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL087",
+          "domain": "착오송금 반환지원",
+          "question": "얼마까지 착오송금 반환지원을 신청할 수 있나요?",
+          "hit_delta": 0,
+          "recall_delta": -1,
+          "mrr_delta": -0.05714285714285716,
+          "ndcg_delta": -0.38685280723454163,
+          "left_top5": [
+            "MT-004_chunk_011",
+            "MT-005_chunk_007",
+            "MT-005_chunk_000",
+            "MT-004_chunk_005",
+            "MT-013_chunk_000"
+          ],
+          "right_top5": [
+            "MT-004_chunk_011",
+            "MT-005_chunk_007",
+            "MT-005_chunk_002",
+            "MT-005_chunk_000",
+            "MT-004_chunk_000"
+          ],
+          "gold": [
+            "MT-013_chunk_000"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL058",
+          "domain": "고객 미수령금",
+          "question": "미수령금에는 어떤 종류가 있나요?",
+          "hit_delta": 0,
+          "recall_delta": -0.2,
+          "mrr_delta": 0.16666666666666669,
+          "ndcg_delta": -0.08679891541462234,
+          "left_top5": [
+            "UN-001_chunk_002",
+            "UN-001_chunk_001",
+            "UN-003_chunk_003",
+            "UN-003_chunk_000",
+            "UN-003_chunk_002"
+          ],
+          "right_top5": [
+            "UN-001_chunk_002",
+            "UN-003_chunk_003",
+            "UN-001_chunk_001",
+            "UN-003_chunk_000",
+            "UN-001_chunk_004"
+          ],
+          "gold": [
+            "UN-003_chunk_001",
+            "UN-003_chunk_002",
+            "UN-003_chunk_003",
+            "UN-003_chunk_004",
+            "UN-003_chunk_005"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL033",
+          "domain": "예금보험금",
+          "question": "지급 안내를 받았는데 그냥 기다리면 되는 건가요?",
+          "hit_delta": 0,
+          "recall_delta": 0,
+          "mrr_delta": -0.6666666666666667,
+          "ndcg_delta": -0.41311732856427996,
+          "left_top5": [
+            "BI-002_chunk_002",
+            "BI-002_chunk_003",
+            "BI-003_chunk_008",
+            "BI-003_chunk_005",
+            "BI-002_chunk_001"
+          ],
+          "right_top5": [
+            "BI-002_chunk_003",
+            "BI-003_chunk_008",
+            "BI-002_chunk_002",
+            "BI-003_chunk_005",
+            "BI-002_chunk_001"
+          ],
+          "gold": [
+            "BI-002_chunk_001",
+            "BI-002_chunk_002"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL035",
+          "domain": "예금보험금",
+          "question": "제가 직접 못 가는데 가족이 대신 받아도 되나요?",
+          "hit_delta": 0,
+          "recall_delta": 0,
+          "mrr_delta": -0.6666666666666667,
+          "ndcg_delta": -0.41311732856427996,
+          "left_top5": [
+            "BI-001_chunk_001",
+            "BI-001_chunk_003",
+            "BI-001_chunk_004",
+            "BI-001_chunk_005",
+            "BI-001_chunk_000"
+          ],
+          "right_top5": [
+            "BI-001_chunk_003",
+            "BI-001_chunk_004",
+            "BI-001_chunk_001",
+            "BI-001_chunk_005",
+            "BI-001_chunk_002"
+          ],
+          "gold": [
+            "BI-001_chunk_001",
+            "BI-001_chunk_006"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL028",
+          "domain": "예금보험금",
+          "question": "예금보험금이 뭔가요?",
+          "hit_delta": 0,
+          "recall_delta": 0,
+          "mrr_delta": -0.5,
+          "ndcg_delta": -0.3690702464285426,
+          "left_top5": [
+            "BI-003_chunk_001",
+            "BI-003_chunk_002",
+            "BI-003_chunk_004",
+            "BI-003_chunk_003",
+            "BI-003_chunk_000"
+          ],
+          "right_top5": [
+            "BI-003_chunk_002",
+            "BI-003_chunk_001",
+            "BI-003_chunk_004",
+            "BI-003_chunk_000",
+            "BI-003_chunk_005"
+          ],
+          "gold": [
+            "BI-003_chunk_001"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL074",
+          "domain": "착오송금 반환지원",
+          "question": "이체수수료는 돌려받을 수 있나요?",
+          "hit_delta": 0,
+          "recall_delta": 0,
+          "mrr_delta": -0.5,
+          "ndcg_delta": -0.044368779233544986,
+          "left_top5": [
+            "MT-007_chunk_000",
+            "MT-015_chunk_002",
+            "MT-013_chunk_000",
+            "MT-006_chunk_000",
+            "MT-011_chunk_000"
+          ],
+          "right_top5": [
+            "MT-015_chunk_002",
+            "MT-007_chunk_000",
+            "MT-006_chunk_000",
+            "MT-013_chunk_000",
+            "MT-005_chunk_008"
+          ],
+          "gold": [
+            "MT-006_chunk_000",
+            "MT-007_chunk_000"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL126",
+          "domain": "은닉재산 신고",
+          "question": "다른 사람이 이미 은닉재산으로 신고한 내용이랑 똑같은 걸 제가 또 신고하면 어떻게 되나요?",
+          "hit_delta": 0,
+          "recall_delta": 0,
+          "mrr_delta": -0.5,
+          "ndcg_delta": -0.3049386285142399,
+          "left_top5": [
+            "HP-002_chunk_007",
+            "HP-002_chunk_003",
+            "HP-002_chunk_009",
+            "HP-002_chunk_008",
+            "HP-001_chunk_008"
+          ],
+          "right_top5": [
+            "HP-002_chunk_003",
+            "HP-002_chunk_007",
+            "HP-002_chunk_008",
+            "HP-002_chunk_009",
+            "HP-001_chunk_008"
+          ],
+          "gold": [
+            "HP-002_chunk_007",
+            "HP-002_chunk_006"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL131",
+          "domain": "은닉재산 신고",
+          "question": "은닉재산 신고 관련해서 더 자세히 물어보려면 어디로 연락해요?",
+          "hit_delta": 0,
+          "recall_delta": 0,
+          "mrr_delta": -0.16666666666666669,
+          "ndcg_delta": -0.13092975357145742,
+          "left_top5": [
+            "HP-001_chunk_005",
+            "HP-002_chunk_000",
+            "HP-002_chunk_009",
+            "HP-003_chunk_001",
+            "HP-001_chunk_000"
+          ],
+          "right_top5": [
+            "HP-001_chunk_005",
+            "HP-002_chunk_009",
+            "HP-002_chunk_000",
+            "HP-002_chunk_006",
+            "HP-001_chunk_000"
+          ],
+          "gold": [
+            "HP-002_chunk_000"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL069",
+          "domain": "착오송금 반환지원",
+          "question": "반환지원을 받을 수 없는 경우는 어떤 경우인가요?",
+          "hit_delta": 0,
+          "recall_delta": 0,
+          "mrr_delta": -0.023809523809523808,
+          "ndcg_delta": 0,
+          "left_top5": [
+            "MT-013_chunk_001",
+            "MT-010_rule_layer01_chunk_014",
+            "MT-004_chunk_008",
+            "MT-013_chunk_002",
+            "MT-010_rule_layer01_chunk_011"
+          ],
+          "right_top5": [
+            "MT-013_chunk_001",
+            "MT-004_chunk_008",
+            "MT-010_rule_layer01_chunk_014",
+            "MT-013_chunk_002",
+            "MT-010_rule_layer01_chunk_019"
+          ],
+          "gold": [
+            "MT-004_chunk_001"
+          ]
+        }
+      ]
+    },
+    {
+      "pair": "Hybrid->Reranker",
+      "hit_gained": 13,
+      "hit_lost": 3,
+      "improved_count": 40,
+      "degraded_count": 18,
+      "top_improvements": [
+        {
+          "evaluation_id": "EVAL027",
+          "domain": "예금보험금",
+          "question": "보험사고 발생 후 지급까지 얼마나 걸리나요?",
+          "hit_delta": 1,
+          "recall_delta": 1,
+          "mrr_delta": 1,
+          "ndcg_delta": 1,
+          "left_top5": [
+            "BI-003_chunk_005",
+            "BI-004_chunk_013",
+            "BI-004_chunk_023",
+            "BI-004_chunk_039",
+            "BI-004_chunk_018"
+          ],
+          "right_top5": [
+            "BI-002_chunk_002",
+            "BI-003_chunk_008",
+            "BI-003_chunk_005",
+            "BI-003_chunk_000",
+            "BI-002_chunk_000"
+          ],
+          "gold": [
+            "BI-002_chunk_002"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL020",
+          "domain": "예금자보호제도",
+          "question": "오늘 너무 힘든데 예금 얼마까지 보호되나요?",
+          "hit_delta": 1,
+          "recall_delta": 1,
+          "mrr_delta": 0.8333333333333334,
+          "ndcg_delta": 1,
+          "left_top5": [
+            "DP-006_chunk_000",
+            "DP-006_chunk_007",
+            "DP-006_chunk_005",
+            "DP-006_chunk_006",
+            "DP-006_chunk_009"
+          ],
+          "right_top5": [
+            "DP-001_chunk_000",
+            "DP-006_chunk_007",
+            "DP-006_chunk_012",
+            "DP-005_chunk_004",
+            "DP-006_chunk_000"
+          ],
+          "gold": [
+            "DP-001_chunk_000"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL077",
+          "domain": "착오송금 반환지원",
+          "question": "법인을 대리해 착오송금 반환지원을 신청할 때 추가로 필요한 서류는 무엇인가요?",
+          "hit_delta": 1,
+          "recall_delta": 1,
+          "mrr_delta": 0.8333333333333334,
+          "ndcg_delta": 1,
+          "left_top5": [
+            "MT-010_operation_layer01_chunk_004",
+            "MT-008_chunk_001",
+            "MT-010_operation_layer01_chunk_002",
+            "MT-010_operation_layer01_chunk_003",
+            "MT-008_chunk_004"
+          ],
+          "right_top5": [
+            "MT-008_chunk_002",
+            "MT-010_operation_layer01_chunk_004",
+            "MT-008_chunk_001",
+            "MT-010_operation_layer01_chunk_002",
+            "MT-010_operation_layer01_chunk_003"
+          ],
+          "gold": [
+            "MT-008_chunk_002"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL094",
+          "domain": "채무조정",
+          "question": "채무조정 신청자격이 어떻게 되나요?",
+          "hit_delta": 1,
+          "recall_delta": 1,
+          "mrr_delta": 0.3333333333333333,
+          "ndcg_delta": 0.5,
+          "left_top5": [
+            "DA-001_chunk_003",
+            "DA-001_chunk_002",
+            "DA-002_chunk_002",
+            "DA-006_chunk_002",
+            "DA-003_chunk_006"
+          ],
+          "right_top5": [
+            "DA-001_chunk_003",
+            "DA-003_chunk_001",
+            "DA-001_chunk_001",
+            "DA-001_chunk_002",
+            "DA-004_chunk_007"
+          ],
+          "gold": [
+            "DA-001_chunk_001"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL107",
+          "domain": "채무조정",
+          "question": "부채증명원은 어떻게 발급받나요?",
+          "hit_delta": 1,
+          "recall_delta": 0.5,
+          "mrr_delta": 0.08333333333333331,
+          "ndcg_delta": 0.2797031865794345,
+          "left_top5": [
+            "DA-007_chunk_001",
+            "DA-007_chunk_003",
+            "DA-007_chunk_000",
+            "DA-007_chunk_002",
+            "DA-004_chunk_009"
+          ],
+          "right_top5": [
+            "DA-007_chunk_001",
+            "DA-007_chunk_003",
+            "DA-007_chunk_004",
+            "DA-007_chunk_000",
+            "DA-007_chunk_002"
+          ],
+          "gold": [
+            "DA-007_chunk_002",
+            "DA-007_chunk_004"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL134",
+          "domain": "은닉재산 신고",
+          "question": "은닉재산 신고와 불법행위 신고는 어떻게 다른가요?",
+          "hit_delta": 1,
+          "recall_delta": 0.3333333333333333,
+          "mrr_delta": 0.2333333333333333,
+          "ndcg_delta": 0.2781491965442198,
+          "left_top5": [
+            "HP-002_chunk_009",
+            "HP-001_chunk_009",
+            "HP-001_chunk_008",
+            "HP-001_chunk_007",
+            "HP-002_chunk_003"
+          ],
+          "right_top5": [
+            "HP-002_chunk_009",
+            "HP-002_chunk_003",
+            "HP-002_chunk_010",
+            "HP-001_chunk_009",
+            "HP-002_chunk_001"
+          ],
+          "gold": [
+            "HP-003_chunk_000",
+            "HP-001_chunk_005",
+            "HP-002_chunk_010"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL023",
+          "domain": "예금보험금",
+          "question": "예금보험금 신청할 때 필요한 서류가 뭔가요?",
+          "hit_delta": 1,
+          "recall_delta": 0.3333333333333333,
+          "mrr_delta": 0.1333333333333333,
+          "ndcg_delta": 0.23463936301137822,
+          "left_top5": [
+            "BI-003_chunk_008",
+            "BI-001_chunk_003",
+            "BI-002_chunk_002",
+            "BI-003_chunk_004",
+            "BI-001_chunk_001"
+          ],
+          "right_top5": [
+            "BI-003_chunk_008",
+            "BI-001_chunk_003",
+            "BI-001_chunk_006",
+            "BI-002_chunk_002",
+            "BI-001_chunk_000"
+          ],
+          "gold": [
+            "BI-001_chunk_000",
+            "BI-001_chunk_001",
+            "BI-001_chunk_006"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL102",
+          "domain": "채무조정",
+          "question": "신용회복위원회를 통한 지원은 어떤 건가요?",
+          "hit_delta": 1,
+          "recall_delta": 0.2,
+          "mrr_delta": 0.08333333333333331,
+          "ndcg_delta": 0.09577980919077977,
+          "left_top5": [
+            "DA-004_chunk_001",
+            "DA-004_chunk_009",
+            "DA-004_chunk_006",
+            "DA-004_chunk_000",
+            "DA-005_chunk_011"
+          ],
+          "right_top5": [
+            "DA-004_chunk_011",
+            "DA-004_chunk_001",
+            "DA-004_chunk_000",
+            "DA-004_chunk_006",
+            "DA-004_chunk_002"
+          ],
+          "gold": [
+            "DA-004_chunk_000",
+            "DA-004_chunk_002",
+            "DA-004_chunk_003",
+            "DA-004_chunk_004",
+            "DA-004_chunk_005"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL049",
+          "domain": "고객 미수령금",
+          "question": "공동명의 계좌 미수령금은 명의자 중 한 명만 신청해도 지급되나요?",
+          "hit_delta": 1,
+          "recall_delta": 0,
+          "mrr_delta": 0.8,
+          "ndcg_delta": 0.6131471927654584,
+          "left_top5": [
+            "UN-003_chunk_006",
+            "UN-003_chunk_007",
+            "UN-001_chunk_004",
+            "UN-004_chunk_002",
+            "UN-002_chunk_000"
+          ],
+          "right_top5": [
+            "UN-002_chunk_000",
+            "UN-003_chunk_007",
+            "UN-004_chunk_002",
+            "UN-003_chunk_006",
+            "UN-003_chunk_000"
+          ],
+          "gold": [
+            "UN-002_chunk_000"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL133",
+          "domain": "은닉재산 신고",
+          "question": "횡령이나 배임도 은닉재산 신고센터에 신고하나요?",
+          "hit_delta": 1,
+          "recall_delta": 0,
+          "mrr_delta": 0.8,
+          "ndcg_delta": 0.5066034605839076,
+          "left_top5": [
+            "HP-001_chunk_005",
+            "HP-002_chunk_009",
+            "HP-001_chunk_007",
+            "HP-001_chunk_008",
+            "HP-003_chunk_000"
+          ],
+          "right_top5": [
+            "HP-003_chunk_000",
+            "HP-001_chunk_005",
+            "HP-002_chunk_006",
+            "HP-001_chunk_000",
+            "HP-002_chunk_003"
+          ],
+          "gold": [
+            "HP-003_chunk_000",
+            "HP-003_chunk_001"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL062",
+          "domain": "착오송금 반환지원",
+          "question": "착오송금 반환지원 제도는 왜 운영되나요?",
+          "hit_delta": 1,
+          "recall_delta": 0,
+          "mrr_delta": 0.75,
+          "ndcg_delta": 0.5693234419266069,
+          "left_top5": [
+            "MT-010_operation_layer01_chunk_000",
+            "MT-010_rule_layer01_chunk_014",
+            "MT-002_chunk_000",
+            "MT-001_chunk_000",
+            "MT-010_rule_layer01_chunk_004"
+          ],
+          "right_top5": [
+            "MT-001_chunk_000",
+            "MT-010_rule_layer01_chunk_034",
+            "MT-010_rule_layer01_chunk_004",
+            "MT-010_rule_layer01_chunk_000",
+            "MT-002_chunk_000"
+          ],
+          "gold": [
+            "MT-001_chunk_000"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL067",
+          "domain": "착오송금 반환지원",
+          "question": "착오송금 얼마부터 반환지원 신청이 가능한가요?",
+          "hit_delta": 1,
+          "recall_delta": 0,
+          "mrr_delta": 0.75,
+          "ndcg_delta": 0.5693234419266069,
+          "left_top5": [
+            "MT-004_chunk_011",
+            "MT-005_chunk_007",
+            "MT-005_chunk_000",
+            "MT-004_chunk_000",
+            "MT-013_chunk_000"
+          ],
+          "right_top5": [
+            "MT-004_chunk_000",
+            "MT-004_chunk_011",
+            "MT-005_chunk_002",
+            "MT-013_chunk_000",
+            "MT-005_chunk_007"
+          ],
+          "gold": [
+            "MT-004_chunk_000"
+          ]
+        }
+      ],
+      "top_degradations": [
+        {
+          "evaluation_id": "EVAL012",
+          "domain": "예금자보호제도",
+          "question": "보호상품과 비보호상품은 어떻게 구분하나요?",
+          "hit_delta": -1,
+          "recall_delta": 0,
+          "mrr_delta": -0.75,
+          "ndcg_delta": -0.34907907019286744,
+          "left_top5": [
+            "DP-004_chunk_007",
+            "DP-004_chunk_009",
+            "DP-004_chunk_011",
+            "DP-004_chunk_012",
+            "DP-004_chunk_003"
+          ],
+          "right_top5": [
+            "DP-004_chunk_012",
+            "DP-006_chunk_003",
+            "DP-004_chunk_005",
+            "DP-004_chunk_007",
+            "DP-004_chunk_003"
+          ],
+          "gold": [
+            "DP-004_chunk_007",
+            "DP-004_chunk_003"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL014",
+          "domain": "예금자보호제도",
+          "question": "은행이 영업정지되면 예금은 어떻게 찾나요?",
+          "hit_delta": -1,
+          "recall_delta": 0,
+          "mrr_delta": -0.75,
+          "ndcg_delta": -0.34907907019286744,
+          "left_top5": [
+            "DP-005_chunk_009",
+            "DP-005_chunk_007",
+            "DP-005_chunk_014",
+            "DP-005_chunk_006",
+            "DP-005_chunk_018"
+          ],
+          "right_top5": [
+            "DP-005_chunk_014",
+            "DP-005_chunk_007",
+            "DP-005_chunk_006",
+            "DP-005_chunk_009",
+            "DP-005_chunk_021"
+          ],
+          "gold": [
+            "DP-005_chunk_002",
+            "DP-005_chunk_009"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL068",
+          "domain": "착오송금 반환지원",
+          "question": "신청 가능한 기간은 언제까지인가요?",
+          "hit_delta": -1,
+          "recall_delta": 0,
+          "mrr_delta": -0.1333333333333333,
+          "ndcg_delta": -0.11314719276545837,
+          "left_top5": [
+            "MT-015_chunk_001",
+            "MT-005_chunk_007",
+            "MT-004_chunk_011",
+            "MT-012_chunk_000",
+            "MT-005_chunk_000"
+          ],
+          "right_top5": [
+            "MT-015_chunk_001",
+            "MT-004_chunk_005",
+            "MT-005_chunk_000",
+            "MT-005_chunk_007",
+            "MT-004_chunk_011"
+          ],
+          "gold": [
+            "MT-004_chunk_011"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL113",
+          "domain": "은닉재산 신고",
+          "question": "은닉재산 신고하면 포상금 얼마나 받을 수 있어요?",
+          "hit_delta": 0,
+          "recall_delta": -0.5,
+          "mrr_delta": 0,
+          "ndcg_delta": -0.31963119654465244,
+          "left_top5": [
+            "HP-002_chunk_001",
+            "HP-002_chunk_009",
+            "HP-001_chunk_000",
+            "HP-001_chunk_002",
+            "HP-001_chunk_004"
+          ],
+          "right_top5": [
+            "HP-002_chunk_001",
+            "HP-002_chunk_009",
+            "HP-001_chunk_003",
+            "HP-001_chunk_000",
+            "HP-001_chunk_002"
+          ],
+          "gold": [
+            "HP-002_chunk_001",
+            "HP-001_chunk_004"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL115",
+          "domain": "은닉재산 신고",
+          "question": "은닉재산 신고로 회수한 금액이 10억이면 포상금은 얼마 정도 되나요?",
+          "hit_delta": 0,
+          "recall_delta": -0.25,
+          "mrr_delta": 0,
+          "ndcg_delta": -0.0944133554388426,
+          "left_top5": [
+            "HP-002_chunk_001",
+            "HP-001_chunk_003",
+            "HP-001_chunk_002",
+            "HP-001_chunk_004",
+            "HP-002_chunk_009"
+          ],
+          "right_top5": [
+            "HP-002_chunk_001",
+            "HP-001_chunk_003",
+            "HP-002_chunk_009",
+            "HP-001_chunk_002",
+            "HP-001_chunk_008"
+          ],
+          "gold": [
+            "HP-002_chunk_001",
+            "HP-001_chunk_006",
+            "HP-001_chunk_003",
+            "HP-001_chunk_004"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL029",
+          "domain": "예금보험금",
+          "question": "가지급금과 개산지급금은 어떻게 다른가요?",
+          "hit_delta": 0,
+          "recall_delta": 0,
+          "mrr_delta": -0.5,
+          "ndcg_delta": -0.268799859341055,
+          "left_top5": [
+            "BI-003_chunk_003",
+            "BI-003_chunk_008",
+            "BI-003_chunk_002",
+            "BI-003_chunk_004",
+            "BI-003_chunk_000"
+          ],
+          "right_top5": [
+            "BI-003_chunk_008",
+            "BI-003_chunk_003",
+            "BI-003_chunk_000",
+            "BI-003_chunk_002",
+            "BI-003_chunk_004"
+          ],
+          "gold": [
+            "BI-003_chunk_002",
+            "BI-003_chunk_003"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL037",
+          "domain": "예금보험금",
+          "question": "돌아가신 가족의 예금보험금은 누가 신청해야 하나요?",
+          "hit_delta": 0,
+          "recall_delta": 0,
+          "mrr_delta": -0.5,
+          "ndcg_delta": -0.3690702464285426,
+          "left_top5": [
+            "BI-001_chunk_004",
+            "BI-001_chunk_003",
+            "BI-003_chunk_008",
+            "BI-002_chunk_002",
+            "BI-003_chunk_004"
+          ],
+          "right_top5": [
+            "BI-001_chunk_003",
+            "BI-001_chunk_004",
+            "BI-003_chunk_008",
+            "BI-002_chunk_002",
+            "BI-003_chunk_006"
+          ],
+          "gold": [
+            "BI-001_chunk_004"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL050",
+          "domain": "고객 미수령금",
+          "question": "여러 은행에 흩어져 있는 미수령금을 한 번에 통합 조회할 수 있어?",
+          "hit_delta": 0,
+          "recall_delta": 0,
+          "mrr_delta": -0.5,
+          "ndcg_delta": -0.3690702464285426,
+          "left_top5": [
+            "UN-003_chunk_006",
+            "UN-001_chunk_004",
+            "UN-003_chunk_007",
+            "UN-001_chunk_000",
+            "UN-003_chunk_000"
+          ],
+          "right_top5": [
+            "UN-003_chunk_007",
+            "UN-003_chunk_006",
+            "UN-004_chunk_000",
+            "UN-001_chunk_000",
+            "UN-003_chunk_000"
+          ],
+          "gold": [
+            "UN-003_chunk_006"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL054",
+          "domain": "고객 미수령금",
+          "question": "미수령금이 뭔가요?",
+          "hit_delta": 0,
+          "recall_delta": 0,
+          "mrr_delta": -0.5,
+          "ndcg_delta": -0.3690702464285426,
+          "left_top5": [
+            "UN-001_chunk_001",
+            "UN-003_chunk_000",
+            "UN-003_chunk_006",
+            "UN-003_chunk_002",
+            "UN-003_chunk_003"
+          ],
+          "right_top5": [
+            "UN-003_chunk_000",
+            "UN-001_chunk_001",
+            "UN-001_chunk_002",
+            "UN-001_chunk_000",
+            "UN-003_chunk_004"
+          ],
+          "gold": [
+            "UN-001_chunk_001"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL063",
+          "domain": "착오송금 반환지원",
+          "question": "착오송금 반환지원은 어떤 절차로 진행되나요?",
+          "hit_delta": 0,
+          "recall_delta": 0,
+          "mrr_delta": -0.5,
+          "ndcg_delta": -0.3690702464285426,
+          "left_top5": [
+            "MT-002_chunk_000",
+            "MT-009_chunk_000",
+            "MT-013_chunk_000",
+            "MT-011_chunk_000",
+            "MT-005_chunk_007"
+          ],
+          "right_top5": [
+            "MT-009_chunk_000",
+            "MT-002_chunk_000",
+            "MT-010_rule_layer01_chunk_016",
+            "MT-010_operation_layer01_chunk_005",
+            "MT-010_rule_layer01_chunk_028"
+          ],
+          "gold": [
+            "MT-002_chunk_000"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL079",
+          "domain": "착오송금 반환지원",
+          "question": "착오송금 반환지원 절차를 쉽게 설명해주세요",
+          "hit_delta": 0,
+          "recall_delta": 0,
+          "mrr_delta": -0.5,
+          "ndcg_delta": -0.3690702464285426,
+          "left_top5": [
+            "MT-009_chunk_000",
+            "MT-002_chunk_000",
+            "MT-010_rule_layer01_chunk_016",
+            "MT-013_chunk_000",
+            "MT-011_chunk_000"
+          ],
+          "right_top5": [
+            "MT-002_chunk_000",
+            "MT-009_chunk_000",
+            "MT-013_chunk_006",
+            "MT-010_rule_layer01_chunk_016",
+            "MT-010_rule_layer01_chunk_028"
+          ],
+          "gold": [
+            "MT-009_chunk_000"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL086",
+          "domain": "착오송금 반환지원",
+          "question": "본사 운영시간이 어떻게 되나요?",
+          "hit_delta": 0,
+          "recall_delta": 0,
+          "mrr_delta": -0.5,
+          "ndcg_delta": -0.3690702464285426,
+          "left_top5": [
+            "MT-012_chunk_001",
+            "MT-012_chunk_000",
+            "MT-003_chunk_000",
+            "MT-010_rule_layer01_chunk_039",
+            "MT-010_rule_layer01_chunk_037"
+          ],
+          "right_top5": [
+            "MT-012_chunk_000",
+            "MT-012_chunk_001",
+            "MT-010_rule_layer01_chunk_004",
+            "MT-008_chunk_001",
+            "MT-008_chunk_000"
+          ],
+          "gold": [
+            "MT-012_chunk_001"
+          ]
+        }
+      ]
+    },
+    {
+      "pair": "Dense->Reranker",
+      "hit_gained": 15,
+      "hit_lost": 3,
+      "improved_count": 35,
+      "degraded_count": 17,
+      "top_improvements": [
+        {
+          "evaluation_id": "EVAL027",
+          "domain": "예금보험금",
+          "question": "보험사고 발생 후 지급까지 얼마나 걸리나요?",
+          "hit_delta": 1,
+          "recall_delta": 1,
+          "mrr_delta": 1,
+          "ndcg_delta": 1,
+          "left_top5": [
+            "BI-004_chunk_013",
+            "BI-003_chunk_005",
+            "BI-004_chunk_023",
+            "BI-004_chunk_039",
+            "BI-004_chunk_018"
+          ],
+          "right_top5": [
+            "BI-002_chunk_002",
+            "BI-003_chunk_008",
+            "BI-003_chunk_005",
+            "BI-003_chunk_000",
+            "BI-002_chunk_000"
+          ],
+          "gold": [
+            "BI-002_chunk_002"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL077",
+          "domain": "착오송금 반환지원",
+          "question": "법인을 대리해 착오송금 반환지원을 신청할 때 추가로 필요한 서류는 무엇인가요?",
+          "hit_delta": 1,
+          "recall_delta": 1,
+          "mrr_delta": 0.875,
+          "ndcg_delta": 1,
+          "left_top5": [
+            "MT-010_operation_layer01_chunk_004",
+            "MT-008_chunk_001",
+            "MT-010_operation_layer01_chunk_003",
+            "MT-010_operation_layer01_chunk_002",
+            "MT-010_rule_layer01_chunk_018"
+          ],
+          "right_top5": [
+            "MT-008_chunk_002",
+            "MT-010_operation_layer01_chunk_004",
+            "MT-008_chunk_001",
+            "MT-010_operation_layer01_chunk_002",
+            "MT-010_operation_layer01_chunk_003"
+          ],
+          "gold": [
+            "MT-008_chunk_002"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL020",
+          "domain": "예금자보호제도",
+          "question": "오늘 너무 힘든데 예금 얼마까지 보호되나요?",
+          "hit_delta": 1,
+          "recall_delta": 1,
+          "mrr_delta": 0.8571428571428572,
+          "ndcg_delta": 1,
+          "left_top5": [
+            "DP-006_chunk_007",
+            "DP-006_chunk_000",
+            "DP-006_chunk_006",
+            "DP-006_chunk_009",
+            "DP-006_chunk_005"
+          ],
+          "right_top5": [
+            "DP-001_chunk_000",
+            "DP-006_chunk_007",
+            "DP-006_chunk_012",
+            "DP-005_chunk_004",
+            "DP-006_chunk_000"
+          ],
+          "gold": [
+            "DP-001_chunk_000"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL067",
+          "domain": "착오송금 반환지원",
+          "question": "착오송금 얼마부터 반환지원 신청이 가능한가요?",
+          "hit_delta": 1,
+          "recall_delta": 1,
+          "mrr_delta": 0.8333333333333334,
+          "ndcg_delta": 1,
+          "left_top5": [
+            "MT-004_chunk_011",
+            "MT-005_chunk_007",
+            "MT-013_chunk_000",
+            "MT-005_chunk_000",
+            "MT-004_chunk_005"
+          ],
+          "right_top5": [
+            "MT-004_chunk_000",
+            "MT-004_chunk_011",
+            "MT-005_chunk_002",
+            "MT-013_chunk_000",
+            "MT-005_chunk_007"
+          ],
+          "gold": [
+            "MT-004_chunk_000"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL094",
+          "domain": "채무조정",
+          "question": "채무조정 신청자격이 어떻게 되나요?",
+          "hit_delta": 1,
+          "recall_delta": 1,
+          "mrr_delta": 0.3333333333333333,
+          "ndcg_delta": 0.5,
+          "left_top5": [
+            "DA-001_chunk_003",
+            "DA-001_chunk_002",
+            "DA-002_chunk_002",
+            "DA-003_chunk_006",
+            "DA-006_chunk_002"
+          ],
+          "right_top5": [
+            "DA-001_chunk_003",
+            "DA-003_chunk_001",
+            "DA-001_chunk_001",
+            "DA-001_chunk_002",
+            "DA-004_chunk_007"
+          ],
+          "gold": [
+            "DA-001_chunk_001"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL107",
+          "domain": "채무조정",
+          "question": "부채증명원은 어떻게 발급받나요?",
+          "hit_delta": 1,
+          "recall_delta": 0.5,
+          "mrr_delta": 0.08333333333333331,
+          "ndcg_delta": 0.2797031865794345,
+          "left_top5": [
+            "DA-007_chunk_001",
+            "DA-007_chunk_003",
+            "DA-007_chunk_000",
+            "DA-007_chunk_002",
+            "DA-004_chunk_009"
+          ],
+          "right_top5": [
+            "DA-007_chunk_001",
+            "DA-007_chunk_003",
+            "DA-007_chunk_004",
+            "DA-007_chunk_000",
+            "DA-007_chunk_002"
+          ],
+          "gold": [
+            "DA-007_chunk_002",
+            "DA-007_chunk_004"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL134",
+          "domain": "은닉재산 신고",
+          "question": "은닉재산 신고와 불법행위 신고는 어떻게 다른가요?",
+          "hit_delta": 1,
+          "recall_delta": 0.3333333333333333,
+          "mrr_delta": 0.2333333333333333,
+          "ndcg_delta": 0.2781491965442198,
+          "left_top5": [
+            "HP-002_chunk_009",
+            "HP-001_chunk_009",
+            "HP-002_chunk_003",
+            "HP-001_chunk_008",
+            "HP-001_chunk_007"
+          ],
+          "right_top5": [
+            "HP-002_chunk_009",
+            "HP-002_chunk_003",
+            "HP-002_chunk_010",
+            "HP-001_chunk_009",
+            "HP-002_chunk_001"
+          ],
+          "gold": [
+            "HP-003_chunk_000",
+            "HP-001_chunk_005",
+            "HP-002_chunk_010"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL023",
+          "domain": "예금보험금",
+          "question": "예금보험금 신청할 때 필요한 서류가 뭔가요?",
+          "hit_delta": 1,
+          "recall_delta": 0.3333333333333333,
+          "mrr_delta": 0.1333333333333333,
+          "ndcg_delta": 0.23463936301137822,
+          "left_top5": [
+            "BI-003_chunk_008",
+            "BI-001_chunk_003",
+            "BI-002_chunk_002",
+            "BI-003_chunk_004",
+            "BI-001_chunk_001"
+          ],
+          "right_top5": [
+            "BI-003_chunk_008",
+            "BI-001_chunk_003",
+            "BI-001_chunk_006",
+            "BI-002_chunk_002",
+            "BI-001_chunk_000"
+          ],
+          "gold": [
+            "BI-001_chunk_000",
+            "BI-001_chunk_001",
+            "BI-001_chunk_006"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL102",
+          "domain": "채무조정",
+          "question": "신용회복위원회를 통한 지원은 어떤 건가요?",
+          "hit_delta": 1,
+          "recall_delta": 0.2,
+          "mrr_delta": 0.08333333333333331,
+          "ndcg_delta": 0.09577980919077977,
+          "left_top5": [
+            "DA-004_chunk_001",
+            "DA-004_chunk_009",
+            "DA-004_chunk_006",
+            "DA-004_chunk_000",
+            "DA-005_chunk_011"
+          ],
+          "right_top5": [
+            "DA-004_chunk_011",
+            "DA-004_chunk_001",
+            "DA-004_chunk_000",
+            "DA-004_chunk_006",
+            "DA-004_chunk_002"
+          ],
+          "gold": [
+            "DA-004_chunk_000",
+            "DA-004_chunk_002",
+            "DA-004_chunk_003",
+            "DA-004_chunk_004",
+            "DA-004_chunk_005"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL049",
+          "domain": "고객 미수령금",
+          "question": "공동명의 계좌 미수령금은 명의자 중 한 명만 신청해도 지급되나요?",
+          "hit_delta": 1,
+          "recall_delta": 0,
+          "mrr_delta": 0.8,
+          "ndcg_delta": 0.6131471927654584,
+          "left_top5": [
+            "UN-003_chunk_006",
+            "UN-003_chunk_007",
+            "UN-001_chunk_004",
+            "UN-004_chunk_002",
+            "UN-002_chunk_000"
+          ],
+          "right_top5": [
+            "UN-002_chunk_000",
+            "UN-003_chunk_007",
+            "UN-004_chunk_002",
+            "UN-003_chunk_006",
+            "UN-003_chunk_000"
+          ],
+          "gold": [
+            "UN-002_chunk_000"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL133",
+          "domain": "은닉재산 신고",
+          "question": "횡령이나 배임도 은닉재산 신고센터에 신고하나요?",
+          "hit_delta": 1,
+          "recall_delta": 0,
+          "mrr_delta": 0.8,
+          "ndcg_delta": 0.5066034605839076,
+          "left_top5": [
+            "HP-001_chunk_005",
+            "HP-002_chunk_009",
+            "HP-001_chunk_007",
+            "HP-001_chunk_008",
+            "HP-003_chunk_000"
+          ],
+          "right_top5": [
+            "HP-003_chunk_000",
+            "HP-001_chunk_005",
+            "HP-002_chunk_006",
+            "HP-001_chunk_000",
+            "HP-002_chunk_003"
+          ],
+          "gold": [
+            "HP-003_chunk_000",
+            "HP-003_chunk_001"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL034",
+          "domain": "예금보험금",
+          "question": "보험금 신청하려는데 신분증만 가져가면 되나요?",
+          "hit_delta": 1,
+          "recall_delta": 0,
+          "mrr_delta": 0.75,
+          "ndcg_delta": 0.5693234419266069,
+          "left_top5": [
+            "BI-001_chunk_003",
+            "BI-001_chunk_000",
+            "BI-001_chunk_001",
+            "BI-003_chunk_008",
+            "BI-001_chunk_005"
+          ],
+          "right_top5": [
+            "BI-003_chunk_008",
+            "BI-001_chunk_003",
+            "BI-001_chunk_000",
+            "BI-001_chunk_005",
+            "BI-001_chunk_001"
+          ],
+          "gold": [
+            "BI-003_chunk_008"
+          ]
+        }
+      ],
+      "top_degradations": [
+        {
+          "evaluation_id": "EVAL012",
+          "domain": "예금자보호제도",
+          "question": "보호상품과 비보호상품은 어떻게 구분하나요?",
+          "hit_delta": -1,
+          "recall_delta": 0,
+          "mrr_delta": -0.75,
+          "ndcg_delta": -0.37594947999616213,
+          "left_top5": [
+            "DP-004_chunk_007",
+            "DP-004_chunk_011",
+            "DP-004_chunk_009",
+            "DP-004_chunk_003",
+            "DP-004_chunk_005"
+          ],
+          "right_top5": [
+            "DP-004_chunk_012",
+            "DP-006_chunk_003",
+            "DP-004_chunk_005",
+            "DP-004_chunk_007",
+            "DP-004_chunk_003"
+          ],
+          "gold": [
+            "DP-004_chunk_007",
+            "DP-004_chunk_003"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL014",
+          "domain": "예금자보호제도",
+          "question": "은행이 영업정지되면 예금은 어떻게 찾나요?",
+          "hit_delta": -1,
+          "recall_delta": 0,
+          "mrr_delta": -0.25,
+          "ndcg_delta": -0.12278468466195064,
+          "left_top5": [
+            "DP-005_chunk_007",
+            "DP-005_chunk_009",
+            "DP-005_chunk_014",
+            "DP-005_chunk_006",
+            "DP-005_chunk_018"
+          ],
+          "right_top5": [
+            "DP-005_chunk_014",
+            "DP-005_chunk_007",
+            "DP-005_chunk_006",
+            "DP-005_chunk_009",
+            "DP-005_chunk_021"
+          ],
+          "gold": [
+            "DP-005_chunk_002",
+            "DP-005_chunk_009"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL011",
+          "domain": "예금자보호제도",
+          "question": "투자신탁 상품도 보호 대상인가요?",
+          "hit_delta": -1,
+          "recall_delta": 0,
+          "mrr_delta": -0.1333333333333333,
+          "ndcg_delta": -0.09348613201962758,
+          "left_top5": [
+            "DP-004_chunk_004",
+            "DP-004_chunk_000",
+            "DP-004_chunk_005",
+            "DP-006_chunk_003",
+            "DP-003_chunk_000"
+          ],
+          "right_top5": [
+            "DP-004_chunk_000",
+            "DP-004_chunk_004",
+            "DP-004_chunk_001",
+            "DP-006_chunk_003",
+            "DP-004_chunk_005"
+          ],
+          "gold": [
+            "DP-004_chunk_005",
+            "DP-004_chunk_007"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL115",
+          "domain": "은닉재산 신고",
+          "question": "은닉재산 신고로 회수한 금액이 10억이면 포상금은 얼마 정도 되나요?",
+          "hit_delta": 0,
+          "recall_delta": -0.25,
+          "mrr_delta": 0,
+          "ndcg_delta": -0.0944133554388426,
+          "left_top5": [
+            "HP-002_chunk_001",
+            "HP-001_chunk_003",
+            "HP-001_chunk_002",
+            "HP-001_chunk_004",
+            "HP-002_chunk_009"
+          ],
+          "right_top5": [
+            "HP-002_chunk_001",
+            "HP-001_chunk_003",
+            "HP-002_chunk_009",
+            "HP-001_chunk_002",
+            "HP-001_chunk_008"
+          ],
+          "gold": [
+            "HP-002_chunk_001",
+            "HP-001_chunk_006",
+            "HP-001_chunk_003",
+            "HP-001_chunk_004"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL035",
+          "domain": "예금보험금",
+          "question": "제가 직접 못 가는데 가족이 대신 받아도 되나요?",
+          "hit_delta": 0,
+          "recall_delta": 0,
+          "mrr_delta": -0.6666666666666667,
+          "ndcg_delta": -0.41311732856427996,
+          "left_top5": [
+            "BI-001_chunk_001",
+            "BI-001_chunk_003",
+            "BI-001_chunk_004",
+            "BI-001_chunk_005",
+            "BI-001_chunk_000"
+          ],
+          "right_top5": [
+            "BI-001_chunk_004",
+            "BI-001_chunk_003",
+            "BI-001_chunk_001",
+            "BI-001_chunk_005",
+            "BI-003_chunk_008"
+          ],
+          "gold": [
+            "BI-001_chunk_001",
+            "BI-001_chunk_006"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL029",
+          "domain": "예금보험금",
+          "question": "가지급금과 개산지급금은 어떻게 다른가요?",
+          "hit_delta": 0,
+          "recall_delta": 0,
+          "mrr_delta": -0.5,
+          "ndcg_delta": -0.268799859341055,
+          "left_top5": [
+            "BI-003_chunk_003",
+            "BI-003_chunk_008",
+            "BI-003_chunk_002",
+            "BI-003_chunk_004",
+            "BI-003_chunk_000"
+          ],
+          "right_top5": [
+            "BI-003_chunk_008",
+            "BI-003_chunk_003",
+            "BI-003_chunk_000",
+            "BI-003_chunk_002",
+            "BI-003_chunk_004"
+          ],
+          "gold": [
+            "BI-003_chunk_002",
+            "BI-003_chunk_003"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL033",
+          "domain": "예금보험금",
+          "question": "지급 안내를 받았는데 그냥 기다리면 되는 건가요?",
+          "hit_delta": 0,
+          "recall_delta": 0,
+          "mrr_delta": -0.5,
+          "ndcg_delta": -0.40317314814559235,
+          "left_top5": [
+            "BI-002_chunk_002",
+            "BI-002_chunk_003",
+            "BI-003_chunk_008",
+            "BI-003_chunk_005",
+            "BI-002_chunk_001"
+          ],
+          "right_top5": [
+            "BI-001_chunk_004",
+            "BI-002_chunk_001",
+            "BI-002_chunk_003",
+            "BI-002_chunk_002",
+            "BI-003_chunk_008"
+          ],
+          "gold": [
+            "BI-002_chunk_001",
+            "BI-002_chunk_002"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL037",
+          "domain": "예금보험금",
+          "question": "돌아가신 가족의 예금보험금은 누가 신청해야 하나요?",
+          "hit_delta": 0,
+          "recall_delta": 0,
+          "mrr_delta": -0.5,
+          "ndcg_delta": -0.3690702464285426,
+          "left_top5": [
+            "BI-001_chunk_004",
+            "BI-001_chunk_003",
+            "BI-003_chunk_008",
+            "BI-002_chunk_002",
+            "BI-003_chunk_004"
+          ],
+          "right_top5": [
+            "BI-001_chunk_003",
+            "BI-001_chunk_004",
+            "BI-003_chunk_008",
+            "BI-002_chunk_002",
+            "BI-003_chunk_006"
+          ],
+          "gold": [
+            "BI-001_chunk_004"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL050",
+          "domain": "고객 미수령금",
+          "question": "여러 은행에 흩어져 있는 미수령금을 한 번에 통합 조회할 수 있어?",
+          "hit_delta": 0,
+          "recall_delta": 0,
+          "mrr_delta": -0.5,
+          "ndcg_delta": -0.3690702464285426,
+          "left_top5": [
+            "UN-003_chunk_006",
+            "UN-001_chunk_004",
+            "UN-003_chunk_007",
+            "UN-001_chunk_000",
+            "UN-003_chunk_000"
+          ],
+          "right_top5": [
+            "UN-003_chunk_007",
+            "UN-003_chunk_006",
+            "UN-004_chunk_000",
+            "UN-001_chunk_000",
+            "UN-003_chunk_000"
+          ],
+          "gold": [
+            "UN-003_chunk_006"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL054",
+          "domain": "고객 미수령금",
+          "question": "미수령금이 뭔가요?",
+          "hit_delta": 0,
+          "recall_delta": 0,
+          "mrr_delta": -0.5,
+          "ndcg_delta": -0.3690702464285426,
+          "left_top5": [
+            "UN-001_chunk_001",
+            "UN-003_chunk_000",
+            "UN-003_chunk_006",
+            "UN-003_chunk_002",
+            "UN-003_chunk_003"
+          ],
+          "right_top5": [
+            "UN-003_chunk_000",
+            "UN-001_chunk_001",
+            "UN-001_chunk_002",
+            "UN-001_chunk_000",
+            "UN-003_chunk_004"
+          ],
+          "gold": [
+            "UN-001_chunk_001"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL063",
+          "domain": "착오송금 반환지원",
+          "question": "착오송금 반환지원은 어떤 절차로 진행되나요?",
+          "hit_delta": 0,
+          "recall_delta": 0,
+          "mrr_delta": -0.5,
+          "ndcg_delta": -0.3690702464285426,
+          "left_top5": [
+            "MT-002_chunk_000",
+            "MT-009_chunk_000",
+            "MT-013_chunk_000",
+            "MT-011_chunk_000",
+            "MT-005_chunk_007"
+          ],
+          "right_top5": [
+            "MT-009_chunk_000",
+            "MT-002_chunk_000",
+            "MT-010_rule_layer01_chunk_016",
+            "MT-010_operation_layer01_chunk_005",
+            "MT-010_rule_layer01_chunk_028"
+          ],
+          "gold": [
+            "MT-002_chunk_000"
+          ]
+        },
+        {
+          "evaluation_id": "EVAL086",
+          "domain": "착오송금 반환지원",
+          "question": "본사 운영시간이 어떻게 되나요?",
+          "hit_delta": 0,
+          "recall_delta": 0,
+          "mrr_delta": -0.5,
+          "ndcg_delta": -0.3690702464285426,
+          "left_top5": [
+            "MT-012_chunk_001",
+            "MT-012_chunk_000",
+            "MT-003_chunk_000",
+            "MT-010_rule_layer01_chunk_039",
+            "MT-010_rule_layer01_chunk_037"
+          ],
+          "right_top5": [
+            "MT-012_chunk_000",
+            "MT-012_chunk_001",
+            "MT-010_rule_layer01_chunk_004",
+            "MT-008_chunk_001",
+            "MT-008_chunk_000"
+          ],
+          "gold": [
+            "MT-012_chunk_001"
+          ]
+        }
+      ]
+    }
+  ],
+  "correctedCompleteProxy": [
+    {
+      "method": "Nori",
+      "applicable_count": 22,
+      "complete_at_5": 0.18181818181818182
+    },
+    {
+      "method": "Dense",
+      "applicable_count": 22,
+      "complete_at_5": 0.22727272727272727
+    },
+    {
+      "method": "Sparse",
+      "applicable_count": 22,
+      "complete_at_5": 0.22727272727272727
+    },
+    {
+      "method": "Hybrid",
+      "applicable_count": 22,
+      "complete_at_5": 0.22727272727272727
+    },
+    {
+      "method": "Reranker",
+      "applicable_count": 22,
+      "complete_at_5": 0.3181818181818182
+    }
+  ]
+}
