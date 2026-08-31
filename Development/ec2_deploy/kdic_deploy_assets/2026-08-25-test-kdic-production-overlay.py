@@ -783,6 +783,22 @@ def test_v15_direct_router_contract() -> dict[str, Any]:
         route = router.detect_route(question, context=context)[0]
         assert route == expected_route, (question, route, expected_route)
 
+    deposit_insurance_system_cases = (
+        "예금보험이 뭐야?",
+        "예금 보험이 뭐야?",
+        "예금보험제도가 뭐야?",
+        "예금 보험 제도가 무엇인가요?",
+    )
+    for question in deposit_insurance_system_cases:
+        assert router.find_businesses(question) == ["예금자보호제도"], question
+
+    deposit_insurance_payout_cases = (
+        "예금보험금 지급 조건",
+        "예금 보험금 지급 조건",
+    )
+    for question in deposit_insurance_payout_cases:
+        assert router.find_businesses(question) == ["예금보험금 안내"], question
+
     natural_transfer_cases = (
         "내가 돈을 잘못보냈는데 어떻게 해",
         "돈을 잘못 보냈는데 어떻게 해야 하나요?",
@@ -819,6 +835,10 @@ def test_v15_direct_router_contract() -> dict[str, Any]:
         "direct_variants": sum(len(values) for values in direct_cases.values()) + len(decorated),
         "low_information": 6,
         "protected_queries": len(expected_routes),
+        "deposit_insurance_system_queries": len(deposit_insurance_system_cases),
+        "deposit_insurance_payout_collision_guards": len(
+            deposit_insurance_payout_cases
+        ),
         "natural_transfer_queries": len(natural_transfer_cases),
         "natural_transfer_false_positives": len(non_transfer_cases),
         "router_api_calls": 0,
@@ -1577,6 +1597,40 @@ def test_context_scope_and_source_regressions() -> dict[str, Any]:
     assert public["keywords"], public
     assert all("착오송금" not in row["query"] for row in public["keywords"]), public
 
+    grounded_source = {
+        "title": "예금보험제도 공식 안내",
+        "url": "https://www.kdic.or.kr/deposit-insurance-system",
+    }
+    unclassified_grounded = service_core.normalize_public_result({
+        "route": "RETRIEVE",
+        "payload": {
+            "answer": "예금보험제도 안내",
+            "used_evidence_ids": ["E-GROUNDED"],
+        },
+        "common": {
+            "analysis": {"businesses": []},
+            "evidence_pack": {
+                "sources": [
+                    {
+                        **grounded_source,
+                        "source_url": grounded_source["url"],
+                        "evidence_ids": ["E-GROUNDED"],
+                    }
+                ]
+            },
+        },
+    })
+    assert unclassified_grounded["businesses"] == [], unclassified_grounded
+    assert unclassified_grounded["sources"] == [grounded_source], unclassified_grounded
+
+    unclassified_candidate_only = service_core.normalize_public_result({
+        "route": "RETRIEVE",
+        "payload": {"answer": "근거 식별자가 없는 검색 답변"},
+        "common": {"analysis": {"businesses": []}},
+        "official_sources": [grounded_source],
+    })
+    assert unclassified_candidate_only["sources"] == [], unclassified_candidate_only
+
     return {
         "compound_hidden_property_followup": "passed",
         "exclusion_replacement_analysis_scope": "debt_only",
@@ -1590,6 +1644,8 @@ def test_context_scope_and_source_regressions() -> dict[str, Any]:
         "public_business_source_keyword_scope": "debt_only",
         "public_action_link_scope": "debt_only",
         "fact_and_unscoped_source_filter": "debt_only",
+        "grounded_source_without_business": "preserved",
+        "candidate_source_without_business": "blocked",
     }
 
 

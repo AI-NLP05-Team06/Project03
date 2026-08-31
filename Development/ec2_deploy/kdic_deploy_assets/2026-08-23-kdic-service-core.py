@@ -718,7 +718,8 @@ def _scoped_sources_from_result(
         return sources
     structured_scopes = _structured_source_business_scopes(result)
     if not allowed_scopes:
-        return []
+        reference_scoped, _ = _reference_scoped_sources_from_result(result)
+        return sources if reference_scoped else []
     if not structured_scopes:
         # Backward-compatible path for older pipelines with no structured
         # Evidence/Fact scope metadata at all.

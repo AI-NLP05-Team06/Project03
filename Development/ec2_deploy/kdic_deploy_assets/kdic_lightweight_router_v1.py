@@ -86,6 +86,11 @@ STRONG_BUSINESS_KEYWORDS: dict[str, tuple[str, ...]] = {
     ),
 }
 
+_DEPOSIT_INSURANCE_SYSTEM_PATTERN = re.compile(
+    r"예금\s*보험(?:\s*제도)?(?!\s*금)",
+    re.I,
+)
+
 TYPO_MAP = (
     ("예금보헝금", "예금보험금"),
     ("예금보혐금", "예금보험금"),
@@ -551,6 +556,13 @@ def find_business_matches(text: str) -> list[dict[str, Any]]:
     found: list[dict[str, Any]] = []
     for business, keywords in BUSINESS_KEYWORDS.items():
         evidence = [keyword for keyword in keywords if _compact(keyword) in compact]
+        deposit_insurance_system_match = (
+            _DEPOSIT_INSURANCE_SYSTEM_PATTERN.search(text)
+            if business == "예금자보호제도"
+            else None
+        )
+        if deposit_insurance_system_match:
+            evidence.append(deposit_insurance_system_match.group(0))
         natural_evidence = (
             _mistaken_transfer_natural_evidence(text)
             if business == "착오송금 반환 신청"
@@ -560,6 +572,8 @@ def find_business_matches(text: str) -> list[dict[str, Any]]:
         if not evidence:
             continue
         strong = [term for term in STRONG_BUSINESS_KEYWORDS[business] if _compact(term) in compact]
+        if deposit_insurance_system_match:
+            strong.append(deposit_insurance_system_match.group(0))
         strong.extend(natural_evidence)
         found.append({
             "business_function": business,
